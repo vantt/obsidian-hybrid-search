@@ -1,6 +1,6 @@
 ---
 title: V03 gói dựng sẵn và release đầu tiên
-status: blocked
+status: completed
 created: 2026-11-02
 ---
 
@@ -43,3 +43,8 @@ Windows: `tar.exe` đọc argv theo code page ANSI nên không `chdir` được 
 - Cổng theo từng nền: mỗi job smoke tự đẩy gói của nền mình lên Release; darwin-x64 còn cần job `pin-effect` đạt. Một nền hỏng chỉ giữ gói của nền đó và đỏ job của nó. Run trên cho 3 gói đã đẩy, darwin-x64 đỏ, `latest` giữ nguyên.
 - Số eval của gói Intel (tham khảo): `vantt/eval/baselines/darwin-x64/` (obsidian-help nDCG@5 0,742; vi-search có gói 0,932).
 - Chờ user quyết với darwin-x64 (không bỏ nền).
+
+## Kết thúc (2026-11-02)
+- User chấp nhận độ lệch đã đo của bản thay (multilingual +0,063, vi-synonym -0,017) và ghi thành danh sách cho phép theo hạng mục (sai số 0,005) trong `bundle-parity.mjs`; hạng mục khác vẫn giới hạn 0,01. Run 41405549264 xanh: `pin-effect` đạt, 4 gói lên `v0.17.2-vantt.1` cùng `.sha256` và `.bundle.json`, release được đặt `latest`, release notes ghi bản thay, bảng độ lệch và "user chấp nhận 2026-11-02".
+- Gói đã phát hành (nén / giải nén, MB): win32-x64 102,6 / 279,3; darwin-arm64 99,5 / 326,3; darwin-x64 87,5 / 281,6; linux-x64 99,1 / 295,7. Smoke xanh cả 4.
+- Việc còn lại ngoài V03: chạy thật đường catchup gọi bundles khi có tag mới.
