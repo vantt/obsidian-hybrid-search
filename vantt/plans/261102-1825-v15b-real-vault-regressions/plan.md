@@ -56,6 +56,8 @@ Lỗi phụ: `quality-gate.mjs --private-detail` báo `detail run failed (exit 1
 
 Sau lần đo: vault B chạy `0.17.2-vantt.4`, có lexicon, `OBSIDIAN_IGNORE_PATTERNS=.obsidian/**,templates/**,*.canvas,_ohs/**`; lần đo V15 kế tiếp (bước 5) sẽ có lexicon.
 
+Đo thêm sau bước 3 (2026-11-02, `vantt.4`, có lexicon khởi đầu, k=10, chạy thẳng `eval/evaluate.ts` có gói): nDCG@5 tổng 0,708 (không lexicon 0,709). `vi-synonym` 0 lên 0,405 (lexicon có tác dụng). `vi-abbr` 0,667 xuống 0,307: hai câu viết tắt rơi về 0 khi lexicon mở rộng chữ tắt thành cụm phổ biến; nguyên nhân dạng chung: nhánh mở rộng viết tắt bỏ phiếu cho mọi note có cụm đầy đủ (cụm tần suất cao), át đáp án mà chữ tắt chỉ là một phần câu. Đề xuất: trọng số thấp hơn cho nhánh mở rộng (`lexiconWeight` 0,6 → thử 0,3), hoặc chỉ mở rộng khi cụm đầy đủ hiếm (theo tần suất tài liệu), hoặc yêu cầu các từ còn lại của câu vẫn khớp. `vi-typo` 0,917 → 0,891, `vi-alias` 0,874 → 0,853 (một câu, có thể là nhiễu). Lỗi phụ thứ hai: chạy qua `quality-gate.mjs --private` (không `--private-detail`) cũng hỏng ("eval failed in private run (exit 1)") trên cùng bản sao vault có `_ohs/lexicon.md`, trong khi gọi thẳng `evaluate.ts` có gói thì chạy được; đầu ra con bị nuốt nên chưa rõ nhánh nào hỏng.
+
 Hướng dẫn chi tiết: `vantt/eval/vi/README.md` (mục `--private-detail` và `learn-abbr`).
 
 ## Xong khi
