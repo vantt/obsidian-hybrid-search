@@ -19,7 +19,7 @@ Dự án dùng OHS cho: `related` (PageRank cá nhân hoá, hạt giống là hi
 
 Quyết định đã chốt (user, 2026-11-01 và 2026-11-02):
 1. Giữ OHS (JS, Node chấp nhận được), không viết lại bằng Rust lúc này.
-2. Tự fork và tự duy trì, tự đuổi theo **mỗi** bản phát hành upstream, theo cách đã làm với herdr. Gửi PR hay issue lên upstream là tuỳ chọn, không phải điều kiện.
+2. Tự fork và tự duy trì, tự đuổi theo **mỗi** bản phát hành upstream, theo cách đã làm với herdr. Gửi PR hay issue lên upstream là tuỳ chọn, không phải điều kiện, và chỉ làm **sau khi** bản vá đã làm xong và chạy ổn trong fork.
 3. Xử lý tiếng Việt là **một thư viện riêng**: có thư viện thì tiếng Việt tốt; không có thì OHS vẫn build, chạy và cho kết quả **y như upstream**. Không viết cứng tiếng Việt vào lõi. Đây là phần được đầu tư nhiều thời gian nhất.
 4. Điện thoại: máy tính đang giữ vault chạy web server và trang xem đơn giản; không đồng bộ vault hay index vào điện thoại.
 
@@ -422,7 +422,7 @@ Xem mục 10.2 (đặc tả đầy đủ). Bản vá chỉ chứa điểm cắm 
 - **Điểm chạm:** `runtime/config.ts` (getter `dbPath`), `vault/vault-config.ts` (`discoverConfig`), `transports/cli.ts` (`preAction`), `transports/mcp-supervisor.ts` (env của daemon), `storage/db.ts` (`getStats` dùng `config.dbPath`), `vault/ignore.ts` (mẫu bỏ qua vận hành vẫn đúng khi DB trong vault).
 - **Test:** vault tạm và DB ở thư mục tạm khác; index rồi kiểm không có file `.obsidian-hybrid-search.db*` trong vault; mở lại bằng `--db`; DB của vault A dùng cho vault B thì báo lỗi; daemon dùng đúng DB (test tích hợp với supervisor).
 - **Probe:** index vault tạm theo cách upstream khuyên (nếu upstream thêm tuỳ chọn tương đương, probe thử cả tên biến của upstream ghi trong spec); kiểm file DB có xuất hiện trong vault không.
-- **Upstream:** nên mở issue (có ích cho mọi người dùng dịch vụ đồng bộ). Nháp ở phụ lục B.
+- **Upstream:** gửi sau khi bản vá đã làm xong và chạy ổn trong fork (L08). Nháp ở phụ lục B.
 
 #### P03 `vector-export`
 - **Vấn đề:** dự án đọc thẳng `vec_chunks`, `chunks`, `notes` để tính vector trung bình của note và K note gần nhất. Upstream đổi schema là vỡ.
@@ -449,7 +449,7 @@ Xem mục 10.2 (đặc tả đầy đủ). Bản vá chỉ chứa điểm cắm 
 - **Bất biến:** tag ASCII và Latin mở rộng cho kết quả như cũ (test hồi quy với bộ tag hiện có trong test của upstream).
 - **Test:** `#kếhoạch`, `#dự-án/2026`, `#тест`, `#日本`, `#ưu_tiên` nhận đúng; `#123` theo quy tắc hiện có.
 - **Probe:** vault tạm có note với `#kếhoạch`, kiểm `ohs search --tag kếhoạch`.
-- **Upstream:** gửi issue trước (rẻ, có ích cho mọi ngôn ngữ). Nháp ở phụ lục B.
+- **Upstream:** gửi sau khi bản vá đã làm xong và chạy ổn trong fork (L08). Nháp ở phụ lục B.
 
 #### P05 `block-anchors` (để sau)
 - Lưu `block_id` (chuỗi `^abc` cuối đoạn) và `has_highlight` (đoạn chứa `==…==` hoặc `<mark>`) cho mỗi đoạn; trả trong kết quả (`anchors`). Thêm `OBSIDIAN_CHUNK_TOKENS` (kích thước đoạn tối đa, `min(giới hạn model, giá trị)`), lưu kích thước hiệu lực vào `settings` và dựng lại khi đổi. Theo dõi upstream issue #91 (đề xuất y hệt phần kích thước đoạn); nếu upstream làm thì bỏ phần đó khỏi bản vá.
@@ -773,7 +773,7 @@ Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V
 | L05 | Tách từ (view `seg`) | Nếu eval `vi-compound` còn kém sau V13 | 3–5 |
 | L06 | `pkm-web` cho điện thoại (phía dự án) | Sau khi desktop có người dùng | 5–8 |
 | L07 | Gói "đầy đủ" có sẵn model để cài không mạng | Nếu khách cài ở nơi mạng kém | 0,5 |
-| L08 | Gửi issue/PR lên upstream cho P02, P09, P03 | Sau khi bản vá chạy ổn trong fork một bản phát hành | 0,5 mỗi cái |
+| L08 | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
 | L09 | Phát hành `ohs-lang-vi` công khai (npm), viết README cho cộng đồng OHS | Nếu gói ổn định qua 3 bản upstream | 0,5 |
 | L10 | Gói ngôn ngữ thứ hai (để kiểm hợp đồng P01 thật sự chung) | Khi có nhu cầu | — |
 
@@ -787,7 +787,7 @@ Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V
 | Q3 | `restoreForEmbedding` mặc định | Theo eval L04 | Theo eval |
 | Q4 | Ký lại `.node` trên macOS bằng Developer ID | Chỉ khi Gatekeeper chặn trong smoke test; cần tài khoản Apple Developer (99 USD/năm) | User |
 | Q5 | Gói tiếng Việt để trong fork hay tách repo riêng | Trong fork (`vantt/packages/`) cho tới L09 | User |
-| Q6 | Có gửi issue lên upstream không, khi nào | Có, cho P02, P09 sau một bản phát hành chạy ổn (L08) | User |
+| Q6 | ~~Có gửi issue lên upstream không, khi nào~~ | **Đã chốt (user 2026-11-02):** gửi sau khi đã làm xong và chạy ổn trong fork (L08); không gửi trước | — |
 | Q7 | Người gán nhãn golden set riêng trên vault thật | User, khoảng 2 giờ | User |
 
 ## 16. Rủi ro
@@ -817,7 +817,9 @@ node vantt/scripts/review-upstream.mjs --tag v0.17.3 --prev v0.17.2-vantt.1
 OHS_LANGUAGE_PACK=$PWD/vantt/packages/ohs-lang-vi/dist OBSIDIAN_VAULT_PATH=/path/vault node dist/src/cli.js search "giu chan khach" --explain
 ```
 
-## Phụ lục B. Nháp issue gửi upstream (chưa gửi; chờ Q6)
+## Phụ lục B. Nháp issue gửi upstream (chưa gửi; gửi sau khi đã làm xong bản vá, L08)
+
+Khi gửi: cập nhật nháp theo bản vá đã làm (đường dẫn, tên biến thật), kèm link nhánh có test.
 
 **B1. Inline tags drop Vietnamese letters (and other scripts outside Latin-1/Extended-A/B)**
 > `src/content/note-extractor.ts` matches inline tag characters with the range `À-ɏ`. Letters such as ạ, ế, ộ, ữ (U+1EA0–U+1EF9, Latin Extended Additional), Cyrillic, Greek and CJK fall outside it, so `#kếhoạch` is indexed as `#k` (or not at all). Repro: a note containing `#kếhoạch`, then `ohs search --tag kếhoạch` returns nothing. Suggestion: use Unicode property classes (`\p{L}\p{N}` with the `u` flag) for tag characters, keeping the current rules for the first character and for `/ - _`. Happy to send a PR with tests.
