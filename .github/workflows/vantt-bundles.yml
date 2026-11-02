@@ -16,6 +16,10 @@ on:
       tag:
         description: 'Fork release tag, e.g. v0.17.2-vantt.1'
         required: true
+      only:
+        description: 'Set to pin-effect to run only that check (measurement, no build, smoke or publishing)'
+        required: false
+        default: ''
       reuse_run:
         description: 'Run id of an earlier vantt-bundles run: skip the build and re-test/re-release its bundle artifacts'
         required: false
@@ -64,7 +68,7 @@ jobs:
 
   bundle:
     needs: prepare
-    if: ${{ inputs.reuse_run == '' }}
+    if: ${{ inputs.reuse_run == '' && inputs.only == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -120,7 +124,7 @@ jobs:
 
   smoke:
     needs: [prepare, bundle, pin-effect]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.bundle.result == 'success' || needs.bundle.result == 'skipped') }}
+    if: ${{ !cancelled() && inputs.only == '' && needs.prepare.result == 'success' && (needs.bundle.result == 'success' || needs.bundle.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
@@ -259,6 +263,17 @@ jobs:
         run: |
           node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/pinned" --pins-of darwin-x64 \
             --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+      # Repeat both sides to tell run-to-run noise on this machine from the pin effect.
+      - name: Repeat both sides
+        run: |
+          { echo "### Machine"; grep -m1 'model name' /proc/cpuinfo || true; echo; } | tee -a "$GITHUB_STEP_SUMMARY" "$RUNNER_TEMP/cpu.txt"
+          node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/locked2" \
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+          node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/pinned2" --pins-of darwin-x64 \
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+          node tools/vantt/scripts/bundle-parity.mjs compare --ref "$RUNNER_TEMP/locked" --other "$RUNNER_TEMP/locked2" > "$RUNNER_TEMP/noise-locked.md" || true
+          node tools/vantt/scripts/bundle-parity.mjs compare --ref "$RUNNER_TEMP/pinned" --other "$RUNNER_TEMP/pinned2" > "$RUNNER_TEMP/noise-pinned.md" || true
+          node tools/vantt/scripts/bundle-parity.mjs compare --ref "$RUNNER_TEMP/locked2" --other "$RUNNER_TEMP/pinned2" > "$RUNNER_TEMP/pin-effect2.md" || true
       - name: Compare
         id: compare
         run: |
@@ -275,12 +290,15 @@ jobs:
           path: |
             ${{ runner.temp }}/pin-effect.md
             ${{ runner.temp }}/pin-effect.json
+            ${{ runner.temp }}/pin-effect2.md
+            ${{ runner.temp }}/noise-*.md
+            ${{ runner.temp }}/cpu.txt
           if-no-files-found: ignore
 
   # The Intel bundle's own eval numbers on its own platform: its per-platform baseline (informational).
   eval-darwin-x64:
     needs: prepare
-    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    if: ${{ !cancelled() && inputs.only == '' && needs.prepare.result == 'success' }}
     runs-on: macos-15-intel
     continue-on-error: true
     timeout-minutes: 90
@@ -332,7 +350,7 @@ jobs:
   # Release notes, and `latest` once every platform has published.
   finalize:
     needs: [prepare, smoke, pin-effect]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    if: ${{ !cancelled() && inputs.only == '' && needs.prepare.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
