@@ -30,7 +30,14 @@ Ba vấn đề đã thấy khi dùng OHS với tiếng Việt và với sản ph
 
 ## 2. Mục tiêu và không làm
 
-### Mục tiêu
+Mọi mục tiêu, việc và bản vá trong tài liệu mang một trong ba nhãn:
+- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V16).
+- **Có thì tốt**: có giá trị nhưng không chặn ai; làm khi đủ điều kiện ghi ở cột "Làm khi" (mục 2.2; việc L01–L26).
+- **Không làm**: đã cân nhắc và loại, ghi lý do để khỏi bàn lại (mục 2.3).
+
+Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`) hay do agent đề xuất khi viết PRD (`ý mới`, cần user xác nhận trước khi làm).
+
+### 2.1. Bắt buộc
 | ID | Mục tiêu | Đo bằng |
 |---|---|---|
 | G1 | Fork luôn có bản dựng trên tag upstream mới nhất trong vòng 24 giờ sau khi upstream phát hành, nếu không có xung đột | Thời điểm release `vX.Y.Z-vantt.N` so với tag upstream |
@@ -41,7 +48,37 @@ Ba vấn đề đã thấy khi dùng OHS với tiếng Việt và với sản ph
 | G6 | Dự án lấy vector và K note gần nhất qua lệnh chính thức của fork, không đọc bảng nội bộ | Bản vá P03 (mục 9) |
 | G7 | DB index đặt được ngoài vault | Bản vá P02 |
 
-### Không làm
+### 2.2. Có thì tốt
+| ID | Mục tiêu | Lợi ích | Phía làm | Nguồn | Làm khi | Việc |
+|---|---|---|---|---|---|---|
+| N01 | Đoạn trỏ thẳng tới `^block`, biết đoạn nào user đã tô; kích thước đoạn cấu hình được | Trang nguyên liệu mở đúng đoạn, ưu tiên đoạn đã tô | fork (P05) | đã bàn | Khi làm lại trang nguyên liệu; theo dõi upstream issue #91 | L01 |
+| N02 | Tìm giới hạn trong một tập note | "Tìm trong vùng", trong note đã nhận, trong hàng xóm graph | fork (P06) | đã bàn | Khi dự án cần tìm theo vùng | L02 |
+| N03 | Sự kiện "note vừa index" | Graph cập nhật theo sự kiện, bỏ vòng đọc lại 5 s | fork (P07) | đã bàn | Khi dự án bỏ vòng đọc lại | L03 |
+| N04 | Chọn model nhúng tốt nhất cho tiếng Việt (e5-small, e5-base, bge-m3, model chuyên tiếng Việt), có hay không phục hồi dấu cho nhánh vector | e5-small cho điểm nền quá cao, khó tách gần nghĩa thật với nhiễu | cấu hình, eval | đã bàn | Sau V13 | L04 |
+| N05 | Tách từ tiếng Việt (view `seg`) | "khách hàng" không kéo "hàng hoá" | gói vi | đã bàn | Nếu `vi-compound` còn kém sau V13 | L05 |
+| N06 | Gói "đầy đủ" có sẵn model | Cài không cần mạng | fork (bundle) | đã bàn | Khi có khách ở nơi mạng kém | L07 |
+| N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
+| N08 | Gói ngôn ngữ thứ hai | Chứng minh điểm cắm P01 thật sự chung | fork | đã bàn | Khi có nhu cầu | L10 |
+| N09 | Đo reranker đa ngữ với tiếng Việt | Có thể tốt hơn cho câu hỏi theo ý; tốn 1–3 s mỗi lần tìm | eval | đã bàn | Sau V13, khi `vi-semantic` còn kém | L11 |
+| N10 | `material` gửi mọi câu tìm trong một lệnh (multi-query) | Bỏ 8 tiến trình, mỗi tiến trình nạp model khoảng 2 s | dự án | đã bàn | Cùng V16 | L12 |
+| N11 | Gợi ý ngay khi đang viết: ô cạnh bài nháp hiện đoạn gần nghĩa với đoạn đang gõ, bấm để chèn link | Giúp bước "express" ngay trên note, không phải đi tìm | dự án (plugin), cần P04 | đã bàn | Sau V08 | L13 |
+| N12 | OCR ảnh và PDF đính kèm vào phần chữ để tìm | Note toàn ảnh hết là nguồn nhiễu, tìm được chữ trong ảnh | fork hoặc dự án | đã bàn (đã nói chưa nên) | Khi note toàn ảnh thành phàn nàn thật; dự án riêng | L14 |
+| N13 | Phương án dự phòng: viết lại phần tìm bằng Rust | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
+| N14 | Sửa chuỗi Telex/VNI gõ dở: "tieengs vieetj", "tie6ng vie65t" thành "tiếng việt" | Người gõ khi bộ gõ tắt hoặc nhầm chế độ vẫn tìm ra | gói vi | ý mới | Sau V13 | L16 |
+| N15 | Sửa gõ sai một chữ cái theo từ vựng vault: "khahc" thành "khách" | Trigram của OHS chỉ áp cho tiêu đề | gói vi | ý mới | Sau V13 | L17 |
+| N16 | Từ đồng nghĩa và Việt–Anh do user khai báo (`khách hàng` ↔ `customer`, `KPI` ↔ `chỉ số`) trong một file của vault | Note viết lẫn Việt–Anh tìm ra nhau | gói vi (tuỳ chọn) | ý mới | Khi eval `vi-mixed-en` còn kém | L18 |
+| N17 | Mở viết tắt: học từ vault (`KH`, `DN`, `TP.HCM`) và từ danh sách do user khai báo | Ghi chép cá nhân viết tắt nhiều | gói vi (tuỳ chọn) | ý mới | Sau N16 | L19 |
+| N18 | Khớp alias và tiêu đề không phân biệt dấu ở nhánh "alias chính xác" của upstream | Gõ "ke hoach" ra ngay note có alias "Kế hoạch" với điểm của khớp alias | fork (mở rộng P01: view cho trường `aliases` dùng ở nhánh alias) | ý mới | Sau V13 | L20 |
+| N19 | Tô chữ khớp trong snippet theo cả dạng bỏ dấu | Gõ không dấu vẫn thấy chữ khớp được tô | fork (P01) + gói vi | ý mới | Sau V13 | L21 |
+| N20 | Sổ câu tìm cục bộ (chỉ trên máy user, tắt mặc định): câu không ra kết quả, câu không mở note nào | Nguồn câu thật để bổ sung golden set | dự án | ý mới | Sau V15 | L22 |
+| N21 | LLM đề xuất câu hỏi và đáp án ứng viên từ vault để user duyệt nhanh khi làm golden set riêng | Giảm 2 giờ gán nhãn của user | dự án hoặc script fork | ý mới | Cùng V15 | L23 |
+| N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 |
+| N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
+| N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
+
+Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
+
+### 2.3. Không làm
 - Không đổi model mặc định của upstream trong lõi. Model là cấu hình (`LOCAL_EMBEDDING_MODEL`); việc chọn model cho tiếng Việt là thí nghiệm (mục 14, L04), kết quả ghi vào cấu hình của bộ cài dự án.
 - Không phát hành lên npm, không đăng MCP Registry dưới tên upstream.
 - Không sửa plugin Obsidian của upstream (`obsidian-plugin/` là submodule). Plugin của dự án là plugin riêng.
@@ -388,15 +425,15 @@ Thứ tự áp đúng như bảng. Bản vá giữ nhỏ, mỗi bản một vi�
 
 | # | id | Pha | Việc | Công |
 |---|---|---|---|---|
-| P00 | `fork-identity` | now | Định danh fork | 0,3 |
-| P01 | `language-pack-api` | now | Điểm cắm gói ngôn ngữ trong lõi (mục 10.2) | 2,5–3 |
-| P02 | `db-path` | now | DB ngoài vault | 1 |
-| P03 | `vector-export` | now | Xuất vector theo note và K note gần nhất | 1 |
-| P04 | `stdio-parity` | now | IPC JSON-lines có đủ `search` (mọi tuỳ chọn), `similar`, `read`, `neighbors` | 1 |
-| P09 | `unicode-inline-tags` | now | Tag nội dòng nhận mọi chữ Unicode | 0,3 |
-| P05 | `block-anchors` | later | Đoạn mang id block `^…` và cờ đoạn tô `==…==`; kích thước đoạn cấu hình được | 2 |
-| P06 | `restrict-paths` | later | Giới hạn tìm trong một tập note cho trước | 0,5–1 |
-| P07 | `index-events` | later | Phát sự kiện "note vừa index" qua stdio | 1 |
+| P00 | `fork-identity` | now (Bắt buộc) | Định danh fork | 0,3 |
+| P01 | `language-pack-api` | now (Bắt buộc) | Điểm cắm gói ngôn ngữ trong lõi (mục 10.2) | 2,5–3 |
+| P02 | `db-path` | now (Bắt buộc) | DB ngoài vault | 1 |
+| P03 | `vector-export` | now (Bắt buộc) | Xuất vector theo note và K note gần nhất | 1 |
+| P04 | `stdio-parity` | now (Bắt buộc) | IPC JSON-lines có đủ `search` (mọi tuỳ chọn), `similar`, `read`, `neighbors` | 1 |
+| P09 | `unicode-inline-tags` | now (Bắt buộc) | Tag nội dòng nhận mọi chữ Unicode | 0,3 |
+| P05 | `block-anchors` | later (Có thì tốt) | Đoạn mang id block `^…` và cờ đoạn tô `==…==`; kích thước đoạn cấu hình được | 2 |
+| P06 | `restrict-paths` | later (Có thì tốt) | Giới hạn tìm trong một tập note cho trước | 0,5–1 |
+| P07 | `index-events` | later (Có thì tốt) | Phát sự kiện "note vừa index" qua stdio | 1 |
 
 (Số P05–P07 giữ theo thứ tự đã bàn; P09 đứng trước vì là pha "now".)
 
@@ -604,6 +641,7 @@ Câu nhiều âm tiết đã được hỗ trợ một phần nhờ cụm hai â
 3. M2 view `norm`, `fold` trong OHS qua P01; eval; chốt trọng số view.
 4. M3 `restore`, `rescore`; eval; chốt tham số (V11).
 5. M4 `restoreForEmbedding` và thử model khác (L04).
+6. Có thì tốt, sau khi M3 đạt: Telex/VNI gõ dở (L16), gõ sai một chữ (L17), đồng nghĩa (L18), viết tắt (L19), alias không dấu (L20), tô chữ khớp (L21), tách từ (L05).
 
 ---
 
@@ -739,7 +777,7 @@ pkm-web (máy giữ vault; thuộc repo dự án, không thuộc fork)
 
 Một "ngày" là một phiên làm việc cả ngày của agent có người duyệt. Cột "Cần" là việc phải xong trước.
 
-### 14.1. Làm ngay
+### 14.1. Làm ngay (nhãn: Bắt buộc)
 | ID | Việc | Cần | Công | Xong khi |
 |---|---|---|---|---|
 | V00 | Cài đặt fork (mục 5): remote, `.gitignore`, `vantt/README.md`, tắt workflow upstream, bật workflow `vantt-*` | — | 0,5 | `gh workflow list` chỉ có `vantt-*` bật |
@@ -758,24 +796,42 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V13 | `ohs-lang-vi` M2+M3: view `norm`/`fold`, `analyzeQuery`, `restore`, `rescore`; chốt tham số bằng eval | V09, V10, V11 | 3,5 | Đạt mục tiêu G3 (mục 11.6) trên corpus sinh |
 | V14 | `review-upstream.mjs` + probe cho mọi bản vá + hoàn thiện skill `ohs-upstream-review` | V06–V08, V12 | 2 | Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục |
 | V15 | Eval trên vault thật của user (golden set riêng 60 câu) | V13; user 2 giờ gán nhãn | 0,5 + user | Số tổng hợp trong `vantt/reviews/` |
-| V16 | Phía dự án: `note_knn.mjs`, `similar_pairs.mjs`, `related.py`, `material.py` dùng P03, P04; bộ cài trỏ gói dựng sẵn | V07, V08, V03 | 1 | Không còn đọc bảng nội bộ của OHS |
+| V16 | Phía dự án: `note_knn.mjs`, `similar_pairs.mjs`, `related.py`, `material.py` dùng P03, P04; bộ cài trỏ gói dựng sẵn (L12 làm cùng lúc) | V07, V08, V03 | 1 | Không còn đọc bảng nội bộ của OHS |
 | | **Cộng** | | **~23** | |
 
 Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01.
 
 ### 14.2. Để sau
-| ID | Việc | Khi nào làm | Công |
-|---|---|---|---|
-| L01 | P05 `block-anchors` (id block, đoạn tô, kích thước đoạn) | Khi làm lại trang nguyên liệu trỏ tới đoạn; theo dõi upstream issue #91 | 2 |
-| L02 | P06 `restrict-paths` | Khi cần "tìm trong vùng" | 0,5–1 |
-| L03 | P07 `index-events` | Khi dự án bỏ vòng đọc lại 5 s | 1 |
-| L04 | Thử model: e5-small, e5-base, bge-m3, model nhúng chuyên tiếng Việt; có và không `restoreForEmbedding` | Sau V13 | 1–2 |
-| L05 | Tách từ (view `seg`) | Nếu eval `vi-compound` còn kém sau V13 | 3–5 |
-| L06 | `pkm-web` cho điện thoại (phía dự án) | Sau khi desktop có người dùng | 5–8 |
-| L07 | Gói "đầy đủ" có sẵn model để cài không mạng | Nếu khách cài ở nơi mạng kém | 0,5 |
-| L08 | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
-| L09 | Phát hành `ohs-lang-vi` công khai (npm), viết README cho cộng đồng OHS | Nếu gói ổn định qua 3 bản upstream | 0,5 |
-| L10 | Gói ngôn ngữ thứ hai (để kiểm hợp đồng P01 thật sự chung) | Khi có nhu cầu | — |
+Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc nhãn "ý mới" ở mục 2.2 cần user xác nhận trước khi bắt đầu.
+
+| ID | Nhãn | Việc | Làm khi | Công |
+|---|---|---|---|---|
+| L01 | Có thì tốt (N01) | P05 `block-anchors` (id block, đoạn tô, kích thước đoạn) | Khi làm lại trang nguyên liệu; theo dõi upstream issue #91 | 2 |
+| L02 | Có thì tốt (N02) | P06 `restrict-paths` | Khi cần "tìm trong vùng" | 0,5–1 |
+| L03 | Có thì tốt (N03) | P07 `index-events` | Khi dự án bỏ vòng đọc lại 5 s | 1 |
+| L04 | Có thì tốt (N04) | Thử model và `restoreForEmbedding` | Sau V13 | 1–2 |
+| L05 | Có thì tốt (N05) | Tách từ (view `seg`) | Nếu `vi-compound` còn kém sau V13 | 3–5 |
+| L06 | Đã chốt, làm sau | `pkm-web` cho điện thoại (phía dự án, mục 13) | Sau khi desktop có người dùng | 5–8 |
+| L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
+| L08 | Đã chốt, làm sau | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
+| L09 | Có thì tốt (N07) | Phát hành `ohs-lang-vi` công khai, README cho cộng đồng OHS | Gói ổn định qua 3 bản upstream | 0,5 |
+| L10 | Có thì tốt (N08) | Gói ngôn ngữ thứ hai | Khi có nhu cầu | — |
+| L11 | Có thì tốt (N09) | Eval reranker trên bộ `vi` (mọi hạng mục, thời gian mỗi câu) | Sau V13 | 0,5 |
+| L12 | Có thì tốt (N10) | `material` dùng `queries[]` qua stdio IPC | Cùng V16 | 0,3 |
+| L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án | Sau V08 | 2–3 |
+| L14 | Có thì tốt (N12) | OCR ảnh và PDF | Khi thành phàn nàn thật | 5+ (dự án riêng) |
+| L15 | Có thì tốt (N13) | Viết lại phần tìm bằng Rust | Khi điều kiện ở N13 xảy ra | 10–14 |
+| L16 | Có thì tốt (N14), ý mới | Sửa Telex/VNI gõ dở trong `analyzeQuery` (bảng quy tắc Telex, VNI; chỉ áp khi chuỗi không phải chữ có trong từ vựng) | Sau V13 | 1 |
+| L17 | Có thì tốt (N15), ý mới | Sửa gõ sai theo từ vựng vault (khoảng cách sửa 1 trên dạng bỏ dấu, giới hạn ứng viên) | Sau V13 | 1–1,5 |
+| L18 | Có thì tốt (N16), ý mới | File đồng nghĩa trong vault (đường dẫn qua tuỳ chọn gói), mở rộng câu ở `analyzeQuery` | Khi `vi-mixed-en` còn kém | 1 |
+| L19 | Có thì tốt (N17), ý mới | Mở viết tắt (học từ vault và danh sách khai báo) | Sau L18 | 1–1,5 |
+| L20 | Có thì tốt (N18), ý mới | Nhánh alias chính xác dùng thêm dạng bỏ dấu (mở rộng hợp đồng P01, tăng `apiVersion` nếu cần) | Sau V13 | 1 |
+| L21 | Có thì tốt (N19), ý mới | Tô chữ khớp trong snippet theo dạng bỏ dấu | Sau V13 | 1 |
+| L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy | Sau V15 | 1 |
+| L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
+| L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
+| L25 | Có thì tốt (N23), ý mới | Gói Windows ARM64 | Khi có khách dùng | 0,5 |
+| L26 | Có thì tốt (N24), ý mới | Nâng cấp tại chỗ và quay lui (phía bộ cài dự án) | Khi phát hành bản thứ hai cho khách | 1 |
 
 ---
 
