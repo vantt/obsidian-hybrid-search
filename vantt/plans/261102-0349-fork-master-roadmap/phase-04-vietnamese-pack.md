@@ -61,7 +61,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 ## Ghi chú sau V13
 
 - Eval (fixture `v0.10.0`): Hit@5 `vi-unaccented` 0,27 → 1,00, `vi-dd` 0,40 → 1,00, MRR `vi-tone-precision` 1,00; không hạng mục nào tụt; eval tiếng Anh upstream nDCG@5 0,735 có và không có gói.
-- Lệch PRD 10.3: câu có dấu mặc định không dùng view (bật view làm `vi-semantic` tụt 0,083); `fold` tự bật khi vault có từ viết không dấu. `accentedNorm: true`, `accentedFold: "always"` trả về hành vi PRD. Chờ user chốt.
+- Lệch PRD 10.3: câu có dấu mặc định không dùng view (bật view làm `vi-semantic` tụt 0,083); `fold` tự bật khi vault có từ viết không dấu. User chốt 2026-11-02 giữ cách V13; PRD 10.3 đã sửa.
 - Đã sửa lỗi M1: `parseSyllable` từ chối `kỹ`, `lý`, `mỹ`, `hy`.
 - Điểm cần sửa ở P01 (V13 nêu): view query luôn là tiền tố OR, không có khớp chính xác hay cụm; `readViewTermsWithPrefix` không có cận trên; `Candidate` của `rescore` thiếu `matchedTerms`; trọng số view không chỉnh theo câu.
 - `query.ts`, `index.ts` có điểm móc cho V17, V18, V19, V20.
@@ -70,7 +70,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 
 - Gói đủ M1–M5, eval mặc định (fixture `v0.10.0`): nDCG@5 tổng 0,666 (upstream) → 0,932; Hit@5 `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-alias` đều 1,00; `vi-snippet` 15/15 đoạn trích là chữ gốc và chứa chỗ khớp; `vi-compound` +0,156 so với baseline; eval tiếng Anh upstream giữ 0,735.
 - Mặc định: `telex`, `typo`, `segment` bật theo quy tắc eval. Câu lẫn tiếng Anh không dùng view `seg`.
-- Từ điển từ ghép: danh sách của `trungtv/pyvi` (MIT), 22.574 từ hai âm tiết, 266 KB; nguồn gốc gốc của pyvi chưa rõ (95% trùng Viet74K, GPL). Thay được bằng một file.
+- Từ điển từ ghép: danh sách của `trungtv/pyvi` (MIT), 22.574 từ hai âm tiết, 266 KB; nguồn gốc gốc của pyvi chưa rõ (95% trùng Viet74K, GPL). Thay được bằng một file. User chốt 2026-11-02: thay bằng danh sách học thống kê từ văn bản có giấy phép rõ, dùng pyvi chỉ lúc phát triển để chỉnh và đo (V20b). Giữ `segment` bật; thêm câu từ ghép khó vào fixture.
 - Test fast-check "token invariant for every view" trong `test/pack.test.ts` từng hỏng ngẫu nhiên do hàm đếm của chính test; đã sửa helper `viewTokens`, giữ nguyên thuộc tính, chạy ổn ở `FC_NUM_RUNS=20000`.
 
 ## Risk
