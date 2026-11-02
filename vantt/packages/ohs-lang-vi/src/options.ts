@@ -4,6 +4,8 @@ import type { TonePlacement } from './data.js';
 export interface ViewWeights {
   norm: number;
   fold: number;
+  /** Weight of the seg view branch (used only with `segment`). */
+  seg: number;
 }
 
 /** Parameters of `restore.ts` (query-time only). */
@@ -80,6 +82,11 @@ export interface PackOptions {
    * without diacritics, i.e. there are notes typed unaccented to find).
    */
   accentedFold: 'always' | 'auto' | 'never';
+  /**
+   * Add the `seg` view: compound words joined with `_` (index-affecting).
+   * Its branch searches the compound words of the query only.
+   */
+  segment: boolean;
   viewWeights: ViewWeights;
   restoreParams: RestoreParams;
   rescore: boolean;
@@ -96,7 +103,8 @@ export const DEFAULT_OPTIONS: PackOptions = {
   minSyllableShare: 0.5,
   accentedNorm: false,
   accentedFold: 'auto',
-  viewWeights: { norm: 1.5, fold: 0.75 },
+  segment: false,
+  viewWeights: { norm: 1.5, fold: 0.75, seg: 1 },
   restoreParams: {
     maxVariants: 5,
     maxSyllables: 12,
@@ -153,7 +161,7 @@ function ratio(input: Record<string, unknown>, key: string, fallback: number): n
 
 /**
  * Validate `OHS_LANGUAGE_PACK_OPTIONS` and fill defaults. Options that later
- * milestones own (telex, typo, lexiconPath, segment) are accepted and ignored
+ * milestones own (telex, typo, lexiconPath) are accepted and ignored
  * here so a config written for a newer pack does not break this one.
  */
 export function resolveOptions(input: unknown = {}): PackOptions {
@@ -172,6 +180,7 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     minSyllableShare: ratio(input, 'minSyllableShare', DEFAULT_OPTIONS.minSyllableShare),
     accentedNorm: bool(input, 'accentedNorm', DEFAULT_OPTIONS.accentedNorm),
     accentedFold: oneOf(input, 'accentedFold', ['always', 'auto', 'never'] as const, DEFAULT_OPTIONS.accentedFold),
+    segment: bool(input, 'segment', DEFAULT_OPTIONS.segment),
     viewWeights: mergeNumbers(DEFAULT_OPTIONS.viewWeights, input.viewWeights, 'viewWeights'),
     restoreParams: mergeNumbers(DEFAULT_OPTIONS.restoreParams, input.restoreParams, 'restoreParams'),
     rescore: bool(input, 'rescore', DEFAULT_OPTIONS.rescore),

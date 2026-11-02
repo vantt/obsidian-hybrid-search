@@ -5,6 +5,7 @@ import { normalize } from '../src/normalize.js';
 import { composeSyllable, isPossibleFoldedSyllable, parseSyllable } from '../src/syllable.js';
 import { allSyllables, prng, vietnameseText } from './helpers.js';
 import { createPack } from '../src/index.js';
+import { bundledCompounds } from '../src/segment.js';
 import { fakeContextFromCounts } from './fake-context.js';
 
 const ONE_MB = 1024 * 1024;
@@ -161,6 +162,27 @@ describe('performance: pack project() on 1 MB', () => {
       expect(msNfd).toBeLessThan(PROJECT_BUDGET_MS);
     });
   }
+
+  it('seg view on 1 MB under 200 ms (NFC and NFD, fresh pack, dictionary loaded)', () => {
+    const pack = createPack({ segment: true });
+    pack.signature(); // loads the compound dictionary, as the core does before indexing
+    const compounds = bundledCompounds();
+    // Real compounds between the random syllables, so the segmenter has work to do.
+    const withCompounds = nfc.replace(/\n/g, () => ` ${compounds[nfc.length % compounds.length]}\n`);
+    const msNfc = once(() => pack.project('seg', 'content', nfc));
+    const msNfd = once(() => pack.project('seg', 'content', nfd));
+    const msCompounds = once(() => pack.project('seg', 'content', withCompounds));
+    console.log(`project seg 1 MB: NFC ${msNfc.toFixed(1)} ms, NFD ${msNfd.toFixed(1)} ms, with compounds ${msCompounds.toFixed(1)} ms`);
+    expect(msNfc).toBeLessThan(PROJECT_BUDGET_MS);
+    expect(msNfd).toBeLessThan(PROJECT_BUDGET_MS);
+    expect(msCompounds).toBeLessThan(PROJECT_BUDGET_MS);
+  });
+
+  it('loading the compound dictionary stays small', () => {
+    const ms = once(() => createPack({ segment: true, tonePlacement: 'classic' }).signature());
+    console.log(`seg dictionary load (classic, cold): ${ms.toFixed(1)} ms`);
+    expect(ms).toBeLessThan(PROJECT_BUDGET_MS);
+  });
 });
 
 describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () => {

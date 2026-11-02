@@ -9,13 +9,16 @@
  *      findUnaccentedSpelling  (accented queries) notes typed without diacritics?
  *      (hook) lexicon synonyms/abbreviations expand the view queries here (V18)
  *   4. buildAnalysis     view queries, embed query, rescore data, debug
- *      (hook) alias keys for aliasViews (V19) and the seg view query (V20) go here
+ *      (hook) alias keys for aliasViews (V19) go here
+ *   5. segQuery          compound words of the query for the seg view (segment-query.ts)
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
 import { restoreTokens, type RestoreResult, type VocabularyCache } from './restore.js';
+import type { CompoundDictionary } from './segment.js';
+import { SEG_VIEW, segQuery } from './segment-query.js';
 import { isPossibleFoldedSyllable, isVietnameseSyllable } from './syllable.js';
 import { TOKEN_RE, foldToken, tokenize } from './views.js';
 
@@ -24,6 +27,8 @@ export interface QueryEnvironment {
   options: PackOptions;
   cache: VocabularyCache;
   forms: ReadonlyMap<string, readonly string[]>;
+  /** Compound dictionary of the seg view; absent when `segment` is off. */
+  compounds?: () => CompoundDictionary;
 }
 
 export interface QueryToken {
@@ -232,5 +237,8 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
   classifyAccents(state, env.options);
   restoreAccents(state, ctx, env);
   findUnaccentedSpelling(state, ctx, env);
-  return buildAnalysis(state, env.options);
+  const analysis = buildAnalysis(state, env.options);
+  if (env.compounds)
+    analysis.viewQueries[SEG_VIEW] = segQuery(state, analysis.data as ViAnalysisData, ctx, env.compounds(), env.options);
+  return analysis;
 }
