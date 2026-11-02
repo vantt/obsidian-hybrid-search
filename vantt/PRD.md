@@ -49,13 +49,12 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | G7 | DB index đặt được ngoài vault | Bản vá P02 |
 | G8 | Gói tiếng Việt xử lý cả cách người Việt gõ và viết thật: chuỗi Telex/VNI gõ dở, gõ sai một chữ, đồng nghĩa và Việt–Anh, viết tắt, từ ghép, alias và tiêu đề không dấu; đoạn trích luôn là chữ gốc, đúng chỗ khớp (user chốt 2026-11-02, trước đây là N05, N14–N19) | Hạng mục `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-compound`, `vi-alias`, `vi-snippet` của bộ eval (mục 11.5), ngưỡng ở mục 11.6 |
 | G9 | Hợp đồng gói ngôn ngữ P01 thật sự chung: một gói ngôn ngữ thứ hai chạy được qua đúng hợp đồng đó mà không sửa lõi (user chốt 2026-11-02, trước đây N08) | Test của gói thứ hai và bài kiểm bất biến xanh khi bật gói đó (V21) |
-| G10 | Biết reranker đa ngữ có đáng bật cho tiếng Việt không (user chốt 2026-11-02, trước đây N09) | Báo cáo eval reranker trên mọi hạng mục `vi`, kèm thời gian mỗi câu (V22) |
+| G10 | Chọn được cấu hình nhánh nghĩa tốt nhất cho tiếng Việt: model nhúng (e5-small, e5-base, bge-m3, một model chuyên tiếng Việt chạy được bằng ONNX), có hay không `restoreForEmbedding`, có hay không reranker đa ngữ (user chốt 2026-11-02, trước đây N04, N09) | Báo cáo trong `vantt/reviews/` trên mọi hạng mục `vi`, kèm chất lượng, mức tách cặp gần nghĩa thật với cặp nhiễu, thời gian index, thời gian mỗi câu, RAM, dung lượng (V22) |
 | G11 | Dự án trỏ được tới đúng đoạn (`note#^block`) và biết đoạn user đã tô; tìm được trong một tập note cho trước; nhận sự kiện "note vừa index" thay vì đọc lại vault mỗi 5 s (user chốt 2026-11-02, trước đây N01–N03) | Bản vá P05, P06, P07 có test và probe xanh (V23–V25); bất biến (mục 11.4) vẫn xanh |
 
 ### 2.2. Có thì tốt
 | ID | Mục tiêu | Lợi ích | Phía làm | Nguồn | Làm khi | Việc |
 |---|---|---|---|---|---|---|
-| N04 | Chọn model nhúng tốt nhất cho tiếng Việt (e5-small, e5-base, bge-m3, model chuyên tiếng Việt), có hay không phục hồi dấu cho nhánh vector | e5-small cho điểm nền quá cao, khó tách gần nghĩa thật với nhiễu | cấu hình, eval | đã bàn | Sau V13 | L04 |
 | N06 | Gói "đầy đủ" có sẵn model | Cài không cần mạng | fork (bundle) | đã bàn | Khi có khách ở nơi mạng kém | L07 |
 | N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
 | N11 | Gợi ý ngay khi đang viết: ô cạnh bài nháp hiện đoạn gần nghĩa với đoạn đang gõ, bấm để chèn link | Giúp bước "express" ngay trên note, không phải đi tìm | dự án (plugin), cần P04 | đã bàn | Sau V08 | L13 |
@@ -67,12 +66,12 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 
-N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
+N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N04, N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22, gộp thử model N04 và đo reranker N09), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
 
 Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
 
 ### 2.3. Không làm
-- Không đổi model mặc định của upstream trong lõi. Model là cấu hình (`LOCAL_EMBEDDING_MODEL`); việc chọn model cho tiếng Việt là thí nghiệm (mục 14, L04), kết quả ghi vào cấu hình của bộ cài dự án.
+- Không đổi model mặc định của upstream trong lõi. Model là cấu hình (`LOCAL_EMBEDDING_MODEL`); việc chọn model cho tiếng Việt là thí nghiệm (mục 14, V22), kết quả ghi vào cấu hình của bộ cài dự án.
 - Không phát hành lên npm, không đăng MCP Registry dưới tên upstream.
 - Không sửa plugin Obsidian của upstream (`obsidian-plugin/` là submodule). Plugin của dự án là plugin riêng.
 - Không đưa nội dung vault thật của user vào repo, CI, log hay báo cáo. Eval trên vault thật chạy ở máy user, chỉ ghi số tổng hợp.
@@ -663,7 +662,7 @@ Vị trí: `vantt/packages/ohs-lang-vi/` (package npm riêng, `"private": true` 
 - Bảng i/y: danh sách phụ âm đầu áp dụng (`k, l, m, t, s, h, v, d, ng, qu?` theo quy tắc chốt khi soạn), kèm phản ví dụ.
 
 #### Tuỳ chọn
-`{ tonePlacement: "modern" | "classic", foldIY: boolean, restore: boolean, restoreForEmbedding: boolean, telex: boolean, typo: boolean, lexiconPath: string, segment: boolean, viewWeights: {norm, fold, seg}, rescoreWeights: {...} }`. Mặc định chốt sau eval (L04 và V11); mọi tuỳ chọn có ảnh hưởng tới index đi vào `signature()`.
+`{ tonePlacement: "modern" | "classic", foldIY: boolean, restore: boolean, restoreForEmbedding: boolean, telex: boolean, typo: boolean, lexiconPath: string, segment: boolean, viewWeights: {norm, fold, seg}, rescoreWeights: {...} }`. Mặc định chốt sau eval (V13 và V22); mọi tuỳ chọn có ảnh hưởng tới index đi vào `signature()`.
 
 #### Test của gói (độc lập với OHS)
 - Test bảng: mọi cặp trong bảng dữ liệu.
@@ -682,7 +681,7 @@ Mục đích: "khách hàng" không kéo "hàng hoá" lên đầu. Thêm view `s
 2. Corpus và golden set tiếng Việt (V10), chạy baseline upstream (không gói).
 3. M2 view `norm`, `fold` trong OHS qua P01; eval; chốt trọng số view.
 4. M3 `restore`, `rescore`; eval; chốt tham số (V11).
-5. M4 `restoreForEmbedding` và thử model khác (L04).
+5. M4 `restoreForEmbedding` và thử model khác, cùng đợt đo reranker (V22).
 6. M5 (bắt buộc, G8): Telex/VNI gõ dở và gõ sai (V17); đồng nghĩa, viết tắt, `learn-abbr` (V18); alias, tiêu đề không dấu và đoạn trích chữ gốc (V19); tách từ (V20). Mỗi bước có hạng mục eval riêng và chốt tham số bằng eval.
 
 ---
@@ -851,11 +850,11 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V19 | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
 | V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển (G8, mục 10.4) | V13, Q9 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
 | V21 | Gói ngôn ngữ thứ hai `ohs-lang-<x>` trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11, Q10 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
-| V22 | Eval reranker đa ngữ trên bộ `vi` (G10): mọi hạng mục, có và không rerank, thời gian mỗi câu trên máy CPU thường | V13 | 0,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất bật hay tắt mặc định trong bộ cài dự án |
+| V22 | Đợt eval nhánh nghĩa trên bộ `vi` (G10), một đợt chạy chung: mỗi model nhúng × `restoreForEmbedding` bật/tắt × rerank có/không; mọi hạng mục (chú ý `vi-semantic`, `vi-unaccented`); đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu (cho `zones`, `related`), thời gian index, thời gian mỗi câu trên máy CPU thường, RAM, dung lượng tải. Mỗi model index một lần rồi chạy mọi biến thể câu tìm trên index đó | V13 | 2–2,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất cho bộ cài dự án: model, `restoreForEmbedding` (chốt Q3), bật hay tắt reranker; lõi không đổi model mặc định |
 | V23 | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
 | V24 | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
 | V25 | P07 `index-events`: stdio IPC phát `indexed` và `removed` sau mỗi lô ghi (G11) | V08 | 1 | Test và probe xanh; dự án nhận sự kiện trong 1 s sau khi sửa note |
-| | **Cộng** | | **~43** | |
+| | **Cộng** | | **~45** | |
 
 Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V23, V24 song song với V04–V08 sau V01; V25 sau V08; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
 
@@ -864,7 +863,6 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 
 | ID | Nhãn | Việc | Làm khi | Công |
 |---|---|---|---|---|
-| L04 | Có thì tốt (N04) | Thử model và `restoreForEmbedding` | Sau V13 | 1–2 |
 | L06 | Đã chốt, làm sau | `pkm-web` cho điện thoại (phía dự án, mục 13) | Sau khi desktop có người dùng | 5–8 |
 | L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
 | L08 | Đã chốt, làm sau | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
@@ -885,7 +883,7 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 |---|---|---|---|
 | Q1 | Kiểu đặt dấu chuẩn để so khớp (`modern` hoà/thuỷ hay `classic` hòa/thủy) | Không quan trọng cho tìm (cả hai được gộp về một); chọn `modern` | Agent, ghi trong spec gói |
 | Q2 | Bật `foldIY` mặc định không | Bật, nếu eval `vi-iy` tốt lên mà `vi-tone-precision` không tụt | Theo eval |
-| Q3 | `restoreForEmbedding` mặc định | Theo eval L04 | Theo eval |
+| Q3 | `restoreForEmbedding` mặc định | Theo eval V22 | Theo eval |
 | Q4 | Ký lại `.node` trên macOS bằng Developer ID | Chỉ khi Gatekeeper chặn trong smoke test; cần tài khoản Apple Developer (99 USD/năm) | User |
 | Q5 | Gói tiếng Việt để trong fork hay tách repo riêng | Trong fork (`vantt/packages/`) cho tới L09 | User |
 | Q6 | ~~Có gửi issue lên upstream không, khi nào~~ | **Đã chốt (user 2026-11-02):** gửi sau khi đã làm xong và chạy ổn trong fork (L08); không gửi trước | — |
