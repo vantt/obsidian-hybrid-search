@@ -9,7 +9,7 @@ import type { QueryContext } from './contract.js';
 import type { QueryEnvironment, QueryState, QueryToken } from './query.js';
 import { correctTypos, MIN_TYPO_LENGTH } from './typo.js';
 import { decodeKeystrokes } from './telex.js';
-import { TOKEN_RE } from './views.js';
+import { foldToken, TOKEN_RE } from './views.js';
 
 const PLAIN_TOKEN = /^[a-z0-9]+$/;
 const LETTER_TOKEN = /^[a-z]+$/;
@@ -38,8 +38,10 @@ export function rewriteTokens(
   cache.sync(ctx);
   const info: RewriteInfo = { telex: [], typo: [] };
   // A token is known when the vault contains it as typed (either view).
+  const lexiconWords = env.lexicon?.knownWords((w) => foldToken(w, options), ctx.vaultPath);
   const known = (t: QueryToken) =>
-    !PLAIN_TOKEN.test(t.norm) || cache.termDocs(ctx, 'fold', t.folded) > 0 || cache.termDocs(ctx, 'norm', t.norm) > 0;
+    !PLAIN_TOKEN.test(t.norm) ||
+    lexiconWords?.has(t.folded) === true || cache.termDocs(ctx, 'fold', t.folded) > 0 || cache.termDocs(ctx, 'norm', t.norm) > 0;
   const unknown = state.tokens.map((t) => !known(t));
 
   if (options.telex) {

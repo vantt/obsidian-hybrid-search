@@ -1,4 +1,5 @@
 import type { TonePlacement } from './data.js';
+import { DEFAULT_LEXICON_PATH } from './lexicon.js';
 
 /** RRF weights of the view branches (query-time only; not part of the signature). */
 export interface ViewWeights {
@@ -80,6 +81,10 @@ export interface PackOptions {
    * without diacritics, i.e. there are notes typed unaccented to find).
    */
   accentedFold: 'always' | 'auto' | 'never';
+  /** Lexicon file (synonyms, abbreviations, compound words), relative to the vault (V18). */
+  lexiconPath: string;
+  /** Probability mass given to a lexicon rewrite of the query in `rescore` (query-time only). */
+  lexiconWeight: number;
   /** Decode Telex/VNI keystrokes that the vault vocabulary confirms (query-time only). */
   telex: boolean;
   /** Correct one-letter typos against the vault vocabulary (query-time only). */
@@ -100,6 +105,8 @@ export const DEFAULT_OPTIONS: PackOptions = {
   minSyllableShare: 0.5,
   accentedNorm: false,
   accentedFold: 'auto',
+  lexiconPath: DEFAULT_LEXICON_PATH,
+  lexiconWeight: 0.6,
   telex: true,
   typo: true,
   viewWeights: { norm: 1.5, fold: 0.75 },
@@ -149,6 +156,14 @@ function oneOf<T extends string>(input: Record<string, unknown>, key: string, al
   return value as T;
 }
 
+function lexiconPath(input: Record<string, unknown>): string {
+  const value = input.lexiconPath;
+  if (value === undefined) return DEFAULT_OPTIONS.lexiconPath;
+  if (typeof value !== 'string' || value.trim() === '')
+    throw new TypeError('ohs-lang-vi: option "lexiconPath" must be a non-empty string');
+  return value;
+}
+
 function ratio(input: Record<string, unknown>, key: string, fallback: number): number {
   const value = input[key];
   if (value === undefined) return fallback;
@@ -159,7 +174,7 @@ function ratio(input: Record<string, unknown>, key: string, fallback: number): n
 
 /**
  * Validate `OHS_LANGUAGE_PACK_OPTIONS` and fill defaults. Options that later
- * milestones own (lexiconPath, segment) are accepted and ignored
+ * milestones own (segment) are accepted and ignored
  * here so a config written for a newer pack does not break this one.
  */
 export function resolveOptions(input: unknown = {}): PackOptions {
@@ -178,6 +193,8 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     minSyllableShare: ratio(input, 'minSyllableShare', DEFAULT_OPTIONS.minSyllableShare),
     accentedNorm: bool(input, 'accentedNorm', DEFAULT_OPTIONS.accentedNorm),
     accentedFold: oneOf(input, 'accentedFold', ['always', 'auto', 'never'] as const, DEFAULT_OPTIONS.accentedFold),
+    lexiconPath: lexiconPath(input),
+    lexiconWeight: ratio(input, 'lexiconWeight', DEFAULT_OPTIONS.lexiconWeight),
     telex: bool(input, 'telex', DEFAULT_OPTIONS.telex),
     typo: bool(input, 'typo', DEFAULT_OPTIONS.typo),
     viewWeights: mergeNumbers(DEFAULT_OPTIONS.viewWeights, input.viewWeights, 'viewWeights'),

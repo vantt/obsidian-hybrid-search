@@ -8,6 +8,7 @@
 import { ALIAS_VIEWS } from './alias.js';
 import type { LanguagePackV1 } from './contract.js';
 import { resolveOptions, type PackOptions } from './options.js';
+import { LexiconStore } from './lexicon.js';
 import { analyzeQuery, type QueryEnvironment } from './query.js';
 import { accentedForms, VocabularyCache } from './restore.js';
 import { rescoreCandidates } from './rescore.js';
@@ -18,17 +19,20 @@ export const PACK_VERSION = '0.2.0';
 
 /**
  * Index-affecting configuration. Anything that changes `project()` output must
- * be listed here (a word-segmentation dictionary hash joins it with V20).
+ * be listed here (the lexicon compound words are included; the segmenter's built-in dictionary hash joins with V20).
  */
-export function packSignature(options: PackOptions): string {
-  return `${PACK_VERSION};tone=${options.tonePlacement};iy=${options.foldIY ? 1 : 0}`;
+export function packSignature(options: PackOptions, compoundKey = ''): string {
+  const base = `${PACK_VERSION};tone=${options.tonePlacement};iy=${options.foldIY ? 1 : 0}`;
+  return compoundKey ? `${base};compounds=${compoundKey}` : base;
 }
 
 export function createPack(rawOptions?: unknown): LanguagePackV1 {
   const options = resolveOptions(rawOptions);
+  const lexicon = new LexiconStore(options);
   const projector = createProjector(options);
   const env: QueryEnvironment = {
     options,
+    lexicon,
     cache: new VocabularyCache(),
     forms: accentedForms(options.tonePlacement, options.foldIY),
     project: projector,
@@ -37,7 +41,7 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     apiVersion: 1,
     id: PACK_ID,
     version: PACK_VERSION,
-    signature: () => packSignature(options),
+    signature: () => packSignature(options, lexicon.compoundKey()),
     views: [
       { name: 'norm', weight: options.viewWeights.norm, tokenizer: VIEW_TOKENIZER },
       { name: 'fold', weight: options.viewWeights.fold, tokenizer: VIEW_TOKENIZER },
@@ -45,7 +49,8 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     project: (view, _field, text) => projector(view, text),
     analyzeQuery: (query, ctx) => analyzeQuery(query, ctx, env),
     aliasViews: ALIAS_VIEWS,
-    // queryCacheKey (V18, lexicon hash) is added here.
+    // Synonyms and abbreviations only widen queries: they are part of the cache key, not of the signature.
+    queryCacheKey: () => lexicon.queryKey(),
   };
   if (options.rescore) pack.rescore = (candidates, analysis) => rescoreCandidates(candidates, analysis, options);
   return pack;
@@ -57,6 +62,14 @@ export type * from './contract.js';
 export * from './data.js';
 export { ALIAS_VIEWS, aliasKey, aliasKeys } from './alias.js';
 export { fold, type FoldOptions } from './fold.js';
+export {
+  compoundDigest,
+  expandQuery,
+  LexiconStore,
+  parseLexicon,
+  queryDigest,
+  type Lexicon,
+} from './lexicon.js';
 export { normalize, type NormalizeOptions } from './normalize.js';
 export { DEFAULT_OPTIONS, resolveOptions, type PackOptions, type RescoreWeights, type RestoreParams, type ViewWeights } from './options.js';
 export { analyzeQuery, type ViAnalysisData } from './query.js';

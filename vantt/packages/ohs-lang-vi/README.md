@@ -23,6 +23,8 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `typo.ts` | V17: sửa gõ sai một chữ (thêm, bớt, thay, đảo hai chữ liền nhau) cho token không có trong vault, dài từ 3 chữ, chỉ nhận ứng viên là âm tiết Việt có trong view `fold`; tối đa 3 ứng viên, chọn theo tần suất cộng bằng chứng cặp từ liền nhau với từ bên cạnh (`phraseDocs`), dùng ứng viên tốt nhất. Chỉ đổi token của câu view và `rescore`, không đổi `baseQuery` |
 | `restore.ts` | Phục hồi dấu theo từ vựng vault: ứng viên là mọi âm tiết có dấu bỏ dấu ra đúng âm tiết gõ (sinh từ bảng âm tiết), giữ những dạng có trong view `norm` (`termStats`), cặp liền nhau có thật (`phraseDocs`) được cộng điểm; k-best Viterbi; cache theo `dbVersion` |
 | `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp, từng chữ. Không bỏ, không thêm ứng viên |
+| `lexicon.ts`, `lexicon-query.ts` | V18: đọc `_ohs/lexicon.md` (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` bị bỏ qua). Đồng nghĩa (hai chiều) và viết tắt (một chiều, `KH = khách hàng`) nối thêm dạng cùng nhóm vào câu view (OR) và thêm tổ hợp thay thế vào đích `rescore` (xác suất `lexiconWeight`). Chữ có dấu trong câu phải khớp đúng dấu (`lượng` không khớp `lương`), chữ không dấu khớp bỏ dấu. Từ ghép (`LexiconStore.load().compounds`) dành cho bộ tách từ V20 |
+| `abbr.ts`, `cli.ts`, `bin.ts` | V18: `ohs-lang-vi learn-abbr --vault <dir> [--lexicon <path>] [--min-count <n>] [--dry-run]` (`bin` của package). Đề xuất viết tắt từ mẫu định nghĩa (`khách hàng (KH)`, `KH: khách hàng`, `KH = khách hàng`) và cụm hay gặp có chữ cái đầu khớp chữ viết tắt trong vault; ghi dưới `## Chờ duyệt`, không đụng mục khác, không đề xuất lại dòng đã có, bỏ `_ohs/`, thư mục ẩn, `node_modules` |
 | `options.ts` | Tuỳ chọn và mặc định |
 | `contract.ts` | Bản sao kiểu của hợp đồng P01 (gói không import lõi) |
 
@@ -49,6 +51,8 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `accentedFold` | `"auto"` | không |
 | `viewWeights` | `{norm: 1.5, fold: 0.75}` | không |
 | `restoreParams` | `{maxVariants: 5, maxSyllables: 12, bigramWeight: 3, unigramSmoothing: 0.5, bigramSmoothing: 0.1, maxPhraseLookups: 96, beamWidth: 16, alternativeThreshold: 0.15}` | không |
+| `lexiconPath` | `"_ohs/lexicon.md"` (so với vault) | không (từ ghép trong file: có) |
+| `lexiconWeight` | `0.6` | không |
 | `telex` | `true` | không |
 | `typo` | `true` | không |
 | `rescore` | `true` | không |
@@ -108,3 +112,20 @@ Cùng máy, corpus, model và lõi (`chk-series`) như V13; so với kết quả
 | `telex` + `typo` | 1,000 / 1,00 | 0,722 / 1,00 | `vi-semantic` MRR -0,002, nDCG@5 không đổi, tổng 0,856 (V13: 0,813) |
 
 Quy tắc chốt (hạng mục tốt lên, không hạng mục nào tụt quá 0,01 nDCG@5): cả hai bật mặc định. Eval upstream (`obsidian-help`) với cả hai bật: nDCG@5 0,735, MRR 0,785, Hit@5 0,879, giống hệt V13. `vi-typo` Hit@1 còn 0,40 (Hit@3 0,93): ứng viên đúng thường đứng cạnh một ứng viên phổ biến hơn.
+
+## Lexicon (V18, 2026-11-02)
+
+Đồng nghĩa và viết tắt chỉ mở rộng câu tìm, nên đi vào `queryCacheKey()` (băm phần đã phân tích của hai mục, nên sửa mục `## Chờ duyệt` hay ghi chú không làm mất cache); `signature()` chỉ đổi khi danh sách từ ghép đổi (`;compounds=<băm>`). Test `test/lexicon.test.ts` kiểm: đổi đồng nghĩa hay viết tắt giữ nguyên `signature()` (lõi không dựng lại index), đổi từ ghép thì `signature()` đổi.
+
+`signature()` và `queryCacheKey()` không nhận `QueryContext` (hợp đồng P01), nên gói lấy vault từ lần `analyzeQuery` gần nhất, chưa có thì từ biến môi trường `OBSIDIAN_VAULT_PATH`. File được đọc lại mỗi lần gọi (nhỏ), phân tích lại chỉ khi nội dung đổi.
+
+Eval (cùng lõi `chk-series`, cùng tuỳ chọn mặc định), nDCG@5 / Hit@5, baseline → V13 → V18:
+
+| Hạng mục | baseline | V13 | V18 |
+|---|---|---|---|
+| Tổng nDCG@5 | 0,666 | 0,813 | 0,851 |
+| `vi-synonym` | 0,067 / 0,13 | 0,067 / 0,13 | **0,645 / 0,80** |
+| `vi-abbr` | 0,933 / 0,93 | 0,933 / 0,93 | **1,000 / 1,00** |
+| 15 hạng còn lại | | | không đổi so với V13 (Δ = 0,000) |
+
+Câu `vi-synonym` còn trượt: "xe hơi" (note ghi "ô tô"), "kinh phí" (hạng 9), "giao kèo" (hạng 10). Lần đo đầu so khớp chữ bỏ dấu cho cả chữ có dấu ("lượng" kích hoạt nhóm "lương") làm `vi-semantic` tụt 0,013; sửa thành chữ có dấu phải khớp đúng dấu thì không hạng nào đổi.
