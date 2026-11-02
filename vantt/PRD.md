@@ -227,7 +227,7 @@ Việc còn lại của V00 (máy làm code):
    git remote set-url --push upstream DISABLE
    git fetch upstream --tags
    ```
-   Catchup và CI cũng fetch theo cách này, không fetch mọi nhánh của upstream.
+   Catchup và CI cũng fetch theo cách này, không fetch mọi nhánh của upstream. Upstream có tag không nằm trên `master` (ví dụ `v0.1.5`, `v0.9.10`, đã xoá khỏi fork 2026-11-02); `--tags` vẫn kéo chúng về máy. Vì vậy catchup **chỉ chọn tag mà `git merge-base --is-ancestor <tag> upstream/master` đúng**, và script của fork không bao giờ `git push --tags`; chỉ đẩy đúng tag phát hành `vX.Y.Z-vantt.N`.
 2. Sửa submodule `obsidian-plugin` nếu cần clone trên CI: URL đang là SSH (`git@github.com:…`). Không sửa `.gitmodules` của upstream trên `master`; trên CI dùng `git config --global url."https://github.com/".insteadOf "git@github.com:"` hoặc không clone submodule (OHS không cần nó để build).
 3. Thêm `.gitignore` riêng cho `vantt/` (`vantt/.catchup-state.json`, `vantt/reports/*.json` trừ bản phát hành, `vantt/.work/`).
 4. Thêm workflow `vantt-*.yml` (mục 7). Sau đó **bật lại Actions** và **tắt từng workflow của upstream**:
