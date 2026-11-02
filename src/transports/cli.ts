@@ -51,6 +51,24 @@ function failCliValidation(err: unknown): never {
   process.exit(1);
 }
 
+/** Reads a `--paths-file`: one vault-relative note path per line; `-` reads stdin. */
+function readPathsFile(file: string | undefined): string[] | undefined {
+  if (file === undefined) return undefined;
+  let text: string;
+  try {
+    text = readFileSync(file === '-' ? 0 : file, 'utf8');
+  } catch (err) {
+    throw new Error(
+      `Cannot read --paths-file ${file}: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== '');
+}
+
 function failAmbiguousPath(err: unknown): boolean {
   if (!isAmbiguousNotePathError(err)) return false;
   console.error(`Found ${err.candidates.length} matches:`);
@@ -139,6 +157,7 @@ interface SearchOpts {
   rerank?: boolean;
   anchors?: boolean;
   explain?: boolean;
+  pathsFile?: string;
 }
 
 interface ReindexOpts {
@@ -463,13 +482,20 @@ program
     '--anchors',
     'Include previewAnchors (headingPath, matchText, charStart/charEnd) in JSON output',
   )
+  .option(
+    '--paths-file <file>',
+    'Restrict the search to the note paths listed in <file> (one vault-relative path per line, "-" for stdin); an empty file matches nothing',
+  )
   .option('--explain', 'Include per-branch ranks and language-pack query analysis in JSON output')
   .action(async (queries: string[], opts: SearchOpts) => {
     const effectiveInput = opts.path ?? queries[0];
     const frontmatterFilters = [...opts.frontmatter, ...opts.prop];
     const scopeFilters = [...opts.scope, ...opts.folder];
     const hasFilters =
-      frontmatterFilters.length > 0 || opts.tag.length > 0 || scopeFilters.length > 0;
+      frontmatterFilters.length > 0 ||
+      opts.tag.length > 0 ||
+      scopeFilters.length > 0 ||
+      opts.pathsFile !== undefined;
     if (!effectiveInput && !hasFilters) {
       program.help();
       return;
@@ -481,7 +507,9 @@ program
     let threshold: number;
     let depth: number;
     let snippetLength: number | undefined;
+    let paths: string[] | undefined;
     try {
+      paths = readPathsFile(opts.pathsFile);
       parsedLimit =
         opts.limit !== undefined
           ? parseCliIntegerOption('--limit', opts.limit, { min: 0 })
@@ -517,6 +545,7 @@ program
         threshold,
         tag: opts.tag.length > 0 ? opts.tag : undefined,
         frontmatter: frontmatterFilters.length > 0 ? frontmatterFilters : undefined,
+        paths,
         related: opts.related ?? false,
         depth,
         direction: opts.direction,
