@@ -11,6 +11,7 @@ import {
   getEmbeddingDim,
   primeEmbeddingDim,
 } from '../inference/embedder.js';
+import { loadLanguagePack } from '../language/loader.js';
 import { config } from '../runtime/config.js';
 import {
   assertEmbeddingModelCompatible,
@@ -52,12 +53,15 @@ import {
   type IndexRunContext,
   type WatcherHandle,
 } from './indexer.js';
+import { languageViewsOutOfDate, syncLanguageViews } from './language-views.js';
 import { rebuildIndex } from './rebuild.js';
 
 export async function openIndexDatabase(): Promise<void> {
   for (let attempt = 0; ; attempt++) {
     try {
       openDb();
+      // Every transport opens the index here, so every one loads the language pack.
+      await loadLanguagePack();
       return;
     } catch (error) {
       const busy =
@@ -85,6 +89,19 @@ function reportRunFailure(run: IndexRunContext, operation: string, error: unknow
   } catch (failure) {
     if (!(failure instanceof IndexLeaseLostError))
       console.error('[indexer] could not record indexing failure:', failure);
+  }
+}
+
+async function syncLanguageViewsForRun(
+  run: IndexRunContext,
+  allowTransition: boolean,
+): Promise<void> {
+  try {
+    await syncLanguageViews(run, allowTransition);
+    clearIndexFailures(run.lease, '', 'language-pack');
+  } catch (error) {
+    reportRunFailure(run, 'language-pack', error);
+    throw error;
   }
 }
 
@@ -251,6 +268,7 @@ export function createIndexService(): IndexService {
         throw error;
       }
     }
+    await syncLanguageViewsForRun(run, allowTransition);
     const contextLength = await prepareOwner(run);
     clearIndexFailures(run.lease, '', 'content-policy');
     return contextLength;
@@ -306,7 +324,10 @@ export function createIndexService(): IndexService {
       if (closed) throw new Error('Indexing service is closed');
       if (started) return;
       started = true;
-      if (!configurationError && getActiveContentPolicySignature() !== desired) {
+      if (
+        !configurationError &&
+        (getActiveContentPolicySignature() !== desired || languageViewsOutOfDate())
+      ) {
         // Only a newly started service can request an automatic policy change.
         // Followers that later acquire ownership must accept the published policy.
         void coordinator
@@ -356,7 +377,9 @@ export function createIndexService(): IndexService {
       return runExplicitIndex(async (run) => {
         if (options.force && !options.path) {
           try {
-            return await rebuildIndex(run, await getContextLength());
+            const result = await rebuildIndex(run, await getContextLength());
+            await syncLanguageViewsForRun(run, true);
+            return result;
           } catch (error) {
             reportRunFailure(run, 'rebuild', error);
             throw error;

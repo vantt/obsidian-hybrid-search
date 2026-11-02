@@ -17,6 +17,7 @@
   "ignoreBinaries": ["qmd"],
   "ignoreDependencies": ["@earendil-works/pi-coding-agent"],
   "ignoreIssues": {
+    "src/language/types.ts": ["types"],
     ".ai/scripts/opencode/codegraph.js": ["exports"],
     ".ai/scripts/pi/codegraph.ts": ["exports"],
     ".ai/setup.mjs": ["exports"]
