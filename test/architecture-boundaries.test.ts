@@ -126,6 +126,9 @@ it('accepts typed storage operations and unrelated prepare/exec methods', async 
     'src/contracts/value.ts': 'export type Value = string;',
     'src/content/new-format.ts':
       "import {normalize} from './text-normalization.js'; export const parse = normalize;",
+    'src/language/pack.ts': "import '../runtime/config.js'; export type Pack = string;",
+    'src/runtime/config.ts': 'export const config = {};',
+    'src/indexing/views.ts': "import type {Pack} from '../language/pack.js'; export type V = Pack;",
     'src/transports/cli.ts': "import '../search/searcher.js';",
     'src/cli.ts': "import './transports/cli.js';",
     'src/server.ts': "import './transports/cli.js';",
@@ -180,6 +183,24 @@ it.each([
     'src/vault/new-discovery.ts',
     "import '../indexing/indexer.js';",
     'src/indexing/indexer.ts',
+  ],
+  [
+    'language-independent',
+    'src/language/new-pack-helper.ts',
+    "import '../storage/language-queries.js';",
+    'src/storage/language-queries.ts',
+  ],
+  [
+    'language-independent',
+    'src/language/new-pack-helper.ts',
+    "import '../search/searcher.js';",
+    'src/search/searcher.ts',
+  ],
+  [
+    'storage-no-orchestration',
+    'src/storage/new-table.ts',
+    "import '../language/loader.js';",
+    'src/language/loader.ts',
   ],
 ])('enforces directory ownership for new files: %s', async (rule, file, source, target) => {
   const violations = await checkArchitecture(

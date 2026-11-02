@@ -42,6 +42,13 @@ export const config = {
   get localModel(): string {
     return process.env.LOCAL_EMBEDDING_MODEL ?? 'Xenova/multilingual-e5-small';
   },
+  /** Language pack module name or absolute path; unset means no pack. */
+  get languagePack(): string | undefined {
+    return process.env.OHS_LANGUAGE_PACK?.trim() || undefined;
+  },
+  get languagePackOptions(): string | undefined {
+    return process.env.OHS_LANGUAGE_PACK_OPTIONS;
+  },
   get rerankerModel(): string {
     return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
   },
