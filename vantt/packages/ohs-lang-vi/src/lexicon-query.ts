@@ -28,7 +28,18 @@ export function applyLexicon(
   const lexicon = store.load(ctx.vaultPath);
   if (lexicon.synonyms.length === 0 && lexicon.abbreviations.length === 0) return;
   const foldWord = (w: string) => foldToken(w, options);
+  // Match the query as typed as well as after telex/typo rewriting (token for token), so a
+  // typo-corrected word ("hoi" -> "moi") never hides a lexicon form the user typed.
+  const typed = tokenize(state.normalized).map((norm) => {
+    const folded = foldWord(norm);
+    return { norm, folded, marked: folded !== norm };
+  });
   const substitutions = expandQuery(lexicon, state.tokens, foldWord);
+  if (typed.length === state.tokens.length) {
+    const seen = new Set(substitutions.map((s) => `${s.start}:${s.end}:${s.words.join(' ')}`));
+    for (const s of expandQuery(lexicon, typed, foldWord))
+      if (!seen.has(`${s.start}:${s.end}:${s.words.join(' ')}`)) substitutions.push(s);
+  }
   if (substitutions.length === 0) return;
 
   const words: string[] = [];

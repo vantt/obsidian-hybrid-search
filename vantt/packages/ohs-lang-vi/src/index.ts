@@ -5,6 +5,7 @@
  * `OHS_LANGUAGE_PACK_OPTIONS` JSON. The M1 primitives stay exported for
  * standalone use and tests.
  */
+import { ALIAS_VIEWS } from './alias.js';
 import type { LanguagePackV1 } from './contract.js';
 import { resolveOptions, type PackOptions } from './options.js';
 import { LexiconStore } from './lexicon.js';
@@ -28,13 +29,14 @@ export function packSignature(options: PackOptions, compoundKey = ''): string {
 export function createPack(rawOptions?: unknown): LanguagePackV1 {
   const options = resolveOptions(rawOptions);
   const lexicon = new LexiconStore(options);
+  const projector = createProjector(options);
   const env: QueryEnvironment = {
     options,
     lexicon,
     cache: new VocabularyCache(),
     forms: accentedForms(options.tonePlacement, options.foldIY),
+    project: projector,
   };
-  const projector = createProjector(options);
   const pack: LanguagePackV1 = {
     apiVersion: 1,
     id: PACK_ID,
@@ -46,9 +48,9 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     ],
     project: (view, _field, text) => projector(view, text),
     analyzeQuery: (query, ctx) => analyzeQuery(query, ctx, env),
+    aliasViews: ALIAS_VIEWS,
     // Synonyms and abbreviations only widen queries: they are part of the cache key, not of the signature.
     queryCacheKey: () => lexicon.queryKey(),
-    // aliasViews (V19) is added here.
   };
   if (options.rescore) pack.rescore = (candidates, analysis) => rescoreCandidates(candidates, analysis, options);
   return pack;
@@ -58,6 +60,7 @@ export default createPack;
 
 export type * from './contract.js';
 export * from './data.js';
+export { ALIAS_VIEWS, aliasKey, aliasKeys } from './alias.js';
 export { fold, type FoldOptions } from './fold.js';
 export {
   compoundDigest,
@@ -71,6 +74,8 @@ export { normalize, type NormalizeOptions } from './normalize.js';
 export { DEFAULT_OPTIONS, resolveOptions, type PackOptions, type RescoreWeights, type RestoreParams, type ViewWeights } from './options.js';
 export { analyzeQuery, type ViAnalysisData } from './query.js';
 export { accentedForms, restoreTokens, VocabularyCache, type RestoreResult } from './restore.js';
+export { decodeKeystrokes, decodeTelex, decodeVni, telexForms, vniForms } from './telex.js';
+export { correctTypos, editNeighbours } from './typo.js';
 export { evidenceIn, rescoreCandidates } from './rescore.js';
 export {
   composeSyllable,

@@ -3,7 +3,7 @@
  *
  * Pipeline (each stage reads and extends `QueryState`):
  *   1. tokenizeQuery     normalize, split into view tokens, classify each token
- *      (hook) telex/typo token rewriting goes here, before classification is used (V17)
+ *      rewriteTokens       telex/typo token rewriting, before classification is used (V17)
  *   2. classifyAccents   is the query typed with diacritics on purpose?
  *   3. restoreAccents    k-best diacritic restoration of unaccented syllables
  *      findUnaccentedSpelling  (accented queries) notes typed without diacritics?
@@ -12,11 +12,13 @@
  *      (hook) alias keys for aliasViews (V19) and the seg view query (V20) go here
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
+import { aliasKeys } from './alias.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
 import type { LexiconStore } from './lexicon.js';
 import { applyLexicon } from './lexicon-query.js';
 import type { PackOptions } from './options.js';
+import { rewriteTokens, rewrittenText, type RewriteInfo } from './rewrite.js';
 import { restoreTokens, type RestoreResult, type VocabularyCache } from './restore.js';
 import { isPossibleFoldedSyllable, isVietnameseSyllable } from './syllable.js';
 import { TOKEN_RE, foldToken, tokenize } from './views.js';
@@ -28,6 +30,8 @@ export interface QueryEnvironment {
   forms: ReadonlyMap<string, readonly string[]>;
   /** User lexicon (V18); absent in environments built by hand. */
   lexicon?: LexiconStore;
+  /** The pack's view projector (alias keys are projections of the query). */
+  project: (view: string, text: string) => string;
 }
 
 export interface QueryToken {
@@ -50,6 +54,8 @@ export interface QueryState {
   restoration: RestoreResult | null;
   /** Accented query whose words the vault also contains written without diacritics. */
   unaccentedInVault: boolean;
+  /** Tokens rewritten by Telex/VNI decoding or typo correction (V17). */
+  rewrite?: RewriteInfo;
 }
 
 /** Pack-private data handed to `rescore` through `QueryAnalysis.data`. */
@@ -70,17 +76,19 @@ const MAX_RESCORE_TARGETS = 5;
 
 // 1. -------------------------------------------------------------------------
 
+export function makeQueryToken(norm: string, options: PackOptions): QueryToken {
+  const marked = fold(norm) !== norm;
+  return {
+    norm,
+    folded: foldToken(norm, options),
+    marked,
+    syllable: marked ? isVietnameseSyllable(norm) : isPossibleFoldedSyllable(norm),
+  };
+}
+
 export function tokenizeQuery(query: string, options: PackOptions): QueryState {
   const normalized = normalize(query, { tonePlacement: options.tonePlacement });
-  const tokens = tokenize(normalized).map((norm) => {
-    const marked = fold(norm) !== norm;
-    return {
-      norm,
-      folded: foldToken(norm, options),
-      marked,
-      syllable: marked ? isVietnameseSyllable(norm) : isPossibleFoldedSyllable(norm),
-    };
-  });
+  const tokens = tokenize(normalized).map((norm) => makeQueryToken(norm, options));
   return { query, normalized, tokens, accented: false, restoration: null, unaccentedInVault: false };
 }
 
@@ -170,7 +178,7 @@ function restoredText(state: QueryState): string {
   return state.normalized.replace(TOKEN_RE, (token) => best[index++] ?? token);
 }
 
-export function buildAnalysis(state: QueryState, options: PackOptions): QueryAnalysis {
+export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pick<QueryEnvironment, 'project'>): QueryAnalysis {
   const restoration = state.restoration;
   const target =
     !state.accented && restoration?.candidates[0]
@@ -190,6 +198,8 @@ export function buildAnalysis(state: QueryState, options: PackOptions): QueryAna
     fold: useFold && state.tokens.length > 0 ? state.tokens.map((t) => t.folded).join(' ') : null,
   };
   const analysis: QueryAnalysis = { viewQueries };
+  // (V19) exact-alias keys for the alias views: the fold projection of the query
+  if (env) analysis.aliasKeys = aliasKeys(state.query, env.project);
   const restoredAny = restoration?.tokens.some((t) => t.restored) ?? false;
   if (options.restoreForEmbedding && restoredAny && confidence >= options.embedMinConfidence)
     analysis.embedQuery = restoredText(state);
@@ -205,11 +215,18 @@ export function buildAnalysis(state: QueryState, options: PackOptions): QueryAna
     accented: state.accented,
   };
   analysis.data = data;
+  // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25
+  // and vector branches, so both get the decoded text.
+  if (state.rewrite && state.rewrite.telex.length > 0) {
+    analysis.baseQuery = rewrittenText(state);
+    analysis.embedQuery = analysis.baseQuery;
+  }
   analysis.debug = {
     normalized: state.normalized,
     accented: state.accented,
     ...(state.accented ? { unaccentedInVault: state.unaccentedInVault } : {}),
     viewQueries,
+    ...(state.rewrite ? { rewrite: { ...state.rewrite, text: rewrittenText(state) } } : {}),
     ...(analysis.embedQuery ? { embedQuery: analysis.embedQuery } : {}),
     ...(restoration
       ? {
@@ -233,10 +250,11 @@ export function buildAnalysis(state: QueryState, options: PackOptions): QueryAna
 /** Analyze one query (P01 `analyzeQuery`). */
 export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnvironment): QueryAnalysis {
   const state = tokenizeQuery(query, env.options);
+  rewriteTokens(state, ctx, env, (norm) => makeQueryToken(norm, env.options));
   classifyAccents(state, env.options);
   restoreAccents(state, ctx, env);
   findUnaccentedSpelling(state, ctx, env);
-  const analysis = buildAnalysis(state, env.options);
+  const analysis = buildAnalysis(state, env.options, env);
   if (env.lexicon) applyLexicon(analysis, state, ctx, env.lexicon, env.options); // V18 hook
   return analysis;
 }

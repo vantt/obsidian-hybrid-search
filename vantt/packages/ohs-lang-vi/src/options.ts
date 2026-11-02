@@ -85,6 +85,10 @@ export interface PackOptions {
   lexiconPath: string;
   /** Probability mass given to a lexicon rewrite of the query in `rescore` (query-time only). */
   lexiconWeight: number;
+  /** Decode Telex/VNI keystrokes that the vault vocabulary confirms (query-time only). */
+  telex: boolean;
+  /** Correct one-letter typos against the vault vocabulary (query-time only). */
+  typo: boolean;
   viewWeights: ViewWeights;
   restoreParams: RestoreParams;
   rescore: boolean;
@@ -103,6 +107,8 @@ export const DEFAULT_OPTIONS: PackOptions = {
   accentedFold: 'auto',
   lexiconPath: DEFAULT_LEXICON_PATH,
   lexiconWeight: 0.6,
+  telex: true,
+  typo: true,
   viewWeights: { norm: 1.5, fold: 0.75 },
   restoreParams: {
     maxVariants: 5,
@@ -168,7 +174,7 @@ function ratio(input: Record<string, unknown>, key: string, fallback: number): n
 
 /**
  * Validate `OHS_LANGUAGE_PACK_OPTIONS` and fill defaults. Options that later
- * milestones own (telex, typo, segment) are accepted and ignored
+ * milestones own (segment) are accepted and ignored
  * here so a config written for a newer pack does not break this one.
  */
 export function resolveOptions(input: unknown = {}): PackOptions {
@@ -189,6 +195,8 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     accentedFold: oneOf(input, 'accentedFold', ['always', 'auto', 'never'] as const, DEFAULT_OPTIONS.accentedFold),
     lexiconPath: lexiconPath(input),
     lexiconWeight: ratio(input, 'lexiconWeight', DEFAULT_OPTIONS.lexiconWeight),
+    telex: bool(input, 'telex', DEFAULT_OPTIONS.telex),
+    typo: bool(input, 'typo', DEFAULT_OPTIONS.typo),
     viewWeights: mergeNumbers(DEFAULT_OPTIONS.viewWeights, input.viewWeights, 'viewWeights'),
     restoreParams: mergeNumbers(DEFAULT_OPTIONS.restoreParams, input.restoreParams, 'restoreParams'),
     rescore: bool(input, 'rescore', DEFAULT_OPTIONS.rescore),

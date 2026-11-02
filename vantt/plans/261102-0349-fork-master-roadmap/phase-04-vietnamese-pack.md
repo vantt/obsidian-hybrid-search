@@ -46,7 +46,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - [x] V13 M2, M3 view, phân tích câu, phục hồi dấu, chấm lại
 - [ ] V17 Telex/VNI và gõ sai
 - [ ] V18 đồng nghĩa, viết tắt, `learn-abbr`
-- [ ] V19 alias không dấu, đoạn trích chữ gốc
+- [x] V19 alias không dấu, đoạn trích chữ gốc
 - [ ] V20 tách từ
 
 ## Success Criteria

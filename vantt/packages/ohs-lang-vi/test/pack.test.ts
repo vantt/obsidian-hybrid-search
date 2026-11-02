@@ -292,3 +292,29 @@ describe('rescore', () => {
     );
   });
 });
+
+describe('alias views', () => {
+  it('declares fold as the alias view and keys the query by its fold projection', () => {
+    const pack = createPack();
+    expect(pack.aliasViews).toEqual(['fold']);
+    const a = analyze('Ke hoach quy bon');
+    expect(a.aliasKeys).toEqual({ fold: 'ke hoach quy bon' });
+  });
+
+  it('matches the key the core stores for an accented alias, with or without marks', () => {
+    const pack = createPack();
+    const stored = pack.project('fold', 'aliases', 'Kế hoạch quý bốn');
+    for (const q of ['Ke hoach quy bon', 'kế hoạch quý bốn', '  KẾ   hoạch quy bon ']) {
+      expect((pack.analyzeQuery(q, fakeContext(VAULT)) as QueryAnalysis).aliasKeys?.fold).toBe(stored);
+    }
+  });
+
+  it('keys đ and title projections the same way', () => {
+    const pack = createPack();
+    expect(analyze('Đường di chuyen').aliasKeys?.fold).toBe(pack.project('fold', 'title', 'Đường di chuyển'));
+  });
+
+  it('gives no key for an empty query', () => {
+    expect(analyze('   ').aliasKeys).toEqual({ fold: null });
+  });
+});
