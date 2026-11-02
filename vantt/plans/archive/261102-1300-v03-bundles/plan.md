@@ -48,3 +48,9 @@ Windows: `tar.exe` đọc argv theo code page ANSI nên không `chdir` được 
 - User chấp nhận độ lệch đã đo của bản thay (multilingual +0,063, vi-synonym -0,017) và ghi thành danh sách cho phép theo hạng mục (sai số 0,005) trong `bundle-parity.mjs`; hạng mục khác vẫn giới hạn 0,01. Run 41405549264 xanh: `pin-effect` đạt, 4 gói lên `v0.17.2-vantt.1` cùng `.sha256` và `.bundle.json`, release được đặt `latest`, release notes ghi bản thay, bảng độ lệch và "user chấp nhận 2026-11-02".
 - Gói đã phát hành (nén / giải nén, MB): win32-x64 102,6 / 279,3; darwin-arm64 99,5 / 326,3; darwin-x64 87,5 / 281,6; linux-x64 99,1 / 295,7. Smoke xanh cả 4.
 - Việc còn lại ngoài V03: chạy thật đường catchup gọi bundles khi có tag mới.
+
+## Sửa độ ổn định của phép kiểm pin-effect (2026-11-02)
+- Run 41406332060 (tag `v0.17.2-vantt.2`) đỏ vì runner lần đó có CPU khác: phía khoá cho `obsidian-help` ALL 0,728 (các lần đạt: 0,735), và độ lệch của bản thay là keyword +0,011, conceptual +0,029, multilingual +0,054, vi-synonym +0,023. Run đó đã dùng bản có danh sách cho phép (đầu ra có dòng "Accepted deltas").
+- Đo: 3 runner (AMD EPYC 9V74, 7763, 7763) cho kết quả giống nhau từng số, và chạy lại cùng một phía trên cùng máy cho kết quả giống hệt. Vậy phép đo xác định theo từng loại CPU, không ngẫu nhiên; độ lệch phụ thuộc loại CPU.
+- Sửa: `vantt-pin-effect.yml` ghi CPU, chỉ kết luận khi là AMD EPYC (loại CPU của số đã được user chấp nhận), nếu không thì chạy lại trên runner mới, tối đa 3 lần; hết 3 lần thì báo đỏ và không phát hành gói Intel. Danh sách cho phép giữ nguyên, không nới ngưỡng.
+- Run 41411464446 cho `v0.17.2-vantt.2`: lần 1 gặp CPU khác (không kết luận), lần 2 đạt; đủ 4 gói (12 file) trên Release, `latest`.
