@@ -1,0 +1,2715 @@
+[
+  {
+    "query": "bread",
+    "options": {},
+    "results": [
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.985347985,
+        "scores": {
+          "semantic": 0.437595004,
+          "bm25": 0.47998555,
+          "fuzzy_title": 0.808593586,
+          "hybrid": 0.985347985
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.893998139,
+        "scores": {
+          "semantic": 0.288675168,
+          "bm25": 0.34031644,
+          "fuzzy_title": null,
+          "hybrid": 0.893998139
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.873459873,
+        "scores": {
+          "semantic": 0.179605296,
+          "bm25": 0.258501415,
+          "fuzzy_title": null,
+          "hybrid": 0.873459873
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.461538462,
+        "scores": {
+          "semantic": 0.534522454,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.461538462
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.454094293,
+        "scores": {
+          "semantic": 0.440237311,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.454094293
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.433136095,
+        "scores": {
+          "semantic": 0.208514464,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.433136095
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.420206659,
+        "scores": {
+          "semantic": 0.121267756,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.420206659
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.414027149,
+        "scores": {
+          "semantic": 0,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.414027149
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "stone river",
+    "options": {},
+    "results": [
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 1,
+        "scores": {
+          "semantic": 0.73720978,
+          "bm25": 0.650551614,
+          "fuzzy_title": null,
+          "hybrid": 1
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.954056696,
+        "scores": {
+          "semantic": 0.381000438,
+          "bm25": 0.520525101,
+          "fuzzy_title": null,
+          "hybrid": 0.954056696
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.939350865,
+        "scores": {
+          "semantic": 0.377964471,
+          "bm25": 0.348187909,
+          "fuzzy_title": null,
+          "hybrid": 0.939350865
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.491935484,
+        "scores": {
+          "semantic": 0.596648382,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.491935484
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.484126984,
+        "scores": {
+          "semantic": 0.510310408,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.484126984
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.4765625,
+        "scores": {
+          "semantic": 0.428746412,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.4765625
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.469230769,
+        "scores": {
+          "semantic": 0.388514293,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.469230769
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.448529412,
+        "scores": {
+          "semantic": 0.309426299,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.448529412
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "strasse",
+    "options": {},
+    "results": [
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.986175115,
+        "scores": {
+          "semantic": 0.550296682,
+          "bm25": null,
+          "fuzzy_title": 0.019693907,
+          "hybrid": 0.986175115
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.932760788,
+        "scores": {
+          "semantic": 0.179605296,
+          "bm25": null,
+          "fuzzy_title": 0.01442024,
+          "hybrid": 0.932760788
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.857142857,
+        "scores": {
+          "semantic": 0.625543211,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.857142857
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.829931973,
+        "scores": {
+          "semantic": 0.43301274,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.829931973
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.816964286,
+        "scores": {
+          "semantic": 0.412081691,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.816964286
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.804395604,
+        "scores": {
+          "semantic": 0.363803404,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.804395604
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.780383795,
+        "scores": {
+          "semantic": 0.145865007,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.780383795
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.768907563,
+        "scores": {
+          "semantic": 0.133630662,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.768907563
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "Straße",
+    "options": {
+      "mode": "fulltext"
+    },
+    "results": [
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.\n",
+        "score": 0.521842913,
+        "scores": {
+          "semantic": null,
+          "bm25": 0.521842913,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.372189517,
+        "scores": {
+          "semantic": null,
+          "bm25": 0.372189517,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      }
+    ]
+  },
+  {
+    "query": "grosse strasse",
+    "options": {
+      "mode": "fulltext"
+    },
+    "results": []
+  },
+  {
+    "query": "canyon",
+    "options": {
+      "mode": "fulltext",
+      "anchors": true
+    },
+    "results": [
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.\n",
+        "score": 0.768556592,
+        "scores": {
+          "semantic": null,
+          "bm25": 0.768556592,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "bm25Anchor": {
+          "kind": "bm25",
+          "headingPath": null,
+          "matchText": "# Grand Canyon",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1,
+        "previewAnchors": [
+          {
+            "kind": "bm25",
+            "headingPath": null,
+            "matchText": "# Grand Canyon",
+            "charStart": 0,
+            "charEnd": 86
+          }
+        ],
+        "primaryAnchorIndex": 0
+      }
+    ]
+  },
+  {
+    "query": "Bread",
+    "options": {
+      "mode": "title"
+    },
+    "results": [
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.808593586,
+        "scores": {
+          "semantic": null,
+          "bm25": null,
+          "fuzzy_title": 0.808593586,
+          "hybrid": null
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      }
+    ]
+  },
+  {
+    "query": "fussweg",
+    "options": {},
+    "results": [
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.959821429,
+        "scores": {
+          "semantic": 0.23947383,
+          "bm25": null,
+          "fuzzy_title": 0.023983951,
+          "hybrid": 0.959821429
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.857142857,
+        "scores": {
+          "semantic": 0.485071293,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.857142857
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.843317972,
+        "scores": {
+          "semantic": 0.417028842,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.843317972
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.829931973,
+        "scores": {
+          "semantic": 0.366864387,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.829931973
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.804395604,
+        "scores": {
+          "semantic": 0.137360536,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.804395604
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.792207792,
+        "scores": {
+          "semantic": 0.133630662,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.792207792
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.780383795,
+        "scores": {
+          "semantic": 3.4e-8,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.780383795
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.768907563,
+        "scores": {
+          "semantic": 3.4e-8,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.768907563
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "Fußweg",
+    "options": {},
+    "results": [
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.99516129,
+        "scores": {
+          "semantic": 0.658552764,
+          "bm25": 0.720953628,
+          "fuzzy_title": 1,
+          "hybrid": 0.99516129
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.3,
+        "scores": {
+          "semantic": 0.668153121,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.3
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.29047619,
+        "scores": {
+          "semantic": 0.58345998,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.29047619
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.2859375,
+        "scores": {
+          "semantic": 0.549442262,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.2859375
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.281538462,
+        "scores": {
+          "semantic": 0.476923774,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.281538462
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.277272727,
+        "scores": {
+          "semantic": 0.433012613,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.277272727
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.273134328,
+        "scores": {
+          "semantic": 0.363803539,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.273134328
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.269117647,
+        "scores": {
+          "semantic": 0.208514464,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.269117647
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "sourdough",
+    "options": {
+      "mode": "title"
+    },
+    "results": [
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 1,
+        "scores": {
+          "semantic": null,
+          "bm25": null,
+          "fuzzy_title": 1,
+          "hybrid": null
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      }
+    ]
+  },
+  {
+    "query": "kitchen herbs",
+    "options": {
+      "mode": "semantic"
+    },
+    "results": [
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.515710611,
+        "scores": {
+          "semantic": 0.515710611,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.510310408,
+        "scores": {
+          "semantic": 0.510310408,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.508000477,
+        "scores": {
+          "semantic": 0.508000477,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.485642987,
+        "scores": {
+          "semantic": 0.485642987,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.294883936,
+        "scores": {
+          "semantic": 0.294883936,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.28347346,
+        "scores": {
+          "semantic": 0.28347346,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.259412402,
+        "scores": {
+          "semantic": 0.259412402,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.171498575,
+        "scores": {
+          "semantic": 0.171498575,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "C++",
+    "options": {
+      "mode": "fulltext"
+    },
+    "results": [
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.\n",
+        "score": 0.705185453,
+        "scores": {
+          "semantic": null,
+          "bm25": 0.705185453,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      }
+    ]
+  },
+  {
+    "query": "ete",
+    "options": {
+      "mode": "fulltext"
+    },
+    "results": [
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.\n",
+        "score": 0.712212671,
+        "scores": {
+          "semantic": null,
+          "bm25": 0.712212671,
+          "fuzzy_title": null,
+          "hybrid": null
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      }
+    ]
+  },
+  {
+    "query": "bread",
+    "options": {
+      "tag": "recipe"
+    },
+    "results": [
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 1,
+        "scores": {
+          "semantic": 0.437595004,
+          "bm25": 0.47998555,
+          "fuzzy_title": 0.808593586,
+          "hybrid": 1
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      }
+    ]
+  },
+  {
+    "query": "stone",
+    "options": {
+      "scope": "streets"
+    },
+    "results": [
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.991935484,
+        "scores": {
+          "semantic": 0.179605296,
+          "bm25": 0.424292996,
+          "fuzzy_title": null,
+          "hybrid": 0.991935484
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.5,
+        "scores": {
+          "semantic": 0.550296682,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.5
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      }
+    ]
+  },
+  {
+    "query": "bread",
+    "options": {
+      "queries": [
+        "bread",
+        "garden herbs"
+      ]
+    },
+    "results": [
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next to the bread oven.",
+        "score": 0.991935484,
+        "scores": {
+          "semantic": 0.612372507,
+          "bm25": 0.836129301,
+          "fuzzy_title": 0.143332234,
+          "hybrid": 0.991935484
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic",
+          "bm25",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+        "score": 0.969230769,
+        "scores": {
+          "semantic": 0.412568535,
+          "bm25": 0.47998555,
+          "fuzzy_title": 0.808593586,
+          "hybrid": 0.969230769
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25",
+          "title"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every day.\n\n## Details\n\nLong before the market opened, the old Straße was paved with stone. Traders came from the river and the hills to sell bread and fish.",
+        "score": 0.946248196,
+        "scores": {
+          "semantic": 0.381000438,
+          "bm25": 0.258501415,
+          "fuzzy_title": null,
+          "hybrid": 0.946248196
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3
+      },
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 0.946248196,
+        "scores": {
+          "semantic": 0.44232588,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.946248196
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Filler words come first so that the match sits in the middle of the note body. Die Große Straße am Ende der Stadt ist breit. The",
+        "score": 0.945793269,
+        "scores": {
+          "semantic": 0.441000909,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.945793269
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining marks: été.",
+        "score": 0.940464896,
+        "scores": {
+          "semantic": 0.679900133,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.940464896
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+        "score": 0.925091912,
+        "scores": {
+          "semantic": 0.094491177,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.925091912
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is an expression.",
+        "score": 0.910447761,
+        "scores": {
+          "semantic": 0.257247941,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.910447761
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8
+      }
+    ]
+  },
+  {
+    "query": "river",
+    "options": {
+      "snippetLength": 80,
+      "anchors": true
+    },
+    "results": [
+      {
+        "path": "notes/empty-title.md",
+        "title": "empty-title",
+        "tags": [],
+        "aliases": [],
+        "snippet": "Just a body line about rivers and stone bridges.",
+        "score": 1,
+        "scores": {
+          "semantic": 0.417028842,
+          "bm25": 0.374150012,
+          "fuzzy_title": null,
+          "hybrid": 1
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "bm25Anchor": {
+          "kind": "bm25",
+          "headingPath": null,
+          "matchText": "Just a body line about rivers and stone bridges.",
+          "charStart": 0,
+          "charEnd": 48
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 1,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Just a body line about rivers and stone bridges.",
+            "charStart": 0,
+            "charEnd": 48
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "nature/canyon.md",
+        "title": "canyon",
+        "tags": [
+          "travel",
+          "nature"
+        ],
+        "aliases": [],
+        "snippet": "# Grand Canyon\n\nThe Grand Canyon is a steep-sided canyon carved by the Colorado ",
+        "score": 0.983870968,
+        "scores": {
+          "semantic": 0.400891926,
+          "bm25": 0.348187909,
+          "fuzzy_title": null,
+          "hybrid": 0.983870968
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "bm25Anchor": {
+          "kind": "bm25",
+          "headingPath": null,
+          "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+          "charStart": 0,
+          "charEnd": 86
+        },
+        "parsedTags": [
+          "travel",
+          "nature"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 2,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "The Grand Canyon is a steep-sided canyon carved by the Colorado River.",
+            "charStart": 0,
+            "charEnd": 86
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "streets/main-street.md",
+        "title": "main-street",
+        "tags": [
+          "city"
+        ],
+        "aliases": [
+          "Fußweg",
+          "Hauptweg"
+        ],
+        "snippet": "# Straße\n\nIntro paragraph about the city plan and the people who walk here every",
+        "score": 0.968253968,
+        "scores": {
+          "semantic": 0.359210574,
+          "bm25": 0.258501415,
+          "fuzzy_title": null,
+          "hybrid": 0.968253968
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "bm25Anchor": {
+          "kind": "bm25",
+          "headingPath": null,
+          "matchText": "Traders came from the river and the hills to sell bread and fish.",
+          "charStart": 0,
+          "charEnd": 232
+        },
+        "parsedTags": [
+          "city"
+        ],
+        "matchedBy": [
+          "semantic",
+          "bm25"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 3,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Intro paragraph about the city plan and the people who walk here every day.",
+            "charStart": 0,
+            "charEnd": 232
+          },
+          {
+            "kind": "bm25",
+            "headingPath": null,
+            "matchText": "Traders came from the river and the hills to sell bread and fish.",
+            "charStart": 0,
+            "charEnd": 232
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "streets/grand-street.md",
+        "title": "grand-street",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Big avenue\n\nFiller words come first so that the match sits in the middle of th",
+        "score": 0.4765625,
+        "scores": {
+          "semantic": 0.293491525,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.4765625
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+          "charStart": 0,
+          "charEnd": 332
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 4,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Filler words come first so that the match sits in the middle of the note body. F",
+            "charStart": 0,
+            "charEnd": 332
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "kitchen/bread.md",
+        "title": "bread",
+        "tags": [
+          "recipe"
+        ],
+        "aliases": [
+          "Sourdough"
+        ],
+        "snippet": "# Bread recipe\n\nMix flour, water and salt. Let the dough rise overnight, then ba",
+        "score": 0.469230769,
+        "scores": {
+          "semantic": 0.291730033,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.469230769
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+          "charStart": 0,
+          "charEnd": 93
+        },
+        "parsedTags": [
+          "recipe"
+        ],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 5,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Mix flour, water and salt. Let the dough rise overnight, then bake the bread.",
+            "charStart": 0,
+            "charEnd": 93
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "kitchen/garden.md",
+        "title": "garden",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Kitchen garden\n\nHerbs for the kitchen: basil, thyme and parsley grow well next",
+        "score": 0.462121212,
+        "scores": {
+          "semantic": 0.288675168,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.462121212
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+          "charStart": 0,
+          "charEnd": 99
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 6,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Herbs for the kitchen: basil, thyme and parsley grow well next to the bread oven",
+            "charStart": 0,
+            "charEnd": 99
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "notes/c-plus-plus.md",
+        "title": "c-plus-plus",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# C++ notes\n\nTemplates in C++ and generics in C# solve similar problems; a+b is ",
+        "score": 0.455223881,
+        "scores": {
+          "semantic": 0.242535561,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.455223881
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 7,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Templates in C++ and generics in C# solve similar problems; a+b is an expression",
+            "charStart": 0,
+            "charEnd": 94
+          }
+        ],
+        "primaryAnchorIndex": 0
+      },
+      {
+        "path": "notes/unicode.md",
+        "title": "unicode",
+        "tags": [],
+        "aliases": [],
+        "snippet": "# Café menu\n\nCrème brûlée, naïve façade, and the word été written with combining",
+        "score": 0.448529412,
+        "scores": {
+          "semantic": 0.137360536,
+          "bm25": null,
+          "fuzzy_title": null,
+          "hybrid": 0.448529412
+        },
+        "semanticAnchor": {
+          "kind": "semantic",
+          "headingPath": null,
+          "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+          "charStart": 0,
+          "charEnd": 94
+        },
+        "parsedTags": [],
+        "matchedBy": [
+          "semantic"
+        ],
+        "links": [],
+        "backlinks": [],
+        "markdownLinks": [],
+        "markdownBacklinks": [],
+        "urls": [],
+        "rank": 8,
+        "previewAnchors": [
+          {
+            "kind": "semantic",
+            "headingPath": null,
+            "matchText": "Crème brûlée, naïve façade, and the word été written with combining marks: été",
+            "charStart": 0,
+            "charEnd": 94
+          }
+        ],
+        "primaryAnchorIndex": 0
+      }
+    ]
+  }
+]
