@@ -1,4 +1,4 @@
-From 4c69fbfba90c3c6551c96e76000e185e858b75bb Mon Sep 17 00:00:00 2001
+From 632209f41385ff3020971f70ca3331a3dc05305b Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:09:32 +0700
 Subject: [PATCH] feat(search): restrict search to a given set of note paths
@@ -94,7 +94,7 @@ index 3ee26ad..e2cd95f 100644
    // constrains the query. Returning "()" here would be a SQL syntax error that the
    // arms' catch blocks would swallow into an empty result.
 diff --git a/src/search/searcher.ts b/src/search/searcher.ts
-index fb4dda1..5895837 100644
+index 54a78ea..3fc6d6d 100644
 --- a/src/search/searcher.ts
 +++ b/src/search/searcher.ts
 @@ -13,6 +13,8 @@ import { normalizeNotePath } from '../content/text-normalization.js';
@@ -115,7 +115,7 @@ index fb4dda1..5895837 100644
    related?: boolean;
    depth?: number;
    direction?: 'outgoing' | 'backlinks' | 'both';
-@@ -1290,6 +1294,13 @@ const searchCache = new LRUCache<SearchResult[]>(100);
+@@ -1292,6 +1296,13 @@ const searchCache = new LRUCache<SearchResult[]>(100);
   *  filter-only branch's FETCH_ALL so both paths cap the vault the same way. */
  const UNLIMITED_RESULTS = 10000;
  
@@ -129,7 +129,7 @@ index fb4dda1..5895837 100644
  function cacheKey(input: string, options: SearchOptions): string {
    const scopeStr = Array.isArray(options.scope) ? options.scope.join(',') : (options.scope ?? '');
    const tagStr = Array.isArray(options.tag) ? options.tag.join(',') : (options.tag ?? '');
-@@ -1300,6 +1311,8 @@ function cacheKey(input: string, options: SearchOptions): string {
+@@ -1302,6 +1313,8 @@ function cacheKey(input: string, options: SearchOptions): string {
    const rerankStr = options.rerank ? config.rerankerModel : '';
    const queriesStr = options.queries && options.queries.length > 1 ? options.queries.join('|') : '';
    const anchorsStr = options.anchors ? 'a' : '';
@@ -138,7 +138,7 @@ index fb4dda1..5895837 100644
    // Empty unless explain or an active language pack applies, so the key is unchanged otherwise.
    const pack = activeLanguagePack();
    const languageStr =
-@@ -1308,7 +1321,7 @@ function cacheKey(input: string, options: SearchOptions): string {
+@@ -1310,7 +1323,7 @@ function cacheKey(input: string, options: SearchOptions): string {
    //   getDbVersion() — shared via SQLite settings; any process that modifies the DB
    //                    bumps it, invalidating caches in all other processes.
    //   localVersion   — in-process counter; bumpIndexVersion() for test-suite isolation.
@@ -147,7 +147,7 @@ index fb4dda1..5895837 100644
  }
  
  // eslint-disable-next-line sonarjs/cognitive-complexity -- primary search entry-point; complexity is inherent in the multi-mode, multi-filter pipeline
-@@ -1349,7 +1362,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1351,7 +1364,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
      const fmStr = Array.isArray(options.frontmatter)
        ? options.frontmatter.join(',')
        : (options.frontmatter ?? '');
@@ -156,7 +156,7 @@ index fb4dda1..5895837 100644
      const cached = searchCache.get(key);
      if (cached) return cached;
      let related = searchRelated(resolvedPath, maxDepth, direction, snippetLength, linkType);
-@@ -1357,6 +1370,10 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1359,6 +1372,10 @@ export async function search(input: string, options: SearchOptions = {}): Promis
      if (hasFilterValue(options.scope)) {
        related = related.filter((r) => matchesScopeFilter(r.path, options.scope!));
      }
@@ -167,7 +167,7 @@ index fb4dda1..5895837 100644
      if (hasFilterValue(options.tag)) {
        const allowedPaths = filterNotePathsByTag(
          related.map((result) => result.path),
-@@ -1395,8 +1412,13 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1397,8 +1414,13 @@ export async function search(input: string, options: SearchOptions = {}): Promis
    const hasFrontmatterFilter = hasFilterValue(options.frontmatter);
    const hasTagFilter = hasFilterValue(options.tag);
    const hasScopeFilter = hasFilterValue(options.scope);
@@ -182,7 +182,7 @@ index fb4dda1..5895837 100644
      const fmKey = cacheKey('', options);
      const cachedFm = searchCache.get(fmKey);
      if (cachedFm) return cachedFm;
-@@ -1435,6 +1457,11 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1437,6 +1459,11 @@ export async function search(input: string, options: SearchOptions = {}): Promis
        fmResults = fmResults.filter((r) => matchesScopeFilter(r.path, options.scope!));
      }
  

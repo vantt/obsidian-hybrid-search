@@ -1,4 +1,4 @@
-From 85658a1427c7cbc84e1386b6f22594399ba54c6d Mon Sep 17 00:00:00 2001
+From d112c088cb4e3423af455dac3fae40d4246672c1 Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:09:15 +0700
 Subject: [PATCH] feat(search): export note vectors and nearest notes as JSON

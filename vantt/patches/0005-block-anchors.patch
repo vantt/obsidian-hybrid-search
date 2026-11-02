@@ -1,4 +1,4 @@
-From fc0a88f6473271aa4639aee9415a83768bbcbfb5 Mon Sep 17 00:00:00 2001
+From 39e5a2075a62ba4843a744c088b34e4f5ab69a2c Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:09:50 +0700
 Subject: [PATCH] feat(index): store block ids and highlight flags per chunk,
@@ -170,7 +170,7 @@ index 83d1b10..9ca8982 100644
      return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
    },
 diff --git a/src/search/searcher.ts b/src/search/searcher.ts
-index 9952ecd..fb4dda1 100644
+index 5f6f462..54a78ea 100644
 --- a/src/search/searcher.ts
 +++ b/src/search/searcher.ts
 @@ -107,6 +107,17 @@ interface MatchAnchor {
@@ -199,7 +199,7 @@ index 9952ecd..fb4dda1 100644
            };
          }
        }
-@@ -646,6 +658,8 @@ type Bm25ChunkData = {
+@@ -647,6 +659,8 @@ type Bm25ChunkData = {
    chunkText: string;
    charStart: number | null;
    charEnd: number | null;
@@ -208,7 +208,7 @@ index 9952ecd..fb4dda1 100644
  };
  
  function getChunkDataForBm25Results(results: RawResult[]): Map<string, Bm25ChunkData> {
-@@ -696,6 +710,8 @@ function matchChunkDataFromRows(
+@@ -697,6 +711,8 @@ function matchChunkDataFromRows(
      text: string;
      char_start: number | null;
      char_end: number | null;
@@ -217,7 +217,7 @@ index 9952ecd..fb4dda1 100644
    }>,
    snippetKeys: Map<string, string>,
  ): Map<string, Bm25ChunkData> {
-@@ -713,6 +729,8 @@ function matchChunkDataFromRows(
+@@ -714,6 +730,8 @@ function matchChunkDataFromRows(
        chunkText: row.text,
        charStart: row.char_start ?? null,
        charEnd: row.char_end ?? null,
@@ -226,7 +226,7 @@ index 9952ecd..fb4dda1 100644
      });
    }
    return result;
-@@ -812,6 +830,7 @@ function searchVector(
+@@ -813,6 +831,7 @@ function searchVector(
              matchText: buildMatchText(row.chunk_text),
              charStart: row.char_start ?? null,
              charEnd: row.char_end ?? null,

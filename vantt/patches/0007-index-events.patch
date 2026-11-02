@@ -1,0 +1,344 @@
+From df221fc146acfa9c1d7ca83006bd7447fb44f301 Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:37:33 +0700
+Subject: [PATCH] feat(stdio): emit indexed and removed events after index
+ writes
+
+---
+ src/indexing/indexer.ts         |  77 ++++++++++++++-
+ src/transports/cli.ts           |   5 +-
+ test/vantt/index-events.test.ts | 169 ++++++++++++++++++++++++++++++++
+ 3 files changed, 246 insertions(+), 5 deletions(-)
+ create mode 100644 test/vantt/index-events.test.ts
+
+diff --git a/src/indexing/indexer.ts b/src/indexing/indexer.ts
+index 6933a22..1a42f4a 100644
+--- a/src/indexing/indexer.ts
++++ b/src/indexing/indexer.ts
+@@ -29,6 +29,7 @@ import {
+   clearIndexFailures,
+   commitIndexedNote,
+   deleteNote,
++  getDbVersion,
+   getNoteMeta,
+   getStoredEmbeddingDim,
+   hasIndexFailure,
+@@ -89,6 +90,68 @@ export interface IndexResult {
+   errors: Array<{ path: string; error: string }>;
+ }
+ 
++export interface IndexEvent {
++  event: 'indexed' | 'removed';
++  paths: string[];
++  db_version: number;
++}
++
++const INDEX_EVENT_COALESCE_MS = 25;
++const indexEventListeners = new Set<(event: IndexEvent) => void>();
++const pendingIndexEvents = { indexed: new Set<string>(), removed: new Set<string>() };
++let indexEventTimer: ReturnType<typeof setTimeout> | undefined;
++
++/** Subscribe to committed index writes made by this process; returns the unsubscribe function. */
++export function onIndexEvent(listener: (event: IndexEvent) => void): () => void {
++  indexEventListeners.add(listener);
++  return () => {
++    indexEventListeners.delete(listener);
++    if (indexEventListeners.size === 0) {
++      if (indexEventTimer) clearTimeout(indexEventTimer);
++      indexEventTimer = undefined;
++      pendingIndexEvents.indexed.clear();
++      pendingIndexEvents.removed.clear();
++    }
++  };
++}
++
++function flushIndexEvents(): void {
++  indexEventTimer = undefined;
++  let dbVersion = 0;
++  try {
++    dbVersion = getDbVersion();
++  } catch {
++    // The database may be closing; the version is advisory.
++  }
++  for (const kind of ['removed', 'indexed'] as const) {
++    const paths = [...pendingIndexEvents[kind]].sort((a, b) => a.localeCompare(b));
++    pendingIndexEvents[kind].clear();
++    if (paths.length === 0) continue;
++    for (const listener of indexEventListeners) {
++      try {
++        listener({ event: kind, paths, db_version: dbVersion });
++      } catch {
++        // A faulty listener must not disturb indexing.
++      }
++    }
++  }
++}
++
++/** Record committed note writes; paths are coalesced into one event per kind per write burst. */
++function noteIndexChange(kind: 'indexed' | 'removed', paths: readonly string[]): void {
++  if (indexEventListeners.size === 0 || paths.length === 0) return;
++  const other = kind === 'indexed' ? 'removed' : 'indexed';
++  for (const notePath of paths) {
++    pendingIndexEvents[other].delete(notePath);
++    pendingIndexEvents[kind].add(notePath);
++  }
++  indexEventTimer ??= setTimeout(flushIndexEvents, INDEX_EVENT_COALESCE_MS);
++}
++
++function noteIndexPublished(published: 'indexed' | 'skipped', notePath: string): void {
++  if (published === 'indexed') noteIndexChange('indexed', [notePath]);
++}
++
+ function assertIndexRun(run: IndexRunContext): void {
+   run.signal.throwIfAborted();
+   const owner = readIndexOwner();
+@@ -551,6 +614,7 @@ export async function indexFile(
+         );
+         if (!removed) continue;
+         bumpIndexVersion();
++        noteIndexChange('removed', [prepared.path]);
+         throw new Error(`ENOENT: note no longer exists, ${prepared.path}`);
+       }
+       if (prepared.kind === 'unchanged') {
+@@ -600,6 +664,7 @@ export async function indexFile(
+       );
+       if (published === 'changed') continue;
+       bumpIndexVersion();
++      noteIndexPublished(published, prepared.note.path);
+       return published;
+     }
+     throw new Error(
+@@ -701,17 +766,20 @@ export function cleanupStaleNotes(
+ ): void {
+   try {
+     run.signal.throwIfAborted();
+-    let deleted = cleanupIgnoredNotes(run.lease, config.ignorePatterns, policy.signature(), (p) =>
++    const deleted = cleanupIgnoredNotes(run.lease, config.ignorePatterns, policy.signature(), (p) =>
+       policy.isIgnored(p),
+-    ).length;
++    );
+     if (fsPaths)
+       for (const notePath of getExistingNotePathSet()) {
+         if (!fsPaths.has(notePath)) {
+           deleteNote(run.lease, notePath);
+-          deleted++;
++          deleted.push(notePath);
+         }
+       }
+-    if (deleted > 0) bumpIndexVersion();
++    if (deleted.length > 0) {
++      bumpIndexVersion();
++      noteIndexChange('removed', deleted);
++    }
+     clearIndexFailures(run.lease, '', 'cleanup');
+   } catch (error) {
+     if (run.signal.aborted || error instanceof IndexLeaseLostError) throw error;
+@@ -1289,6 +1357,7 @@ export function startWatcher(contextLength: number, run: IndexRunContext): Watch
+                 }
+                 deleteNote(run.lease, rel);
+                 bumpIndexVersion();
++                noteIndexChange('removed', [rel]);
+                 return true;
+               }),
+             );
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index 0d29dae..290d058 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -7,7 +7,7 @@ import { promisify } from 'node:util';
+ import pc from 'picocolors';
+ import { parseCliIntegerOption, parseCliNumberOption } from '../contracts/boundary-validation.js';
+ import { createIndexService, openIndexDatabase } from '../indexing/index-service.js';
+-import { formatDuration, renderProgressLine } from '../indexing/indexer.js';
++import { formatDuration, onIndexEvent, renderProgressLine } from '../indexing/indexer.js';
+ import { activeModelName, getContextLength, primeEmbeddingDim } from '../inference/embedder.js';
+ import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings.js';
+ import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
+@@ -909,6 +909,9 @@ const serveCommand = program
+       process.on('SIGINT', cleanup);
+ 
+       const writeLine = (s: string) => process.stdout.write(s + '\n');
++      // Opt-in: unsolicited `{"event":...}` lines (no `id`) after each index write batch.
++      if (process.env.OHS_STDIO_EVENTS === '1')
++        onIndexEvent((event) => writeLine(JSON.stringify(event)));
+       const actions: StdioActionHandlers = {
+         read: (paths, options) => readNotes(paths, options),
+         vectors: (params) => exportNoteVectors({ ...params, ohsVersion: version }),
+diff --git a/test/vantt/index-events.test.ts b/test/vantt/index-events.test.ts
+new file mode 100644
+index 0000000..766ca85
+--- /dev/null
++++ b/test/vantt/index-events.test.ts
+@@ -0,0 +1,169 @@
++import { spawn } from 'node:child_process';
++import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
++import { createServer, type Server } from 'node:http';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++
++// Real `serve --stdio` processes against a temp vault and a fake embedding server.
++// The watcher debounces each file for 5 s, so the file-change tests wait for that.
++const root = path.resolve(import.meta.dirname, '../..');
++const DIM = 8;
++const dirs: string[] = [];
++let embedServer: Server;
++let embedPort = 0;
++
++function embedText(text: string): number[] {
++  const vector = new Array<number>(DIM).fill(0);
++  for (const word of text.toLowerCase().match(/[a-z]+/g) ?? []) {
++    let hash = 0;
++    for (const char of word) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
++    vector[hash % DIM] = (vector[hash % DIM] ?? 0) + 1;
++  }
++  const norm = Math.hypot(...vector) || 1;
++  return vector.map((v) => v / norm);
++}
++
++beforeAll(async () => {
++  embedServer = createServer((req, res) => {
++    let body = '';
++    req.on('data', (chunk: Buffer) => (body += chunk.toString()));
++    req.on('end', () => {
++      const parsed = JSON.parse(body || '{}') as { input?: string | string[] };
++      const inputs = Array.isArray(parsed.input) ? parsed.input : [parsed.input ?? ''];
++      res.writeHead(200, { 'content-type': 'application/json' });
++      res.end(
++        JSON.stringify({
++          object: 'list',
++          data: inputs.map((text, index) => ({
++            object: 'embedding',
++            index,
++            embedding: embedText(text),
++          })),
++          model: 'text-embedding-3-small',
++        }),
++      );
++    });
++  });
++  await new Promise<void>((resolve) => embedServer.listen(0, '127.0.0.1', resolve));
++  embedPort = (embedServer.address() as { port: number }).port;
++});
++
++afterAll(() => {
++  embedServer.close();
++  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
++});
++
++interface Session {
++  vault: string;
++  lines: Array<Record<string, unknown>>;
++  exit: Promise<number | null>;
++  closeStdin(): void;
++  waitFor(
++    match: (line: Record<string, unknown>) => boolean,
++    ms: number,
++  ): Promise<Record<string, unknown>>;
++}
++
++function startServer(events: boolean): Session {
++  const vault = mkdtempSync(path.join(tmpdir(), 'ohs-index-events-'));
++  dirs.push(vault);
++  writeFileSync(path.join(vault, 'apples.md'), 'Apples grow in the orchard.\n');
++  mkdirSync(path.join(vault, 'sub'));
++  writeFileSync(path.join(vault, 'sub', 'pears.md'), 'Pears ripen in autumn.\n');
++  const env: NodeJS.ProcessEnv = {
++    ...process.env,
++    OBSIDIAN_VAULT_PATH: vault,
++    OPENAI_API_KEY: 'test',
++    OPENAI_BASE_URL: `http://127.0.0.1:${embedPort}/v1`,
++    OPENAI_EMBEDDING_MODEL: 'text-embedding-3-small',
++    OHS_DISABLE_UPDATE_CHECK: '1',
++    NO_COLOR: '1',
++  };
++  if (events) env.OHS_STDIO_EVENTS = '1';
++  else delete env.OHS_STDIO_EVENTS;
++  const child = spawn(process.execPath, [path.join(root, 'dist/src/cli.js'), 'serve', '--stdio'], {
++    cwd: vault,
++    env,
++    stdio: ['pipe', 'pipe', 'ignore'],
++  });
++  const lines: Array<Record<string, unknown>> = [];
++  const waiters: Array<() => void> = [];
++  let buffered = '';
++  child.stdout.on('data', (chunk: Buffer) => {
++    buffered += chunk.toString();
++    let newline = buffered.indexOf('\n');
++    while (newline >= 0) {
++      const line = buffered.slice(0, newline);
++      buffered = buffered.slice(newline + 1);
++      newline = buffered.indexOf('\n');
++      if (line.trim()) lines.push(JSON.parse(line) as Record<string, unknown>);
++    }
++    for (const wake of waiters.splice(0)) wake();
++  });
++  const exit = new Promise<number | null>((resolve) => child.on('exit', (code) => resolve(code)));
++  return {
++    vault,
++    lines,
++    exit,
++    closeStdin: () => child.stdin.end(),
++    waitFor: (match, ms) =>
++      new Promise((resolve, reject) => {
++        const timer = setTimeout(
++          () => reject(new Error(`timeout waiting for line; got ${JSON.stringify(lines)}`)),
++          ms,
++        );
++        const check = () => {
++          const found = lines.find(match);
++          if (found) {
++            clearTimeout(timer);
++            resolve(found);
++          } else waiters.push(check);
++        };
++        check();
++      }),
++  };
++}
++
++const isEvent = (name: string, file: string) => (line: Record<string, unknown>) =>
++  line.event === name && Array.isArray(line.paths) && line.paths.includes(file);
++
++describe('serve --stdio index events', () => {
++  it('emits indexed and removed events without an id after note writes', async () => {
++    const session = startServer(true);
++    await session.waitFor((l) => l.ready === true, 30_000);
++    // Let the initial index settle, then edit and delete.
++    await session.waitFor(isEvent('indexed', 'apples.md'), 30_000);
++    const edited = Date.now();
++    writeFileSync(
++      path.join(session.vault, 'apples.md'),
++      'Apples and quinces grow in the orchard.\n',
++    );
++    session.lines.length = 0;
++    const event = await session.waitFor(isEvent('indexed', 'apples.md'), 20_000);
++    expect(event).toMatchObject({ event: 'indexed', paths: ['apples.md'] });
++    expect(event).not.toHaveProperty('id');
++    expect(typeof event.db_version).toBe('number');
++    expect(Date.now() - edited).toBeLessThan(15_000);
++
++    unlinkSync(path.join(session.vault, 'sub', 'pears.md'));
++    const removed = await session.waitFor(isEvent('removed', 'sub/pears.md'), 20_000);
++    expect(removed).toMatchObject({ event: 'removed', paths: ['sub/pears.md'] });
++    expect(removed).not.toHaveProperty('id');
++
++    session.closeStdin();
++    expect(await session.exit).toBe(0);
++  }, 90_000);
++
++  it('stays silent without opt-in', async () => {
++    const session = startServer(false);
++    await session.waitFor((l) => l.ready === true, 30_000);
++    await new Promise((r) => setTimeout(r, 2000));
++    writeFileSync(path.join(session.vault, 'apples.md'), 'Apples and figs.\n');
++    await new Promise((r) => setTimeout(r, 9000));
++    session.closeStdin();
++    expect(await session.exit).toBe(0);
++    expect(session.lines.filter((l) => 'event' in l)).toEqual([]);
++    expect(session.lines).toEqual([{ ready: true }]);
++  }, 60_000);
++});
+-- 
+2.53.0
+

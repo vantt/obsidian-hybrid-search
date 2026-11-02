@@ -1,4 +1,4 @@
-From 59c6d27f17b843f5be0f67031223cd81cea90b0b Mon Sep 17 00:00:00 2001
+From 532efb480d58e59854086cb3271093fcad054314 Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:08:16 +0700
 Subject: [PATCH] feat(storage): allow the index database outside the vault

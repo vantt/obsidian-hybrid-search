@@ -25,6 +25,12 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
 7. `status` (CLI, MCP, stdio) có `language_pack: {requested, loaded, id, version, signature, views}` hoặc `{requested, loaded: false, error}`. Không cấu hình gói thì không có trường này.
 8. Đổi chữ ký gói, đổi bố cục view, thêm hoặc bỏ gói: chỉ dựng lại view từ bảng `notes` (đường riêng, một giao dịch), không quét vault, không gọi embedder.
 9. Tăng `INDEX_SCHEMA_VERSION` từ `1` lên `2`.
+10. Bổ sung hợp đồng (vẫn `apiVersion: 1`, chỉ thêm, gói cũ chạy y nguyên):
+    - `QueryAnalysis.viewTerms?: Record<view, Array<string | {text, prefix?}> | null>`: câu truy vấn có cấu trúc cho từng view. Các term nối bằng `OR`. Chuỗi là khớp đúng (một token thì khớp đúng token, nhiều token thì khớp cụm từ); `{text, prefix: true}` là khớp tiền tố (`"text"*`). Mảng khác rỗng thay cho `viewQueries[v]`; `null`, mảng rỗng hay toàn term trống thì dùng lại `viewQueries[v]`. `viewQueries` giữ nghĩa cũ: mọi từ thành term tiền tố. Dấu `"` trong `text` được nhân đôi, không thoát khỏi chuỗi FTS.
+    - `QueryAnalysis.viewWeights?: Record<view, number | null>`: trọng số RRF của view cho riêng câu này. Số hữu hạn `>= 0` thay `views[].weight`; `null`, thiếu hay giá trị hỏng giữ trọng số khai báo. Bỏ nhánh vẫn là `viewQueries[v] = null` (và không có `viewTerms[v]`).
+    - `Candidate.matchedTerms: string[]` truyền cho `rescore`: chữ gốc đã khớp qua view, rỗng khi ứng viên không khớp view nào.
+    - `signature(ctx?)` và `queryCacheKey(ctx?)` nhận `PackContext = { vaultPath }`. `QueryContext` mở rộng `PackContext`. Khoá cache của bộ nạp có thêm đường dẫn vault, nên đổi vault trong cùng tiến trình thì nạp lại gói và gọi lại `signature`.
+    - `termsWithPrefix` có cận trên (`term <= prefix || U+10FFFF`), fts5vocab chỉ quét đoạn tiền tố thay vì tới hết bảng từ vựng. Kết quả không đổi.
 
 ## 3. Bất biến
 
@@ -44,18 +50,18 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
 
 | File | Hàm hoặc chỗ | Vì sao |
 |---|---|---|
-| `src/language/types.ts` (mới) | hợp đồng | `LanguagePackV1`, `QueryAnalysis`, `QueryContext`, `Candidate`, hằng số |
-| `src/language/loader.ts` (mới) | `loadLanguagePack`, `getLanguagePack`, `disableLanguagePack`, `languagePackStatus` | nạp, kiểm hợp đồng, thử `project`, cache theo cấu hình, trạng thái |
+| `src/language/types.ts` (mới) | hợp đồng | `LanguagePackV1`, `QueryAnalysis` (`viewTerms`, `viewWeights`), `QueryContext`, `PackContext`, `ViewQueryTerm`, `Candidate`, hằng số |
+| `src/language/loader.ts` (mới) | `loadLanguagePack`, `getLanguagePack`, `disableLanguagePack`, `languagePackStatus`, `requestKey` | nạp, kiểm hợp đồng, thử `project`, cache theo cấu hình và vault, trạng thái |
 | `src/language/noop.ts` (mới) | `noopAnalysis` | phân tích rỗng khi gói lỗi |
 | `src/language/tokens.ts` (mới) | `parseTokenizerRules`, `tokenize`, `mapHighlightedTokens`, `buildMarkedSnippet`, `matchedWords` | bất biến token, đoạn trích chữ gốc |
 | `src/storage/language-tables.ts` (mới) | DDL, `writeNoteLexical`, `rebuildLanguageTables`, `dropLanguageTables` | bảng view; storage chỉ ghi chữ đã chiếu |
-| `src/storage/language-queries.ts` (mới) | `replaceLanguageViews`, `readViewMatches`, `findViewAliasRows`, vocab | đọc và ghi view qua `getDb` |
+| `src/storage/language-queries.ts` (mới) | `replaceLanguageViews`, `readViewMatches`, `findViewAliasRows`, vocab (`readViewTermsWithPrefix` có cận trên) | đọc và ghi view qua `getDb` |
 | `src/storage/db.ts` | `INDEX_SCHEMA_VERSION`, `PreparedIndexNote.lexical`, `upsertNote`, `replaceActiveIndex`, `bumpDbVersion` (export) | ghi view cùng giao dịch với note; reindex đầy đủ xoá view |
 | `src/indexing/language-views.ts` (mới) | `lexicalForNote`, `syncLanguageViews`, `languageViewsOutOfDate` | tính view, dựng lại riêng view |
 | `src/indexing/indexer.ts` | `indexFile` | đính `lexical` trước `commitIndexedNote` |
 | `src/indexing/index-service.ts` | `openIndexDatabase`, `prepareContentOwner`, `reindex({force})`, `start` | nạp gói cho mọi giao tiếp; đồng bộ view |
-| `src/search/language-search.ts` (mới) | phân tích câu, nhánh view, alias view, `rescore`, khoá cache | phía tìm của gói |
-| `src/search/searcher.ts` | `searchByQuery`, `search`, `cacheKey`, `rrfFusion`, `searchFuzzyTitle`, `searchBm25` (tách `enrichMarkedSnippets`), `toSearchResult`, `SearchResult`, `SearchOptions` | nhánh RRF, `explain`, `matchedTerms` |
+| `src/search/language-search.ts` (mới) | phân tích câu, `viewQueriesFor` (`viewTerms`, `viewWeights`), nhánh view, alias view, `rescore`, khoá cache | phía tìm của gói |
+| `src/search/searcher.ts` | `searchByQuery`, `search`, `cacheKey`, `rrfFusion`, `searchFuzzyTitle`, `searchBm25` (tách `enrichMarkedSnippets`), `searchLanguageViews`, `applyLanguageRescore`, `toSearchResult`, `SearchResult`, `SearchOptions` | nhánh RRF, `explain`, `matchedTerms` |
 | `src/runtime/config.ts` | `languagePack`, `languagePackOptions` | biến môi trường |
 | `src/contracts/boundary-validation.ts` | `explain` | MCP và stdio |
 | `src/transports/cli.ts`, `mcp-runtime.ts`, `stdio-server.ts`, `status-payload.ts` | `--explain`, `explain`, `language_pack` | đưa tuỳ chọn qua mọi giao tiếp |
@@ -78,6 +84,12 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
   - Sửa hay xoá note từng file: view theo kịp, FTS view qua `integrity-check`. `reindex --force` dựng lại view.
   - Gói lỗi (`load`, `apiVersion: 2`, `project`, `project` lỗi khi dựng view, JSON tuỳ chọn hỏng, `analyzeQuery` lỗi): chạy như không gói, `status` báo lỗi, không có bảng view.
   - `explain` qua stdio và schema MCP.
+  - Bổ sung hợp đồng (khối `contract additions`, gói giả đọc `__langUpperAnalysis`, ghi `__langUpperContexts`, `__langUpperCandidates`):
+    - `viewTerms`: `GRAN` khớp đúng không ra "Grand", `{text: 'GRAN', prefix: true}` ra; `GRAND CANYON` khớp cụm, `CANYON GRAND` không; term nối `OR`, dấu `"` không phá câu FTS; mảng rỗng, `null`, term trống dùng lại `viewQueries` (tiền tố); chế độ `title` dùng được.
+    - `viewWeights`: trọng số 4 tăng điểm, 0.1 giảm điểm so với trọng số khai báo; `null`, `-1`, `NaN`, view lạ giữ nguyên điểm.
+    - `rescore` nhận `matchedTerms` chữ gốc (`Straße`), rỗng với ứng viên không khớp view.
+    - `signature` và `queryCacheKey` nhận `{ vaultPath }` đúng vault.
+    - `termsWithPrefix` chỉ trả term có tiền tố (cả chữ có dấu, tiền tố rỗng, tiền tố không có term).
 - `test/vantt/language-pack-tokens.test.ts`: bộ tách JS cho đúng số token như FTS5 thật (đối chiếu `fts5vocab instance`) với ba tokenizer; ghép `_`; token tiếp nối `U+2060`; cắt cửa sổ đoạn trích; kiểm hợp đồng ở bộ nạp.
 - Probe: `node vantt/probes/language-pack-api.mjs --ohs <bản đã build>`. Trả 1 trên upstream v0.17.2, 0 trên bản đã vá (đã chạy cả hai).
 - `test_command`: `npx vitest run test/vantt/language-pack-baseline.test.ts test/vantt/language-pack.test.ts test/vantt/language-pack-tokens.test.ts test/architecture-boundaries.test.ts`.
@@ -96,6 +108,7 @@ Cách tìm lại điểm chạm:
 - `replaceActiveIndex`: `dropLanguageTables(db)` trước các lệnh `DELETE FROM`.
 - `prepareContentOwner`: `syncLanguageViewsForRun` sau khối `content-policy`. `start()`: điều kiện chuyển cấu hình có thêm `languageViewsOutOfDate()`.
 - `indexFile`: `lexicalForNote` ngay trước `retryIndexWrite` có `commitIndexedNote`.
+- `searchLanguageViews`: truyền `(q) => toFtsQuery(q, 'OR')` cho `viewQueriesFor`. Upstream đổi hay đổi tên `toFtsQuery` thì giữ nghĩa cũ cho `viewQueries` (mọi từ là term tiền tố nối `OR`); `viewTerms` tự dựng câu FTS trong `language-search.ts`.
 - `INDEX_SCHEMA_VERSION`: upstream tăng hằng số này thì lấy số lớn hơn của hai bên, cộng 1 nếu cần, để DB cũ chạy lại migration.
 - Upstream đổi tokenizer của `notes_fts_bm25` hoặc số token đoạn trích (`numTokens` trong `prepareBm25Rows`): sửa `windowSize` trong `language-search.ts` cho khớp.
 

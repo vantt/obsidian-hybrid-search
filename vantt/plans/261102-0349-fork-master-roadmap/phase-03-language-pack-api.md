@@ -51,6 +51,7 @@ Bản vá P01 thêm điểm cắm chung cho mọi ngôn ngữ vào lõi; lõi kh
 - Diff `searcher.ts` khoảng 400 dòng: P03, P06 và các bản vá sau dựng trên P01.
 
 - V21 xong: `ohs-lang-de` chạy qua P01 không sửa lõi; eval tiếng Đức (39 câu, fulltext) nDCG@5 0,57 → 0,97, không hạng mục nào tụt. Không thấy lỗ hổng nào của P01.
+- V11b bổ sung P01 (vẫn `apiVersion: 1`, chỉ thêm): `viewTerms` (khớp chính xác, cụm, tiền tố theo từng term), `viewWeights` theo câu, `Candidate.matchedTerms` cho `rescore`, `signature(ctx)`/`queryCacheKey(ctx)` nhận `{ vaultPath }`, cận trên cho `termsWithPrefix`. Chuỗi dựng lại trên `vantt/work/series-p01b`: 2088 test xanh; gói `vi`, `de` không đổi vẫn xanh. Gói chưa dùng các điểm mới.
 
 ## Risk
 
