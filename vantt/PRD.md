@@ -873,10 +873,10 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
 | L08 | Đã chốt, làm sau | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
 | L09 | Có thì tốt (N07) | Phát hành `ohs-lang-vi` công khai, README cho cộng đồng OHS | Gói ổn định qua 3 bản upstream | 0,5 |
-| L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án | Sau V08 | 2–3 |
+| L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02); phía fork đã đủ: P04 (`read`, `neighbors`, `search` qua stdio), P07 (sự kiện index), P06 (giới hạn tập note) | Sau V08 | 2–3 |
 | L14 | Có thì tốt (N12) | OCR ảnh và PDF | Khi thành phàn nàn thật | 5+ (dự án riêng) |
 | L15 | Có thì tốt (N13) | Viết lại phần tìm bằng Rust | Khi điều kiện ở N13 xảy ra | 10–14 |
-| L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy | Sau V15 | 1 |
+| L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02): plugin ghi câu tìm và việc có mở note từ kết quả; xuất câu thành golden set riêng rồi chạy `quality-gate.mjs --private` của fork. Fork không thêm gì | Sau V15 | 1 |
 | L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
 | L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
 | L25 | Có thì tốt (N23), ý mới | Gói Windows ARM64 | Khi có khách dùng | 0,5 |
