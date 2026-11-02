@@ -59,3 +59,7 @@ Windows: `tar.exe` đọc argv theo code page ANSI nên không `chdir` được 
 - Run 41419225358 đỏ do lỗi hạ tầng: job eval clone fixture `v0.10.0` cố định trong khi `run-eval.mjs` và golden set đã sang `v0.11.0` ("golden-set.json differs..."). Đã sửa: các job lấy tag từ `FIXTURE_TAG` trong `run-eval.mjs`.
 - Run 41422251427 (EPYC 7763, cùng máy, khoá 1.30.0 so với bản thay 1.23.2) trên gói vi mới: obsidian-help ALL +0,007, multilingual +0,063 (đã chấp nhận); vi ALL +0,001, vi-semantic +0,004, vi-synonym 0,689 xuống 0,668 (-0,021, vẫn trong danh sách cho phép -0,017 ± 0,005), **vi-snippet 0,951 lên 0,975 (+0,024) vượt ngưỡng 0,01 và chưa được chấp nhận**. Đây là độ lệch thật của bản thay trên bộ dữ liệu và gói mới, không phải lỗi eval. Theo quy tắc, danh sách cho phép không tự sửa; `darwin-x64` của `v0.17.2-vantt.4` chưa phát hành (3 gói kia đã lên), chờ user quyết.
 
+## Quy tắc chỉ chặn khi tụt (2026-11-02)
+- User chốt: bỏ danh sách độ lệch được chấp nhận theo từng hạng mục, thay bằng "chỉ chặn khi tụt": (bản thay trừ bản khoá) nDCG@5 không nhỏ hơn -0,01 thì đạt; cải thiện luôn đạt (chỉ báo tham khảo trong release notes); riêng `vi-synonym` được tụt tới -0,03. Giữ nguyên: so trên cùng một máy, chỉ tính trên AMD EPYC (CPU khác thì chạy lại, tối đa 3 lần), thất bại thì đỏ rõ.
+- Mã: `vantt/scripts/lib/parity-rule.mjs` (hàm `judgeRegression`), test `vantt/scripts/test/parity-rule.test.mjs`, cờ `--regressions-only` của `bundle-parity.mjs compare`.
+
