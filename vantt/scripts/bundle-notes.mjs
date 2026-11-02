@@ -5,7 +5,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
-const { values } = parseArgs({ options: { dir: { type: 'string' }, tag: { type: 'string' }, parity: { type: 'string' } } });
+const { values } = parseArgs({ options: { dir: { type: 'string' }, tag: { type: 'string' }, parity: { type: 'string' }, hold: { type: 'string', multiple: true } } });
 const dir = path.resolve(values.dir);
 const read = (f) => JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
 const all = (suffix) => readdirSync(dir, { recursive: true }).filter((f) => String(f).endsWith(suffix)).map(String).sort();
@@ -28,12 +28,12 @@ const lines = [
 for (const b of bundles) {
   const s = smokes[b.platform];
   lines.push(
-    `| ${b.platform} | \`${b.bundle}\` | ${mb(b.size_packed)} | ${mb(b.size_unpacked)} | ${mb(b.size_unpacked_before_prune)} | ${s?.index_ms != null ? (s.index_ms / 1000).toFixed(1) : '-'} | ${s?.db_size_mb ?? '-'} | ${s ? (s.ok ? 'pass' : 'FAIL') : '-'} |`,
+    `| ${b.platform} | ${s?.ok && !(values.hold ?? []).includes(b.platform) ? `\`${b.bundle}\`` : 'not published'} | ${mb(b.size_packed)} | ${mb(b.size_unpacked)} | ${mb(b.size_unpacked_before_prune)} | ${s?.index_ms != null ? (s.index_ms / 1000).toFixed(1) : '-'} | ${s?.db_size_mb ?? '-'} | ${s ? (s.ok ? 'pass' : 'FAIL') : '-'} |`,
   );
 }
 const subs = bundles.filter((b) => b.substitutions && Object.keys(b.substitutions).length);
 for (const b of subs)
   lines.push('', `${b.platform}: dependencies replaced at bundling time (${Object.entries(b.substitutions).map(([n, v]) => `${n} ${v.from} -> ${v.to}`).join(', ')}); the release tree is unchanged.`);
-if (values.parity) lines.push('', 'Search-quality parity with linux-x64 (nDCG@5, tolerance 0.01):', '', readFileSync(path.resolve(values.parity), 'utf8').trim());
+if (values.parity) lines.push('', 'Effect of the darwin-x64 dependency pins on search quality (same machine, locked against pinned, nDCG@5, tolerance 0.01):', '', readFileSync(path.resolve(values.parity), 'utf8').trim());
 lines.push('', 'Each bundle has a `.sha256` file (`<hex>  <name>`) and a `.bundle.json` with sizes. macOS bundles are not code-signed: remove the quarantine attribute after verifying the checksum (`xattr -dr com.apple.quarantine <dir>`).');
 process.stdout.write(lines.join('\n') + '\n');

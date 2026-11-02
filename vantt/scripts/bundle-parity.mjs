@@ -4,9 +4,10 @@
 //
 //   node vantt/scripts/bundle-parity.mjs run --tree <release tree, npm ci done> --out <dir>
 //        [--pin name@version ...] [--lang-pack <built ohs-lang-vi dir>] [--otf <obsidian-test-fixture bin/otf.mjs>]
+//        [--pins-of <platform>]   apply that platform's PLATFORM_PINS instead of this machine's
 //   node vantt/scripts/bundle-parity.mjs compare --ref <dir> --other <dir> [--tolerance 0.01] [--out <report.json>]
 //
-// `run` applies the same pins as the bundle to the tree's node_modules, then runs upstream's eval
+// `run` applies the pins of the bundle (or of --pins-of) to the tree's node_modules, then runs upstream's eval
 // (eval/evaluate.ts) on the obsidian-help corpus without a pack and on the vi-search corpus with the pack,
 // and writes obsidian-help.json and vi.json. `compare` fails when any category's nDCG@5 differs by more
 // than the tolerance (PRD 8.4, parity of the pinned build).
@@ -26,7 +27,7 @@ function run(values) {
   const out = path.resolve(values.out);
   mkdirSync(out, { recursive: true });
   const platform = `${process.platform}-${process.arch}`;
-  const pins = parsePins(PLATFORM_PINS[platform] ?? {}, values.pin);
+  const pins = parsePins(PLATFORM_PINS[values['pins-of'] ?? platform] ?? {}, values.pin);
   // `--no-default-pins` is not offered on purpose: the reference platform has no default pins, the pinned one must use them.
   const substitutions = applyPins(path.join(tree, 'node_modules'), pins, path.join(out, 'pins'));
   const meta = { platform, substitutions, node: process.versions.node };
@@ -77,7 +78,7 @@ const [cmd, ...rest] = process.argv.slice(2);
 const { values } = parseArgs({
   args: rest,
   options: {
-    tree: { type: 'string' }, out: { type: 'string' }, pin: { type: 'string', multiple: true }, 'lang-pack': { type: 'string' }, otf: { type: 'string' },
+    tree: { type: 'string' }, out: { type: 'string' }, pin: { type: 'string', multiple: true }, 'lang-pack': { type: 'string' }, otf: { type: 'string' }, 'pins-of': { type: 'string' },
     ref: { type: 'string' }, other: { type: 'string' }, tolerance: { type: 'string' },
   },
 });
