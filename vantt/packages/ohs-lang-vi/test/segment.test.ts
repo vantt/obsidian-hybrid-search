@@ -149,20 +149,21 @@ describe('seg view projection', () => {
 
 describe('pack with segment', () => {
   it('adds the seg view with its own tokenizer and weight', () => {
-    expect(createPack().views.map((v) => v.name)).toEqual(['norm', 'fold']);
+    expect(createPack({ segment: false }).views.map((v) => v.name)).toEqual(['norm', 'fold']);
     const pack = createPack({ segment: true, viewWeights: { seg: 2 } });
     expect(pack.views.map((v) => v.name)).toEqual(['norm', 'fold', 'seg']);
     expect(pack.views[2]).toEqual({ name: 'seg', weight: 2, tokenizer: SEG_TOKENIZER });
-    expect(() => createPack().project('seg', 'content', 'x')).toThrow(/unknown view/);
+    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(/unknown view/);
   });
 
   it('puts the dictionary digest into the signature', () => {
-    const plain = createPack().signature();
+    const plain = createPack({ segment: false }).signature();
     const withSeg = createPack(SEG).signature();
     expect(withSeg).not.toBe(plain);
     expect(withSeg).toMatch(/;seg=[0-9a-f]{12}$/);
     expect(createPack({ ...SEG, viewWeights: { seg: 3 } }).signature()).toBe(withSeg);
-    expect(packSignature(resolveOptions(), 'abc')).toBe(plain);
+    expect(packSignature(resolveOptions({ segment: false }), 'abc')).toBe(plain);
+    expect(createPack().signature()).toBe(withSeg); // on by default
   });
 
   it('rebuilds the dictionary when the lexicon compounds change, and only then', () => {
@@ -207,7 +208,10 @@ describe('seg view query', () => {
   it('is null without compounds, for English, and absent when segment is off', () => {
     expect(analyze('mua').viewQueries.seg).toBeNull();
     expect(analyze('customer care team').viewQueries.seg).toBeNull();
-    expect('seg' in analyze('khách hàng', {}).viewQueries).toBe(false);
+    // mixed with English, accented or not: the vector branch carries it
+    expect(analyze('chăm sóc khách hàng online').viewQueries.seg).toBeNull();
+    expect(analyze('kiểm tra code trước khi merge').viewQueries.seg).toBeNull();
+    expect('seg' in analyze('khách hàng', { segment: false }).viewQueries).toBe(false);
   });
 
   it('adds a different split of the query when the vault has it', () => {

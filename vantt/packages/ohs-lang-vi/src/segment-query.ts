@@ -13,7 +13,7 @@ export const SEG_VIEW = 'seg';
 
 /**
  * Compounds of the target words (the literal query when accented, else the
- * likely restorations), segmented like notes are. Vault statistics are used
+ * likely restorations) of a wholly Vietnamese query, segmented like notes are. Vault statistics are used
  * at query time only: any other dictionary compound spanning query words
  * that the seg view of the vault contains is added too, so a query whose
  * segmentation differs from the one in a note still finds that note.
@@ -26,6 +26,9 @@ export function segQuery(
   options: PackOptions,
 ): string | null {
   if (!isVietnameseQuery(state, options)) return null;
+  // A query mixing other words (English) leans on the vector branch; one more
+  // lexical branch would drown it (vi-mixed-en).
+  if (state.tokens.some((t) => !t.syllable)) return null;
   const threshold = options.restoreParams.alternativeThreshold;
   const wordLists = data.accented
     ? [data.target]

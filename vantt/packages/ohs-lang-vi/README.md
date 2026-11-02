@@ -18,12 +18,13 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 |---|---|
 | `normalize.ts`, `fold.ts`, `syllable.ts`, `data.ts` | M1 (V09): chuẩn hoá giữ dấu, bỏ dấu, tách âm tiết, bảng dữ liệu |
 | `views.ts` | View `norm` (chuẩn hoá giữ dấu) và `fold` (bỏ dấu, `đ→d`, tuỳ chọn i/y). Chiếu từng token, giữ nguyên ký tự phân cách, nên bất biến token của P01 đúng theo cách dựng |
-| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho Telex/gõ sai (V17, đã làm), lexicon (V18), alias (V19, đã làm: `alias.ts`), tách từ (V20) |
+| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho Telex/gõ sai (V17, đã làm), lexicon (V18), alias (V19, đã làm: `alias.ts`), tách từ (V20, đã làm: `segment-query.ts`) |
 | `telex.ts`, `rewrite.ts` | V17: giải chuỗi Telex/VNI gõ dở (`tieengs`, `tie6ng1` thành `tiếng`; `uow` đọc cả `ươ` lẫn `uơ`). Chỉ áp cho token không có trong từ vựng vault (hai view) mà dạng giải ra có trong view `norm`, nên "team", "seen", "online" giữ nguyên. Câu có token được giải thì `baseQuery` và `embedQuery` là câu đã giải, và các token đã giải được tính là âm tiết có dấu cho cổng `minSyllableShare` |
 | `typo.ts` | V17: sửa gõ sai một chữ (thêm, bớt, thay, đảo hai chữ liền nhau) cho token không có trong vault, dài từ 3 chữ, chỉ nhận ứng viên là âm tiết Việt có trong view `fold`; tối đa 3 ứng viên, chọn theo tần suất cộng bằng chứng cặp từ liền nhau với từ bên cạnh (`phraseDocs`), dùng ứng viên tốt nhất. Chỉ đổi token của câu view và `rescore`, không đổi `baseQuery` |
 | `restore.ts` | Phục hồi dấu theo từ vựng vault: ứng viên là mọi âm tiết có dấu bỏ dấu ra đúng âm tiết gõ (sinh từ bảng âm tiết), giữ những dạng có trong view `norm` (`termStats`), cặp liền nhau có thật (`phraseDocs`) được cộng điểm; k-best Viterbi; cache theo `dbVersion` |
 | `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp, từng chữ. Không bỏ, không thêm ứng viên |
-| `lexicon.ts`, `lexicon-query.ts` | V18: đọc `_ohs/lexicon.md` (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` bị bỏ qua). Đồng nghĩa (hai chiều) và viết tắt (một chiều, `KH = khách hàng`) nối thêm dạng cùng nhóm vào câu view (OR) và thêm tổ hợp thay thế vào đích `rescore` (xác suất `lexiconWeight`). Chữ có dấu trong câu phải khớp đúng dấu (`lượng` không khớp `lương`), chữ không dấu khớp bỏ dấu. Từ ghép (`LexiconStore.load().compounds`) dành cho bộ tách từ V20 |
+| `lexicon.ts`, `lexicon-query.ts` | V18: đọc `_ohs/lexicon.md` (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` bị bỏ qua). Đồng nghĩa (hai chiều) và viết tắt (một chiều, `KH = khách hàng`) nối thêm dạng cùng nhóm vào câu view (OR) và thêm tổ hợp thay thế vào đích `rescore` (xác suất `lexiconWeight`). Chữ có dấu trong câu phải khớp đúng dấu (`lượng` không khớp `lương`), chữ không dấu khớp bỏ dấu. Từ ghép (`LexiconStore.load().compounds`) đi vào bộ tách từ V20 |
+| `segment.ts`, `segment-query.ts`, `data/compounds.txt` | V20: view `seg` (tokenizer có thêm `_`): âm tiết của từ ghép nối bằng `_` (`khách_hàng`), các token khác như view `norm`. Từ ghép: từ điển hai âm tiết đóng gói (nguồn, giấy phép, cách lọc ở [`data/README.md`](data/README.md)) cộng mục `## Từ ghép` của lexicon (độ dài bất kỳ). Tách theo đường ngắn nhất (ít từ nhất, hoà thì từ đầu dài hơn), chỉ nối qua khoảng trắng. Câu `seg` chỉ gồm các từ ghép của câu (câu có dấu: chính câu; câu không dấu: các tổ hợp phục hồi), tách cùng cách, cộng từ ghép khác trong câu mà view `seg` của vault có (`termStats`); null khi câu có từ không phải âm tiết Việt. Từ điển (cả từ ghép lexicon) băm vào `signature()` khi `segment` bật; lexicon đọc lại trong `signature()` |
 | `abbr.ts`, `cli.ts`, `bin.ts` | V18: `ohs-lang-vi learn-abbr --vault <dir> [--lexicon <path>] [--min-count <n>] [--dry-run]` (`bin` của package). Đề xuất viết tắt từ mẫu định nghĩa (`khách hàng (KH)`, `KH: khách hàng`, `KH = khách hàng`) và cụm hay gặp có chữ cái đầu khớp chữ viết tắt trong vault; ghi dưới `## Chờ duyệt`, không đụng mục khác, không đề xuất lại dòng đã có, bỏ `_ohs/`, thư mục ẩn, `node_modules` |
 | `options.ts` | Tuỳ chọn và mặc định |
 | `contract.ts` | Bản sao kiểu của hợp đồng P01 (gói không import lõi) |
@@ -49,7 +50,8 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `minSyllableShare` | `0.5` | không |
 | `accentedNorm` | `false` | không |
 | `accentedFold` | `"auto"` | không |
-| `viewWeights` | `{norm: 1.5, fold: 0.75}` | không |
+| `segment` | `true` | có (bật/tắt view `seg`; băm từ điển và từ ghép lexicon) |
+| `viewWeights` | `{norm: 1.5, fold: 0.75, seg: 1}` | không |
 | `restoreParams` | `{maxVariants: 5, maxSyllables: 12, bigramWeight: 3, unigramSmoothing: 0.5, bigramSmoothing: 0.1, maxPhraseLookups: 96, beamWidth: 16, alternativeThreshold: 0.15}` | không |
 | `lexiconPath` | `"_ohs/lexicon.md"` (so với vault) | không (từ ghép trong file: có) |
 | `lexiconWeight` | `0.6` | không |
@@ -58,7 +60,7 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `rescore` | `true` | không |
 | `rescoreWeights` | `{phrase: 4, bigram: 1, coverage: 0.5, normRank: 0, unit: 1/61, semantic: 0}` | không |
 
-Tuỳ chọn sai kiểu hay khoá lạ trong nhóm số thì `createPack` ném lỗi rõ (lõi báo trong `status.language_pack.error`). Khoá cấp trên chưa biết (`segment`…) được bỏ qua.
+Tuỳ chọn sai kiểu hay khoá lạ trong nhóm số thì `createPack` ném lỗi rõ (lõi báo trong `status.language_pack.error`). Khoá cấp trên chưa biết được bỏ qua.
 
 ## Test
 
@@ -129,3 +131,12 @@ Eval (cùng lõi `chk-series`, cùng tuỳ chọn mặc định), nDCG@5 / Hit@5
 | 15 hạng còn lại | | | không đổi so với V13 (Δ = 0,000) |
 
 Câu `vi-synonym` còn trượt: "xe hơi" (note ghi "ô tô"), "kinh phí" (hạng 9), "giao kèo" (hạng 10). Lần đo đầu so khớp chữ bỏ dấu cho cả chữ có dấu ("lượng" kích hoạt nhóm "lương") làm `vi-semantic` tụt 0,013; sửa thành chữ có dấu phải khớp đúng dấu thì không hạng nào đổi.
+
+## Tách từ (V20, 2026-11-02)
+
+Eval mặc định (lõi `chk-series` `4c69fbf`), nDCG@5 so với V17+V18+V19 đã trộn: tổng 0,909 → 0,932; `vi-typo` 0,722 → 0,975; `vi-synonym` 0,645 → 0,729 (Hit@5 0,80 → 1,00); `vi-snippet` 0,743 → 0,777; `vi-alias` 0,975 → 1,000; 12 hạng còn lại không đổi. `vi-compound` 1,000 (baseline upstream 0,844) đã bão hoà từ V13; trên bộ từ ghép khó hơn (note mồi có hai âm tiết đảo hay rời nhau nhiều lần, `vantt/plans/261102-1221-v20-word-segmentation/hard-compound-gen.mjs`) seg đưa câu có dấu 0,779 → 1,000, câu không dấu 0,523 → 0,864, cụm trong câu dài 0,788 → 1,000. Eval tiếng Anh upstream giữ 0,735. Nên `segment` mặc định bật.
+
+- Câu trộn tiếng Anh không dùng nhánh seg: bật cho mọi câu làm `vi-mixed-en` tụt 0,033 ("kiểm tra code trước khi merge" kéo note có "kiểm tra" lên trên note đích); trọng số 0,5 hay 0,75 không gỡ được.
+- Chỉ giữ từ điển hai âm tiết: từ ba âm tiết trở lên nuốt âm tiết của từ sau khi khớp dài nhất (`an toàn khu` + `vực`).
+- Hiệu năng: `project` seg 1 MB 67–114 ms (tuỳ tải máy); nạp từ điển 30–100 ms một lần mỗi tiến trình; dung lượng `data/compounds.txt` 266 KB (gzip 86 KB).
+

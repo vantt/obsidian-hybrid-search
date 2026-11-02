@@ -26,12 +26,13 @@ function analyze(query: string, raw: unknown = {}, docs = VAULT): QueryAnalysis 
 }
 
 describe('createPack', () => {
-  it('builds a P01 v1 pack with norm and fold views', () => {
+  it('builds a P01 v1 pack with norm, fold and seg views', () => {
     const pack = createPack();
     expect(pack.apiVersion).toBe(1);
     expect(pack.id).toBe('vi');
     expect(pack.version).toBe(PACK_VERSION);
-    expect(pack.views.map((v) => v.name)).toEqual(['norm', 'fold']);
+    expect(pack.views.map((v) => v.name)).toEqual(['norm', 'fold', 'seg']);
+    expect(createPack({ segment: false }).views.map((v) => v.name)).toEqual(['norm', 'fold']);
     for (const v of pack.views) expect(v.name).toMatch(/^[a-z][a-z0-9_]{0,15}$/);
     expect(typeof pack.rescore).toBe('function');
     expect(createPackDefault).toBe(createPack);
@@ -48,7 +49,7 @@ describe('createPack', () => {
 
   it('applies view weights and disables rescore on request', () => {
     const pack = createPack({ viewWeights: { norm: 2, fold: 0.5 }, rescore: false });
-    expect(pack.views.map((v) => v.weight)).toEqual([2, 0.5]);
+    expect(pack.views.map((v) => v.weight)).toEqual([2, 0.5, 1]);
     expect(pack.rescore).toBeUndefined();
   });
 
@@ -90,7 +91,8 @@ describe('project', () => {
   });
 
   it('throws on an unknown view', () => {
-    expect(() => pack.project('seg', 'content', 'x')).toThrow(/unknown view/);
+    expect(() => pack.project('xyz', 'content', 'x')).toThrow(/unknown view/);
+    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(/unknown view/);
   });
 
   it('never changes English or code-like text beyond case', () => {
@@ -150,7 +152,7 @@ describe('analyzeQuery', () => {
 
   it('accented query, both views on: norm is the normalized query, fold the folded one, no restoration', () => {
     const a = analyze('Giữ chân khách hàng', BOTH);
-    expect(a.viewQueries).toEqual({ norm: 'giữ chân khách hàng', fold: 'giu chan khach hang' });
+    expect(a.viewQueries).toEqual({ norm: 'giữ chân khách hàng', fold: 'giu chan khach hang', seg: 'giữ_chân khách_hàng' });
     expect(a.embedQuery).toBeUndefined();
     expect(a.baseQuery).toBeUndefined();
     expect((a.data as ViAnalysisData).accented).toBe(true);
@@ -159,10 +161,10 @@ describe('analyzeQuery', () => {
 
   it('accented query, defaults: no view branch unless the vault has the words typed unaccented', () => {
     const a = analyze('Giữ chân khách hàng');
-    expect(a.viewQueries).toEqual({ norm: null, fold: null });
+    expect(a.viewQueries).toEqual({ norm: null, fold: null, seg: 'giữ_chân khách_hàng' });
     expect((a.data as ViAnalysisData).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
     const typedPlain = analyze('Giữ chân khách hàng', {}, [...VAULT, 'ghi chu: giu chan khach cu']);
-    expect(typedPlain.viewQueries).toEqual({ norm: null, fold: 'giu chan khach hang' });
+    expect(typedPlain.viewQueries).toEqual({ norm: null, fold: 'giu chan khach hang', seg: 'giữ_chân khách_hàng' });
     expect(analyze('khách', {}, [...VAULT, 'khach moi']).viewQueries.fold).toBe('khach');
     expect(analyze('Giữ chân khách hàng', { accentedFold: 'never' }, [...VAULT, 'giu chan khach']).viewQueries.fold).toBeNull();
   });
@@ -203,13 +205,13 @@ describe('analyzeQuery', () => {
   });
 
   it('nothing to restore and no diacritics: both view branches are skipped', () => {
-    expect(analyze('online meeting').viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('online meeting').viewQueries).toEqual({ norm: null, fold: null, seg: null });
     expect(analyze('xyz', {}, []).viewQueries.norm).toBeNull();
   });
 
   it('English query without Vietnamese evidence leaves the pack inert', () => {
     const docs = [...VAULT, 'How to install plugins', 'Go to the settings'];
-    expect(analyze('how to install plugins', {}, docs).viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('how to install plugins', {}, docs).viewQueries).toEqual({ norm: null, fold: null, seg: null });
     // "to" has an accented form in this vault ("tô"), so it is Vietnamese evidence
     // once enough of the query is made of syllables.
     expect(analyze('how to install', {}, [...docs, 'bát tô lớn']).viewQueries.fold).toBeNull();
@@ -218,7 +220,7 @@ describe('analyzeQuery', () => {
 
   it('Telex keystrokes with few real syllables leave the pack inert (minSyllableShare)', () => {
     const docs = [...VAULT, 'chân dung', 'sử dụng'];
-    expect(analyze('bis quyeets chupj anhr chaan dung', {}, docs).viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('bis quyeets chupj anhr chaan dung', {}, docs).viewQueries).toEqual({ norm: null, fold: null, seg: null });
     expect(analyze('bis quyeets chupj anhr chaan dung', { minSyllableShare: 0 }, docs).viewQueries.fold).not.toBeNull();
   });
 
@@ -227,7 +229,7 @@ describe('analyzeQuery', () => {
   });
 
   it('empty or punctuation-only query skips both views', () => {
-    expect(analyze('  ?! ').viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('  ?! ').viewQueries).toEqual({ norm: null, fold: null, seg: null });
   });
 
   it('foldIY folds the fold-view query too', () => {

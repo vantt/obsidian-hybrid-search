@@ -97,6 +97,7 @@ export {
 export {
   buildDictionary,
   bundledCompounds,
+  bundledDictionary,
   CompoundSource,
   compoundsOf,
   projectSegmented,

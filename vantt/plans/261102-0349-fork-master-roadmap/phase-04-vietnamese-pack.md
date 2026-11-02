@@ -47,7 +47,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - [x] V17 Telex/VNI và gõ sai
 - [x] V18 đồng nghĩa, viết tắt, `learn-abbr`
 - [x] V19 alias không dấu, đoạn trích chữ gốc
-- [ ] V20 tách từ
+- [x] V20 tách từ
 
 ## Success Criteria
 
@@ -71,3 +71,9 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - Phục hồi dấu đoán sai làm kết quả tệ hơn: nhánh `fold` luôn chạy, `rescore` không bỏ ứng viên, có hạng mục eval riêng.
 - Sửa Telex đổi nhầm chữ tiếng Anh: chỉ áp cho token không có trong từ vựng vault mà dạng giải ra có trong từ vựng.
 - Không có từ điển đạt giấy phép: dựng từ thống kê cặp âm tiết trên corpus sinh và ghi rõ.
+
+## Ghi chú sau V20
+
+- Từ điển từ ghép: `pyvi` `words.txt` (MIT), 22.574 từ hai âm tiết; 95% mục trùng danh sách GPL `Viet74K` nên có thể cùng gốc (ghi ở `data/README.md`).
+- `segment` mặc định bật: tổng nDCG@5 0,909 → 0,932, không hạng nào tụt; `vi-compound` bão hoà (1,000), đo thêm trên bộ khó trong `vantt/plans/261102-1221-v20-word-segmentation/`. Đề xuất cho fixture: thêm câu `vi-compound` kiểu bộ khó (note mồi chứa hai âm tiết đảo, rời nhau, nhiều lần hơn note đích; câu không dấu; cụm trong câu dài).
+

@@ -112,7 +112,7 @@ export const DEFAULT_OPTIONS: PackOptions = {
   minSyllableShare: 0.5,
   accentedNorm: false,
   accentedFold: 'auto',
-  segment: false,
+  segment: true,
   lexiconPath: DEFAULT_LEXICON_PATH,
   lexiconWeight: 0.6,
   telex: true,

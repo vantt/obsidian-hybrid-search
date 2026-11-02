@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createPack, parseLexicon } from '../src/index.js';
+import { bundledDictionary, createPack, packSignature, parseLexicon, resolveOptions } from '../src/index.js';
 import type { QueryAnalysis } from '../src/contract.js';
 import type { ViAnalysisData } from '../src/query.js';
 import { fakeContext } from './fake-context.js';
@@ -168,9 +168,9 @@ describe('lexicon in the pack', () => {
   });
 
   it('compound words do not touch the index without segment', () => {
-    const signature = createPack().signature();
-    write(LEXICON.replace('bạn hàng', 'bạn hàng\nnhà hàng'));
-    expect(createPack().signature()).toBe(signature);
+    const signature = createPack({ segment: false }).signature();
+    write(LEXICON.replace('bạn hàng', 'bạn hàng\ngiữ chân khách'));
+    expect(createPack({ segment: false }).signature()).toBe(signature);
   });
 
   it('compound words change the signature (with segment), not the cache key', () => {
@@ -190,8 +190,8 @@ describe('lexicon in the pack', () => {
 
   it('signature without a lexicon is the plain one', () => {
     rmSync(join(dir, '_ohs'), { recursive: true });
-    expect(createPack().signature()).not.toContain('seg=');
-    expect(createPack({ segment: true }).signature()).toBe(createPack({ segment: true }).signature());
+    expect(createPack({ segment: false }).signature()).not.toContain('seg=');
+    expect(createPack().signature()).toBe(packSignature(resolveOptions(), bundledDictionary('modern').digest));
   });
 
   it('reports the file as read (sanity)', () => {
