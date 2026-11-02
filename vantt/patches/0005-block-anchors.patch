@@ -1,0 +1,587 @@
+From 39e5a2075a62ba4843a744c088b34e4f5ab69a2c Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:09:50 +0700
+Subject: [PATCH] feat(index): store block ids and highlight flags per chunk,
+ make chunk size configurable
+
+Each chunk records the Obsidian block id that ends it (^abc) and whether it
+holds highlighted text (==text== or <mark>). Search anchors expose both when
+present. OBSIDIAN_CHUNK_TOKENS lowers the chunk size below the model limit;
+the setting is part of the index identity, so changing it rebuilds the index.
+Without it chunking and results are unchanged. Schema version 3 backfills
+anchors for existing chunks from their stored text.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ src/content/block-anchors.ts     |  48 +++++++
+ src/content/chunker.ts           |   6 +
+ src/indexing/index-service.ts    |   8 +-
+ src/indexing/indexer.ts          |   5 +-
+ src/runtime/config.ts            |   5 +
+ src/search/searcher.ts           |  19 +++
+ src/storage/db.ts                |  27 +++-
+ src/storage/search-queries.ts    |  11 +-
+ test/vantt/block-anchors.test.ts | 215 +++++++++++++++++++++++++++++++
+ 9 files changed, 336 insertions(+), 8 deletions(-)
+ create mode 100644 src/content/block-anchors.ts
+ create mode 100644 test/vantt/block-anchors.test.ts
+
+diff --git a/src/content/block-anchors.ts b/src/content/block-anchors.ts
+new file mode 100644
+index 0000000..b19cca2
+--- /dev/null
++++ b/src/content/block-anchors.ts
+@@ -0,0 +1,48 @@
++/**
++ * Obsidian anchors carried by a chunk: a trailing block id (`text ^block-id`, or a
++ * line holding only `^block-id`) and highlighted text (`==text==`, `<mark>`).
++ * Pure functions over the chunk text so the index and the schema migration agree.
++ */
++export interface ChunkAnchors {
++  /** The trailing block id including its caret (for example `^abc-1`), or null. */
++  blockId: string | null;
++  hasHighlight: boolean;
++}
++
++const BLOCK_ID_AT_END = /(?:^|\s)(\^[A-Za-z0-9-]+)\s*$/;
++const FENCE_LINE = /^ {0,3}(`{3,}|~{3,})/;
++const INLINE_CODE = /`[^`\n]*`/g;
++const MARKDOWN_HIGHLIGHT = /==(?!\s)(?:(?!==)[^\n])+?(?<!\s)==/;
++const HTML_MARK = /<mark\b[^>]*>/i;
++
++/** Text outside fenced code; `endsInCode` is true when the last non-empty line is code. */
++function visibleText(text: string): { visible: string; endsInCode: boolean } {
++  const kept: string[] = [];
++  let fence: string | null = null;
++  let endsInCode = false;
++  for (const line of text.split('\n')) {
++    const marker = FENCE_LINE.exec(line)?.[1];
++    if (fence === null) {
++      if (marker) {
++        fence = marker;
++        if (line.trim()) endsInCode = true;
++        continue;
++      }
++      kept.push(line);
++      if (line.trim()) endsInCode = false;
++    } else {
++      if (line.trim()) endsInCode = true;
++      if (marker && marker[0] === fence[0] && marker.length >= fence.length) fence = null;
++    }
++  }
++  return { visible: kept.join('\n').replace(INLINE_CODE, ''), endsInCode };
++}
++
++export function extractChunkAnchors(text: string): ChunkAnchors {
++  const { visible, endsInCode } = visibleText(text);
++  const match = endsInCode ? null : BLOCK_ID_AT_END.exec(text.trimEnd());
++  return {
++    blockId: match ? match[1]! : null,
++    hasHighlight: MARKDOWN_HIGHLIGHT.test(visible) || HTML_MARK.test(visible),
++  };
++}
+diff --git a/src/content/chunker.ts b/src/content/chunker.ts
+index 6adedd9..80846d9 100644
+--- a/src/content/chunker.ts
++++ b/src/content/chunker.ts
+@@ -910,6 +910,12 @@ function replaceMarkdownInlineLinks(value: string): string {
+   return result;
+ }
+ 
++/** Chunk size actually used: the model limit, lowered by OBSIDIAN_CHUNK_TOKENS when set. */
++export function effectiveChunkTokens(modelLimit: number): number {
++  const configured = config.chunkTokens;
++  return configured === undefined ? modelLimit : Math.min(modelLimit, configured);
++}
++
+ export function chunkNote(content: string, contextLength: number): Chunk[] {
+   if (estimateTokens(content) <= contextLength) {
+     return [createSourceChunk(content, 0, content.length, [])];
+diff --git a/src/indexing/index-service.ts b/src/indexing/index-service.ts
+index 197c7f6..7e3e7e1 100644
+--- a/src/indexing/index-service.ts
++++ b/src/indexing/index-service.ts
+@@ -166,11 +166,17 @@ export function createIndexService(): IndexService {
+         ? error
+         : new Error('Invalid content ignore configuration', { cause: error });
+   }
+-  const desired = configurationError
++  const contentPolicy = configurationError
+     ? `invalid:${createHash('sha256')
+         .update(raw ?? '')
+         .digest('hex')}`
+     : policySignature(patterns);
++  // A configured chunk size changes how every note is split, so it is part of the index
++  // identity and a change triggers a rebuild. Unset keeps upstream's signature unchanged.
++  const desired =
++    config.chunkTokens === undefined
++      ? contentPolicy
++      : `${contentPolicy}+chunk=${config.chunkTokens}`;
+ 
+   async function withContentRun<T>(
+     owner: OwnerRunContext,
+diff --git a/src/indexing/indexer.ts b/src/indexing/indexer.ts
+index 6933a22..71e2fbf 100644
+--- a/src/indexing/indexer.ts
++++ b/src/indexing/indexer.ts
+@@ -3,9 +3,11 @@ import { createHash } from 'node:crypto';
+ import { readdirSync, statSync, type Stats } from 'node:fs';
+ import { readFile } from 'node:fs/promises';
+ import path from 'node:path';
++import { extractChunkAnchors } from '../content/block-anchors.js';
+ import {
+   chunkNote,
+   createChunkBoundaryIndex,
++  effectiveChunkTokens,
+   refineChunksToFit,
+   type Chunk,
+ } from '../content/chunker.js';
+@@ -331,7 +333,7 @@ export async function prepareIndexFile(
+     : null;
+   const content = projection?.text ?? extracted.content;
+   const tags = projection?.segments ? extractNoteTags(content, frontmatter) : extracted.tags;
+-  const semanticChunks = chunkNote(content, contextLength).filter(
++  const semanticChunks = chunkNote(content, effectiveChunkTokens(contextLength)).filter(
+     (chunk) => chunk.text.trim().length > 0,
+   );
+   let embeddedChunks: EmbeddedChunk[] = [];
+@@ -444,6 +446,7 @@ export async function prepareIndexFile(
+         text: chunk.text,
+         headingPath: chunk.headingChain.length > 0 ? chunk.headingChain.join(' > ') : null,
+         embedding,
++        ...extractChunkAnchors(chunk.text),
+         ...(projection?.segments
+           ? mapContentRange(projection, chunk.charStart, chunk.charEnd)
+           : { charStart: chunk.charStart, charEnd: chunk.charEnd }),
+diff --git a/src/runtime/config.ts b/src/runtime/config.ts
+index 83d1b10..9ca8982 100644
+--- a/src/runtime/config.ts
++++ b/src/runtime/config.ts
+@@ -49,6 +49,11 @@ export const config = {
+   get languagePackOptions(): string | undefined {
+     return process.env.OHS_LANGUAGE_PACK_OPTIONS;
+   },
++  /** Optional upper bound for the chunk size in estimated tokens; unset keeps the model limit. */
++  get chunkTokens(): number | undefined {
++    const parsed = Number.parseInt(process.env.OBSIDIAN_CHUNK_TOKENS?.trim() ?? '', 10);
++    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
++  },
+   get rerankerModel(): string {
+     return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
+   },
+diff --git a/src/search/searcher.ts b/src/search/searcher.ts
+index 5f6f462..54a78ea 100644
+--- a/src/search/searcher.ts
++++ b/src/search/searcher.ts
+@@ -107,6 +107,17 @@ interface MatchAnchor {
+   matchText: string; // first ~80 stripped chars of chunk body for DOM block lookup
+   charStart: number | null; // null if chunk indexed before this migration
+   charEnd: number | null;
++  /** Trailing Obsidian block id (`^abc`) of the matched chunk; present only when it has one. */
++  blockId?: string;
++  /** True when the matched chunk holds highlighted text; present only when true. */
++  hasHighlight?: true;
++}
++
++function anchorFlags(blockId: string | null, hasHighlight: number | boolean): Partial<MatchAnchor> {
++  return {
++    ...(blockId ? { blockId } : {}),
++    ...(hasHighlight ? { hasHighlight: true as const } : {}),
++  };
+ }
+ 
+ export interface SearchResult {
+@@ -386,6 +397,7 @@ function enrichMarkedSnippets(
+             ),
+             charStart: data.charStart,
+             charEnd: data.charEnd,
++            ...anchorFlags(data.blockId ?? null, data.hasHighlight ?? 0),
+           };
+         }
+       }
+@@ -647,6 +659,8 @@ type Bm25ChunkData = {
+   chunkText: string;
+   charStart: number | null;
+   charEnd: number | null;
++  blockId?: string | null;
++  hasHighlight?: number;
+ };
+ 
+ function getChunkDataForBm25Results(results: RawResult[]): Map<string, Bm25ChunkData> {
+@@ -697,6 +711,8 @@ function matchChunkDataFromRows(
+     text: string;
+     char_start: number | null;
+     char_end: number | null;
++    block_id?: string | null;
++    has_highlight?: number;
+   }>,
+   snippetKeys: Map<string, string>,
+ ): Map<string, Bm25ChunkData> {
+@@ -714,6 +730,8 @@ function matchChunkDataFromRows(
+       chunkText: row.text,
+       charStart: row.char_start ?? null,
+       charEnd: row.char_end ?? null,
++      blockId: row.block_id ?? null,
++      hasHighlight: row.has_highlight ?? 0,
+     });
+   }
+   return result;
+@@ -813,6 +831,7 @@ function searchVector(
+             matchText: buildMatchText(row.chunk_text),
+             charStart: row.char_start ?? null,
+             charEnd: row.char_end ?? null,
++            ...anchorFlags(row.block_id, row.has_highlight),
+           },
+         };
+       });
+diff --git a/src/storage/db.ts b/src/storage/db.ts
+index 62fa1c2..40fa373 100644
+--- a/src/storage/db.ts
++++ b/src/storage/db.ts
+@@ -4,6 +4,7 @@ import { mkdirSync, statSync } from 'node:fs';
+ import path from 'node:path';
+ import * as sqliteVec from 'sqlite-vec';
+ import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
++import { extractChunkAnchors } from '../content/block-anchors.js';
+ import { CONTENT_POLICY_IDENTITY, type SourcePart } from '../content/content-ignore.js';
+ import { normalizeNotePath, normalizeTag } from '../content/text-normalization.js';
+ import { config } from '../runtime/config.js';
+@@ -236,7 +237,17 @@ function rebuildFrontmatterLookup(db: DB): void {
+ }
+ 
+ // Advance this revision for schema changes, independently of ownership table setup.
+-const INDEX_SCHEMA_VERSION = '2';
++const INDEX_SCHEMA_VERSION = '3';
++
++/** Derive anchors for chunks indexed before the columns existed; no embedder, no rechunking. */
++function backfillChunkAnchors(db: DB): void {
++  const update = db.prepare('UPDATE chunks SET block_id = ?, has_highlight = ? WHERE id = ?');
++  const rows = db.prepare('SELECT id, text FROM chunks').all() as { id: number; text: string }[];
++  for (const row of rows) {
++    const { blockId, hasHighlight } = extractChunkAnchors(row.text);
++    if (blockId !== null || hasHighlight) update.run(blockId, hasHighlight ? 1 : 0, row.id);
++  }
++}
+ 
+ function runMigrations(db: DB): void {
+   // Base schema — no FTS tables here; they are managed by the versioned migration below
+@@ -328,6 +339,11 @@ function runMigrations(db: DB): void {
+   if (!chunkCols.some((c) => c.name === 'source_spans')) {
+     db.exec('ALTER TABLE chunks ADD COLUMN source_spans TEXT');
+   }
++  if (!chunkCols.some((c) => c.name === 'block_id')) {
++    db.exec('ALTER TABLE chunks ADD COLUMN block_id TEXT');
++    db.exec('ALTER TABLE chunks ADD COLUMN has_highlight INTEGER NOT NULL DEFAULT 0');
++    backfillChunkAnchors(db);
++  }
+ 
+   // Partial index for fast --errors lookups (only indexes failed rows)
+   db.exec(`
+@@ -870,6 +886,8 @@ export interface PreparedIndexNote {
+     charStart?: number | null;
+     charEnd?: number | null;
+     sourceSpans?: readonly SourcePart[] | null;
++    blockId?: string | null;
++    hasHighlight?: boolean;
+   }[];
+   /** Language-pack view text; required exactly when the index has view tables. */
+   lexical?: NoteLexical;
+@@ -1013,12 +1031,13 @@ export function upsertNote(
+ 
+ function insertChunks(db: DB, noteId: number, chunks: PreparedIndexNote['chunks']): void {
+   const insertChunk = db.prepare(
+-    'INSERT INTO chunks (note_id, chunk_index, text, heading_path, embedding_status, char_start, char_end, source_spans) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
++    'INSERT INTO chunks (note_id, chunk_index, text, heading_path, embedding_status, char_start, char_end, source_spans, block_id, has_highlight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+   );
+   const insertVec = db.prepare('INSERT INTO vec_chunks (chunk_id, embedding) VALUES (?, ?)');
+ 
+   for (let i = 0; i < chunks.length; i++) {
+-    const { text, headingPath, embedding, charStart, charEnd, sourceSpans } = chunks[i]!;
++    const { text, headingPath, embedding, charStart, charEnd, sourceSpans, blockId, hasHighlight } =
++      chunks[i]!;
+     validateChunkSourceSpans(chunks[i]!);
+     const status = embedding !== null ? 'ok' : 'failed';
+     const result = insertChunk.run(
+@@ -1030,6 +1049,8 @@ function insertChunks(db: DB, noteId: number, chunks: PreparedIndexNote['chunks'
+       charStart ?? null,
+       charEnd ?? null,
+       sourceSpans ? JSON.stringify(sourceSpans) : null,
++      blockId ?? null,
++      hasHighlight ? 1 : 0,
+     );
+     if (embedding !== null) {
+       // sqlite-vec vec0 requires INTEGER (BigInt), not REAL (JS number)
+diff --git a/src/storage/search-queries.ts b/src/storage/search-queries.ts
+index df663c2..5320173 100644
+--- a/src/storage/search-queries.ts
++++ b/src/storage/search-queries.ts
+@@ -136,7 +136,8 @@ export function readChunksForPaths(uniquePaths: string[]) {
+ 
+   return db
+     .prepare(
+-      `SELECT n.path, c.heading_path, c.text, c.chunk_index, c.char_start, c.char_end
++      `SELECT n.path, c.heading_path, c.text, c.chunk_index, c.char_start, c.char_end,
++             c.block_id, c.has_highlight
+          FROM notes n
+          JOIN chunks c ON c.note_id = n.id
+          WHERE n.path IN (${placeholders})
+@@ -149,6 +150,8 @@ export function readChunksForPaths(uniquePaths: string[]) {
+     chunk_index: number;
+     char_start: number | null;
+     char_end: number | null;
++    block_id: string | null;
++    has_highlight: number;
+   }>;
+ }
+ 
+@@ -233,7 +236,7 @@ export function createVectorReader(
+       WITH ranked AS (
+         SELECT vc.chunk_id, vc.distance,
+                c.note_id, c.chunk_index, c.text AS chunk_text, c.heading_path,
+-               c.char_start, c.char_end,
++               c.char_start, c.char_end, c.block_id, c.has_highlight,
+                n.path, n.title, n.tags, n.aliases,
+                ROW_NUMBER() OVER (PARTITION BY c.note_id ORDER BY vc.distance, c.chunk_index) AS row_num
+         FROM vec_chunks AS vc
+@@ -243,7 +246,7 @@ export function createVectorReader(
+           AND k = ?${restrictionSql}
+       )
+       SELECT chunk_id, distance, note_id, chunk_index, chunk_text, heading_path,
+-             char_start, char_end, path, title, tags, aliases
++             char_start, char_end, block_id, has_highlight, path, title, tags, aliases
+       FROM ranked
+       WHERE row_num = 1
+       ORDER BY distance, chunk_index
+@@ -261,6 +264,8 @@ export function createVectorReader(
+         heading_path: string | null;
+         char_start: number | null;
+         char_end: number | null;
++        block_id: string | null;
++        has_highlight: number;
+         path: string;
+         title: string;
+         tags: string;
+diff --git a/test/vantt/block-anchors.test.ts b/test/vantt/block-anchors.test.ts
+new file mode 100644
+index 0000000..4933796
+--- /dev/null
++++ b/test/vantt/block-anchors.test.ts
+@@ -0,0 +1,215 @@
++import Database from 'better-sqlite3';
++import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
++import { extractChunkAnchors } from '../../src/content/block-anchors.js';
++import { effectiveChunkTokens } from '../../src/content/chunker.js';
++import { fixtureVector } from './fixtures/language-pack-vault.js';
++
++const vault = mkdtempSync(path.join(tmpdir(), 'ohs-block-anchors-'));
++process.env.OBSIDIAN_VAULT_PATH = vault;
++delete process.env.OBSIDIAN_CHUNK_TOKENS;
++
++vi.mock('../../src/inference/embedder.js', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../../src/inference/embedder.js')>();
++  return {
++    ...actual,
++    activeModelName: () => 'fixture-model',
++    getEmbeddingDim: () => Promise.resolve(8),
++    getContextLength: () => Promise.resolve(512),
++    getDocumentTokenPolicy: () =>
++      Promise.resolve({ limit: 508, count: (text: string) => text.length / 4 }),
++    embedDetailed: vi.fn((texts: string[]) =>
++      Promise.resolve(texts.map((text) => ({ ok: true as const, embedding: fixtureVector(text) }))),
++    ),
++    embed: vi.fn((texts: string[]) => Promise.resolve(texts.map((t) => fixtureVector(t)))),
++  };
++});
++
++const { openIndexDatabase, createIndexService } =
++  await import('../../src/indexing/index-service.js');
++const { search } = await import('../../src/search/searcher.js');
++const { closeDb, getDb } = await import('../../src/storage/db.js');
++
++describe('extractChunkAnchors', () => {
++  it('reads a trailing block id at the end of a paragraph', () => {
++    expect(extractChunkAnchors('A paragraph of text. ^abc-12').blockId).toBe('^abc-12');
++    expect(extractChunkAnchors('- item one\n- item two\n\n^list-1\n').blockId).toBe('^list-1');
++  });
++
++  it('ignores carets that are not trailing block ids', () => {
++    expect(extractChunkAnchors('2^10 is large').blockId).toBeNull();
++    expect(extractChunkAnchors('first ^abc line\nand more text').blockId).toBeNull();
++    expect(extractChunkAnchors('no anchor here').blockId).toBeNull();
++  });
++
++  it('does not treat a caret inside a code fence as an anchor', () => {
++    expect(extractChunkAnchors('Text\n\n```\ncode ^notanchor\n').blockId).toBeNull();
++    expect(extractChunkAnchors('```\ncode\n```\n\nafter fence ^real').blockId).toBe('^real');
++  });
++
++  it('detects highlights written as == == or <mark>', () => {
++    expect(extractChunkAnchors('keep ==this part== in mind').hasHighlight).toBe(true);
++    expect(extractChunkAnchors('keep <mark>this</mark> in mind').hasHighlight).toBe(true);
++    expect(extractChunkAnchors('a == b == c').hasHighlight).toBe(false);
++    expect(extractChunkAnchors('`==code==` only').hasHighlight).toBe(false);
++    expect(extractChunkAnchors('```\n==code==\n```').hasHighlight).toBe(false);
++    expect(extractChunkAnchors('plain text').hasHighlight).toBe(false);
++  });
++});
++
++describe('effectiveChunkTokens', () => {
++  it('is the model limit when OBSIDIAN_CHUNK_TOKENS is unset or invalid', () => {
++    delete process.env.OBSIDIAN_CHUNK_TOKENS;
++    expect(effectiveChunkTokens(8192)).toBe(8192);
++    process.env.OBSIDIAN_CHUNK_TOKENS = 'abc';
++    expect(effectiveChunkTokens(8192)).toBe(8192);
++    process.env.OBSIDIAN_CHUNK_TOKENS = '0';
++    expect(effectiveChunkTokens(8192)).toBe(8192);
++    delete process.env.OBSIDIAN_CHUNK_TOKENS;
++  });
++
++  it('is the smaller of the model limit and the setting', () => {
++    process.env.OBSIDIAN_CHUNK_TOKENS = '1024';
++    expect(effectiveChunkTokens(8192)).toBe(1024);
++    expect(effectiveChunkTokens(512)).toBe(512);
++    delete process.env.OBSIDIAN_CHUNK_TOKENS;
++  });
++});
++
++const NOTE = [
++  '# Garden',
++  '',
++  'Notes from the back yard, written down so that nothing is forgotten when the season turns.',
++  '',
++  '## Tomatoes',
++  '',
++  'Every summer the gardeners learn again that tomatoes need steady watering and plenty of sun during long weeks. ^tomato-1',
++  '',
++  '## Compost',
++  '',
++  'The compost heap works best when turned often, so ==remember to turn the compost== weekly.',
++  '',
++].join('\n');
++
++function chunkRows() {
++  return getDb()
++    .prepare(
++      `SELECT c.block_id, c.has_highlight, c.heading_path FROM chunks c
++       JOIN notes n ON n.id = c.note_id WHERE n.path = 'garden.md' ORDER BY c.chunk_index`,
++    )
++    .all() as Array<{
++    block_id: string | null;
++    has_highlight: number;
++    heading_path: string | null;
++  }>;
++}
++
++function policy(): string {
++  return (
++    (
++      getDb().prepare("SELECT value FROM settings WHERE key='content_policy'").get() as
++        { value: string } | undefined
++    )?.value ?? 'none'
++  );
++}
++
++async function reindex(chunkTokens: string | null): Promise<void> {
++  closeDb();
++  if (chunkTokens === null) delete process.env.OBSIDIAN_CHUNK_TOKENS;
++  else process.env.OBSIDIAN_CHUNK_TOKENS = chunkTokens;
++  await openIndexDatabase();
++  const service = createIndexService();
++  try {
++    expect((await service.reindex()).errors).toEqual([]);
++  } finally {
++    await service.close();
++  }
++}
++
++beforeAll(() => {
++  mkdirSync(vault, { recursive: true });
++  writeFileSync(path.join(vault, 'garden.md'), NOTE);
++});
++
++afterAll(() => {
++  delete process.env.OBSIDIAN_CHUNK_TOKENS;
++  closeDb();
++  rmSync(vault, { recursive: true, force: true });
++});
++
++describe('block anchors in the index', () => {
++  it('without OBSIDIAN_CHUNK_TOKENS the note stays one chunk and the policy is upstream', async () => {
++    await reindex(null);
++    expect(chunkRows()).toHaveLength(1);
++    expect(policy()).toBe('none');
++    const anchors = (
++      await search('tomatoes', { mode: 'fulltext', anchors: true, snippetLength: 60 })
++    )[0]?.previewAnchors;
++    expect(anchors?.[0]).not.toHaveProperty('blockId');
++  });
++
++  it('OBSIDIAN_CHUNK_TOKENS splits the note and each chunk keeps its own anchors', async () => {
++    await reindex('40');
++    expect(policy()).toContain('chunk=40');
++    expect(chunkRows()).toEqual([
++      { block_id: null, has_highlight: 0, heading_path: '# Garden' },
++      { block_id: '^tomato-1', has_highlight: 0, heading_path: '# Garden > ## Tomatoes' },
++      { block_id: null, has_highlight: 1, heading_path: '# Garden > ## Compost' },
++    ]);
++  });
++
++  it('exposes block_id and has_highlight on result anchors, only when present', async () => {
++    const [tomato] = await search('steady watering', {
++      mode: 'fulltext',
++      anchors: true,
++      snippetLength: 60,
++    });
++    expect(tomato?.previewAnchors?.[0]).toMatchObject({ blockId: '^tomato-1' });
++    expect(tomato?.previewAnchors?.[0]).not.toHaveProperty('hasHighlight');
++    const [compost] = await search('turn the compost', {
++      mode: 'fulltext',
++      anchors: true,
++      snippetLength: 60,
++    });
++    expect(compost?.previewAnchors?.[0]).toMatchObject({ hasHighlight: true });
++    expect(compost?.previewAnchors?.[0]).not.toHaveProperty('blockId');
++    const [semantic] = await search('steady watering', { mode: 'semantic', anchors: true });
++    expect(semantic?.previewAnchors?.[0]).toHaveProperty('kind', 'semantic');
++  });
++
++  it('changing the setting rebuilds; unsetting it restores the upstream chunking', async () => {
++    await reindex('60');
++    expect(policy()).toContain('chunk=60');
++    await reindex(null);
++    expect(policy()).toBe('none');
++    expect(chunkRows()).toHaveLength(1);
++  });
++
++  it('migrates a schema-2 index by deriving anchors for existing chunks', async () => {
++    await reindex('40');
++    closeDb();
++    const raw = new Database(path.join(vault, '.obsidian-hybrid-search.db'));
++    raw.exec(
++      'ALTER TABLE chunks DROP COLUMN block_id; ALTER TABLE chunks DROP COLUMN has_highlight',
++    );
++    raw.prepare("UPDATE settings SET value='2' WHERE key='index_schema_version'").run();
++    raw.close();
++    delete process.env.OBSIDIAN_CHUNK_TOKENS;
++    process.env.OBSIDIAN_CHUNK_TOKENS = '40';
++    await openIndexDatabase();
++    expect(chunkRows().map((r) => [r.block_id, r.has_highlight])).toEqual([
++      [null, 0],
++      ['^tomato-1', 0],
++      [null, 1],
++    ]);
++    expect(
++      (
++        getDb().prepare("SELECT value FROM settings WHERE key='index_schema_version'").get() as {
++          value: string;
++        }
++      ).value,
++    ).toBe('3');
++  });
++});
+-- 
+2.53.0
+

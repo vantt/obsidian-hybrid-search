@@ -1,0 +1,2 @@
+# The smoke vault keeps its CRLF note and its NFD note byte for byte.
+smoke-vault/** -text
