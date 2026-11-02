@@ -25,3 +25,17 @@
 #
 # After a conflict is fixed and the run goes green, catchup re-exports every
 # applied patch into this directory (PRD 6.4); commit the refreshed files on master.
+
+[[patches]]
+id = "language-pack-api"
+name = "feat(language): add a language-pack extension point"
+patch_file = "0001-language-pack-api.patch"
+metadata_file = "0001-language-pack-api.spec.md"
+consumer = "ohs-lang-vi; ohs-lang-de; future language packs"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/search/searcher.ts", "src/storage/db.ts", "src/indexing/index-service.ts", "src/indexing/indexer.ts", "src/runtime/config.ts", "src/contracts/boundary-validation.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/stdio-server.ts", "src/transports/status-payload.ts", "dependency-cruiser.config.cjs", "knip.json", "ARCHITECTURE.md", "test/architecture/check.ts", "test/architecture-boundaries.test.ts"]
+test_command = "npx vitest run test/vantt/language-pack-baseline.test.ts test/vantt/language-pack.test.ts test/vantt/language-pack-tokens.test.ts test/architecture-boundaries.test.ts"
+capability_check = "node vantt/probes/language-pack-api.mjs --ohs ."
+probe = "vantt/probes/language-pack-api.mjs"
+phase = "now"
