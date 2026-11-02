@@ -43,7 +43,7 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 ## Todo
 
 - [ ] V04 P00 `fork-identity`
-- [ ] V05 P09 `unicode-inline-tags`
+- [x] V05 P09 `unicode-inline-tags`
 - [ ] V06 P02 `db-path`
 - [ ] V07 P03 `vector-export`
 - [ ] V08 P04 `stdio-parity`
@@ -58,6 +58,11 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - V23: không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream.
 - V24: tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó.
 - V25: client nhận sự kiện trong 1 giây sau khi sửa note.
+
+## Ghi chú ghép
+
+- `series.toml` giữ thứ tự P00, P01, P02, P03, P04, P09, P05, P06, P07: bản vá về sau chèn đúng vị trí, không chỉ nối cuối.
+- P09 (V05) xong: không tăng `INDEX_SCHEMA_VERSION`; note đã index trước bản vá giữ tag cũ tới khi note đổi hoặc chạy `ohs reindex --force` (ghi ở spec).
 
 ## Risk
 

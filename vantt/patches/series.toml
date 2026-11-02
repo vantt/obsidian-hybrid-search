@@ -39,3 +39,17 @@ test_command = "npx vitest run test/vantt/language-pack-baseline.test.ts test/va
 capability_check = "node vantt/probes/language-pack-api.mjs --ohs ."
 probe = "vantt/probes/language-pack-api.mjs"
 phase = "now"
+
+[[patches]]
+id = "unicode-inline-tags"
+name = "fix(content): accept Unicode letters in inline tags"
+patch_file = "0009-unicode-inline-tags.patch"
+metadata_file = "0009-unicode-inline-tags.spec.md"
+consumer = "người dùng tiếng Việt và mọi ngôn ngữ ngoài Latin cơ bản"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/content/note-extractor.ts"]
+test_command = "npx vitest run test/vantt/unicode-inline-tags.test.ts test/indexer.test.ts test/indexer-edge-cases.test.ts"
+capability_check = "node vantt/probes/unicode-inline-tags.mjs --ohs ."
+probe = "vantt/probes/unicode-inline-tags.mjs"
+phase = "now"

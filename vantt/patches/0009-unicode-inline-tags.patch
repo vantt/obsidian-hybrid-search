@@ -1,0 +1,122 @@
+From a17ab14e2722a66fe77e70a338ce805159c7e64e Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:06:50 +0700
+Subject: [PATCH] fix(content): accept Unicode letters in inline tags
+
+Inline tags used an ASCII and U+00C0-U+024F character class, so tags with
+Vietnamese diacritics (U+1EA0-U+1EF9) were cut short or dropped. Match a
+Unicode letter or underscore first, then letters, numbers, combining marks,
+underscores, hyphens and slashes. ASCII tag behavior is unchanged, and tags
+still cannot start with a digit.
+
+Patch-Id: unicode-inline-tags
+
+Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+---
+ src/content/note-extractor.ts          | 10 ++--
+ test/vantt/unicode-inline-tags.test.ts | 67 ++++++++++++++++++++++++++
+ 2 files changed, 72 insertions(+), 5 deletions(-)
+ create mode 100644 test/vantt/unicode-inline-tags.test.ts
+
+diff --git a/src/content/note-extractor.ts b/src/content/note-extractor.ts
+index 5b4f337..16bf681 100644
+--- a/src/content/note-extractor.ts
++++ b/src/content/note-extractor.ts
+@@ -45,16 +45,16 @@ export function parseAliasField(raw: unknown): string[] {
+ 
+ /**
+  * Extract inline tags from note body: #tag, #tag/subtag
+- * Matches # preceded by start-of-string or whitespace, followed by
+- * a letter/underscore and then any word chars, hyphens, or slashes.
++ * Matches # preceded by start-of-string or whitespace, followed by a Unicode
++ * letter or underscore, then letters, numbers, combining marks, underscores,
++ * hyphens, or slashes. A leading digit is not a tag start, so purely numeric
++ * tokens never match.
+  */
+ export function parseInlineTags(content: string): string[] {
+   const seen = new Set<string>();
+   // Strip code blocks to avoid matching # inside them
+   const stripped = content.replace(/```[\s\S]*?```/g, '').replace(/`[^`]*`/g, '');
+-  for (const match of stripped.matchAll(
+-    /(?:^|[\s,;(])#([a-zA-Z_\u00C0-\u024F][a-zA-Z0-9_\-/\u00C0-\u024F]*)/gm,
+-  )) {
++  for (const match of stripped.matchAll(/(?:^|[\s,;(])#([\p{L}_][\p{L}\p{N}\p{M}_\-/]*)/gmu)) {
+     seen.add(match[1]!);
+   }
+   return [...seen];
+diff --git a/test/vantt/unicode-inline-tags.test.ts b/test/vantt/unicode-inline-tags.test.ts
+new file mode 100644
+index 0000000..b70df77
+--- /dev/null
++++ b/test/vantt/unicode-inline-tags.test.ts
+@@ -0,0 +1,67 @@
++import assert from 'node:assert/strict';
++import { describe, it } from 'vitest';
++import { parseInlineTags } from '../../src/content/note-extractor.js';
++
++describe('parseInlineTags — Unicode letters', () => {
++  it('keeps Vietnamese tags with diacritics in the U+1EA0–U+1EF9 range', () => {
++    assert.deepEqual(parseInlineTags('Ghi chú #tiếng-việt và #đồ_án'), ['tiếng-việt', 'đồ_án']);
++  });
++
++  it('keeps a Vietnamese tag without being cut at the first diacritic', () => {
++    assert.deepEqual(parseInlineTags('#kếhoạch #ưu_tiên'), ['kếhoạch', 'ưu_tiên']);
++  });
++
++  it('keeps hierarchical tags with Unicode segments', () => {
++    assert.deepEqual(parseInlineTags('see #dự-án/2026 now'), ['dự-án/2026']);
++  });
++
++  it('keeps Cyrillic, Greek and CJK tags', () => {
++    assert.deepEqual(parseInlineTags('#тест #αλφα #日本'), ['тест', 'αλφα', '日本']);
++  });
++
++  it('keeps decomposed (NFD) Vietnamese tags through combining marks', () => {
++    // "kếhoạch" with every precomposed letter split into base + combining marks.
++    const tag = 'ke\u0302\u0301hoa\u0323ch';
++    assert.deepEqual(parseInlineTags(`#${tag} next`), [tag]);
++  });
++
++  it('accepts Unicode tags after punctuation that already started tags', () => {
++    assert.deepEqual(parseInlineTags('(#đồ_án), #dữ-liệu;#ôn'), ['đồ_án', 'dữ-liệu', 'ôn']);
++  });
++
++  it('does not match Unicode tags inside code', () => {
++    assert.deepEqual(parseInlineTags('```\n#ẩn\n```\n`#ẩn2`'), []);
++  });
++});
++
++describe('parseInlineTags — rules preserved', () => {
++  it('still parses ASCII tags exactly as before', () => {
++    assert.deepEqual(parseInlineTags('#pkm #note/basic/primary #real-tag #a_b #_x'), [
++      'pkm',
++      'note/basic/primary',
++      'real-tag',
++      'a_b',
++      '_x',
++    ]);
++  });
++
++  it('rejects tags whose first character is a digit', () => {
++    assert.deepEqual(parseInlineTags('#123 #42foo #٣٤'), []);
++  });
++
++  it('does not treat a # inside a word as a tag start', () => {
++    assert.deepEqual(parseInlineTags('issue#đồ_án and a#b'), []);
++  });
++
++  it('keeps digits after the first character inside a Unicode tag', () => {
++    assert.deepEqual(parseInlineTags('#đề2026'), ['đề2026']);
++  });
++
++  it('does not extend a tag across a non-letter symbol', () => {
++    assert.deepEqual(parseInlineTags('#abc×def #xyz÷uvw'), ['abc', 'xyz']);
++  });
++
++  it('deduplicates Unicode tags', () => {
++    assert.deepEqual(parseInlineTags('#đồ_án then #đồ_án'), ['đồ_án']);
++  });
++});
+-- 
+2.53.0
+
