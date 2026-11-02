@@ -31,7 +31,7 @@ Ba vấn đề đã thấy khi dùng OHS với tiếng Việt và với sản ph
 ## 2. Mục tiêu và không làm
 
 Mọi mục tiêu, việc và bản vá trong tài liệu mang một trong ba nhãn:
-- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V22).
+- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V25).
 - **Có thì tốt**: có giá trị nhưng không chặn ai; làm khi đủ điều kiện ghi ở cột "Làm khi" (mục 2.2; việc L01–L26).
 - **Không làm**: đã cân nhắc và loại, ghi lý do để khỏi bàn lại (mục 2.3).
 
@@ -50,13 +50,11 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | G8 | Gói tiếng Việt xử lý cả cách người Việt gõ và viết thật: chuỗi Telex/VNI gõ dở, gõ sai một chữ, đồng nghĩa và Việt–Anh, viết tắt, từ ghép, alias và tiêu đề không dấu; đoạn trích luôn là chữ gốc, đúng chỗ khớp (user chốt 2026-11-02, trước đây là N05, N14–N19) | Hạng mục `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-compound`, `vi-alias`, `vi-snippet` của bộ eval (mục 11.5), ngưỡng ở mục 11.6 |
 | G9 | Hợp đồng gói ngôn ngữ P01 thật sự chung: một gói ngôn ngữ thứ hai chạy được qua đúng hợp đồng đó mà không sửa lõi (user chốt 2026-11-02, trước đây N08) | Test của gói thứ hai và bài kiểm bất biến xanh khi bật gói đó (V21) |
 | G10 | Biết reranker đa ngữ có đáng bật cho tiếng Việt không (user chốt 2026-11-02, trước đây N09) | Báo cáo eval reranker trên mọi hạng mục `vi`, kèm thời gian mỗi câu (V22) |
+| G11 | Dự án trỏ được tới đúng đoạn (`note#^block`) và biết đoạn user đã tô; tìm được trong một tập note cho trước; nhận sự kiện "note vừa index" thay vì đọc lại vault mỗi 5 s (user chốt 2026-11-02, trước đây N01–N03) | Bản vá P05, P06, P07 có test và probe xanh (V23–V25); bất biến (mục 11.4) vẫn xanh |
 
 ### 2.2. Có thì tốt
 | ID | Mục tiêu | Lợi ích | Phía làm | Nguồn | Làm khi | Việc |
 |---|---|---|---|---|---|---|
-| N01 | Đoạn trỏ thẳng tới `^block`, biết đoạn nào user đã tô; kích thước đoạn cấu hình được | Trang nguyên liệu mở đúng đoạn, ưu tiên đoạn đã tô | fork (P05) | đã bàn | Khi làm lại trang nguyên liệu; theo dõi upstream issue #91 | L01 |
-| N02 | Tìm giới hạn trong một tập note | "Tìm trong vùng", trong note đã nhận, trong hàng xóm graph | fork (P06) | đã bàn | Khi dự án cần tìm theo vùng | L02 |
-| N03 | Sự kiện "note vừa index" | Graph cập nhật theo sự kiện, bỏ vòng đọc lại 5 s | fork (P07) | đã bàn | Khi dự án bỏ vòng đọc lại | L03 |
 | N04 | Chọn model nhúng tốt nhất cho tiếng Việt (e5-small, e5-base, bge-m3, model chuyên tiếng Việt), có hay không phục hồi dấu cho nhánh vector | e5-small cho điểm nền quá cao, khó tách gần nghĩa thật với nhiễu | cấu hình, eval | đã bàn | Sau V13 | L04 |
 | N06 | Gói "đầy đủ" có sẵn model | Cài không cần mạng | fork (bundle) | đã bàn | Khi có khách ở nơi mạng kém | L07 |
 | N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
@@ -69,7 +67,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 
-N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
+N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
 
 Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
 
@@ -447,11 +445,11 @@ Thứ tự áp đúng như bảng. Bản vá giữ nhỏ, mỗi bản một vi�
 | P03 | `vector-export` | now (Bắt buộc) | Xuất vector theo note và K note gần nhất | 1 |
 | P04 | `stdio-parity` | now (Bắt buộc) | IPC JSON-lines có đủ `search` (mọi tuỳ chọn), `similar`, `read`, `neighbors` | 1 |
 | P09 | `unicode-inline-tags` | now (Bắt buộc) | Tag nội dòng nhận mọi chữ Unicode | 0,3 |
-| P05 | `block-anchors` | later (Có thì tốt) | Đoạn mang id block `^…` và cờ đoạn tô `==…==`; kích thước đoạn cấu hình được | 2 |
-| P06 | `restrict-paths` | later (Có thì tốt) | Giới hạn tìm trong một tập note cho trước | 0,5–1 |
-| P07 | `index-events` | later (Có thì tốt) | Phát sự kiện "note vừa index" qua stdio | 1 |
+| P05 | `block-anchors` | now (Bắt buộc) | Đoạn mang id block `^…` và cờ đoạn tô `==…==`; kích thước đoạn cấu hình được | 2 |
+| P06 | `restrict-paths` | now (Bắt buộc) | Giới hạn tìm trong một tập note cho trước | 0,5–1 |
+| P07 | `index-events` | now (Bắt buộc) | Phát sự kiện "note vừa index" qua stdio | 1 |
 
-(Số P05–P07 giữ theo thứ tự đã bàn; P09 đứng trước vì là pha "now".)
+(Số P05–P07 giữ theo thứ tự đã bàn. Cả chín bản vá đều là pha "now" từ 2026-11-02; thứ tự áp vẫn như bảng.)
 
 #### P00 `fork-identity`
 - **Vấn đề:** bản fork tự nhận là OHS upstream: kiểm cập nhật npm `obsidian-hybrid-search/latest` (`cli.ts:345`, `checkForUpdates` trong `mcp-runtime.ts`) và báo "có bản mới" sai; `--version` không cho biết đang chạy bản fork.
@@ -504,14 +502,14 @@ Xem mục 10.2 (đặc tả đầy đủ). Bản vá chỉ chứa điểm cắm 
 - **Probe:** vault tạm có note với `#kếhoạch`, kiểm `ohs search --tag kếhoạch`.
 - **Upstream:** gửi sau khi bản vá đã làm xong và chạy ổn trong fork (L08). Nháp ở phụ lục B.
 
-#### P05 `block-anchors` (để sau)
+#### P05 `block-anchors`
 - Lưu `block_id` (chuỗi `^abc` cuối đoạn) và `has_highlight` (đoạn chứa `==…==` hoặc `<mark>`) cho mỗi đoạn; trả trong kết quả (`anchors`). Thêm `OBSIDIAN_CHUNK_TOKENS` (kích thước đoạn tối đa, `min(giới hạn model, giá trị)`), lưu kích thước hiệu lực vào `settings` và dựng lại khi đổi. Theo dõi upstream issue #91 (đề xuất y hệt phần kích thước đoạn); nếu upstream làm thì bỏ phần đó khỏi bản vá.
 - Dùng cho: trang nguyên liệu trỏ `note#^block`; ưu tiên đoạn user đã tô.
 
-#### P06 `restrict-paths` (để sau)
+#### P06 `restrict-paths`
 - Tuỳ chọn `paths[]` (hoặc `--paths-file`) giới hạn mọi nhánh tìm vào tập note cho trước, đẩy xuống SQL như `buildFilterPredicate`.
 
-#### P07 `index-events` (để sau)
+#### P07 `index-events`
 - stdio IPC phát `{"event":"indexed","paths":[…],"db_version":n}` sau mỗi lô ghi, và `{"event":"removed",…}`. Dự án dùng để cập nhật graph theo sự kiện thay vì đọc lại vault mỗi 5 s.
 
 ---
@@ -812,7 +810,7 @@ pkm-web (máy giữ vault; thuộc repo dự án, không thuộc fork)
 ### 13.2. Phần thuộc fork OHS
 - P04 `stdio-parity` là toàn bộ thứ fork cần cho điện thoại: `search` đủ tuỳ chọn, `similar`, `read`, `neighbors`, request đồng thời có `id`.
 - **Không** mở HTTP của OHS ra mạng. `ohs serve --http` giữ nguyên mặc định 127.0.0.1. Một điểm xác thực duy nhất là `pkm-web`.
-- P06 (giới hạn tập note) giúp "tìm trong vùng" từ điện thoại; để sau.
+- P06 (giới hạn tập note) giúp "tìm trong vùng" từ điện thoại; làm ở V24.
 
 ### 13.3. Đặc tả tối thiểu của `pkm-web` (để nhóm dự án làm; ghi ở đây để đủ bối cảnh)
 - **Mạng:** mặc định tắt. Bật trong plugin của dự án. Chỉ nghe địa chỉ Tailscale (100.x) hoặc LAN do user chọn; không nghe 0.0.0.0 trừ khi user bật rõ; không có đường ra Internet công khai.
@@ -854,18 +852,18 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển (G8, mục 10.4) | V13, Q9 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
 | V21 | Gói ngôn ngữ thứ hai `ohs-lang-<x>` trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11, Q10 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
 | V22 | Eval reranker đa ngữ trên bộ `vi` (G10): mọi hạng mục, có và không rerank, thời gian mỗi câu trên máy CPU thường | V13 | 0,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất bật hay tắt mặc định trong bộ cài dự án |
-| | **Cộng** | | **~39** | |
+| V23 | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
+| V24 | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
+| V25 | P07 `index-events`: stdio IPC phát `indexed` và `removed` sau mỗi lô ghi (G11) | V08 | 1 | Test và probe xanh; dự án nhận sự kiện trong 1 s sau khi sửa note |
+| | **Cộng** | | **~43** | |
 
-Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
+Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V23, V24 song song với V04–V08 sau V01; V25 sau V08; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
 
 ### 14.2. Để sau
-Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc nhãn "ý mới" ở mục 2.2 cần user xác nhận trước khi bắt đầu. L05, L16–L21 đã chuyển thành V17–V20 (bắt buộc).
+Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc nhãn "ý mới" ở mục 2.2 cần user xác nhận trước khi bắt đầu. L05, L16–L21 đã chuyển thành V17–V20, L01–L03 thành V23–V25 (bắt buộc).
 
 | ID | Nhãn | Việc | Làm khi | Công |
 |---|---|---|---|---|
-| L01 | Có thì tốt (N01) | P05 `block-anchors` (id block, đoạn tô, kích thước đoạn) | Khi làm lại trang nguyên liệu; theo dõi upstream issue #91 | 2 |
-| L02 | Có thì tốt (N02) | P06 `restrict-paths` | Khi cần "tìm trong vùng" | 0,5–1 |
-| L03 | Có thì tốt (N03) | P07 `index-events` | Khi dự án bỏ vòng đọc lại 5 s | 1 |
 | L04 | Có thì tốt (N04) | Thử model và `restoreForEmbedding` | Sau V13 | 1–2 |
 | L06 | Đã chốt, làm sau | `pkm-web` cho điện thoại (phía dự án, mục 13) | Sau khi desktop có người dùng | 5–8 |
 | L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
