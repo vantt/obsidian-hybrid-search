@@ -6,7 +6,7 @@ import { resolveOptions } from '../src/options.js';
 import type { ViAnalysisData } from '../src/query.js';
 import { tokenize } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
-import { allSyllables, tokens as ftsTokens } from './helpers.js';
+import { allSyllables, viewTokens } from './helpers.js';
 import { composeSyllable } from '../src/syllable.js';
 import { TONES, type Tone } from '../src/data.js';
 
@@ -123,8 +123,8 @@ describe('project', () => {
           for (const view of ['norm', 'fold']) {
             const projected = tokenize(p.project(view, field, t));
             expect(projected.length).toBe(source.length);
-            // Same tokenization as the M1 helper that mirrors unicode61 (+# aside).
-            expect(ftsTokens(p.project(view, field, t).replace(/[+#]/g, ' ')).length).toBe(ftsTokens(t.replace(/[+#]/g, ' ')).length);
+            // Same count with an independent emulation of the view tokenizer (tokenchars '+#').
+            expect(viewTokens(p.project(view, field, t))).toHaveLength(viewTokens(t).length);
             projected.forEach((tok, k) => {
               // token k of the view is the projection of source token k
               expect(tok.toLowerCase()).toBe(p.project(view, field, source[k]!).toLowerCase());
@@ -132,8 +132,24 @@ describe('project', () => {
           }
         }
       }),
-      { numRuns: 400 },
+      { numRuns: Number(process.env.FC_NUM_RUNS ?? 400) },
     );
+  });
+
+  it('keeps the token invariant when a combining mark is glued to + or #', () => {
+    // A combining mark next to `#` is one token ("\u0338#"); fold drops the
+    // mark and must leave "#" (still one token), never an empty token.
+    const packs = [createPack(), createPack({ foldIY: true }), createPack({ tonePlacement: 'classic' })];
+    for (const t of ['↚#', '\u2190\u0338#', '\u0301#', 'a\u0301+', '#\u0300', 'x ↚# y', 'c\u0338++']) {
+      for (const p of packs) {
+        for (const view of ['norm', 'fold']) {
+          const out = p.project(view, 'title', t);
+          expect(viewTokens(out)).toHaveLength(viewTokens(t).length);
+          expect(tokenize(out)).toHaveLength(tokenize(t).length);
+        }
+      }
+    }
+    expect(createPack().project('fold', 'title', '\u2190\u0338#')).toBe('\u2190#');
   });
 
   it('is pure and deterministic', () => {
