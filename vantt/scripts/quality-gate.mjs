@@ -9,6 +9,7 @@
 //        [--otf <otf.mjs>]       cloned obsidian-test-fixture for the vi corpus (default: npx from GitHub)
 //        [--k 10]
 //   node vantt/scripts/quality-gate.mjs --private <dir|golden-set.json> [--vault <dir>] [--with-lang <id>] [--json] [--out <file>]
+//        [--private-detail <file>]   local per-query JSON (queries, paths, ranks): the file must be outside the repository
 //
 // Run from the repo root of the release branch (built, dependencies installed). Exit 0 =
 // pass (pending targets are reported, not failed), 1 = a check failed, 2 = could not run.
@@ -16,14 +17,16 @@
 //
 // Private mode (V15) evaluates the user's own vault with their own golden set, which
 // live outside the repository. Only aggregate numbers are printed or written: never
-// a query, a path or a note title; the child's own output is swallowed.
+// a query, a path or a note title; the child's own output is swallowed. `--private-detail`
+// is the one exception: it writes per-query content to a local file outside the repository
+// (refused otherwise) and prints only that the file was written.
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, realpathSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { baseVersion, pickBaseline, writeBaseline } from './lib/baselines.mjs';
-import { evalEnv, goldenFile, nfdGolden, platformKey, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
+import { evalEnv, goldenFile, nfdGolden, platformKey, prepareDataset, runDetail, runEvaluate } from './lib/eval-run.mjs';
 import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from './lib/gates.mjs';
 import { ensureNpm } from './lib/npm.mjs';
 import { git, sh } from './lib/proc.mjs';
@@ -49,10 +52,30 @@ export function parseCli(argv) {
       private: { type: 'string' },
       vault: { type: 'string' },
       out: { type: 'string' },
+      'private-detail': { type: 'string' },
     },
     strict: true,
   });
   return values;
+}
+
+/**
+ * Why `file` may not receive private per-query content, or null when it may: it must lie outside
+ * the repository work tree (and so outside vantt/) and outside any other git work tree.
+ */
+export function detailPathError(file, root) {
+  const target = path.resolve(file);
+  let ancestor = path.dirname(target);
+  while (!existsSync(ancestor) && ancestor !== path.dirname(ancestor)) ancestor = path.dirname(ancestor);
+  const real = path.join(realpathSync(ancestor), path.relative(ancestor, target));
+  const inside = (dir) => {
+    const rel = path.relative(realpathSync(dir), real);
+    return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+  };
+  if (inside(root)) return '--private-detail must be outside the repository (it holds real queries and note paths)';
+  const other = git(realpathSync(ancestor), ['rev-parse', '--show-toplevel'], { allowFail: true });
+  if (other.ok) return '--private-detail must not be inside a git work tree';
+  return null;
 }
 
 const packDir = (root, lang) => path.join(root, 'vantt', 'packages', `ohs-lang-${lang}`);
@@ -306,12 +329,61 @@ async function privateMode(opts, root, config) {
     const v = verdict(report.checks);
     report.gate = v.status;
     report.failed = v.failed;
+    if (opts['private-detail']) {
+      log('Private detail: per-query search with explain (output suppressed).');
+      const detailWithout = runDetail({ ...common, env: evalEnv() });
+      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir) });
+      const queries = JSON.parse(readFileSync(golden, 'utf8'));
+      const file = path.resolve(opts['private-detail']);
+      mkdirSync(path.dirname(file), { recursive: true });
+      writeFileSync(file, `${JSON.stringify(buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang }), null, 2)}\n`, { mode: 0o600 });
+      log(`Per-query detail written to ${file}`);
+    }
   } catch (e) {
+    report.gate = 'error';
     report.error = e.message;
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }
   return report;
+}
+
+const nfc = (p) => p.normalize('NFC');
+
+/** One side (without or with the pack) of a query's detail. */
+function detailSide(row, detail, relevant) {
+  const top = row.top_paths ?? [];
+  return {
+    ndcg_5: row.ndcg_5,
+    mrr: row.mrr,
+    hit_5: row.hit_5,
+    top_paths: top.map(nfc),
+    relevant_ranks: Object.fromEntries(relevant.map((p) => [nfc(p), top.indexOf(p.normalize('NFD')) + 1 || null])),
+    results: (detail?.results ?? []).map((r) => ({ ...r, path: nfc(r.path) })),
+    analysis: detail?.analysis ?? null,
+  };
+}
+
+/** Per-query detail of the two runs, joined by query id. */
+function buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang }) {
+  const by = (list, key = 'id') => new Map((list ?? []).map((x) => [x[key], x]));
+  const [w, p, dw, dp] = [by(without.per_query), by(withPack.per_query), by(detailWithout), by(detailWith)];
+  return {
+    note: 'PRIVATE: real queries and note paths. Keep outside the repository.',
+    pack: lang,
+    k,
+    queries: queries.map((q) => {
+      const relevant = q.relevant_paths ?? [];
+      return {
+        id: q.id,
+        category: q.category,
+        query: q.query,
+        relevant_paths: relevant.map(nfc),
+        without_pack: detailSide(w.get(q.id) ?? {}, dw.get(q.id), relevant),
+        with_pack: detailSide(p.get(q.id) ?? {}, dp.get(q.id), relevant),
+      };
+    }),
+  };
 }
 
 function printHuman(report) {
@@ -324,12 +396,20 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   let opts;
   try {
     opts = parseCli(argv);
+    if (opts['private-detail'] && !opts.private) throw new Error('--private-detail is only valid with --private');
     if (!opts.private && !opts['target-sha']) throw new Error('--target-sha is required (or --private)');
   } catch (e) {
     log(`quality-gate: ${e.message}`);
     return 2;
   }
   const root = git(cwd, ['rev-parse', '--show-toplevel']);
+  if (opts['private-detail']) {
+    const refusal = detailPathError(opts['private-detail'], root);
+    if (refusal) {
+      log(`quality-gate: ${refusal}`);
+      return 2;
+    }
+  }
   const config = JSON.parse(readFileSync(path.join(here, 'quality-gates.json'), 'utf8'));
   const report = opts.private ? await privateMode(opts, root, config) : await standard(opts, root, config);
   if (opts.out) {

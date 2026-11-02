@@ -130,3 +130,32 @@ Baseline phụ thuộc nền (ONNX lượng tử cho số khác nhau theo CPU), 
 ### Kiểm đoạn trích (V19)
 
 `check-snippets.mjs` chạy các câu `vi-snippet` qua OHS thật có gói và kiểm đoạn trích của note đúng là chữ gốc (mảnh nguyên văn của note, còn dấu) và chứa `snippet_contains`; in thêm số câu có `matchedTerms` đúng. Dùng bản sao vault `vi-search` không có file `.db`. Thoát 0 khi đạt 100%. Lệnh chạy ở đầu file script.
+
+### Đánh giá vault riêng và điều tra hạng mục tụt (V15, V15b)
+
+```bash
+node vantt/scripts/quality-gate.mjs --private <golden-set.json> --vault <vault> --with-lang vi \
+  --out <báo cáo.json> --private-detail <file chi tiết.json>
+```
+
+Chế độ `--private` chỉ in số tổng hợp (không câu hỏi, đường dẫn hay tiêu đề note). `--private-detail <file>` (chỉ dùng cùng `--private`) ghi thêm một file JSON cục bộ **có nội dung thật**, mỗi câu một mục:
+
+- `id`, `category`, `query`, `relevant_paths`;
+- `without_pack` và `with_pack`: `ndcg_5`, `mrr`, `hit_5`, `top_paths` (top-k), `relevant_ranks` (hạng 1 gốc của từng note đúng, `null` nếu ngoài top-k), `results` (từng kết quả: `score`, `scores`, `matched_by`, `matched_terms`, `ranks` = hạng trong từng nhánh RRF theo `explain`), `analysis` (`explain.debug` của gói: `viewQueries`, `restore` kèm ứng viên và xác suất, `embedQuery`, `rewrite`, `lexicon`; `null` khi không có gói).
+
+Quy tắc an toàn: file phải nằm **ngoài repo** (ngoài cây làm việc git, nên cũng ngoài `vantt/`); đường dẫn trong repo hay trong cây git khác bị từ chối ngay, thoát 2, chưa chạy gì. File ghi với quyền `0600`. Stdout/stderr chỉ in đường dẫn file đã ghi. Đừng dán nội dung file vào issue, PR, log hay báo cáo; báo cáo chỉ nêu số tổng hợp. Chạy lại với `--k 30` nếu cần thấy note đúng nằm ở hạng sâu hơn (số ở top-k, nên đổi `k` làm đổi nDCG).
+
+Cách điều tra một hạng mục tụt (ví dụ `vi-iy`):
+
+1. Lọc các mục `category` đó, tìm câu mà `with_pack.relevant_ranks` tệ hơn `without_pack` (hạng lớn hơn hoặc `null`).
+2. Mở `with_pack.analysis`: `restore` có phục hồi sai dấu không (ứng viên đầu có đúng chữ của note không, xác suất bao nhiêu), `viewQueries` có chứa dạng gộp `y`/`i` mong muốn không, `embedQuery` có đổi câu gửi cho model vector không.
+3. So `results[].ranks` hai phía: nhánh nào đẩy note đúng xuống (BM25 gốc, `view:norm`, `view:fold`, `view:seg`, vector, tiêu đề) và nhánh nào kéo note sai lên. Nếu hạng theo nhánh vẫn tốt mà `score` cuối thấp, nghi bước chấm lại (`rescore`: trọng số `viewWeights`, xác suất ứng viên khôi phục).
+4. Ghi giả thuyết kèm bằng chứng (hạng trước/sau, nhánh) mà không chép câu hỏi hay đường dẫn thật vào repo; sửa gói bằng test dùng dữ liệu tổng hợp.
+
+Dựng lexicon từ chính vault (viết tắt, xem `packages/ohs-lang-vi/README.md`):
+
+```bash
+ohs-lang-vi learn-abbr --vault <vault> [--dry-run] [--min-count <n>]   # cần build gói: npm run build trong vantt/packages/ohs-lang-vi
+```
+
+Lệnh ghi đề xuất vào `<vault>/_ohs/lexicon.md` dưới `## Chờ duyệt` (không đụng mục khác). Bạn xem từng dòng, chuyển dòng đúng sang `## Viết tắt` (và tự thêm `## Đồng nghĩa`, `## Từ ghép` nếu cần); mục `## Chờ duyệt` không có tác dụng khi tìm. Sau đó chạy lại V15 như trên: `vi-synonym` cần lexicon này mới cải thiện. `_ohs/lexicon.md` nằm trong vault của bạn, không đưa vào repo.

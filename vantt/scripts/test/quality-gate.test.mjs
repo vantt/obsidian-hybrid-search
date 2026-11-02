@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { baseVersion, compareVersions, pickBaseline, writeBaseline } from '../lib/baselines.mjs';
 import { nfdGolden, platformKey } from '../lib/eval-run.mjs';
 import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from '../lib/gates.mjs';
-import { main } from '../quality-gate.mjs';
+import { detailPathError, main } from '../quality-gate.mjs';
 import { git, write } from './helpers.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -220,6 +220,15 @@ const per_query = golden.map((q) => ({ id: q.id, query: 'SECRET-QUERY', category
 fs.writeFileSync(get('--output'), JSON.stringify({ meta: { golden_set_size: golden.length }, summary: { ndcg_5: score, hit_5: score }, by_category: { c: { ndcg_5: score, hit_5: score } }, per_query }));
 `;
 
+// Stubs of the core modules that lib/detail-search.mjs imports: one result per query with explain data.
+const INDEX_SERVICE = `export async function openIndexDatabase() {}
+export function createIndexService() { return { reindex: async () => ({}), close() {} }; }
+`;
+const SEARCHER = `export async function search(query) {
+  return [{ path: 'SECRET-PATH.md', score: 0.5, scores: { bm25: 1 }, matchedBy: ['bm25'], explain: { ranks: { bm25: 1 }, debug: process.env.OHS_LANGUAGE_PACK ? { restore: 'SECRET-RESTORED ' + query } : undefined } }];
+}
+`;
+
 let STUB_SHA;
 describe('quality-gate CLI on a stub eval', () => {
   let dir;
@@ -232,6 +241,8 @@ describe('quality-gate CLI on a stub eval', () => {
     write(root, 'package.json', '{"name":"x","version":"1.0.0-vantt.1"}\n');
     write(root, 'package-lock.json', '{"name":"x","version":"1.0.0-vantt.1","packages":{"":{"version":"1.0.0-vantt.1"}}}\n');
     write(root, 'eval/evaluate.ts', EVALUATE);
+    write(root, 'src/indexing/index-service.ts', INDEX_SERVICE);
+    write(root, 'src/search/searcher.ts', SEARCHER);
     write(root, 'fixtures/obsidian-help/golden-set.json', JSON.stringify([{ id: 'q1', category: 'c' }, { id: 'q2', category: 'c' }]));
     write(root, 'fixtures/obsidian-help/dataset/a.md', '# a\n');
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.79');
@@ -365,5 +376,65 @@ describe('quality-gate CLI on a stub eval', () => {
     const { code, report } = await run(['--private', priv, '--json']);
     expect(code).toBe(2);
     expect(report.error).toMatch(/vault/);
+  });
+  describe('--private-detail', () => {
+    const setup = () => {
+      write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
+      const priv = path.join(dir, 'private');
+      mkdirSync(path.join(priv, 'vault'), { recursive: true });
+      writeFileSync(path.join(priv, 'vault', 'note.md'), '# SECRET-NOTE\n');
+      const rel = 'Hoà giải.md'.normalize('NFC');
+      writeFileSync(path.join(priv, 'golden-set.json'), JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', relevant_paths: [rel], category: 'c' }]));
+      return priv;
+    };
+
+    it('writes per-query detail to a file outside the repository and prints no content', async () => {
+      const priv = setup();
+      const file = path.join(dir, 'out', 'detail.json');
+      const { code, out, err } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', file, '--json']);
+      expect(code).toBe(0);
+      expect(out + err).not.toMatch(/SECRET/);
+      const detail = JSON.parse(readFileSync(file, 'utf8'));
+      expect(detail).toMatchObject({ pack: 'de', k: 10 });
+      const [q] = detail.queries;
+      expect(q).toMatchObject({ id: 'p1', category: 'c', query: 'SECRET-QUERY', relevant_paths: ['Hoà giải.md'.normalize('NFC')] });
+      expect(q.without_pack.top_paths).toEqual(['SECRET-PATH.md']);
+      expect(q.with_pack.relevant_ranks).toEqual({ [q.relevant_paths[0]]: null });
+      expect(q.without_pack.results[0]).toMatchObject({ path: 'SECRET-PATH.md', ranks: { bm25: 1 } });
+      expect(q.without_pack.analysis).toBeNull();
+      expect(q.with_pack.analysis).toEqual({ restore: 'SECRET-RESTORED SECRET-QUERY' });
+      expect(existsSync(path.join(root, 'vantt/.work/quality-private'))).toBe(false);
+    });
+
+    it('refuses a path inside the repository or vantt/, and writes nothing', async () => {
+      const priv = setup();
+      for (const rel of ['detail.json', 'vantt/reviews/detail.json', 'vantt/.work/d/detail.json']) {
+        const file = path.join(root, rel);
+        const { code, out, err } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', file, '--json']);
+        expect(code).toBe(2);
+        expect(out).toBe('');
+        expect(err).toMatch(/outside the repository/);
+        expect(err).not.toMatch(/SECRET/);
+        expect(existsSync(file)).toBe(false);
+      }
+    });
+
+    it('refuses a path that reaches the repository through a symlink', async () => {
+      const priv = setup();
+      symlinkSync(root, path.join(dir, 'link'), 'dir');
+      const { code } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', path.join(dir, 'link', 'x', 'detail.json'), '--json']);
+      expect(code).toBe(2);
+      expect(existsSync(path.join(root, 'x'))).toBe(false);
+    });
+
+    it('is only valid with --private', async () => {
+      const { code, err } = await run([...std(), '--private-detail', path.join(dir, 'd.json')]);
+      expect(code).toBe(2);
+      expect(err).toMatch(/only valid with --private/);
+    });
+
+    it('detailPathError accepts a fresh directory outside any work tree', () => {
+      expect(detailPathError(path.join(dir, 'a', 'b', 'detail.json'), root)).toBeNull();
+    });
   });
 });

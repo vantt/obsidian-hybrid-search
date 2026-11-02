@@ -4,6 +4,7 @@
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { childEnv } from './proc.mjs';
 
 export const platformKey = () => `${process.platform}-${process.arch}`;
@@ -46,6 +47,8 @@ export function evalEnv(extra = {}) {
   return { ...env, ...extra };
 }
 
+const copyFilter = (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src);
+
 const tsx = (cwd, argv, env, capture) => {
   const res = spawnSync(process.execPath, ['--import', 'tsx', ...argv], {
     cwd,
@@ -80,10 +83,7 @@ export function runEvaluate({ tree, vault, golden, scratch, k = 10, env = evalEn
   const work = mkdtempSync(path.join(scratch, 'eval-'));
   try {
     const copy = path.join(work, 'vault');
-    cpSync(vault, copy, {
-      recursive: true,
-      filter: (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src),
-    });
+    cpSync(vault, copy, { recursive: true, filter: copyFilter });
     const out = path.join(work, 'result.json');
     const res = tsx(
       tree,
@@ -93,6 +93,27 @@ export function runEvaluate({ tree, vault, golden, scratch, k = 10, env = evalEn
     );
     if (!res.ok) throw new Error(`eval failed in ${capture ? 'private run' : tree} (exit ${res.status})`);
     log('  eval done');
+    return JSON.parse(readFileSync(out, 'utf8'));
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Per-query search detail (private mode): the ranked results of every query in `golden` with their
+ * per-branch ranks and the pack analysis, on a throw-away copy of `vault`. Returns
+ * [{id, results, analysis}]. The child's output is always swallowed.
+ */
+export function runDetail({ tree, vault, golden, scratch, k = 10, env = evalEnv() }) {
+  mkdirSync(scratch, { recursive: true });
+  const work = mkdtempSync(path.join(scratch, 'detail-'));
+  try {
+    const copy = path.join(work, 'vault');
+    cpSync(vault, copy, { recursive: true, filter: copyFilter });
+    const out = path.join(work, 'detail.json');
+    const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'detail-search.mjs');
+    const res = tsx(tree, [script, '--tree', tree, '--vault', copy, '--queries', golden, '--output', out, '--k', String(k)], env, true);
+    if (!res.ok) throw new Error(`detail run failed (exit ${res.status})`);
     return JSON.parse(readFileSync(out, 'utf8'));
   } finally {
     rmSync(work, { recursive: true, force: true });
