@@ -836,33 +836,34 @@ pkm-web (máy giữ vault; thuộc repo dự án, không thuộc fork)
 Một "ngày" là một phiên làm việc cả ngày của agent có người duyệt. Cột "Cần" là việc phải xong trước.
 
 ### 14.1. Làm ngay (nhãn: Bắt buộc)
+Trạng thái 2026-11-02: mọi việc bắt buộc đã xong (đánh dấu "(xong)"), theo [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md). Còn theo dõi: V15b (sửa các hạng mục tụt trên vault thật). L24 (mục 14.2) cũng đã xong.
 | ID | Việc | Cần | Công | Xong khi |
 |---|---|---|---|---|
-| V00 | Cài đặt fork (mục 5): remote, `.gitignore`, `vantt/README.md`, tắt workflow upstream, bật workflow `vantt-*` | — | 0,5 | `gh workflow list` chỉ có `vantt-*` bật |
-| V01 | `catchup.mjs` + test (mục 6, 11.2, T8) + skill `ohs-catchup` | V00 | 2 | Chạy trên `v0.17.2` ra nhánh `vantt/v0.17.2` xanh với chuỗi rỗng và với bản vá giả; diễn tập xung đột qua |
-| V02 | `vantt-catchup.yml`, `vantt-pr-check.yml` (mục 7.2, 7.4) | V01 | 0,5 | Chạy tay xanh; một lần hỏng cố ý mở đúng một issue |
-| V03 | `bundle.mjs` + `vantt-bundles.yml` + smoke (mục 8) | V02 | 2 | Release có 4 gói + sha256; smoke xanh cả 4 nền; ghi kích thước |
-| V04 | P00 `fork-identity` | V01 | 0,3 | Test xanh |
-| V05 | P09 `unicode-inline-tags` | V01 | 0,3 | Test xanh, probe trả 1 trên upstream, 0 trên fork |
-| V06 | P02 `db-path` | V01 | 1 | Test và probe |
-| V07 | P03 `vector-export` | V01 | 1 | Test và probe |
-| V08 | P04 `stdio-parity` | V07 | 1 | Test parity mở rộng xanh; N request rồi đóng stdin nhận đủ N phản hồi |
-| V09 | `ohs-lang-vi` M1: `normalize`, `fold`, `syllable`, bảng dữ liệu, test bảng và thuộc tính | — (song song) | 2,5 | Test của gói xanh, hiệu năng đạt |
-| V10 | Bộ eval tiếng Việt: preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set, smoke-vault, baseline upstream | — (song song) | 2,5 | Golden set đủ 17 hạng mục × 15 câu; baseline ghi trong `vantt/eval/baselines/` |
-| V11 | P01 `language-pack-api` (mục 10.2, gồm `aliasViews`, `queryCacheKey`, đoạn trích theo bất biến token) + test bằng gói giả | V01 | 4 | Toàn bộ test của P01 xanh; bất biến (V12) xanh |
-| V12 | `invariance.mjs`, `quality-gate.mjs`, nối vào catchup | V10, V11 | 1 | Catchup chạy đủ T1–T5 |
-| V13 | `ohs-lang-vi` M2+M3: view `norm`/`fold`, `analyzeQuery`, `restore`, `rescore`; chốt tham số bằng eval | V09, V10, V11 | 3,5 | Đạt mục tiêu G3 (mục 11.6) trên corpus sinh |
-| V14 | `review-upstream.mjs` + probe cho mọi bản vá + hoàn thiện skill `ohs-upstream-review` | V06–V08, V12 | 2 | Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục |
-| V15 | Eval trên vault thật của user (golden set riêng 60 câu) | V13; user 2 giờ gán nhãn | 0,5 + user | Số tổng hợp trong `vantt/reviews/` |
-| V17 | `ohs-lang-vi` M5a: `telex.ts`, `typo.ts` (G8) | V13 | 2,5 | `vi-telex`, `vi-typo` đạt mục 11.6; hạng mục khác không tụt |
-| V18 | `ohs-lang-vi` M5b: `lexicon.ts`, `abbr.ts`, lệnh `learn-abbr` (G8) | V13 | 2,5 | `vi-synonym`, `vi-abbr` đạt; đổi đồng nghĩa hay viết tắt trong file lexicon không dựng lại index |
-| V19 | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
-| V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển theo tiêu chí Q9 (G8, mục 10.4) | V13 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
-| V21 | Gói ngôn ngữ thứ hai `ohs-lang-de` (tiếng Đức, Q10) trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
-| V22 | Đợt eval nhánh nghĩa trên bộ `vi` (G10), một đợt chạy chung: mỗi model nhúng × `restoreForEmbedding` bật/tắt × rerank có/không; mọi hạng mục (chú ý `vi-semantic`, `vi-unaccented`); đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu (cho `zones`, `related`), thời gian index, thời gian mỗi câu trên máy CPU thường, RAM, dung lượng tải. Mỗi model index một lần rồi chạy mọi biến thể câu tìm trên index đó | V13 | 2–2,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất cho bộ cài dự án: model, `restoreForEmbedding` (chốt Q3), bật hay tắt reranker; lõi không đổi model mặc định |
-| V23 | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
-| V24 | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
-| V25 | P07 `index-events`: stdio IPC phát `indexed` và `removed` sau mỗi lô ghi (G11) | V08 | 1 | Test và probe xanh; dự án nhận sự kiện trong 1 s sau khi sửa note |
+| V00 (xong) | Cài đặt fork (mục 5): remote, `.gitignore`, `vantt/README.md`, tắt workflow upstream, bật workflow `vantt-*` | — | 0,5 | `gh workflow list` chỉ có `vantt-*` bật |
+| V01 (xong) | `catchup.mjs` + test (mục 6, 11.2, T8) + skill `ohs-catchup` | V00 | 2 | Chạy trên `v0.17.2` ra nhánh `vantt/v0.17.2` xanh với chuỗi rỗng và với bản vá giả; diễn tập xung đột qua |
+| V02 (xong) | `vantt-catchup.yml`, `vantt-pr-check.yml` (mục 7.2, 7.4) | V01 | 0,5 | Chạy tay xanh; một lần hỏng cố ý mở đúng một issue |
+| V03 (xong) | `bundle.mjs` + `vantt-bundles.yml` + smoke (mục 8) | V02 | 2 | Release có 4 gói + sha256; smoke xanh cả 4 nền; ghi kích thước |
+| V04 (xong) | P00 `fork-identity` | V01 | 0,3 | Test xanh |
+| V05 (xong) | P09 `unicode-inline-tags` | V01 | 0,3 | Test xanh, probe trả 1 trên upstream, 0 trên fork |
+| V06 (xong) | P02 `db-path` | V01 | 1 | Test và probe |
+| V07 (xong) | P03 `vector-export` | V01 | 1 | Test và probe |
+| V08 (xong) | P04 `stdio-parity` | V07 | 1 | Test parity mở rộng xanh; N request rồi đóng stdin nhận đủ N phản hồi |
+| V09 (xong) | `ohs-lang-vi` M1: `normalize`, `fold`, `syllable`, bảng dữ liệu, test bảng và thuộc tính | — (song song) | 2,5 | Test của gói xanh, hiệu năng đạt |
+| V10 (xong) | Bộ eval tiếng Việt: preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set, smoke-vault, baseline upstream | — (song song) | 2,5 | Golden set đủ 17 hạng mục × 15 câu; baseline ghi trong `vantt/eval/baselines/` |
+| V11 (xong) | P01 `language-pack-api` (mục 10.2, gồm `aliasViews`, `queryCacheKey`, đoạn trích theo bất biến token) + test bằng gói giả | V01 | 4 | Toàn bộ test của P01 xanh; bất biến (V12) xanh |
+| V12 (xong) | `invariance.mjs`, `quality-gate.mjs`, nối vào catchup | V10, V11 | 1 | Catchup chạy đủ T1–T5 |
+| V13 (xong) | `ohs-lang-vi` M2+M3: view `norm`/`fold`, `analyzeQuery`, `restore`, `rescore`; chốt tham số bằng eval | V09, V10, V11 | 3,5 | Đạt mục tiêu G3 (mục 11.6) trên corpus sinh |
+| V14 (xong) | `review-upstream.mjs` + probe cho mọi bản vá + hoàn thiện skill `ohs-upstream-review` | V06–V08, V12 | 2 | Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục |
+| V15 (xong) | Eval trên vault thật của user (golden set riêng 60 câu) | V13; user 2 giờ gán nhãn | 0,5 + user | Số tổng hợp trong `vantt/reviews/` |
+| V17 (xong) | `ohs-lang-vi` M5a: `telex.ts`, `typo.ts` (G8) | V13 | 2,5 | `vi-telex`, `vi-typo` đạt mục 11.6; hạng mục khác không tụt |
+| V18 (xong) | `ohs-lang-vi` M5b: `lexicon.ts`, `abbr.ts`, lệnh `learn-abbr` (G8) | V13 | 2,5 | `vi-synonym`, `vi-abbr` đạt; đổi đồng nghĩa hay viết tắt trong file lexicon không dựng lại index |
+| V19 (xong) | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
+| V20 (xong) | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển theo tiêu chí Q9 (G8, mục 10.4) | V13 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
+| V21 (xong) | Gói ngôn ngữ thứ hai `ohs-lang-de` (tiếng Đức, Q10) trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
+| V22 (xong) | Đợt eval nhánh nghĩa trên bộ `vi` (G10), một đợt chạy chung: mỗi model nhúng × `restoreForEmbedding` bật/tắt × rerank có/không; mọi hạng mục (chú ý `vi-semantic`, `vi-unaccented`); đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu (cho `zones`, `related`), thời gian index, thời gian mỗi câu trên máy CPU thường, RAM, dung lượng tải. Mỗi model index một lần rồi chạy mọi biến thể câu tìm trên index đó | V13 | 2–2,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất cho bộ cài dự án: model, `restoreForEmbedding` (chốt Q3), bật hay tắt reranker; lõi không đổi model mặc định |
+| V23 (xong) | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
+| V24 (xong) | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
+| V25 (xong) | P07 `index-events`: stdio IPC phát `indexed` và `removed` sau mỗi lô ghi (G11) | V08 | 1 | Test và probe xanh; dự án nhận sự kiện trong 1 s sau khi sửa note |
 | | **Cộng** | | **~44** | |
 
 Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V23, V24 song song với V04–V08 sau V01; V25 sau V08; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
@@ -881,7 +882,7 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L15 | Có thì tốt (N13) | Viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node (không phải chuyển script Python của dự án, việc đó ở V16) | Khi điều kiện ở N13 xảy ra | 10–14 |
 | L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02): plugin ghi câu tìm và việc có mở note từ kết quả; xuất câu thành golden set riêng rồi chạy `quality-gate.mjs --private` của fork. Fork không thêm gì | Sau V15 | 1 |
 | L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
-| L24 | Bắt buộc (user xác nhận 2026-11-02, trước là N22 có thì tốt) | Biểu đồ chỉ số qua các bản trong báo cáo review; làm trong goal hiện tại cùng phase 6 | Sau V14 | 0,5 |
+| L24 (xong) | Bắt buộc (user xác nhận 2026-11-02, trước là N22 có thì tốt) | Biểu đồ chỉ số qua các bản trong báo cáo review; làm trong goal hiện tại cùng phase 6 | Sau V14 | 0,5 |
 | L25 | Có thì tốt (N23), ý mới | Gói Windows ARM64 | Khi có khách dùng | 0,5 |
 | L26 | Có thì tốt (N24), ý mới | Nâng cấp tại chỗ và quay lui (phía bộ cài dự án) | Khi phát hành bản thứ hai cho khách | 1 |
 

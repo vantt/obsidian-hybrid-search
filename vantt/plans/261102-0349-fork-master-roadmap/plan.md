@@ -83,13 +83,16 @@ Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự ch
 
 ## Xong khi (điều kiện cho goal)
 
-- [ ] Mọi việc V00–V15, V17–V25 có trạng thái DONE và điều kiện "Xong khi" của chúng được kiểm bằng lệnh hoặc báo cáo ghi trong phase file.
-- [ ] `node vantt/scripts/catchup.mjs --with-lang vi --json` trên tag upstream mới nhất thoát 0, chạy đủ T1–T5, mọi bản vá P00–P09 được áp.
-- [ ] Release `vX.Y.Z-vantt.N` có 4 gói dựng sẵn kèm sha256, smoke xanh cả 4 nền.
-- [ ] Cổng chất lượng đạt mục tiêu G3 và G8 (PRD 11.6) trên corpus sinh; bất biến G2 trùng 100%.
+Bằng chứng (2026-11-02): catchup CI run 41419225358 (T1–T5, 9 bản vá, `0.17.2-vantt.4`); release `v0.17.2-vantt.4` 12 file, smoke xanh 4 nền; cổng chất lượng V12 (`vantt/scripts/quality-gates.json`, mọi mục tiêu G3/G8 bắt buộc); bất biến 58/58; `vantt/reviews/v0.17.2.md`, `semantic-eval-2026-11-02.md`, `v0.17.2-vantt.2.private.md`.
+
+
+- [x] Mọi việc V00–V15, V17–V25 có trạng thái DONE và điều kiện "Xong khi" của chúng được kiểm bằng lệnh hoặc báo cáo ghi trong phase file.
+- [x] `node vantt/scripts/catchup.mjs --with-lang vi --json` trên tag upstream mới nhất thoát 0, chạy đủ T1–T5, mọi bản vá P00–P09 được áp.
+- [x] Release `vX.Y.Z-vantt.N` có 4 gói dựng sẵn kèm sha256, smoke xanh cả 4 nền.
+- [x] Cổng chất lượng đạt mục tiêu G3 và G8 (PRD 11.6) trên corpus sinh; bất biến G2 trùng 100%.
 - [ ] V15b: tìm và sửa hạng mục tụt trên vault thật (user thêm 2026-11-02).
 - [x] L24: báo cáo review có biểu đồ chỉ số qua các bản (user thêm vào goal 2026-11-02).
-- [ ] Có `vantt/reviews/v0.17.2.md` theo mẫu PRD 12.5, có báo cáo V22 và số tổng hợp V15.
-- [ ] `vantt/README.md` cập nhật trạng thái; PRD mục 14 đánh dấu việc đã xong.
+- [x] Có `vantt/reviews/v0.17.2.md` theo mẫu PRD 12.5, có báo cáo V22 và số tổng hợp V15.
+- [x] `vantt/README.md` cập nhật trạng thái; PRD mục 14 đánh dấu việc đã xong.
 
 <!-- slug: fork-master-roadmap -->
