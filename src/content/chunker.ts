@@ -910,6 +910,12 @@ function replaceMarkdownInlineLinks(value: string): string {
   return result;
 }
 
+/** Chunk size actually used: the model limit, lowered by OBSIDIAN_CHUNK_TOKENS when set. */
+export function effectiveChunkTokens(modelLimit: number): number {
+  const configured = config.chunkTokens;
+  return configured === undefined ? modelLimit : Math.min(modelLimit, configured);
+}
+
 export function chunkNote(content: string, contextLength: number): Chunk[] {
   if (estimateTokens(content) <= contextLength) {
     return [createSourceChunk(content, 0, content.length, [])];
