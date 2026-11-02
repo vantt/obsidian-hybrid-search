@@ -42,7 +42,7 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 
 ## Todo
 
-- [ ] V04 P00 `fork-identity`
+- [x] V04 P00 `fork-identity`
 - [x] V05 P09 `unicode-inline-tags`
 - [ ] V06 P02 `db-path`
 - [ ] V07 P03 `vector-export`
@@ -63,6 +63,7 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 
 - `series.toml` giữ thứ tự P00, P01, P02, P03, P04, P09, P05, P06, P07: bản vá về sau chèn đúng vị trí, không chỉ nối cuối.
 - P09 (V05) xong: không tăng `INDEX_SCHEMA_VERSION`; note đã index trước bản vá giữ tag cũ tới khi note đổi hoặc chạy `ohs reindex --force` (ghi ở spec).
+- P00 (V04) xong: dựng trên tag `v0.17.2` để đứng đầu chuỗi; đã kiểm P00 → P01 → P09 áp sạch bằng `git am --3way`. Bản vá thêm `OHS_DISABLE_UPDATE_CHECK=1` (bộ cài dự án sẽ đặt biến này) và `build: "vantt"` trong `status` khi có dấu fork.
 
 ## Risk
 

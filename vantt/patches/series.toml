@@ -27,6 +27,20 @@
 # applied patch into this directory (PRD 6.4); commit the refreshed files on master.
 
 [[patches]]
+id = "fork-identity"
+name = "feat(cli): report fork build identity and allow disabling update checks"
+patch_file = "0000-fork-identity.patch"
+metadata_file = "0000-fork-identity.spec.md"
+consumer = "fork release builds; ohs installer"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/runtime/package-identity.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/status-payload.ts"]
+test_command = "npx vitest run test/vantt/fork-identity.test.ts"
+capability_check = "node vantt/probes/fork-identity.mjs --ohs ."
+probe = "vantt/probes/fork-identity.mjs"
+phase = "now"
+
+[[patches]]
 id = "language-pack-api"
 name = "feat(language): add a language-pack extension point"
 patch_file = "0001-language-pack-api.patch"
