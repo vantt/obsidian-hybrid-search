@@ -178,7 +178,7 @@ describe('lexicon in the pack', () => {
     const signature = pack.signature();
     const key = pack.queryCacheKey!();
     // A compound the bundled dictionary does not have ("nhà hàng" is already there).
-    expect(pack.project('seg', 'content', 'Giữ chân khách')).toBe('giữ chân khách');
+    expect(pack.project('seg', 'content', 'Giữ chân khách')).toBe('giữ_chân khách');
     write(LEXICON.replace('bạn hàng', 'bạn hàng\ngiữ chân khách'));
     expect(pack.signature()).not.toBe(signature);
     // project() follows the dictionary the new signature stands for
