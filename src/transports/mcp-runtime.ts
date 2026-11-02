@@ -223,6 +223,7 @@ async function callSearchTool(a: Record<string, unknown>): Promise<McpToolResult
       threshold: searchArgs.threshold,
       tag,
       frontmatter,
+      paths: searchArgs.paths,
       related: searchArgs.related,
       depth: searchArgs.depth,
       direction: searchArgs.direction,
@@ -409,6 +410,12 @@ export function createMcpServer(runtime: McpRuntime): Server {
               description:
                 'Minimum score 0..1 after text/path ranking. Use ~0.2 to hide weak matches when precision matters. ' +
                 'Ignored by related and filter-only searches; keep 0 for exploration or when recall matters because high thresholds can drop useful results.',
+            },
+            paths: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'Restrict the search to exactly these vault-relative note paths (e.g. ["projects/a.md"]). Applied inside every retrieval branch, so results equal a search over a vault holding only these notes. An empty array matches nothing. Not set: whole vault.',
             },
             tag: {
               description:
