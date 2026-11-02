@@ -31,6 +31,7 @@ import {
   clearIndexFailures,
   commitIndexedNote,
   deleteNote,
+  getDbVersion,
   getNoteMeta,
   getStoredEmbeddingDim,
   hasIndexFailure,
@@ -89,6 +90,68 @@ export interface IndexResult {
   indexed: number;
   skipped: number;
   errors: Array<{ path: string; error: string }>;
+}
+
+export interface IndexEvent {
+  event: 'indexed' | 'removed';
+  paths: string[];
+  db_version: number;
+}
+
+const INDEX_EVENT_COALESCE_MS = 25;
+const indexEventListeners = new Set<(event: IndexEvent) => void>();
+const pendingIndexEvents = { indexed: new Set<string>(), removed: new Set<string>() };
+let indexEventTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Subscribe to committed index writes made by this process; returns the unsubscribe function. */
+export function onIndexEvent(listener: (event: IndexEvent) => void): () => void {
+  indexEventListeners.add(listener);
+  return () => {
+    indexEventListeners.delete(listener);
+    if (indexEventListeners.size === 0) {
+      if (indexEventTimer) clearTimeout(indexEventTimer);
+      indexEventTimer = undefined;
+      pendingIndexEvents.indexed.clear();
+      pendingIndexEvents.removed.clear();
+    }
+  };
+}
+
+function flushIndexEvents(): void {
+  indexEventTimer = undefined;
+  let dbVersion = 0;
+  try {
+    dbVersion = getDbVersion();
+  } catch {
+    // The database may be closing; the version is advisory.
+  }
+  for (const kind of ['removed', 'indexed'] as const) {
+    const paths = [...pendingIndexEvents[kind]].sort((a, b) => a.localeCompare(b));
+    pendingIndexEvents[kind].clear();
+    if (paths.length === 0) continue;
+    for (const listener of indexEventListeners) {
+      try {
+        listener({ event: kind, paths, db_version: dbVersion });
+      } catch {
+        // A faulty listener must not disturb indexing.
+      }
+    }
+  }
+}
+
+/** Record committed note writes; paths are coalesced into one event per kind per write burst. */
+function noteIndexChange(kind: 'indexed' | 'removed', paths: readonly string[]): void {
+  if (indexEventListeners.size === 0 || paths.length === 0) return;
+  const other = kind === 'indexed' ? 'removed' : 'indexed';
+  for (const notePath of paths) {
+    pendingIndexEvents[other].delete(notePath);
+    pendingIndexEvents[kind].add(notePath);
+  }
+  indexEventTimer ??= setTimeout(flushIndexEvents, INDEX_EVENT_COALESCE_MS);
+}
+
+function noteIndexPublished(published: 'indexed' | 'skipped', notePath: string): void {
+  if (published === 'indexed') noteIndexChange('indexed', [notePath]);
 }
 
 function assertIndexRun(run: IndexRunContext): void {
@@ -554,6 +617,7 @@ export async function indexFile(
         );
         if (!removed) continue;
         bumpIndexVersion();
+        noteIndexChange('removed', [prepared.path]);
         throw new Error(`ENOENT: note no longer exists, ${prepared.path}`);
       }
       if (prepared.kind === 'unchanged') {
@@ -603,6 +667,7 @@ export async function indexFile(
       );
       if (published === 'changed') continue;
       bumpIndexVersion();
+      noteIndexPublished(published, prepared.note.path);
       return published;
     }
     throw new Error(
@@ -704,17 +769,20 @@ export function cleanupStaleNotes(
 ): void {
   try {
     run.signal.throwIfAborted();
-    let deleted = cleanupIgnoredNotes(run.lease, config.ignorePatterns, policy.signature(), (p) =>
+    const deleted = cleanupIgnoredNotes(run.lease, config.ignorePatterns, policy.signature(), (p) =>
       policy.isIgnored(p),
-    ).length;
+    );
     if (fsPaths)
       for (const notePath of getExistingNotePathSet()) {
         if (!fsPaths.has(notePath)) {
           deleteNote(run.lease, notePath);
-          deleted++;
+          deleted.push(notePath);
         }
       }
-    if (deleted > 0) bumpIndexVersion();
+    if (deleted.length > 0) {
+      bumpIndexVersion();
+      noteIndexChange('removed', deleted);
+    }
     clearIndexFailures(run.lease, '', 'cleanup');
   } catch (error) {
     if (run.signal.aborted || error instanceof IndexLeaseLostError) throw error;
@@ -1292,6 +1360,7 @@ export function startWatcher(contextLength: number, run: IndexRunContext): Watch
                 }
                 deleteNote(run.lease, rel);
                 bumpIndexVersion();
+                noteIndexChange('removed', [rel]);
                 return true;
               }),
             );
