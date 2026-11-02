@@ -42,7 +42,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Done |
 | 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done (V09, V13, V17–V20) |
 | 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | In progress (V10 xong) |
-| 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14 | 2 | Pending |
+| 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14 | 2 | Done (chạy lại báo cáo ở bước kiểm cuối) |
 
 Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự chạy theo việc, ở bảng dưới.
 

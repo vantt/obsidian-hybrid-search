@@ -31,12 +31,17 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 
 ## Todo
 
-- [ ] V14 script review, probe đủ, skill hoàn thiện, báo cáo mẫu
+- [x] V14 script review, probe đủ, skill hoàn thiện, báo cáo mẫu
 
 ## Success Criteria
 
 - Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục của mẫu PRD 12.5.
 - Mọi bản vá có trong `series.toml` lúc chạy đều có kết quả probe.
+
+## Ghi chú sau V14
+
+- `review-upstream.mjs` dựng 4 cây (upstream và fork của hai tag), chạy mọi probe, eval upstream và `vi`, diff điểm chạm, tạo cặp chấm mù; 22 test xanh. Báo cáo mẫu `vantt/reviews/v0.17.2.md` (cặp `v0.17.1` → `v0.17.2`): upstream chỉ nâng phụ thuộc, 8 bản vá đều còn cần, khuyên nâng.
+- Lượt chạy mẫu dựng fork với `--skip-tests --skip-quality`, chưa có P07, và số `vi` (nDCG@5 0,813) thấp hơn gói đầy đủ (0,932). Lead chạy lại báo cáo ở bước kiểm cuối trên chuỗi đủ 9 bản vá.
 
 ## Risk
 
