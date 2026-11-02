@@ -4,9 +4,14 @@ import { fileURLToPath } from 'node:url';
 import { parseSeries, SeriesError } from '../lib/series.mjs';
 
 describe('parseSeries', () => {
-  it('accepts the shipped empty series', () => {
+  it('parses the shipped series and lists the planned order', () => {
     const text = readFileSync(fileURLToPath(new URL('../../patches/series.toml', import.meta.url)), 'utf8');
-    expect(parseSeries(text).patches).toEqual([]);
+    const ids = parseSeries(text).patches.map((p) => p.id);
+    // PRD 9.4 order; patches not shipped yet are absent but never reordered.
+    const planned = ['fork-identity', 'language-pack-api', 'db-path', 'vector-export', 'stdio-parity', 'unicode-inline-tags', 'block-anchors', 'restrict-paths', 'index-events'];
+    expect(ids.length).toBeGreaterThanOrEqual(8);
+    expect(ids).toEqual(planned.filter((id) => ids.includes(id)));
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('reads strings, multi-line arrays, booleans and comments', () => {

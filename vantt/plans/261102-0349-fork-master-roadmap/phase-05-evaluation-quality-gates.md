@@ -42,7 +42,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 ## Todo
 
 - [x] V10 bộ eval tiếng Việt và baseline upstream
-- [ ] V12 bất biến và cổng chất lượng nối vào catchup
+- [x] V12 bất biến và cổng chất lượng nối vào catchup
 - [ ] V15 eval trên vault thật (chờ user gán nhãn)
 - [ ] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
 
@@ -59,6 +59,8 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - `npm run eval` bị npm từ chối khi bản npm khác `devEngines` (12.2.0); dùng `node vantt/eval/vi/run-eval.mjs`.
 - User chốt 2026-11-02: làm corpus khó hơn, giữ ngưỡng PRD. Fixture `v0.10.0`: baseline upstream Hit@5 `vi-unaccented` 0,27, `vi-dd` 0,40; khi phục hồi dấu đạt 1,00. SQLite `unicode61` đã tự bỏ dấu cho âm tiết một dấu; chỉ âm tiết hai dấu (`ế`, `ữ`) và `đ` là hỏng (đúng như PRD 3.5; corpus cũ chưa tái hiện được vì tiêu đề lộ câu tìm).
 - `run-eval.mjs` có `--ohs <dir>`, `--lang-pack`, `--lang-options`, `--compare`, `--accented-sanity`. Runner dựng vault dưới `os.tmpdir()`: đặt `TMPDIR` ra ngoài `/tmp`.
+- V12 xong: `catchup.mjs --with-lang vi --json` trên `v0.17.2`, đủ 9 bản vá, T1–T5 SUCCESS. T4: 58/58 câu trùng upstream khi không gói. T5: mọi mục tiêu G3, G8 bắt buộc và đạt (nDCG@5 `vi` 0,666 → 0,932; `vi-unaccented` Hit@5 0,267 → 1,0; `vi-dd` 0,4 → 1,0; `vi-snippet` 15/15; eval upstream có gói 0,735 không tụt). Baseline `obsidian-help` linux-x64 đã ghi. `evergreen-notes` tuỳ chọn (crawl web quá lâu), lý do ở plan con V12.
+- Sau release đầu, ghi baseline có gói bằng `quality-gate.mjs --with-lang vi --write-baseline` qua PR.
 
 ## Risk
 
