@@ -206,7 +206,11 @@ jobs:
             runner: ubuntu-latest
           - platform: darwin-x64
             runner: macos-15-intel
+          # Control, not gating: how far an unpinned build on another OS and architecture drifts from Linux.
+          - platform: darwin-arm64
+            runner: macos-14
     runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.platform == 'darwin-arm64' }}
     timeout-minutes: 90
     defaults:
       run:
@@ -267,15 +271,26 @@ jobs:
           path: parity
       - name: Compare darwin-x64 with linux-x64
         run: |
-          set -o pipefail
+          rc=0
           node tools/vantt/scripts/bundle-parity.mjs compare --ref parity/parity-linux-x64 \
-            --other parity/parity-darwin-x64 --tolerance 0.01 --out parity/report.json | tee parity/report.md
+            --other parity/parity-darwin-x64 --tolerance 0.01 --out parity/report.json > parity/report.md || rc=$?
+          cat parity/report.md
           cat parity/report.md >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - name: Control, darwin-arm64 against linux-x64 (informational)
+        if: always()
+        run: |
+          { echo; echo "Control, darwin-arm64 (locked dependencies) against linux-x64:"; echo; } >> "$GITHUB_STEP_SUMMARY"
+          node tools/vantt/scripts/bundle-parity.mjs compare --ref parity/parity-linux-x64 \
+            --other parity/parity-darwin-arm64 --tolerance 0.01 --out parity/control.json | tee parity/control.md >> "$GITHUB_STEP_SUMMARY" || true
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: parity-report
-          path: parity/report.*
+          path: |
+            parity/report.*
+            parity/control.*
 
   # Only bundles that passed the smoke test on every platform are published.
   release:
