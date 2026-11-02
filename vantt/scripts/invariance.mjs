@@ -11,13 +11,14 @@
 // Run from the repo root of the release branch (built, dependencies installed). Exit 0 =
 // identical on every query; 1 = a query differs; 2 = the test could not run. With --json
 // one JSON object goes to stdout (catchup stores it); progress goes to stderr.
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { compareResults } from './lib/compare.mjs';
 import { datasetDir, evalEnv, goldenFile, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
 import { git } from './lib/proc.mjs';
+import { sameRunFile } from './lib/same-run.mjs';
 import { createUpstreamTree } from './lib/trees.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -107,6 +108,11 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   } finally {
     if (upstream && !opts.keep) upstream.cleanup();
     if (!opts.keep) rmSync(scratch, { recursive: true, force: true });
+  }
+  if (report.status !== 'error') {
+    // Same-run record of pristine upstream, reused by quality-gate.mjs (see lib/same-run.mjs).
+    mkdirSync(path.dirname(sameRunFile(root)), { recursive: true });
+    writeFileSync(sameRunFile(root), `${JSON.stringify(report)}\n`);
   }
   if (opts.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   else log(`invariance: ${report.status} (${report.identical}/${report.queries})`);

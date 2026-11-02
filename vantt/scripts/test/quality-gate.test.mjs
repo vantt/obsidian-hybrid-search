@@ -24,19 +24,30 @@ const byId = (checks) => Object.fromEntries(checks.map((c) => [c.id, c]));
 
 describe('upstreamChecks', () => {
   const cfg = CONFIG.upstream;
+  const reference = res({ ndcg_5: 0.8 });
   const baseline = { version: '1.0.0', exact: true, result: res({ ndcg_5: 0.8 }) };
-  it('passes within the Linux tolerance and fails beyond it (both directions)', () => {
-    const run = (v) => upstreamChecks(cfg, { platform: 'linux-x64', result: res({ ndcg_5: v }), baseline })[0].status;
-    expect(run(0.804)).toBe('pass');
-    expect(run(0.796)).toBe('pass');
-    expect(run(0.7939)).toBe('fail');
-    expect(run(0.8061)).toBe('fail');
+  const run = (v, extra = {}) => upstreamChecks(cfg, { platform: 'linux-x64', result: res({ ndcg_5: v }), reference, baseline, ...extra });
+  it('compares with upstream measured in the same run, tolerance both directions', () => {
+    const status = (v) => byId(run(v))['upstream-no-pack'].status;
+    expect(status(0.804)).toBe('pass');
+    expect(status(0.796)).toBe('pass');
+    expect(status(0.7939)).toBe('fail');
+    expect(status(0.8061)).toBe('fail');
   });
-  it('is pending without a baseline', () => {
-    expect(upstreamChecks(cfg, { platform: 'linux-x64', result: res({}), baseline: null })[0].status).toBe('pending');
+  it('a stored baseline from another CPU only warns, never fails', () => {
+    // The CI runner scored 0.728 where the dev machine recorded 0.735: same tree, different CPU.
+    const c = byId(upstreamChecks(cfg, { platform: 'linux-x64', result: res({ ndcg_5: 0.728 }), reference: res({ ndcg_5: 0.728 }), baseline: { version: '0.17.2', result: res({ ndcg_5: 0.735 }) } }));
+    expect(c['upstream-no-pack'].status).toBe('pass');
+    expect(c['upstream-baseline-drift'].status).toBe('warn');
+    expect(verdict(Object.values(c)).status).toBe('pass');
+  });
+  it('is pending without a same-run reference, and skips drift without a baseline', () => {
+    const c = byId(run(0.8, { reference: null, baseline: null }));
+    expect(c['upstream-no-pack'].status).toBe('pending');
+    expect(c['upstream-baseline-drift'].status).toBe('skipped');
   });
   it('uses the quality.ts floors on darwin-arm64', () => {
-    const c = upstreamChecks(cfg, { platform: 'darwin-arm64', result: res({}), baseline, floors: { ok: false, message: 'below floor' } })[0];
+    const c = byId(run(0.8, { platform: 'darwin-arm64', floors: { ok: false, message: 'below floor' } }))['upstream-no-pack'];
     expect(c).toMatchObject({ status: 'fail', detail: 'below floor' });
   });
 });
@@ -115,20 +126,26 @@ describe('viChecks', () => {
     expect(ok['t-snippet'].status).toBe('pass');
   });
 
-  it('compares with the previous release when there is one, else with upstream', () => {
+  it('the previous release baseline is informational unless enforced', () => {
     const prev = { version: '1.0.0-vantt.1', result: res({ ndcg_5: 0.9 }, cats({ 'vi-accented': { ndcg_5: 1 } })) };
-    const c = byId(viChecks(CONFIG.vi, { result: res({ ndcg_5: 0.8 }, cats()), upstream, prevRelease: prev }));
-    expect(c['vi-regression-overall'].status).toBe('fail');
-    expect(c['vi-regression-overall'].detail).toMatch(/previous release 1.0.0-vantt.1/);
+    const input = { result: res({ ndcg_5: 0.8 }, cats()), upstream, prevRelease: prev };
+    const soft = byId(viChecks(PENDING, input));
+    expect(soft['vi-previous-release-overall']).toMatchObject({ status: 'warn' });
+    expect(soft['vi-previous-release-overall'].detail).toMatch(/previous release 1.0.0-vantt.1/);
+    expect(verdict(Object.values(soft)).status).toBe('pass');
+    const hard = byId(viChecks({ ...PENDING, previous_release_enforced: true }, input));
+    expect(hard['vi-previous-release-overall'].status).toBe('fail');
   });
 
-  it('fails when the upstream baseline was recorded for another golden set', () => {
-    const c = viChecks(CONFIG.vi, { result: res({}, cats(), 99), upstream });
-    expect(c).toHaveLength(1);
-    expect(c[0]).toMatchObject({ id: 'vi-baseline-valid', status: 'fail' });
+  it('a stored upstream baseline from another machine is a drift note, also when it is stale', () => {
+    const stored = { version: '0.9.0', result: res({ ndcg_5: 0.6 }, cats(), 99) };
+    const c = byId(viChecks(PENDING, { result: res({}, cats()), upstream, stored }));
+    expect(c['vi-baseline-drift']).toMatchObject({ status: 'warn' });
+    expect(c['vi-baseline-drift'].detail).toMatch(/99 queries/);
+    expect(c['vi-regression-categories'].status).toBe('pass');
   });
 
-  it('is pending without any baseline', () => {
+  it('is pending without a same-run upstream measurement', () => {
     expect(byId(viChecks(CONFIG.vi, { result: res({}, cats()), upstream: null }))['vi-regression'].status).toBe('pending');
   });
 
@@ -137,7 +154,7 @@ describe('viChecks', () => {
     for (const id of ['G3-unaccented', 'G3-dd', 'G3-tone-precision', 'G8-telex', 'G8-typo', 'G8-synonym', 'G8-abbr', 'G8-alias', 'G8-compound', 'G8-snippet'])
       expect(ids).toContain(id);
     expect(CONFIG.vi.targets.filter((t) => t.status !== 'enforced')).toEqual([]);
-    expect(CONFIG.upstream).toMatchObject({ linux_tolerance: 0.005, pack_regression_max: 0.01 });
+    expect(CONFIG.upstream).toMatchObject({ tolerance: 0.005, pack_regression_max: 0.01 });
     expect(CONFIG.vi).toMatchObject({ category_regression_max: 0.02 });
   });
 });
@@ -181,7 +198,8 @@ import path from 'node:path';
 const a = process.argv;
 const get = (f) => a[a.indexOf(f) + 1];
 const pack = process.env.OHS_LANGUAGE_PACK;
-const score = pack ? Number(fs.readFileSync(path.join(pack, 'score.txt'), 'utf8')) : 0.8;
+const worse = fs.existsSync('eval/behavior.txt');
+const score = pack ? Number(fs.readFileSync(path.join(pack, 'score.txt'), 'utf8')) : worse ? 0.7 : 0.8;
 const golden = JSON.parse(fs.readFileSync(get('--golden-set'), 'utf8'));
 console.log('SECRET-QUERY SECRET-PATH ' + get('--vault'));
 console.error('SECRET-STDERR');
@@ -189,6 +207,7 @@ const per_query = golden.map((q) => ({ id: q.id, query: 'SECRET-QUERY', category
 fs.writeFileSync(get('--output'), JSON.stringify({ meta: { golden_set_size: golden.length }, summary: { ndcg_5: score, hit_5: score }, by_category: { c: { ndcg_5: score, hit_5: score } }, per_query }));
 `;
 
+let STUB_SHA;
 describe('quality-gate CLI on a stub eval', () => {
   let dir;
   let root;
@@ -198,6 +217,7 @@ describe('quality-gate CLI on a stub eval', () => {
     mkdirSync(root);
     git(root, 'init', '-q', '-b', 'master');
     write(root, 'package.json', '{"name":"x","version":"1.0.0-vantt.1"}\n');
+    write(root, 'package-lock.json', '{"name":"x","version":"1.0.0-vantt.1","packages":{"":{"version":"1.0.0-vantt.1"}}}\n');
     write(root, 'eval/evaluate.ts', EVALUATE);
     write(root, 'fixtures/obsidian-help/golden-set.json', JSON.stringify([{ id: 'q1', category: 'c' }, { id: 'q2', category: 'c' }]));
     write(root, 'fixtures/obsidian-help/dataset/a.md', '# a\n');
@@ -206,6 +226,7 @@ describe('quality-gate CLI on a stub eval', () => {
     symlinkSync(REAL_MODULES, path.join(root, 'node_modules'), 'dir');
     git(root, 'add', '-A');
     git(root, 'commit', '-q', '-m', 'init');
+    STUB_SHA = git(root, 'rev-parse', 'HEAD');
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
@@ -225,24 +246,42 @@ describe('quality-gate CLI on a stub eval', () => {
     }
     return { code, out: out.join(''), err: err.join(''), report: out.length ? JSON.parse(out.join('')) : null };
   }
-  const std = ['--target-ref', 'v1.0.0', '--target-sha', 'abc', '--branch', 'vantt/v1.0.0', '--json'];
+  const std = () => ['--target-ref', 'v1.0.0', '--target-sha', STUB_SHA, '--branch', 'vantt/v1.0.0', '--json'];
   const baselineDir = () => path.join(root, 'vantt/eval/baselines', platformKey());
 
-  it('no pack: runs the upstream eval, pending without a baseline', async () => {
-    const { code, report } = await run(std);
+  it('no pack: measures pristine upstream itself and compares with it; no stored baseline needed', async () => {
+    const { code, report } = await run(std());
     expect(code).toBe(0);
-    expect(report).toMatchObject({ gate: 'pass', pending: ['upstream-no-pack'] });
+    expect(byId(report.checks)['upstream-no-pack'].detail).toMatch(/same run and machine/);
+    expect(report.pending).toEqual([]);
   });
 
-  it('no pack: fails when the result drifts from the recorded baseline', async () => {
-    writeBaseline(baselineDir(), { version: '1.0.0', set: 'obsidian-help', result: { summary: { ndcg_5: 0.9 } } });
-    const { code, report } = await run(std);
+  it('no pack: reuses the invariance measurement of this commit instead of measuring again', async () => {
+    const head = git(root, 'rev-parse', 'HEAD');
+    write(root, 'vantt/.work/invariance-last.json', JSON.stringify({ target: { sha: STUB_SHA }, fork_head: head, k: 10, corpora: { 'obsidian-help': { summary_upstream: { ndcg_5: 0.8 } } } }));
+    const { code, err } = await run(std());
+    expect(code).toBe(0);
+    expect(err).toMatch(/reusing the invariance run/);
+  });
+
+  it('no pack: fails when the fork scores differently from pristine upstream on this machine', async () => {
+    write(root, 'eval/behavior.txt', 'worse');
+    git(root, 'add', '-A');
+    git(root, 'commit', '-q', '-m', 'fork changes search');
+    const { code, report } = await run(std());
     expect(code).toBe(1);
     expect(report.failed).toEqual(['upstream-no-pack']);
   });
 
+  it('no pack: a stored baseline recorded on another machine only warns', async () => {
+    writeBaseline(baselineDir(), { version: '1.0.0', set: 'obsidian-help', result: { summary: { ndcg_5: 0.9 } } });
+    const { code, report } = await run(std());
+    expect(code).toBe(0);
+    expect(report.warnings).toEqual(['upstream-baseline-drift']);
+  });
+
   it('with a pack: passes within 0.01 and pends the language without a golden set', async () => {
-    const { code, report } = await run([...std, '--with-lang', 'de']);
+    const { code, report } = await run([...std(), '--with-lang', 'de']);
     expect(code).toBe(0);
     expect(byId(report.checks)['upstream-with-pack'].status).toBe('pass');
     expect(report.pending).toContain('de-eval');
@@ -250,23 +289,23 @@ describe('quality-gate CLI on a stub eval', () => {
 
   it('with a pack: fails when it loses more than 0.01 on the upstream eval', async () => {
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.7');
-    const { code, report } = await run([...std, '--with-lang', 'de']);
+    const { code, report } = await run([...std(), '--with-lang', 'de']);
     expect(code).toBe(1);
     expect(report.failed).toEqual(['upstream-with-pack']);
   });
 
   it('a missing pack is pending, not a failure', async () => {
-    const { code, report } = await run([...std, '--with-lang', 'zz']);
+    const { code, report } = await run([...std(), '--with-lang', 'zz']);
     expect(code).toBe(0);
     expect(report.pending).toContain('pack-zz');
   });
 
   it('--strict fails on pending; --write-baseline records and never replaces', async () => {
-    expect((await run([...std, '--strict'])).code).toBe(1);
-    const first = await run([...std, '--write-baseline']);
+    expect((await run([...std(), '--strict', '--with-lang', 'zz'])).code).toBe(1);
+    const first = await run([...std(), '--write-baseline']);
     expect(first.report.baselines_written).toHaveLength(1);
     expect(existsSync(path.join(baselineDir(), '1.0.0.obsidian-help.json'))).toBe(true);
-    const second = await run([...std, '--write-baseline']);
+    const second = await run([...std(), '--write-baseline']);
     expect(second.code).toBe(2);
     expect(second.report.error).toMatch(/reviewed PR/);
   });

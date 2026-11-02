@@ -1,7 +1,7 @@
 // Invariance test (PRD 11.4) on a throw-away repo whose "eval" is a stub: the upstream
 // commit and the fork commit are compared through the real worktree + eval plumbing.
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -74,6 +74,10 @@ describe('invariance.mjs', () => {
     expect(code).toBe(0);
     expect(report).toMatchObject({ status: 'pass', queries: 2, identical: 2, upstream_deps: 'shared' });
     expect(existsSync(path.join(root, 'vantt/.work/invariance'))).toBe(false);
+    // Left for quality-gate.mjs, which compares the fork with this same-run upstream measurement.
+    const record = JSON.parse(readFileSync(path.join(root, 'vantt/.work/invariance-last.json'), 'utf8'));
+    expect(record).toMatchObject({ target: { sha: upstream }, k: 10 });
+    expect(record.corpora['obsidian-help'].summary_upstream).toEqual({ ndcg_5: 1 });
     expect(git(root, 'worktree', 'list').split('\n')).toHaveLength(1);
   });
 

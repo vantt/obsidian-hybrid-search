@@ -1,6 +1,6 @@
 // Gate rules of PRD 11.6 as pure functions over eval results, testable without running an
 // eval. A check is {id, status, detail, ...}; status is pass | fail | pending (reported,
-// never fails) | skipped.
+// never fails) | warn (informational drift, never fails) | skipped.
 const EPS = 1e-9;
 const r3 = (x) => Math.round(x * 1000) / 1000;
 const check = (id, status, detail, extra = {}) => ({ id, status, detail, ...extra });
@@ -38,29 +38,44 @@ export function regressionChecks(idPrefix, { result, ref, refLabel, metric, cate
   ];
 }
 
-/** Upstream eval without a pack (PRD 11.6, first row). `floors` = {ok, message} from eval/quality.ts (macOS ARM only). */
-export function upstreamChecks(cfg, { platform, result, baseline, floors }) {
+/**
+ * Stored baselines were measured on another machine, and quantised ONNX gives different
+ * scores per CPU, so they are a drift report (status `warn`, never a failure). The pass or
+ * fail comes from a measurement of pristine upstream made in the same run on the same
+ * machine (`reference`). On macOS ARM upstream's own floors (eval/quality.ts) decide.
+ */
+const driftCheck = (id, cfg, now, baseline, label) =>
+  baseline
+    ? check(
+        id,
+        Math.abs(now - baseline.result.summary[cfg.metric]) > cfg.tolerance + EPS ? 'warn' : 'pass',
+        `informational: ${cfg.metric} ${baseline.result.summary[cfg.metric]} (stored ${label} ${baseline.version}, recorded on another machine) vs ${now} measured here`,
+        { value: now, baseline: baseline.result.summary[cfg.metric], baseline_version: baseline.version },
+      )
+    : check(id, 'skipped', `no stored ${label} baseline for this platform`);
+
+/** Upstream eval without a pack (PRD 11.6, first row). `reference` = pristine upstream measured in this run. */
+export function upstreamChecks(cfg, { platform, result, reference, baseline, floors }) {
   const m = cfg.metric;
   const now = result.summary[m];
+  const checks = [];
   if (platform === 'darwin-arm64' && floors) {
-    return [check('upstream-no-pack', floors.ok ? 'pass' : 'fail', floors.message, { value: now })];
+    checks.push(check('upstream-no-pack', floors.ok ? 'pass' : 'fail', floors.message, { value: now }));
+  } else if (!reference) {
+    checks.push(check('upstream-no-pack', 'pending', 'pristine upstream was not measured in this run', { value: now }));
+  } else {
+    const then = reference.summary[m];
+    checks.push(
+      check(
+        'upstream-no-pack',
+        Math.abs(now - then) > cfg.tolerance + EPS ? 'fail' : 'pass',
+        `${m} ${then} (pristine upstream, same run and machine) -> ${now} (fork, no pack), tolerance ${cfg.tolerance}`,
+        { value: now, upstream: then },
+      ),
+    );
   }
-  if (!baseline) {
-    return [
-      check('upstream-no-pack', 'pending', `no ${cfg.corpus} baseline for ${platform}; record one with --write-baseline`, {
-        value: now,
-      }),
-    ];
-  }
-  const then = baseline.result.summary[m];
-  return [
-    check(
-      'upstream-no-pack',
-      Math.abs(now - then) > cfg.linux_tolerance + EPS ? 'fail' : 'pass',
-      `${m} ${then} (baseline ${baseline.version}${baseline.exact ? '' : ', nearest older'}) -> ${now}, tolerance ${cfg.linux_tolerance}`,
-      { value: now, baseline: then, baseline_version: baseline.version },
-    ),
-  ];
+  checks.push(driftCheck('upstream-baseline-drift', cfg, now, baseline, cfg.corpus));
+  return checks;
 }
 
 /** Upstream eval with a pack may lose at most `pack_regression_max` (PRD 11.6, second row). */
@@ -114,31 +129,54 @@ function targetCheck(t, { result, upstream }) {
 }
 
 /**
- * Checks of the vi eval with a pack. `prevRelease` = baseline of the previous release with
- * that pack, `upstream` = upstream (no pack) baseline of the same corpus; both
- * {version, result} or null. Without a previous release the upstream baseline is the reference.
+ * Checks of the vi eval with a pack.
+ *   upstream     no-pack eval of the same tree measured in this run, {version, result}: reference for
+ *                the regression rules and for the "over upstream" targets
+ *   stored       stored upstream baseline of the corpus (another machine): drift report only
+ *   prevRelease  stored baseline of the previous release with the pack: reported, and enforced only
+ *                when cfg.previous_release_enforced (scores differ per CPU)
  */
-export function viChecks(cfg, { result, upstream, prevRelease }) {
-  if (upstream && upstream.result.meta?.golden_set_size !== result.meta?.golden_set_size) {
-    return [
-      check(
-        'vi-baseline-valid',
-        'fail',
-        `upstream baseline ${upstream.version} has ${upstream.result.meta?.golden_set_size} queries but the eval ran ${result.meta?.golden_set_size}: record a new baseline (reviewed PR)`,
-      ),
-    ];
-  }
-  const ref = prevRelease ?? upstream;
-  const checks = ref
+export function viChecks(cfg, { result, upstream, stored, prevRelease }) {
+  const checks = upstream
     ? regressionChecks('vi-regression', {
         result,
-        ref: ref.result,
-        refLabel: prevRelease ? `previous release ${prevRelease.version}` : `upstream ${upstream.version}`,
+        ref: upstream.result,
+        refLabel: `upstream ${upstream.version}`,
         metric: cfg.metric,
         categoryMax: cfg.category_regression_max,
         overallMax: cfg.overall_regression_max,
       })
-    : [check('vi-regression', 'pending', 'no baseline for the vi corpus on this platform; record one with --write-baseline')];
+    : [check('vi-regression', 'pending', 'upstream was not measured on the vi corpus in this run')];
+  if (prevRelease) {
+    for (const c of regressionChecks('vi-previous-release', {
+      result,
+      ref: prevRelease.result,
+      refLabel: `previous release ${prevRelease.version}`,
+      metric: cfg.metric,
+      categoryMax: cfg.category_regression_max,
+      overallMax: cfg.overall_regression_max,
+    }))
+      checks.push(cfg.previous_release_enforced || c.status !== 'fail' ? c : { ...c, status: 'warn', detail: `informational: ${c.detail}` });
+  }
+  if (stored && upstream) {
+    const sizes = [stored.result.meta?.golden_set_size, upstream.result.meta?.golden_set_size];
+    const worst = Math.max(
+      Math.abs(stored.result.summary[cfg.metric] - upstream.result.summary[cfg.metric]),
+      ...Object.keys(stored.result.by_category ?? {}).map((c) =>
+        Math.abs((metricOf(stored.result, c, cfg.metric) ?? 0) - (metricOf(upstream.result, c, cfg.metric) ?? 0)),
+      ),
+    );
+    const stale = sizes[0] !== sizes[1];
+    checks.push(
+      check(
+        'vi-baseline-drift',
+        stale || worst > cfg.category_regression_max + EPS ? 'warn' : 'pass',
+        stale
+          ? `informational: stored baseline ${stored.version} has ${sizes[0]} queries, the eval ran ${sizes[1]}: record a new baseline`
+          : `informational: largest ${cfg.metric} difference to the stored baseline ${stored.version} (another machine) is ${r3(worst)}`,
+      ),
+    );
+  }
   for (const t of cfg.targets) checks.push(targetCheck(t, { result, upstream: upstream?.result }));
   return checks;
 }

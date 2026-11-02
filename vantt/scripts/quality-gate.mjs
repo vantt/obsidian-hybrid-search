@@ -27,6 +27,7 @@ import { evalEnv, goldenFile, platformKey, prepareDataset, runEvaluate } from '.
 import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from './lib/gates.mjs';
 import { ensureNpm } from './lib/npm.mjs';
 import { git, sh } from './lib/proc.mjs';
+import { sameRunUpstream } from './lib/same-run.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const log = (m) => process.stderr.write(`${m}\n`);
@@ -93,14 +94,15 @@ function qualityFloors(root, result, scratch) {
 /** The vi corpus eval of a pack through vantt/eval/vi/run-eval.mjs. */
 function runViEval(root, lang, dir, config, scratch, k, otf) {
   mkdirSync(scratch, { recursive: true });
-  const out = path.join(scratch, `vi-${lang}.json`);
-  const options = config.pack_options?.[lang];
+  // lang null: the same tree without a pack.
+  const out = path.join(scratch, `vi-${lang ?? 'nopack'}.json`);
+  const options = lang ? config.pack_options?.[lang] : null;
   const res = spawnSync(
     process.execPath,
     [
       path.join(root, 'vantt', 'eval', 'vi', 'run-eval.mjs'),
       '--ohs', root,
-      '--lang-pack', dir,
+      ...(lang ? ['--lang-pack', dir] : []),
       ...(options ? ['--lang-options', JSON.stringify(options)] : []),
       '--k', String(k),
       '--out', out,
@@ -110,7 +112,7 @@ function runViEval(root, lang, dir, config, scratch, k, otf) {
     // which npm 12 (the version upstream pins) only does with allow-git.
     { cwd: root, env: evalEnv({ TMPDIR: scratch, npm_config_allow_git: 'all' }), stdio: ['ignore', 2, 2] },
   );
-  if (res.status !== 0) throw new Error(`vi eval with pack ${lang} failed (exit ${res.status})`);
+  if (res.status !== 0) throw new Error(`vi eval ${lang ? `with pack ${lang}` : 'without a pack'} failed (exit ${res.status})`);
   return JSON.parse(readFileSync(out, 'utf8'));
 }
 
@@ -184,7 +186,9 @@ async function standard(opts, root, config) {
     const noPack = runEvaluate({ ...common, tree: root, env: evalEnv() });
     const floors = platform === 'darwin-arm64' ? qualityFloors(root, noPack, scratch) : null;
     const upBaseline = pickBaseline(baselines, { set: corpus, version: baseVersion(pkgVersion) });
-    checks.push(...upstreamChecks(config.upstream, { platform, result: noPack, baseline: upBaseline, floors }));
+    // Pristine upstream measured in this run, on this machine (T4's result when it is current).
+    const reference = platform === 'darwin-arm64' ? null : sameRunUpstream({ root, sha: opts['target-sha'], corpus, k, scratch, log });
+    checks.push(...upstreamChecks(config.upstream, { platform, result: noPack, reference, baseline: upBaseline, floors }));
     if (opts['write-baseline'])
       written.push(writeBaseline(baselines, { version: baseVersion(pkgVersion), set: corpus, result: noPack, force: opts.force }));
 
@@ -205,22 +209,25 @@ async function standard(opts, root, config) {
         checks.push({ id: `${lang}-eval`, status: 'pending', detail: `no ${lang} golden set yet` });
         continue;
       }
+      log('vi eval without a pack (same-run reference)');
+      const viNoPack = { version: 'same run', result: runViEval(root, null, null, config, scratch, k, opts.otf) };
       log(`vi eval with pack ${lang}`);
       const vi = runViEval(root, lang, dir, config, scratch, k, opts.otf);
       const snippetOk = runSnippetCheck(root, lang, dir, config, scratch, opts.otf);
       if (snippetOk !== undefined) vi.by_category['vi-snippet'] = { ...vi.by_category['vi-snippet'], snippet_ok: snippetOk };
-      const upstream = pickBaseline(baselines, { set: config.vi.set, version: baseVersion(pkgVersion) });
+      const stored = pickBaseline(baselines, { set: config.vi.set, version: baseVersion(pkgVersion) });
       const prevRelease = pickBaseline(baselines, { set: config.vi.set, lang, version: pkgVersion });
-      checks.push(...viChecks(config.vi, { result: vi, upstream, prevRelease }));
+      checks.push(...viChecks(config.vi, { result: vi, upstream: viNoPack, stored, prevRelease }));
       entry.vi = {
         summary: vi.summary,
         by_category: Object.fromEntries(
           Object.entries(vi.by_category).map(([c, m]) => [
             c,
-            { ndcg_5: m.ndcg_5, hit_5: m.hit_5, mrr: m.mrr, snippet_ok: m.snippet_ok ?? null, upstream_ndcg_5: upstream?.result.by_category?.[c]?.ndcg_5 ?? null },
+            { ndcg_5: m.ndcg_5, hit_5: m.hit_5, mrr: m.mrr, snippet_ok: m.snippet_ok ?? null, upstream_ndcg_5: viNoPack.result.by_category?.[c]?.ndcg_5 ?? null },
           ]),
         ),
-        upstream_baseline: upstream?.version ?? null,
+        reference: 'no-pack eval of the same tree, same run',
+        stored_baseline: stored?.version ?? null,
         previous_release_baseline: prevRelease?.version ?? null,
       };
       if (opts['write-baseline'])
@@ -235,6 +242,7 @@ async function standard(opts, root, config) {
   }
   if (written.length) report.baselines_written = written.map((f) => path.relative(root, f));
   report.pending = checks.filter((c) => c.status === 'pending').map((c) => c.id);
+  report.warnings = checks.filter((c) => c.status === 'warn').map((c) => c.id);
   if (report.gate !== 'error') {
     const v = verdict(checks, opts.strict);
     report.gate = v.status;
