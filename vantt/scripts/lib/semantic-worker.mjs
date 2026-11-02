@@ -38,6 +38,14 @@ function separation(pos, neg) {
   };
 }
 
+// A pack that fails to load makes OHS run as plain upstream; refuse to measure that by accident.
+async function openIndex() {
+  await indexService.openIndexDatabase();
+  const status = (await load('src/language/loader.ts')).languagePackStatus();
+  if (process.env.OHS_LANGUAGE_PACK && !status?.loaded) throw new Error(`language pack not loaded: ${JSON.stringify(status)}`);
+  return status;
+}
+
 const embedder = await load('src/inference/embedder.ts');
 const indexService = await load('src/indexing/index-service.ts');
 const db = await load('src/storage/db.ts');
@@ -58,7 +66,7 @@ if (step === 'load') {
 }
 
 if (step === 'index') {
-  await indexService.openIndexDatabase();
+  const pack = await openIndex();
   const svc = indexService.createIndexService();
   const t0 = now();
   const r = await svc.reindex({ force: true }).finally(() => svc.close());
@@ -67,7 +75,7 @@ if (step === 'index') {
   const count = (t) => d.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n;
   emit({
     index_ms: Math.round(ms), indexed: r.indexed, errors: r.errors.length, notes: count('notes'), chunks: count('chunks'),
-    dim: db.getStoredEmbeddingDim(), rss_mb: rssMb(),
+    dim: db.getStoredEmbeddingDim(), rss_mb: rssMb(), pack: pack?.signature ?? null,
   });
 }
 
@@ -89,7 +97,7 @@ if (step === 'bench') {
 
 if (step === 'pairs') {
   // (a) lexicon synonym phrases vs cross-group phrases; (b) query vs stored note vectors for the paraphrase categories.
-  await indexService.openIndexDatabase();
+  await openIndex();
   if (db.getStoredEmbeddingDim() !== null) embedder.primeEmbeddingDim(db.getStoredEmbeddingDim());
   const lex = fs.readFileSync(path.join(process.env.OBSIDIAN_VAULT_PATH, '_ohs/lexicon.md'), 'utf8');
   const section = lex.split(/^## /m).find((s) => s.startsWith('Đồng nghĩa')) ?? '';
@@ -131,7 +139,7 @@ if (step === 'pairs') {
 if (step === 'query') {
   const { search } = await load('src/search/searcher.ts');
   const { buildPerQueryResult } = await load('eval/evaluate.ts');
-  await indexService.openIndexDatabase();
+  const pack = await openIndex();
   const stored = db.getStoredEmbeddingDim();
   if (stored !== null) embedder.primeEmbeddingDim(stored);
   const golden = JSON.parse(fs.readFileSync(params.golden, 'utf8'));
@@ -153,7 +161,7 @@ if (step === 'query') {
       per_query: rows.map((r, i) => ({ id: r.id, category: r.category, ndcg_5: r.ndcg_5, hit_5: r.hit_5, hit_1: r.hit_1, mrr: r.mrr, ms: round(times[i], 1) })),
     });
   }
-  emit({ passes });
+  emit({ passes, pack: pack?.signature ?? null });
 }
 
 throw new Error(`unknown step: ${step}`);
