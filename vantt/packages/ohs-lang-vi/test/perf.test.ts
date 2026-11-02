@@ -9,7 +9,12 @@ import { bundledCompounds } from '../src/segment.js';
 import { fakeContextFromCounts } from './fake-context.js';
 
 const ONE_MB = 1024 * 1024;
-const PROJECT_BUDGET_MS = 200;
+/**
+ * Budgets are the PRD targets for a user's machine. Shared CI runners are slower,
+ * so CI may scale every budget with OHS_PERF_FACTOR (default 1, never below 1).
+ */
+const PERF_FACTOR = Math.max(1, Number(process.env.OHS_PERF_FACTOR ?? '1') || 1);
+const PROJECT_BUDGET_MS = 200 * PERF_FACTOR;
 
 /** Best of a few runs: perf asserts should catch regressions, not scheduler noise. */
 function bestOf(runs: number, fn: () => unknown): number {
@@ -99,7 +104,7 @@ describe('performance: 1 MB projection (M1 pieces of project())', () => {
     const small = nfc.slice(0, 10_000);
     const ms = bestOf(5, () => fold(normalize(small)));
     console.log(`fold(normalize()) 10 KB: ${ms.toFixed(2)} ms`);
-    expect(ms).toBeLessThan(5);
+    expect(ms).toBeLessThan(5 * PERF_FACTOR);
   });
 });
 
@@ -118,7 +123,7 @@ describe('performance: primitives that analyzeQuery (V13) will call', () => {
       for (const w of sentence.split(' ')) isPossibleFoldedSyllable(w);
     });
     console.log(`12-syllable primitives cold: ${ms.toFixed(2)} ms`);
-    expect(ms).toBeLessThan(20);
+    expect(ms).toBeLessThan(20 * PERF_FACTOR);
   });
 
   it('12-syllable query warm: well under 1 ms', () => {
@@ -133,7 +138,7 @@ describe('performance: primitives that analyzeQuery (V13) will call', () => {
     });
     const perQuery = ms / 100;
     console.log(`12-syllable primitives warm: ${perQuery.toFixed(4)} ms per query`);
-    expect(perQuery).toBeLessThan(1);
+    expect(perQuery).toBeLessThan(1 * PERF_FACTOR);
   });
 
   it('parseSyllable on 50,000 distinct words is fast (uncached path), under 500 ms', () => {
@@ -143,7 +148,7 @@ describe('performance: primitives that analyzeQuery (V13) will call', () => {
       for (const w of sample) parseSyllable(w);
     });
     console.log(`parseSyllable x${sample.length} distinct: ${ms.toFixed(1)} ms`);
-    expect(ms).toBeLessThan(500);
+    expect(ms).toBeLessThan(500 * PERF_FACTOR);
   });
 });
 
@@ -231,7 +236,7 @@ describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () =
     const pack = createPack();
     const ms = once(() => pack.analyzeQuery(query, ctx));
     console.log(`analyzeQuery 12 syllables cold: ${ms.toFixed(2)} ms`);
-    expect(ms).toBeLessThan(20);
+    expect(ms).toBeLessThan(20 * PERF_FACTOR);
   });
 
   it('after an index change (caches reset) under 20 ms, warm well below', () => {
@@ -241,7 +246,7 @@ describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () =
     const afterWrite = once(() => pack.analyzeQuery(query, ctx));
     const warm = bestOf(5, () => pack.analyzeQuery(query, ctx));
     console.log(`analyzeQuery 12 syllables after write: ${afterWrite.toFixed(2)} ms, warm: ${warm.toFixed(3)} ms`);
-    expect(afterWrite).toBeLessThan(20);
-    expect(warm).toBeLessThan(5);
+    expect(afterWrite).toBeLessThan(20 * PERF_FACTOR);
+    expect(warm).toBeLessThan(5 * PERF_FACTOR);
   });
 });

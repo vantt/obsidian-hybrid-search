@@ -42,7 +42,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 
 - [x] V00 cài đặt fork xong
 - [x] V01 catchup và skill `ohs-catchup`
-- [ ] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
+- [x] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
 - [ ] V03 gói dựng sẵn 4 nền và smoke
 
 ## Success Criteria
@@ -59,6 +59,12 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 - Build chạy `npm ci --ignore-scripts && npm rebuild` vì `prepare` của upstream từ chối khi `.claude/skills` là thư mục thật.
 - Móc T4/T5 cho V12: `node vantt/scripts/{invariance,quality-gate}.mjs --target-ref <ref> --target-sha <sha> --branch <branch> --json [--with-lang <id>]`, mô tả ở đầu `vantt/scripts/lib/tiers.mjs`.
 - Đồng bộ `master` với upstream (PRD 6.6) đã viết trong skill `ohs-catchup`; V02 tự động hoá.
+
+## Ghi chú sau V02
+
+- `vantt-catchup.yml` (cron 6 giờ, chạy tay có `dry_run`, `force_rebuild`, `simulate_failure`; đồng bộ `master` với upstream; mở một issue khi hỏng, lần sau chỉ bình luận) và `vantt-pr-check.yml` đã chạy; Issues đã bật; actionlint sạch. Chỉ còn `vantt-*` active.
+- Lần hỏng cố ý mở đúng issue #1 (đã đóng). Issue #2 là lỗi thật: test tốc độ của gói vi đo 318 ms trên runner. Lead thêm `OHS_PERF_FACTOR` (mặc định 1, CI đặt 3): chỉ tiêu 200 ms của PRD vẫn kiểm trên máy thật.
+- Chưa có secret `VANTT_PUSH_TOKEN`; đẩy đồng bộ `master` sẽ bị chặn nếu upstream đổi workflow. Đường đẩy nhánh phát hành và tag trên CI chưa chạy thử thật.
 
 ## Risk
 

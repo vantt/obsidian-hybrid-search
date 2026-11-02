@@ -46,6 +46,9 @@ concurrency:
 
 env:
   HUSKY: '0'
+  # Shared runners are slower than a user's machine; scales the Vietnamese pack
+  # timing budgets (PRD targets stay enforced locally with factor 1).
+  OHS_PERF_FACTOR: '3'
   GH_TOKEN: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
   # gh would otherwise resolve this fork's parent (flowing-abyss) as the default repo.
   GH_REPO: ${{ github.repository }}
