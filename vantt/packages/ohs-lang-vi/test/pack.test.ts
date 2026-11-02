@@ -255,7 +255,37 @@ describe('analyzeQuery', () => {
   it('restoreForEmbedding sends the restored text (punctuation kept) when confident', () => {
     const a = analyze('Giu chan, khach hang!', { restoreForEmbedding: true, embedMinConfidence: 0 });
     expect(a.embedQuery).toBe('giữ chân, khách hàng!');
-    expect(analyze('giu chan khach hang').embedQuery).toBeUndefined();
+    expect(analyze('giu chan khach hang', { restoreForEmbedding: false }).embedQuery).toBeUndefined();
+    expect(analyze('giu chan khach hang').embedQuery).toBe('giữ chân khách hàng'); // on by default
+  });
+
+  describe('restoreForEmbedding on a partially accented query', () => {
+    const NAMES = [
+      'Phố cổ Hội An mùa đèn lồng',
+      'Hội An có nhiều quán ăn ngon',
+      'Ăn sáng ở phố cổ',
+      'Em ăn cơm với ăn canh',
+      'Ăn vặt ở chợ đêm',
+      'Ẩn dụ trong thơ',
+    ];
+    const on = { restoreForEmbedding: true, embedMinConfidence: 0 };
+
+    it('keeps typed words and does not restore the proper name "An"', () => {
+      const a = analyze('Hội An', on, NAMES);
+      expect((a.debug as { accented: boolean }).accented).toBe(false); // exactly 50% is not "more than 50%"
+      expect(a.embedQuery).toBeUndefined();
+    });
+
+    it('restores unaccented words the vault never writes bare, keeps typed accents', () => {
+      const a = analyze('Hội an nhieu quan', on, NAMES);
+      expect((a.debug as { accented: boolean }).accented).toBe(false);
+      expect(a.embedQuery).toBe('hội an nhiều quán');
+    });
+
+    it('does not restore a word below the confidence threshold', () => {
+      const a = analyze('Hội an nhieu quan', { restoreForEmbedding: true, embedMinConfidence: 1 }, NAMES);
+      expect(a.embedQuery).toBeUndefined();
+    });
   });
 });
 

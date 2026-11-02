@@ -16,6 +16,10 @@ on:
       tag:
         description: 'Fork release tag, e.g. v0.17.2-vantt.1'
         required: true
+      reuse_run:
+        description: 'Run id of an earlier vantt-bundles run: skip the build and re-test/re-release its bundle artifacts'
+        required: false
+        default: ''
   workflow_call:
     inputs:
       tag:
@@ -60,6 +64,7 @@ jobs:
 
   bundle:
     needs: prepare
+    if: ${{ inputs.reuse_run == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -68,7 +73,8 @@ jobs:
             runner: windows-latest
           - platform: darwin-arm64
             runner: macos-14
-          # macos-13 (Intel) is retired by GitHub; macos-15-intel is the remaining native Intel runner.
+          # onnxruntime-node 1.30 ships no darwin/x64 binding; bundle.mjs substitutes the newest version
+          # that has one (PLATFORM_PINS) for this platform only, and the parity job checks the result.
           - platform: darwin-x64
             runner: macos-15-intel
           - platform: linux-x64
@@ -113,7 +119,8 @@ jobs:
           if-no-files-found: error
 
   smoke:
-    needs: bundle
+    needs: [prepare, bundle, pin-effect]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.bundle.result == 'success' || needs.bundle.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
@@ -143,6 +150,16 @@ jobs:
         with:
           name: bundle-${{ matrix.platform }}
           path: ${{ runner.temp }}/in
+          run-id: ${{ inputs.reuse_run || github.run_id }}
+          github-token: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
+
+      # A reused run keeps its artifacts in that run; the release job reads this run's.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ inputs.reuse_run != '' }}
+        with:
+          name: bundle-${{ matrix.platform }}
+          path: ${{ runner.temp }}/in/*
+          if-no-files-found: error
 
       # The model is downloaded on the first run (about 120 MB) and cached after.
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -176,9 +193,142 @@ jobs:
           path: ${{ runner.temp }}/smoke.json
           if-no-files-found: ignore
 
-  # Only bundles that passed the smoke test on every platform are published.
-  release:
-    needs: [bundle, smoke]
+      # Each platform publishes its own asset: a failure on one platform never holds back the others.
+      # darwin-x64 also needs the pin-effect check (job pin-effect) to have passed.
+      - name: Upload this platform's bundle to the release
+        if: ${{ success() && (matrix.platform != 'darwin-x64' || needs.pin-effect.outputs.ok == 'true') }}
+        run: gh release upload "$TAG" "$RUNNER_TEMP"/in/ohs-* --clobber
+
+      - name: Fail visibly when the pin-effect check did not pass
+        if: ${{ success() && matrix.platform == 'darwin-x64' && needs.pin-effect.outputs.ok != 'true' }}
+        run: |
+          echo "::error::darwin-x64 was not published: onnxruntime-node 1.23.2 changes nDCG@5 by more than 0.01 against 1.30.0 on the same machine (see job pin-effect)"
+          exit 1
+
+  # Isolates the effect of the pinned onnxruntime-node on search quality: one machine, one run, the same
+  # release tree, locked 1.30.0 against the 1.23.2 that the darwin-x64 bundle ships. Every category of the
+  # obsidian-help (no pack) and vi-search (pack on) evals must agree within 0.01 nDCG@5 (PRD 8.4, step 6).
+  # The job always succeeds; the verdict is the `ok` output, used to publish or hold back darwin-x64.
+  pin-effect:
+    needs: prepare
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      ok: ${{ steps.compare.outputs.ok }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          path: tree
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          path: tools
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: tree/.node-version
+          cache: ''
+      - name: Pin npm 12.2.0
+        run: npm install -g npm@12.2.0 && npm --version
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/huggingface
+          key: vantt-hf-model-${{ runner.os }}-e5-small-v1
+      - name: Install the release tree and build the Vietnamese pack
+        run: |
+          set -euo pipefail
+          (cd tree && npm ci --ignore-scripts --no-audit --no-fund && npm rebuild)
+          cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
+          (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
+          # npm 12 refuses git dependencies (EALLOWGIT), so the corpus generator (no dependencies of its own) is cloned.
+          git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
+      # The locked run goes first: the pinned run replaces files in the tree's dependencies.
+      - name: Eval with the locked dependencies
+        run: |
+          node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/locked" \
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+      - name: Eval with the darwin-x64 pins
+        run: |
+          node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/pinned" --pins-of darwin-x64 \
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+      - name: Compare
+        id: compare
+        run: |
+          rc=0
+          node tools/vantt/scripts/bundle-parity.mjs compare --ref "$RUNNER_TEMP/locked" --other "$RUNNER_TEMP/pinned" \
+            --tolerance 0.01 --out "$RUNNER_TEMP/pin-effect.json" > "$RUNNER_TEMP/pin-effect.md" || rc=$?
+          cat "$RUNNER_TEMP/pin-effect.md"
+          { echo "### Pin effect (locked onnxruntime-node against the darwin-x64 pins, same machine)"; echo; cat "$RUNNER_TEMP/pin-effect.md"; } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$rc" = 0 ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: pin-effect
+          path: |
+            ${{ runner.temp }}/pin-effect.md
+            ${{ runner.temp }}/pin-effect.json
+          if-no-files-found: ignore
+
+  # The Intel bundle's own eval numbers on its own platform: its per-platform baseline (informational).
+  eval-darwin-x64:
+    needs: prepare
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    runs-on: macos-15-intel
+    continue-on-error: true
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          path: tree
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          path: tools
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: tree/.node-version
+          cache: ''
+      - name: Pin npm 12.2.0
+        run: npm install -g npm@12.2.0 && npm --version
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/huggingface
+          key: vantt-hf-model-${{ runner.os }}-e5-small-v1
+      - name: Install the release tree and build the Vietnamese pack
+        run: |
+          set -euo pipefail
+          (cd tree && npm ci --ignore-scripts --no-audit --no-fund && npm rebuild)
+          cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
+          (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
+          git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
+      - name: Eval with the bundle's dependencies
+        run: |
+          node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/eval" \
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: eval-darwin-x64
+          path: |
+            ${{ runner.temp }}/eval/obsidian-help.json
+            ${{ runner.temp }}/eval/vi.json
+          if-no-files-found: error
+
+  # Release notes, and `latest` once every platform has published.
+  finalize:
+    needs: [prepare, smoke, pin-effect]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -190,15 +340,17 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: artifacts
-
-      - name: Upload to the release and mark it latest
+      - name: Write notes
+        env:
+          ALL_OK: ${{ needs.smoke.result == 'success' && needs.pin-effect.outputs.ok == 'true' }}
+          PIN_OK: ${{ needs.pin-effect.outputs.ok == 'true' }}
         run: |
           set -euo pipefail
           find artifacts -type f | sort
-          shopt -s nullglob
-          files=(artifacts/bundle-*/ohs-*)
-          [ "${#files[@]}" -ge 12 ] || { echo "::error::expected 4 bundles with .sha256 and .bundle.json, found ${#files[@]} files"; exit 1; }
-          node tools/vantt/scripts/bundle-notes.mjs --dir artifacts --tag "$TAG" > notes.md
+          args=(--dir artifacts --tag "$TAG")
+          [ -f artifacts/pin-effect/pin-effect.md ] && args+=(--parity artifacts/pin-effect/pin-effect.md)
+          [ "$PIN_OK" = true ] || args+=(--hold darwin-x64)
+          node tools/vantt/scripts/bundle-notes.mjs "${args[@]}" > notes.md
           cat notes.md >> "$GITHUB_STEP_SUMMARY"
-          gh release upload "$TAG" "${files[@]}" --clobber
-          gh release edit "$TAG" --notes-file notes.md --latest
+          if [ "$ALL_OK" = true ]; then gh release edit "$TAG" --notes-file notes.md --latest
+          else gh release edit "$TAG" --notes-file notes.md; fi

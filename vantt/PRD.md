@@ -40,7 +40,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 ### 2.1. Bắt buộc
 | ID | Mục tiêu | Đo bằng |
 |---|---|---|
-| G1 | Fork luôn có bản dựng trên tag upstream mới nhất trong vòng 24 giờ sau khi upstream phát hành, nếu không có xung đột | Thời điểm release `vX.Y.Z-vantt.N` so với tag upstream |
+| G1 | Fork có bản dựng trên tag upstream mà user chỉ định: theo upstream là việc thủ công, chỉ khi user yêu cầu (user chốt 2026-11-02, bỏ mục tiêu 24 giờ tự động) | Thời điểm release `vX.Y.Z-vantt.N` so với lúc user yêu cầu |
 | G2 | Không có gói ngôn ngữ thì kết quả tìm giống hệt upstream cùng tag | Bài kiểm "bất biến" (mục 11.4): `top_paths` từng câu trong eval của upstream trùng khớp 100% |
 | G3 | Có gói tiếng Việt thì tìm tiếng Việt tốt lên rõ, nhất là gõ không dấu | Bộ eval tiếng Việt (mục 11.5): ngưỡng ở mục 11.6 |
 | G4 | Khách không phải chạy `npm`; cài từ gói dựng sẵn cho Windows x64, macOS ARM, macOS Intel, Linux x64 | Smoke test trên runner sạch của từng nền (mục 8.4) |
@@ -59,10 +59,10 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
 | N11 | Gợi ý ngay khi đang viết: ô cạnh bài nháp hiện đoạn gần nghĩa với đoạn đang gõ, bấm để chèn link | Giúp bước "express" ngay trên note, không phải đi tìm | dự án (plugin), cần P04 | đã bàn | Sau V08 | L13 |
 | N12 | OCR ảnh và PDF đính kèm vào phần chữ để tìm | Note toàn ảnh hết là nguồn nhiễu, tìm được chữ trong ảnh | fork hoặc dự án | đã bàn (đã nói chưa nên) | Khi note toàn ảnh thành phàn nàn thật; dự án riêng | L14 |
-| N13 | Phương án dự phòng: viết lại phần tìm bằng Rust | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
+| N13 | Phương án dự phòng: viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node; không liên quan tới việc chuyển script Python của dự án (V16) | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
 | N20 | Sổ câu tìm cục bộ (chỉ trên máy user, tắt mặc định): câu không ra kết quả, câu không mở note nào | Nguồn câu thật để bổ sung golden set | dự án | ý mới | Sau V15 | L22 |
 | N21 | LLM đề xuất câu hỏi và đáp án ứng viên từ vault để user duyệt nhanh khi làm golden set riêng | Giảm 2 giờ gán nhãn của user | dự án hoặc script fork | ý mới | Cùng V15 | L23 |
-| N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 |
+| N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới, user xác nhận làm ngay 2026-11-02 | Sau V14 | L24 | 
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 
@@ -307,7 +307,9 @@ Nhờ đó lần catchup sau áp sạch trên upstream mới.
 ```
 
 ### 6.6. Đồng bộ `master` của fork với upstream
-`master` của fork theo `upstream/master` và chỉ theo nhánh này; các nhánh khác của upstream không được theo dõi hay chép sang fork (để có mã mới nhất khi thử `--ref upstream/master`). Workflow catchup làm thêm một bước: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
+Fork không tự theo upstream (user chốt 2026-11-02: "không cần follow upstream; khi upstream có thay đổi thì anh sẽ kêu"). Tag upstream đang dùng được ghim trong `vantt/upstream.pin`. Chỉ khi user yêu cầu mới chuyển sang tag mới và đồng bộ `master`: chạy `workflow_dispatch` của `vantt-catchup.yml` với `target_ref` và `sync_master`, hoặc chạy catchup cục bộ, rồi cập nhật `vantt/upstream.pin` bằng commit hoặc PR.
+
+Khi được yêu cầu, `master` theo `upstream/master` và chỉ theo nhánh này; các nhánh khác của upstream không được theo dõi hay chép sang fork. Bước đồng bộ: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
 
 ---
 
@@ -320,9 +322,9 @@ Nhờ đó lần catchup sau áp sạch trên upstream mới.
 - Cache: `~/.npm`, `~/.cache/huggingface` (model). Không cache `node_modules` giữa các nền.
 
 ### 7.2. `vantt-catchup.yml`
-- Kích hoạt: `schedule` mỗi 6 giờ; `workflow_dispatch` với `target_ref`, `force_rebuild`; `push` lên `master` chạm `vantt/patches/**` hoặc `vantt/packages/**` (dựng lại bản cho tag hiện tại).
+- Kích hoạt (không có `schedule`, user chốt 2026-11-02): `workflow_dispatch` với `target_ref` (trống = tag trong `vantt/upstream.pin`), `sync_master` (mặc định tắt; bật mới đồng bộ `master` với upstream, mục 6.6), `force_rebuild`, `dry_run`, `simulate_failure`; `push` lên `master` chạm `vantt/patches/**` hoặc `vantt/packages/**` dựng lại bản cho tag ghim trong `vantt/upstream.pin`, không bao giờ lấy tag mới hơn và không đồng bộ `master`.
 - Runner: `ubuntu-latest`.
-- Bước: checkout (`fetch-depth: 0`) → Node → `node vantt/scripts/catchup.mjs --with-lang vi --json --report catchup.json` (bỏ `--ref` thì lấy tag mới nhất; nhánh đã xanh thì thoát sớm) → nếu xanh: gỡ workflow upstream (catchup đã làm), đẩy nhánh `vantt/<tag>` (`--force-with-lease`), tạo tag `v<version>` trên nhánh, gọi `vantt-bundles.yml` (`workflow_call`) → nếu có bản vá được xuất lại: mở PR vào `master` → tải `catchup.json` lên artifact.
+- Bước: checkout (`fetch-depth: 0`) → Node → `node vantt/scripts/catchup.mjs --with-lang vi --json --report catchup.json` (CI luôn truyền `--ref` là tag ghim hoặc `target_ref`; nhánh đã xanh thì thoát sớm) → nếu xanh: gỡ workflow upstream (catchup đã làm), đẩy nhánh `vantt/<tag>` (`--force-with-lease`), tạo tag `v<version>` trên nhánh, gọi `vantt-bundles.yml` (`workflow_call`) → nếu có bản vá được xuất lại: mở PR vào `master` → tải `catchup.json` lên artifact.
 - Hỏng: mở issue `[catchup] <tag>: <status>` kèm bản vá lỗi, file xung đột, link run; không mở trùng nếu đã có issue mở cùng tag. Gắn nhãn `catchup`.
 - Cổng chất lượng trên Linux chỉ so với baseline Linux (mục 11.6), vì số của ONNX lượng tử khác theo kiến trúc.
 
@@ -366,7 +368,9 @@ ohs-<version>-<platform>/
 └── LICENSES/             LICENSE của OHS (MIT), Node, và các phụ thuộc (tạo bằng license-checker hoặc tương đương lúc build)
 ```
 - Không đóng model vào gói (model tải lần đầu, khoảng 120 MB cho e5-small, vào thư mục cache của bộ cài). Tuỳ chọn sau: gói "đầy đủ" có model để cài không mạng (L07).
-- Thu gọn: bỏ `*.md`, test, bản đồ nguồn, header C trong `node_modules`; bỏ build của nền khác trong `onnxruntime-node` (ví dụ bỏ thư mục `linux`, `darwin` trên gói Windows). Ghi kích thước trước và sau vào release notes. Mục tiêu: dưới 250 MB giải nén (đo thật trên Windows trước đây: 529 MB `node_modules`).
+- Thu gọn: bỏ `*.md`, test, bản đồ nguồn, header C trong `node_modules`; bỏ build của nền khác trong `onnxruntime-node` (ví dụ bỏ thư mục `linux`, `darwin` trên gói Windows). Ghi kích thước trước và sau vào release notes. Kích thước đo thật (bản `0.17.2-vantt.1`, sau thu gọn): Windows 279 MB, macOS ARM 326 MB, Linux 296 MB giải nén; khoảng 100 MB sau khi nén (trước thu gọn 632 đến 943 MB). Riêng Node chiếm 85 đến 125 MB. Chỉ tiêu 250 MB cũ được thay bằng các số đo này: user chấp nhận 2026-11-02.
+- Thu gọn thêm, chỉ xoá file: provider CUDA và TensorRT của `onnxruntime-node` (cần driver NVIDIA và CUDA mà gói không có; OHS chạy CPU hoặc DirectML) và các file `.wasm` của `onnxruntime-web` (đường lùi cho trình duyệt; Node dùng `onnxruntime-node`).
+- macOS Intel (`darwin-x64`): `onnxruntime-node` 1.30.0 (bản `@huggingface/transformers` 4.3.1 ghim đúng) không có binding `darwin/x64`; bản mới nhất có binding là 1.23.2 (kiểm trong tarball npm của 1.21.1 đến 1.30.0). `bundle.mjs` chỉ cho nền này thay `onnxruntime-node` và `onnxruntime-common` bằng 1.23.2 lúc đóng gói (`PLATFORM_PINS`), không đụng mã hay lockfile của upstream; bản thay ghi trong `MANIFEST.json`, `.bundle.json` và release notes. Smoke xanh trên `macos-15-intel`. Kiểm tương đương chất lượng (mục 8.4, bước 6) chưa đạt: xem mục đó.
 - Không đổi mã của phụ thuộc. Thu gọn chỉ xoá file.
 
 ### 8.3. Ký mã
@@ -379,6 +383,7 @@ ohs-<version>-<platform>/
 3. `bin/ohs status`, `bin/ohs reindex` với model thật (cache model của CI), `bin/ohs search "giu chan khach" --json` khi bật gói tiếng Việt và khi tắt; kiểm số kết quả và note đứng đầu theo file kỳ vọng.
 4. `bin/ohs-mcp` bắt tay MCP qua stdio (gửi `initialize`, `tools/list`), có tool `search`.
 5. Đo: thời gian index, dung lượng gói, dung lượng DB; ghi vào artifact.
+6. Tương đương chất lượng của bản thay phụ thuộc (hiện chỉ `darwin-x64`): chạy eval upstream `obsidian-help` (không gói) và eval `vi-search` (có `ohs-lang-vi`) trên `macos-15-intel` với cây phát hành đã thay `onnxruntime-node`, so với cùng cây trên Linux dùng phụ thuộc theo lockfile; nDCG@5 của mọi hạng mục phải lệch không quá 0,01 (`vantt/scripts/bundle-parity.mjs`). Lần đo đầu (2026-11-02) lệch quá: `obsidian-help` multilingual +0,063, conceptual +0,029, `vi-unaccented` -0,024, `vi-semantic` +0,013. Đối chứng không thay phụ thuộc (macOS ARM, `onnxruntime-node` 1.30.0, theo lockfile) cũng lệch so với Linux: multilingual +0,063, conceptual +0,034, `vi-dd` -0,033, `vi-snippet` -0,012. Vậy ngưỡng 0,01 giữa hai nền khác nhau không đạt được ngay cả khi không thay gì, và bước này cần user chốt lại tiêu chí (ví dụ so với đối chứng ARM, hoặc nới ngưỡng) trước khi `darwin-x64` được phát hành.
 
 ---
 
@@ -871,12 +876,12 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
 | L08 | Đã chốt, làm sau | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
 | L09 | Có thì tốt (N07) | Phát hành `ohs-lang-vi` công khai, README cho cộng đồng OHS | Gói ổn định qua 3 bản upstream | 0,5 |
-| L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án | Sau V08 | 2–3 |
+| L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02); phía fork đã đủ: P04 (`read`, `neighbors`, `search` qua stdio), P07 (sự kiện index), P06 (giới hạn tập note) | Sau V08 | 2–3 |
 | L14 | Có thì tốt (N12) | OCR ảnh và PDF | Khi thành phàn nàn thật | 5+ (dự án riêng) |
-| L15 | Có thì tốt (N13) | Viết lại phần tìm bằng Rust | Khi điều kiện ở N13 xảy ra | 10–14 |
-| L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy | Sau V15 | 1 |
+| L15 | Có thì tốt (N13) | Viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node (không phải chuyển script Python của dự án, việc đó ở V16) | Khi điều kiện ở N13 xảy ra | 10–14 |
+| L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02): plugin ghi câu tìm và việc có mở note từ kết quả; xuất câu thành golden set riêng rồi chạy `quality-gate.mjs --private` của fork. Fork không thêm gì | Sau V15 | 1 |
 | L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
-| L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
+| L24 | Bắt buộc (user xác nhận 2026-11-02, trước là N22 có thì tốt) | Biểu đồ chỉ số qua các bản trong báo cáo review; làm trong goal hiện tại cùng phase 6 | Sau V14 | 0,5 |
 | L25 | Có thì tốt (N23), ý mới | Gói Windows ARM64 | Khi có khách dùng | 0,5 |
 | L26 | Có thì tốt (N24), ý mới | Nâng cấp tại chỗ và quay lui (phía bộ cài dự án) | Khi phát hành bản thứ hai cho khách | 1 |
 

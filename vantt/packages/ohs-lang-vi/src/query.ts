@@ -175,12 +175,29 @@ export function isVietnameseQuery(state: QueryState, options: PackOptions): bool
   return state.restoration?.tokens.some((t) => t.variants.some((v) => v.form !== t.norm)) ?? false;
 }
 
-/** Rewrite the normalized query with the best restoration, keeping punctuation. */
-function restoredText(state: QueryState): string {
-  const best = state.restoration?.candidates[0]?.forms;
-  if (!best) return state.normalized;
+/**
+ * Rewrite the normalized query with the best restoration, keeping punctuation.
+ * Words typed with diacritics are never changed. In a partially accented query
+ * ("Hội An") an unaccented word is restored only when the vault never writes it
+ * that way (a name such as "An" stays) and its accented form is confident.
+ */
+function restoredText(state: QueryState, options: PackOptions): string {
+  const restoration = state.restoration;
+  const best = restoration?.candidates[0]?.forms;
+  if (!restoration || !best) return state.normalized;
+  const partial = state.tokens.some((t) => t.marked);
   let index = 0;
-  return state.normalized.replace(TOKEN_RE, (token) => best[index++] ?? token);
+  return state.normalized.replace(TOKEN_RE, (token) => {
+    const i = index++;
+    const info = restoration.tokens[i];
+    const form = best[i];
+    if (!info || form === undefined || info.pinned) return token;
+    if (partial) {
+      const marginal = info.variants.find((v) => v.form === form)?.marginal ?? 0;
+      if (info.literalDocs > 0 || marginal < options.embedMinConfidence) return token;
+    }
+    return form;
+  });
 }
 
 export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pick<QueryEnvironment, 'project'>): QueryAnalysis {
@@ -206,8 +223,10 @@ export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pic
   // (V19) exact-alias keys for the alias views: the fold projection of the query
   if (env) analysis.aliasKeys = aliasKeys(state.query, env.project);
   const restoredAny = restoration?.tokens.some((t) => t.restored) ?? false;
-  if (options.restoreForEmbedding && restoredAny && confidence >= options.embedMinConfidence)
-    analysis.embedQuery = restoredText(state);
+  if (options.restoreForEmbedding && restoredAny && confidence >= options.embedMinConfidence) {
+    const text = restoredText(state, options);
+    if (text !== state.normalized) analysis.embedQuery = text;
+  }
   const targets =
     !state.accented && restoration && restoration.candidates.length > 0
       ? restoration.candidates.slice(0, MAX_RESCORE_TARGETS).map((c) => ({ words: c.forms, p: c.probability }))

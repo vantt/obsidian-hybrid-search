@@ -13,7 +13,7 @@
 // 6. imports the bundled Vietnamese pack with the bundled Node
 // Exit code 0 only when every check passed. A JSON report with timings and sizes goes to --out.
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -154,7 +154,8 @@ async function main() {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(base, { recursive: true });
   const t0 = Date.now();
-  const ex = spawnSync(TAR, ['-xf', archive, '-C', base], { stdio: 'inherit' });
+  // bsdtar on Windows reads argv in the ANSI code page and cannot chdir to "Thư mục thử"; the working directory is passed wide.
+  const ex = spawnSync(TAR, ['-xf', archive], { cwd: base, stdio: 'inherit' });
   check('extract archive', ex.status === 0);
   report.extract_ms = Date.now() - t0;
   const roots = readdirSync(base).filter((d) => d.startsWith('ohs-'));
@@ -177,9 +178,25 @@ async function main() {
 
   // vault copy next to the bundle, also with a Vietnamese name
   const vault = path.join(work, 'Kho thử');
-  cpSync(vaultSrc, vault, { recursive: true });
+  // File by file: the destination has a non-ASCII name and a whole-tree cpSync left no directory on the Windows runner.
+  mkdirSync(vault, { recursive: true });
+  for (const f of walk(vaultSrc)) {
+    mkdirSync(path.dirname(path.join(vault, f)), { recursive: true });
+    copyFileSync(path.join(vaultSrc, f), path.join(vault, f));
+  }
   const env = { ...process.env, OBSIDIAN_VAULT_PATH: vault, NODE_OPTIONS: '' };
   delete env.NODE_OPTIONS;
+
+  // The embedder loads this optional dependency lazily and hides the cause when it fails.
+  const nodeBin = path.join(root, 'node', isWin ? 'node.exe' : path.join('bin', 'node'));
+  const hf = spawnSync(nodeBin, ['--input-type=module', '-e', "await import('@huggingface/transformers'); process.stdout.write('ok')"], { cwd: path.join(root, 'app'), encoding: 'utf8', env });
+  check('bundled @huggingface/transformers imports', hf.status === 0, hf.status === 0 ? '' : `${hf.stderr}`.split('\n').slice(0, 6).join(' | '));
+
+  // The vault path must reach the bundled Node intact (Vietnamese letters, spaces), with and without a shell in between.
+  const probe = "const p = process.env.OBSIDIAN_VAULT_PATH; process.stdout.write(JSON.stringify({ p, dir: require('node:fs').statSync(p).isDirectory() }));";
+  const direct = spawnSync(nodeBin, ['-e', probe], { encoding: 'utf8', env });
+  check('vault directory exists for the smoke process', existsSync(vault), `${vault} entries=${existsSync(vault) ? readdirSync(vault).length : '-'}`);
+  check('vault path is a directory for the bundled Node', direct.status === 0 && direct.stdout.includes('"dir":true'), `${direct.stdout} ${String(direct.stderr).split('\n').filter((l) => /Error|ENOENT|errno|path/i.test(l)).join(' | ')} codepoints=${[...path.basename(vault)].map((c) => c.codePointAt(0).toString(16))}`);
 
   // 3. CLI through launchers
   const ver = await runOnce(root, 'ohs', ['--version'], env, 60_000);
@@ -239,7 +256,6 @@ async function main() {
   check('ohs-mcp tools/list has search', tools.includes('search'), tools.join(','));
 
   // 6. bundled language pack loads under the bundled Node
-  const nodeBin = path.join(root, 'node', isWin ? 'node.exe' : path.join('bin', 'node'));
   if (manifest.lang_packs?.vi) {
     const entry = pathToFileURL(path.join(root, 'lang', 'ohs-lang-vi', 'build', 'index.js')).href;
     const code = `const m = await import(${JSON.stringify(entry)}); process.stdout.write(typeof m.fold === 'function' ? String(m.fold('Giữ chân khách')) : 'no-fold');`;

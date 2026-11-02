@@ -1,6 +1,6 @@
 ---
 name: ohs-catchup
-description: Build the vantt fork release branch `vantt/<tag>` from an upstream obsidian-hybrid-search tag with vantt/scripts/catchup.mjs, apply the patch series, resolve patch conflicts from the patch spec, and re-export fixed patches to master. Use when upstream publishes a tag, when CI catchup fails, when catchup exits 3 (conflict), or when asked "đuổi theo upstream", "dựng nhánh vantt/<tag>", "bản vá xung đột".
+description: Build the vantt fork release branch `vantt/<tag>` from an upstream obsidian-hybrid-search tag with vantt/scripts/catchup.mjs, apply the patch series, resolve patch conflicts from the patch spec, and re-export fixed patches to master. Use when the user asks to move to a new upstream tag, when CI catchup fails, when catchup exits 3 (conflict), or when asked "đuổi theo upstream", "dựng nhánh vantt/<tag>", "bản vá xung đột".
 ---
 
 # Catch up with upstream OHS
@@ -10,6 +10,7 @@ description: Build the vantt fork release branch `vantt/<tag>` from an upstream 
 Read first: `vantt/PRD.md` sections 4.3 (version), 6 (catchup), 9.1 (`series.toml`), 9.3 (spec template), 11.1 (test tiers).
 
 ## Rules
+- The fork does not follow upstream on its own (user decision 2026-11-02). The tag in use is pinned in `vantt/upstream.pin`; CI (push and default dispatch) always passes it as `--ref`, there is no schedule. Move to a newer upstream tag, or sync `master`, only when the user asks. Without `--ref`, `catchup.mjs` takes the newest stable upstream tag: pass `--ref "$(cat vantt/upstream.pin)"` for a routine rebuild.
 - Never `git push --tags`. The only tag ever pushed is a release tag `vX.Y.Z-vantt.N`, and only by the release workflow or when the human asks.
 - Never fetch or push other upstream branches. Catchup fetches `upstream master` plus tags and builds only tags reachable from `upstream/master`.
 - Commits on `master` touch only `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. OHS code changes only through patches.
@@ -18,12 +19,17 @@ Read first: `vantt/PRD.md` sections 4.3 (version), 6 (catchup), 9.1 (`series.tom
 - Upstream pins npm via `devEngines` (e.g. 12.2.0). Catchup installs that npm into `vantt/.work/tools/` and puts it first on `PATH` for build and tests; you do not need to change the global npm.
 - The build runs `npm ci --ignore-scripts && npm rebuild`: upstream's root `prepare` (agent-config symlinks into `.claude/`) refuses when `.claude/skills` is a real directory holding our `ohs-*` skills, and the release does not need it. Dependencies' install scripts (native modules) still run via `npm rebuild`.
 
+## Move to a new upstream tag (on the user's request)
+1. Dispatch `vantt-catchup` with `target_ref=<new tag>` and `sync_master=true` (use `dry_run=true` first to rehearse; a dry run neither pushes nor syncs), or run catchup locally with `--ref <new tag>`.
+2. Fix any conflict (Step 2); the green run pushes `vantt/<tag>` and tag `v<version>`.
+3. Set the new tag in `vantt/upstream.pin` and commit it to `master` by commit or PR (a `master` commit touching only `vantt/` passes `vantt-pr-check`).
+
 ## Step 1. Run
 Start on `master` (or any branch) with no uncommitted changes to tracked files. Untracked files are ignored and never copied onto the release branch: catchup copies only the tracked `vantt/` and `.claude/skills/ohs-*` files.
 
 ```bash
 node vantt/scripts/catchup.mjs --dry-run                 # target, branch, which patches apply / skip / conflict
-node vantt/scripts/catchup.mjs --with-lang vi --json     # newest stable tag on upstream/master
+node vantt/scripts/catchup.mjs --with-lang vi --json --ref "$(cat vantt/upstream.pin)"   # the pinned tag (without --ref: newest stable tag on upstream/master)
 node vantt/scripts/catchup.mjs --ref v0.17.2 --json      # a specific tag
 node vantt/scripts/catchup.mjs --ref upstream/master     # early test on upstream master -> vantt/upstream-master-<sha7>
 node vantt/scripts/catchup.mjs --ref v0.17.2 --clean     # rebuild even if the branch is already green
@@ -95,7 +101,7 @@ Catchup writes `version = "<tag>-vantt.<N>"` and `"vanttFork": true` into `packa
 `vantt/reports/catchup-<tag>.json` (also printed with `--json`, copied with `--report <file>`): `status`, `target_ref`, `target_sha`, `release_branch`, `branch_sha`, `version`, `series_sha256`, `patches_sha256`, `lang_packs`, `patches[]` (`APPLIED | SKIPPED_UPSTREAM_HAS_IT | CONFLICT`, commit, `resolved` after a hand fix), `capability`, `tests` (`upstream`, `patches`, `lang_<id>`, `invariance`), `quality`, `failed_patch`, `conflicted_files`, `reexported_patches`, `started_at`, `finished_at`. `vantt/reports/` is gitignored; add a released report with `git add -f`.
 
 ## Sync `master` with upstream (PRD 6.6)
-Catchup never touches `master`. The CI workflow (or you, when asked) does:
+Catchup never touches `master`. Only on the user's request does the CI workflow (dispatch with `sync_master`) or you do:
 ```bash
 git fetch upstream +refs/heads/master:refs/remotes/upstream/master
 git checkout master
