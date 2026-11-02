@@ -1,6 +1,7 @@
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { readVaultLocator } from '../storage/vault-locator.js';
+import { config } from '../runtime/config.js';
+import { isSameVaultPath, readVaultLocator } from '../storage/vault-locator.js';
 
 export function validateVaultPath(vaultPath: string | undefined): asserts vaultPath is string {
   if (vaultPath === undefined) {
@@ -31,18 +32,50 @@ function walkUpFind(name: string): string | undefined {
   }
 }
 
+const DEFAULT_DB_NAME = '.obsidian-hybrid-search.db';
+
+/** Read the vault a database file belongs to; undefined when it is missing, unreadable or unlabeled. */
+function readLocatorQuietly(dbFile: string): string | undefined {
+  try {
+    return readVaultLocator(dbFile) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Route the process to an index database outside the default location. The storage
+ * layer and the daemon it spawns read OBSIDIAN_DB_PATH, so setting it here makes
+ * every transport resolve the same file.
+ */
+function useExternalDatabase(dbFile: string, vaultPath: string): void {
+  if (path.resolve(dbFile) !== path.join(path.resolve(vaultPath), DEFAULT_DB_NAME)) {
+    process.env.OBSIDIAN_DB_PATH = path.resolve(dbFile);
+  }
+}
+
 /** Select the vault; defaults are restored later from its actual database connection. */
 export function discoverConfig(dbPathOpt?: string): void {
+  const configuredDb = config.dbPathOverride;
   const explicitVault = process.env.OBSIDIAN_VAULT_PATH;
   if (explicitVault !== undefined) {
     validateVaultPath(explicitVault);
+    // An explicit vault keeps its own database unless --db names an existing database
+    // that records this very vault. A database of another vault is never adopted.
+    if (dbPathOpt) {
+      const stored = readLocatorQuietly(dbPathOpt);
+      if (stored && isSameVaultPath(stored, explicitVault)) {
+        useExternalDatabase(dbPathOpt, explicitVault);
+      }
+    }
     return;
   }
 
   let dbFile: string | undefined = dbPathOpt;
-  if (!dbFile) {
-    const vaultDir = walkUpFind('.obsidian-hybrid-search.db');
-    if (vaultDir) dbFile = path.join(vaultDir, '.obsidian-hybrid-search.db');
+  if (!dbFile && configuredDb && existsSync(configuredDb)) dbFile = configuredDb;
+  if (!dbFile && !configuredDb) {
+    const vaultDir = walkUpFind(DEFAULT_DB_NAME);
+    if (vaultDir) dbFile = path.join(vaultDir, DEFAULT_DB_NAME);
   }
 
   if (!dbFile) {
@@ -58,7 +91,8 @@ export function discoverConfig(dbPathOpt?: string): void {
   }
 
   try {
-    // A locator supplies only the target vault, never its provider or ignore defaults.
+    // A locator supplies only the target vault, never its provider, ignore defaults or
+    // database location; OBSIDIAN_DB_PATH (already in the environment) names those.
     process.env.OBSIDIAN_VAULT_PATH = readVaultLocator(dbFile) || path.dirname(dbFile);
   } catch {
     // DB unreadable — let normal startup errors surface without inventing a target.
