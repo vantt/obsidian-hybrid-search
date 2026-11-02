@@ -36,7 +36,7 @@ Bản vá P01 thêm điểm cắm chung cho mọi ngôn ngữ vào lõi; lõi kh
 ## Todo
 
 - [x] V11 P01 `language-pack-api` và gói giả
-- [ ] V21 gói tiếng Đức `ohs-lang-de`
+- [x] V21 gói tiếng Đức `ohs-lang-de`
 
 ## Success Criteria
 
@@ -49,6 +49,8 @@ Bản vá P01 thêm điểm cắm chung cho mọi ngôn ngữ vào lõi; lõi kh
 - Hợp đồng thêm `QueryContext.dbVersion()` và quy tắc token nối (`U+2060`) cho từ ghép tiếng Đức; chữ ký gói lưu ở `settings.language_pack`, không gộp vào `content_policy`. Chi tiết trong `vantt/patches/0001-language-pack-api.spec.md`.
 - Điều kiện "bất biến của V12 xanh" kiểm lại khi V12 xong.
 - Diff `searcher.ts` khoảng 400 dòng: P03, P06 và các bản vá sau dựng trên P01.
+
+- V21 xong: `ohs-lang-de` chạy qua P01 không sửa lõi; eval tiếng Đức (39 câu, fulltext) nDCG@5 0,57 → 0,97, không hạng mục nào tụt. Không thấy lỗ hổng nào của P01.
 
 ## Risk
 
