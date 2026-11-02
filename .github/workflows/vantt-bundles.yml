@@ -211,7 +211,7 @@ jobs:
 
   # Effect of the pinned onnxruntime-node on search quality: one machine, one run, the same release tree, locked
   # 1.30.0 against the 1.23.2 that the darwin-x64 bundle ships (PRD 8.4, step 6). The numbers of quantised ONNX
-  # models depend on the runner's CPU, so the check only counts on the CPU class the accepted deltas were measured
+  # models depend on the runner's CPU, so the check only counts on the CPU class it was calibrated
   # on (AMD EPYC); another class retries on a fresh runner, up to three attempts.
   pe1:
     needs: prepare

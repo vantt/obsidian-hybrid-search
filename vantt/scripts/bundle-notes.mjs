@@ -34,6 +34,6 @@ for (const b of bundles) {
 const subs = bundles.filter((b) => b.substitutions && Object.keys(b.substitutions).length);
 for (const b of subs)
   lines.push('', `${b.platform}: dependencies replaced at bundling time (${Object.entries(b.substitutions).map(([n, v]) => `${n} ${v.from} -> ${v.to}`).join(', ')}); the release tree is unchanged.`);
-if (values.parity) lines.push('', 'Effect of the darwin-x64 dependency pins on search quality (same machine, locked against pinned, nDCG@5, tolerance 0.01):', '', readFileSync(path.resolve(values.parity), 'utf8').trim());
+if (values.parity) lines.push('', 'Effect of the darwin-x64 dependency pins on search quality (same machine, locked against pinned, nDCG@5; only regressions block):', '', readFileSync(path.resolve(values.parity), 'utf8').trim());
 lines.push('', 'Each bundle has a `.sha256` file (`<hex>  <name>`) and a `.bundle.json` with sizes. macOS bundles are not code-signed: remove the quarantine attribute after verifying the checksum (`xattr -dr com.apple.quarantine <dir>`).');
 process.stdout.write(lines.join('\n') + '\n');

@@ -2,7 +2,7 @@ name: vantt-pin-effect
 
 # One attempt of the pin-effect check (PRD 8.4, step 6), called by vantt-bundles.yml. Evaluates the release tree
 # twice on this runner, with locked onnxruntime-node and with the darwin-x64 pins, and compares nDCG@5 per category.
-# The numbers depend on the CPU class: the accepted deltas were measured on AMD EPYC, so on another CPU the attempt
+# The numbers depend on the CPU class: the check was calibrated on AMD EPYC, so on another CPU the attempt
 # is "inconclusive" and the caller retries on a fresh runner.
 
 on:
@@ -18,7 +18,7 @@ on:
         type: number
     outputs:
       ok:
-        description: 'true when every category is within the tolerance or its accepted delta'
+        description: 'true when no category regresses beyond the rule (vantt/scripts/lib/parity-rule.mjs)'
         value: ${{ jobs.pin-effect.outputs.ok }}
       inconclusive:
         description: 'true when the runner CPU is not the reference class'
@@ -110,7 +110,7 @@ jobs:
         run: |
           rc=0
           node tools/vantt/scripts/bundle-parity.mjs compare --ref "$RUNNER_TEMP/locked" --other "$RUNNER_TEMP/pinned" \
-            --tolerance 0.01 --accepted --out "$RUNNER_TEMP/pin-effect.json" > "$RUNNER_TEMP/pin-effect.md" || rc=$?
+            --tolerance 0.01 --regressions-only --out "$RUNNER_TEMP/pin-effect.json" > "$RUNNER_TEMP/pin-effect.md" || rc=$?
           cat "$RUNNER_TEMP/pin-effect.md"
           { echo "(locked onnxruntime-node against the darwin-x64 pins, same machine)"; echo; cat "$RUNNER_TEMP/pin-effect.md"; } >> "$GITHUB_STEP_SUMMARY"
           if [ "$rc" = 0 ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; fi
