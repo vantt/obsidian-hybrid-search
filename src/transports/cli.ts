@@ -132,6 +132,7 @@ interface SearchOpts {
   onlyAbsolutePaths?: boolean;
   rerank?: boolean;
   anchors?: boolean;
+  explain?: boolean;
 }
 
 interface ReindexOpts {
@@ -456,6 +457,7 @@ program
     '--anchors',
     'Include previewAnchors (headingPath, matchText, charStart/charEnd) in JSON output',
   )
+  .option('--explain', 'Include per-branch ranks and language-pack query analysis in JSON output')
   .action(async (queries: string[], opts: SearchOpts) => {
     const effectiveInput = opts.path ?? queries[0];
     const frontmatterFilters = [...opts.frontmatter, ...opts.prop];
@@ -517,6 +519,7 @@ program
         notePath: opts.path,
         rerank: opts.rerank ?? false,
         anchors: opts.anchors ?? false,
+        ...(opts.explain ? { explain: true } : {}),
         queries: !opts.path && queries.length > 1 ? queries : undefined,
       });
     } catch (err) {
