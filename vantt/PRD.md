@@ -31,7 +31,7 @@ Ba vấn đề đã thấy khi dùng OHS với tiếng Việt và với sản ph
 ## 2. Mục tiêu và không làm
 
 Mọi mục tiêu, việc và bản vá trong tài liệu mang một trong ba nhãn:
-- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V16).
+- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V22).
 - **Có thì tốt**: có giá trị nhưng không chặn ai; làm khi đủ điều kiện ghi ở cột "Làm khi" (mục 2.2; việc L01–L26).
 - **Không làm**: đã cân nhắc và loại, ghi lý do để khỏi bàn lại (mục 2.3).
 
@@ -47,6 +47,9 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | G5 | Mỗi bản upstream mới đều có báo cáo: bản vá nào còn cần, upstream đã tự giải chỗ nào, chất lượng tìm tốt lên hay xấu đi | File `vantt/reviews/<tag>.md` (mục 12) |
 | G6 | Dự án lấy vector và K note gần nhất qua lệnh chính thức của fork, không đọc bảng nội bộ | Bản vá P03 (mục 9) |
 | G7 | DB index đặt được ngoài vault | Bản vá P02 |
+| G8 | Gói tiếng Việt xử lý cả cách người Việt gõ và viết thật: chuỗi Telex/VNI gõ dở, gõ sai một chữ, đồng nghĩa và Việt–Anh, viết tắt, từ ghép, alias và tiêu đề không dấu; đoạn trích luôn là chữ gốc, đúng chỗ khớp (user chốt 2026-11-02, trước đây là N05, N14–N19) | Hạng mục `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-compound`, `vi-alias`, `vi-snippet` của bộ eval (mục 11.5), ngưỡng ở mục 11.6 |
+| G9 | Hợp đồng gói ngôn ngữ P01 thật sự chung: một gói ngôn ngữ thứ hai chạy được qua đúng hợp đồng đó mà không sửa lõi (user chốt 2026-11-02, trước đây N08) | Test của gói thứ hai và bài kiểm bất biến xanh khi bật gói đó (V21) |
+| G10 | Biết reranker đa ngữ có đáng bật cho tiếng Việt không (user chốt 2026-11-02, trước đây N09) | Báo cáo eval reranker trên mọi hạng mục `vi`, kèm thời gian mỗi câu (V22) |
 
 ### 2.2. Có thì tốt
 | ID | Mục tiêu | Lợi ích | Phía làm | Nguồn | Làm khi | Việc |
@@ -55,26 +58,18 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N02 | Tìm giới hạn trong một tập note | "Tìm trong vùng", trong note đã nhận, trong hàng xóm graph | fork (P06) | đã bàn | Khi dự án cần tìm theo vùng | L02 |
 | N03 | Sự kiện "note vừa index" | Graph cập nhật theo sự kiện, bỏ vòng đọc lại 5 s | fork (P07) | đã bàn | Khi dự án bỏ vòng đọc lại | L03 |
 | N04 | Chọn model nhúng tốt nhất cho tiếng Việt (e5-small, e5-base, bge-m3, model chuyên tiếng Việt), có hay không phục hồi dấu cho nhánh vector | e5-small cho điểm nền quá cao, khó tách gần nghĩa thật với nhiễu | cấu hình, eval | đã bàn | Sau V13 | L04 |
-| N05 | Tách từ tiếng Việt (view `seg`) | "khách hàng" không kéo "hàng hoá" | gói vi | đã bàn | Nếu `vi-compound` còn kém sau V13 | L05 |
 | N06 | Gói "đầy đủ" có sẵn model | Cài không cần mạng | fork (bundle) | đã bàn | Khi có khách ở nơi mạng kém | L07 |
 | N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
-| N08 | Gói ngôn ngữ thứ hai | Chứng minh điểm cắm P01 thật sự chung | fork | đã bàn | Khi có nhu cầu | L10 |
-| N09 | Đo reranker đa ngữ với tiếng Việt | Có thể tốt hơn cho câu hỏi theo ý; tốn 1–3 s mỗi lần tìm | eval | đã bàn | Sau V13, khi `vi-semantic` còn kém | L11 |
-| N10 | `material` gửi mọi câu tìm trong một lệnh (multi-query) | Bỏ 8 tiến trình, mỗi tiến trình nạp model khoảng 2 s | dự án | đã bàn | Cùng V16 | L12 |
 | N11 | Gợi ý ngay khi đang viết: ô cạnh bài nháp hiện đoạn gần nghĩa với đoạn đang gõ, bấm để chèn link | Giúp bước "express" ngay trên note, không phải đi tìm | dự án (plugin), cần P04 | đã bàn | Sau V08 | L13 |
 | N12 | OCR ảnh và PDF đính kèm vào phần chữ để tìm | Note toàn ảnh hết là nguồn nhiễu, tìm được chữ trong ảnh | fork hoặc dự án | đã bàn (đã nói chưa nên) | Khi note toàn ảnh thành phàn nàn thật; dự án riêng | L14 |
 | N13 | Phương án dự phòng: viết lại phần tìm bằng Rust | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
-| N14 | Sửa chuỗi Telex/VNI gõ dở: "tieengs vieetj", "tie6ng vie65t" thành "tiếng việt" | Người gõ khi bộ gõ tắt hoặc nhầm chế độ vẫn tìm ra | gói vi | ý mới | Sau V13 | L16 |
-| N15 | Sửa gõ sai một chữ cái theo từ vựng vault: "khahc" thành "khách" | Trigram của OHS chỉ áp cho tiêu đề | gói vi | ý mới | Sau V13 | L17 |
-| N16 | Từ đồng nghĩa và Việt–Anh do user khai báo (`khách hàng` ↔ `customer`, `KPI` ↔ `chỉ số`) trong một file của vault | Note viết lẫn Việt–Anh tìm ra nhau | gói vi (tuỳ chọn) | ý mới | Khi eval `vi-mixed-en` còn kém | L18 |
-| N17 | Mở viết tắt: học từ vault (`KH`, `DN`, `TP.HCM`) và từ danh sách do user khai báo | Ghi chép cá nhân viết tắt nhiều | gói vi (tuỳ chọn) | ý mới | Sau N16 | L19 |
-| N18 | Khớp alias và tiêu đề không phân biệt dấu ở nhánh "alias chính xác" của upstream | Gõ "ke hoach" ra ngay note có alias "Kế hoạch" với điểm của khớp alias | fork (mở rộng P01: view cho trường `aliases` dùng ở nhánh alias) | ý mới | Sau V13 | L20 |
-| N19 | Tô chữ khớp trong snippet theo cả dạng bỏ dấu | Gõ không dấu vẫn thấy chữ khớp được tô | fork (P01) + gói vi | ý mới | Sau V13 | L21 |
 | N20 | Sổ câu tìm cục bộ (chỉ trên máy user, tắt mặc định): câu không ra kết quả, câu không mở note nào | Nguồn câu thật để bổ sung golden set | dự án | ý mới | Sau V15 | L22 |
 | N21 | LLM đề xuất câu hỏi và đáp án ứng viên từ vault để user duyệt nhanh khi làm golden set riêng | Giảm 2 giờ gán nhãn của user | dự án hoặc script fork | ý mới | Cùng V15 | L23 |
 | N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 |
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
+
+N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
 
 Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
 
@@ -548,6 +543,12 @@ export interface LanguagePackV1 {
   /** Phân tích câu tìm. Được gọi một lần mỗi câu (và mỗi câu trong queries[]). */
   analyzeQuery(query: string, ctx: QueryContext): QueryAnalysis | Promise<QueryAnalysis>;
 
+  /** View dùng thêm cho nhánh "alias chính xác" (con của views). Lõi lưu project(v, 'aliases', alias) và project(v, 'title', title) của từng note làm khoá tra. */
+  aliasViews?: ReadonlyArray<string>;
+
+  /** Khoá cache phía câu tìm: đổi khi dữ liệu chỉ dùng lúc tìm đổi (file đồng nghĩa, viết tắt). Không làm dựng lại index. */
+  queryCacheKey?(): string;
+
   /** Chấm lại ứng viên sau RRF, trước rerank. Tuỳ chọn. Không được bỏ ứng viên, chỉ đổi điểm. */
   rescore?(candidates: ReadonlyArray<Candidate>, analysis: QueryAnalysis, ctx: QueryContext):
     ReadonlyArray<{ path: string; score: number }> | Promise<…>;
@@ -560,6 +561,8 @@ export interface QueryAnalysis {
   baseQuery?: string;
   /** Câu gửi cho embedder (nhánh vector); mặc định là câu gốc. */
   embedQuery?: string;
+  /** Khoá tra alias chính xác cho từng view trong aliasViews; null thì bỏ. */
+  aliasKeys?: Record<string, string | null>;
   /** Dữ liệu riêng của gói, chuyển nguyên cho rescore. */
   data?: unknown;
   /** Ghi chú để debug (in khi LOG_LEVEL=debug và trong --explain). */
@@ -575,6 +578,8 @@ export interface QueryContext {
   phraseDocs(view: string, phrase: string): number;
   /** Tổng số note. */
   noteCount(): number;
+  /** Đường dẫn vault, để gói đọc file khai báo của user (đồng nghĩa, viết tắt). Chỉ đọc. */
+  vaultPath: string;
 }
 
 export interface Candidate {
@@ -587,15 +592,20 @@ export interface Candidate {
 }
 ```
 
+**Bất biến token của view** (gói phải giữ, P01 kiểm bằng test): với mọi `view` và `field`, tách `project(view, field, text)` bằng tokenizer của view ra cùng thứ tự token như tách `text` bằng `unicode61 remove_diacritics 0`; token thứ k của view ứng với token thứ k của chữ gốc. Ngoại lệ duy nhất: một token view được ghép từ nhiều token gốc liền nhau bằng `_` (view tách từ) và đếm là bấy nhiêu token gốc. Lõi dùng bất biến này để đưa chỗ khớp ở view về chữ gốc (đoạn trích, mục Tìm).
+
 #### Index
 - Với mỗi view `v`: bảng `notes_lex_<v>(note_id INTEGER PRIMARY KEY REFERENCES notes(id) ON DELETE CASCADE, title, aliases, content)` và bảng FTS external content `notes_fts_lex_<v>(title, aliases, content)` trên đó, tokenizer của view, trigger giữ đồng bộ như bảng upstream. Thêm bảng `fts5vocab` `notes_fts_lex_<v>_vocab` (kiểu `row`) cho `termStats`.
 - Văn bản view được tính trong `indexing/` (ở `prepareIndexFile`, cạnh nơi dựng `PreparedIndexNote`) và ghi trong cùng giao dịch với `upsertNote` (thêm tham số vào hàm ghi của `storage/`; `storage/` không gọi gói).
 - Không có gói: không tạo bảng `notes_lex_*`. Có gói rồi bỏ: xoá các bảng `notes_lex_*` lúc mở DB.
 - Chữ ký: nối `lang:<id>@<signature()>` vào chữ ký `content_policy` (cơ chế ở `index-service.ts:236-248`). Đổi chữ ký thì dựng lại; phải bảo đảm đường dựng lại **dùng lại embedding** (kiểm `embedding_context` không đổi vì văn bản đầu vào embedder không đổi) và chỉ tính lại view. Nếu đường `rebuildIndex` hiện tại không cho phép như vậy, thêm đường dựng lại riêng cho view: duyệt `notes`, gọi `project`, ghi `notes_lex_*`, dựng lại FTS (`INSERT INTO notes_fts_lex_v(notes_fts_lex_v) VALUES('rebuild')`).
+- Với mỗi `v` trong `aliasViews`: bảng `notes_alias_lex_<v>(note_id INTEGER REFERENCES notes(id) ON DELETE CASCADE, key TEXT)` có index trên `key`, ghi cùng giao dịch; `key` là `project(v, 'aliases', alias)` cho từng alias và `project(v, 'title', title)`.
 - Tăng `INDEX_SCHEMA_VERSION` (bẫy migration, mục 3.2) và thêm khoá `settings.language_pack` lưu `{id, version, signature, views}`.
 
 #### Tìm
-- Trong `searchByQuery` (`searcher.ts:1500`), trước các nhánh: gọi `analyzeQuery`. Khoá cache (`:1275`) thêm chữ ký gói và **câu gốc** (không dùng câu đã phân tích làm khoá).
+- Trong `searchByQuery` (`searcher.ts:1500`), trước các nhánh: gọi `analyzeQuery`. Khoá cache (`:1275`) thêm chữ ký gói, `queryCacheKey()` (nếu có) và **câu gốc** (không dùng câu đã phân tích làm khoá).
+- Alias chính xác (`searchByAliasExact`, `searcher.ts:384`): ngoài khớp của upstream, tra `aliasKeys[v]` trong `notes_alias_lex_<v>`; note khớp vào cùng nhánh alias (trọng số RRF 2.0), xếp sau khớp của upstream, không trùng path. Không có gói thì nhánh y như upstream.
+- Đoạn trích của kết quả đến từ nhánh view: `snippet()` trên bảng view cho chữ đã chiếu (bỏ dấu, nối `_`), **không được trả ra**. Lõi lấy vị trí token khớp (mốc `SNIPPET_MARK_START/END`, `searcher.ts:268-273`, hoặc hàm `offsets`), đổi về token gốc theo bất biến token, rồi cắt đoạn trích từ `notes.content` gốc quanh đó, cùng độ dài và cùng cách đánh dấu như nhánh BM25 upstream; `buildMatchTextFromMarkedSnippet` nhận đoạn đã đổi. Kết quả thêm trường `matchedTerms` (chữ gốc đã khớp, ví dụ gõ "ke hoach" ra `["kế", "hoạch"]`) để client tô.
 - Nhánh BM25 gốc dùng `analysis.baseQuery ?? query`. Nhánh vector dùng `analysis.embedQuery ?? query`. Mỗi view có `viewQueries[v]` khác null thành một nhánh BM25 mới trên `notes_fts_lex_<v>`, cùng giới hạn ứng viên, cùng bộ lọc (`buildFilterPredicate`).
 - RRF: danh sách nhánh = 4 nhánh upstream + các nhánh view, trọng số view lấy từ `views[].weight`. Không có gói thì danh sách và trọng số y hệt upstream.
 - `rescore` (nếu có) chạy sau RRF và gán `scores.hybrid`, trước rerank (`:1586-1593`); với nhiều câu, chạy sau khi trộn (`:1326-1330`) với phân tích của câu đầu. Lõi chuẩn hoá điểm trả về vào [0, 1], giữ nguyên tập ứng viên.
@@ -608,6 +618,9 @@ export interface Candidate {
 - Gói lỗi (ném lỗi lúc nạp, `apiVersion: 2`, `project` ném lỗi): OHS chạy tiếp, `status` báo lỗi, không có bảng view.
 - Đổi chữ ký gói: dựng lại view, số lần gọi embedder = 0.
 - `rescore` trả điểm cho path lạ hoặc thiếu path: lõi bỏ qua path lạ, giữ điểm cũ cho path thiếu.
+- `aliasViews`: gói giả khớp alias viết hoa vào nhánh alias; không có gói thì nhánh alias trùng snapshot.
+- Đoạn trích từ nhánh view là chữ gốc, đúng vị trí khớp, kể cả token ghép `_`; `matchedTerms` đúng. Gói vi phạm bất biến token: lõi rơi về đoạn trích đầu note và ghi cảnh báo, không lỗi.
+- `queryCacheKey()` đổi thì cache không trả kết quả cũ; index không dựng lại.
 
 ### 10.3. Gói `ohs-lang-vi`
 
@@ -623,24 +636,34 @@ Vị trí: `vantt/packages/ohs-lang-vi/` (package npm riêng, `"private": true` 
 | `query.ts` | `analyzeQuery`: chuẩn hoá câu; xác định câu có dấu (mọi âm tiết Việt có dấu nào không); câu có dấu → `norm` = câu chuẩn hoá, `fold` = câu bỏ dấu; câu không dấu → `norm` = null (hoặc câu phục hồi, xem `restore.ts`), `fold` = câu bỏ dấu; `embedQuery` = câu phục hồi khi tin cậy đủ (bật bằng tuỳ chọn, chốt bằng eval) |
 | `restore.ts` | Phục hồi dấu theo từ vựng của vault: với mỗi âm tiết không dấu, lấy các dạng có dấu có thật trong view `norm` có cùng dạng bỏ dấu (dùng `termStats`, `termsWithPrefix` trên view `fold` để tìm, rồi tra ngược sang `norm`) kèm tần suất; với cặp âm tiết liền nhau, ưu tiên cặp có thật (`phraseDocs` trên `norm`); chọn tổ hợp tốt nhất bằng quy hoạch động (Viterbi) trên điểm unigram + bigram, giới hạn tối đa 5 biến thể mỗi âm tiết và câu tối đa 12 âm tiết. Trả danh sách tổ hợp kèm xác suất. Cần bảng ánh xạ ngược fold→norm: dựng từ `fts5vocab` của view `norm` (lõi cung cấp `termsWithPrefix`; gói tự bỏ dấu từng term để gom). Cache trong bộ nhớ theo `db_version` |
 | `rescore.ts` | Cộng điểm cho ứng viên có tổ hợp phục hồi xác suất cao xuất hiện đúng (theo `matchedViews` và snippet), cộng điểm cho khớp cụm hai âm tiết; công thức có tham số, chốt bằng eval. Không bao giờ bỏ ứng viên |
+| `telex.ts` | Giải chuỗi Telex và VNI gõ dở (bộ gõ tắt hoặc nhầm chế độ): "tieengs vieetj", "tie6ng vie65t" → "tiếng việt". Chỉ áp cho token **không** có trong từ vựng vault (view `fold`) mà dạng giải ra có trong từ vựng `norm`; nếu không thì giữ nguyên ("team", "seen" không bị đổi). Bảng quy tắc Telex (`s f r x j`, `aa ee oo aw ow uw dd w`) và VNI (`1–9`) đầy đủ |
+| `typo.ts` | Sửa gõ sai một chữ theo từ vựng vault: khoảng cách sửa 1 (thêm, bớt, thay, đảo hai chữ liền nhau) trên dạng bỏ dấu, chỉ cho token không có trong từ vựng, dài từ 3 chữ, tối đa 3 ứng viên theo tần suất. Dùng chung bảng từ vựng trong bộ nhớ với `restore.ts` (cache theo `db_version`); thêm dạng sửa vào câu view (nối OR), không thay câu gốc |
+| `lexicon.ts` | Đồng nghĩa và viết tắt do user khai báo trong một file của vault (đường dẫn qua tuỳ chọn `lexiconPath`, mặc định `_ohs/lexicon.md`; định dạng mỗi dòng một nhóm `khách hàng = customer = KH`, chốt ở Q8). Mở rộng câu ở `analyzeQuery`: thêm các dạng cùng nhóm vào câu view (nối OR, trọng số thấp hơn qua `rescore`), không đổi `embedQuery`. Đọc file qua `ctx.vaultPath`; `queryCacheKey()` = băm nội dung file |
+| `abbr.ts` + lệnh `ohs-lang-vi learn-abbr --vault <dir>` | Học viết tắt từ vault: quét Markdown tìm mẫu định nghĩa ("khách hàng (KH)", "KH: khách hàng", "KH = khách hàng") và cụm nhiều âm tiết hay gặp có chữ đầu khớp chữ viết tắt (KH → khách hàng, DN → doanh nghiệp, TP.HCM → thành phố Hồ Chí Minh). Ghi **đề xuất** vào file lexicon dưới mục chờ duyệt; chỉ dòng user đã chuyển lên mục chính mới được dùng. Chạy tay, không chạy lúc index |
+| `segment.ts` | Tách từ cho view `seg` (mục 10.4) |
 | `index.ts` | `createPack(options): LanguagePackV1`, export mặc định đọc `OHS_LANGUAGE_PACK_OPTIONS` |
 
 #### Bảng dữ liệu cần soạn (kèm test bảng)
 - Bảng nguyên âm và dấu: 12 nguyên âm cơ bản × 6 thanh, dạng NFC và NFD.
 - Bảng đặt dấu cho vần `oa, oe, uy, uê, ươ, iê, yê, uô` và các ngoại lệ `qu`, `gi`; ít nhất 60 cặp kiểm (hòa/hoà, hỏa/hoả, thủy/thuỷ, khỏe/khoẻ, quý, giá, giường, người, khuỷu, ngoằn…).
+- Bảng Telex và VNI: mọi tổ hợp nguyên âm × dấu × thanh, kèm phản ví dụ chữ tiếng Anh không được đổi.
+- Từ điển từ ghép cho `segment.ts` (nguồn và giấy phép chốt ở Q9).
 - Bảng i/y: danh sách phụ âm đầu áp dụng (`k, l, m, t, s, h, v, d, ng, qu?` theo quy tắc chốt khi soạn), kèm phản ví dụ.
 
 #### Tuỳ chọn
-`{ tonePlacement: "modern" | "classic", foldIY: boolean, restore: boolean, restoreForEmbedding: boolean, viewWeights: {norm, fold}, rescoreWeights: {...} }`. Mặc định chốt sau eval (L04 và V11); mọi tuỳ chọn có ảnh hưởng tới index đi vào `signature()`.
+`{ tonePlacement: "modern" | "classic", foldIY: boolean, restore: boolean, restoreForEmbedding: boolean, telex: boolean, typo: boolean, lexiconPath: string, segment: boolean, viewWeights: {norm, fold, seg}, rescoreWeights: {...} }`. Mặc định chốt sau eval (L04 và V11); mọi tuỳ chọn có ảnh hưởng tới index đi vào `signature()`.
 
 #### Test của gói (độc lập với OHS)
 - Test bảng: mọi cặp trong bảng dữ liệu.
 - Test thuộc tính (fast-check): `normalize(normalize(x)) = normalize(x)`; `fold(fold(x)) = fold(x)`; `fold(normalize(x)) = fold(x)`; NFC và NFD của cùng chữ cho cùng kết quả; chữ không phải tiếng Việt (ASCII, tiếng Anh) qua `normalize` chỉ đổi hoa thường; không làm mất ký tự không phải chữ (số, dấu câu, emoji).
 - Test hiệu năng: `project` trên 1 MB văn bản dưới 200 ms; `analyzeQuery` câu 12 âm tiết với từ vựng 50.000 term dưới 20 ms.
+- Test `telex`, `typo`, `lexicon` với `QueryContext` giả: "tieengs vieetj" ra "tiếng việt" khi từ vựng có; "team", "seen", "online" giữ nguyên; "khahc" ra "khách"; token có trong từ vựng không bị sửa; file lexicon đổi thì `queryCacheKey()` đổi; dòng ở mục chờ duyệt không được dùng.
+- Test `learn-abbr` trên vault mẫu: tìm đúng các mẫu định nghĩa, không đề xuất trùng, không ghi đè mục chính.
+- Test bất biến token (mục 10.2) cho mọi view, kể cả `seg`, bằng fast-check.
 - Test `restore` với `QueryContext` giả (từ vựng nhỏ cố định): "ban hang online" → "bán hàng online" đứng đầu khi từ vựng có "bán hàng"; "ban" một mình trả nhiều biến thể theo tần suất.
 
-### 10.4. Tách từ (để sau, L05)
-Câu nhiều âm tiết đã được hỗ trợ một phần nhờ cụm hai âm tiết (`phraseDocs`, `rescore`). Tách từ thật (từ điển + thống kê cặp trong vault, khớp dài nhất) chỉ làm nếu eval cho thấy lỗi kiểu "hàng" khớp nhầm "hàng hoá" khi tìm "khách hàng" còn đáng kể sau V11. Khi làm: thêm view `seg` (chữ đã nối từ ghép bằng `_`), không đổi hợp đồng.
+### 10.4. Tách từ (bắt buộc, V20; trước đây N05)
+Mục đích: "khách hàng" không kéo "hàng hoá" lên đầu. Thêm view `seg` (view thứ ba, đúng giới hạn 3 view): `project` nối các âm tiết của một từ ghép bằng `_` ("khách_hàng"), giữ bất biến token (mục 10.2). Cách tách: khớp dài nhất theo từ điển từ ghép đóng gói sẵn (Q9), cộng danh sách từ ghép trong file lexicon của user. `project` là hàm thuần nên không dùng thống kê vault lúc index; thống kê cặp âm tiết của vault chỉ dùng lúc tìm (`phraseDocs`) để tách câu tìm. `analyzeQuery` tách câu theo cùng từ điển và đặt `viewQueries.seg`. Bật bằng tuỳ chọn `segment` (mặc định bật nếu eval `vi-compound` tốt lên mà các hạng mục khác không tụt). Đổi từ điển thì đổi `signature()`.
 
 ### 10.5. Thứ tự làm gói tiếng Việt
 1. M1 `normalize`, `fold`, `syllable`, bảng dữ liệu, test (V09).
@@ -648,7 +671,7 @@ Câu nhiều âm tiết đã được hỗ trợ một phần nhờ cụm hai â
 3. M2 view `norm`, `fold` trong OHS qua P01; eval; chốt trọng số view.
 4. M3 `restore`, `rescore`; eval; chốt tham số (V11).
 5. M4 `restoreForEmbedding` và thử model khác (L04).
-6. Có thì tốt, sau khi M3 đạt: Telex/VNI gõ dở (L16), gõ sai một chữ (L17), đồng nghĩa (L18), viết tắt (L19), alias không dấu (L20), tô chữ khớp (L21), tách từ (L05).
+6. M5 (bắt buộc, G8): Telex/VNI gõ dở và gõ sai (V17); đồng nghĩa, viết tắt, `learn-abbr` (V18); alias, tiêu đề không dấu và đoạn trích chữ gốc (V19); tách từ (V20). Mỗi bước có hạng mục eval riêng và chốt tham số bằng eval.
 
 ---
 
@@ -695,6 +718,12 @@ Câu nhiều âm tiết đã được hỗ trợ một phần nhờ cụm hai â
   | `vi-mixed-en` | "kế hoạch marketing", "plan tiếp thị" |
   | `vi-semantic` | hỏi theo ý, không trùng chữ |
   | `vi-names` | tên người, địa danh có dấu và không dấu |
+  | `vi-telex` | "tieengs vieetj", "ke61 hoa5ch" |
+  | `vi-typo` | "khahc hang", "kees hoach" |
+  | `vi-synonym` | "customer" ra note viết "khách hàng" (theo file lexicon của corpus) |
+  | `vi-abbr` | "KH tiềm năng" ra "khách hàng tiềm năng" |
+  | `vi-alias` | "ke hoach" ra note có alias "Kế hoạch" ở đầu |
+  | `vi-snippet` | đoạn trích là chữ gốc có dấu, chứa chỗ khớp; `matchedTerms` đúng |
 - **Nguồn:**
   1. Corpus sinh (preset `vi-search` của obsidian-test-fixture): xác định, có đáp án sinh cùng corpus, commit được, chạy trong CI.
   2. Vault thật của user (bản B): golden set do user gán nhãn (khoảng 60 câu, 2 giờ của user), **lưu ngoài repo**, chạy ở máy user bằng `vantt/scripts/quality-gate.mjs --private <đường dẫn>`; chỉ ghi số tổng hợp vào `vantt/reviews/`.
@@ -706,6 +735,7 @@ Câu nhiều âm tiết đã được hỗ trợ một phần nhờ cụm hai â
 | Eval upstream, không gói | Đạt ngưỡng của `eval/quality.ts` (chỉ trên macOS ARM như upstream); trên Linux so với baseline Linux đã chốt, lệch nDCG@5 không quá 0,005 |
 | Eval upstream, có gói `vi` | Không tụt quá 0,01 nDCG@5 so với không gói (gói không được làm hỏng tìm tiếng Anh) |
 | Eval `vi`, có gói | Mỗi hạng mục không tụt so với baseline bản phát hành trước quá 0,02 nDCG@5; tổng thể không tụt |
+| Mục tiêu G8 | `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-alias`: Hit@5 ≥ 0,8; `vi-compound`: nDCG@5 hơn baseline upstream tối thiểu 0,1; `vi-snippet`: 100% đoạn trích là chữ gốc và chứa chỗ khớp; các hạng mục khác không tụt quá 0,01 nDCG@5 khi bật từng tính năng |
 | Mục tiêu phát hành gói lần đầu (G3) | `vi-unaccented`, `vi-dd`: Hit@5 ≥ 0,85 và gấp tối thiểu 2 lần baseline upstream; `vi-accented`: không tụt so với upstream; `vi-tone-precision`: MRR ≥ 0,9 |
 
 Baseline lưu trong `vantt/eval/baselines/<platform>/<version>.json`. Hạ baseline chỉ qua PR có người duyệt, kèm lý do.
@@ -797,19 +827,25 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V07 | P03 `vector-export` | V01 | 1 | Test và probe |
 | V08 | P04 `stdio-parity` | V07 | 1 | Test parity mở rộng xanh |
 | V09 | `ohs-lang-vi` M1: `normalize`, `fold`, `syllable`, bảng dữ liệu, test bảng và thuộc tính | — (song song) | 2,5 | Test của gói xanh, hiệu năng đạt |
-| V10 | Bộ eval tiếng Việt: preset `vi-search` trong obsidian-test-fixture, golden set, smoke-vault, baseline upstream | — (song song) | 2 | Golden set đủ 11 hạng mục × 15 câu; baseline ghi trong `vantt/eval/baselines/` |
-| V11 | P01 `language-pack-api` (mục 10.2) + test bằng gói giả | V01 | 3 | Toàn bộ test của P01 xanh; bất biến (V12) xanh |
+| V10 | Bộ eval tiếng Việt: preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set, smoke-vault, baseline upstream | — (song song) | 2,5 | Golden set đủ 17 hạng mục × 15 câu; baseline ghi trong `vantt/eval/baselines/` |
+| V11 | P01 `language-pack-api` (mục 10.2, gồm `aliasViews`, `queryCacheKey`, đoạn trích theo bất biến token) + test bằng gói giả | V01 | 4 | Toàn bộ test của P01 xanh; bất biến (V12) xanh |
 | V12 | `invariance.mjs`, `quality-gate.mjs`, nối vào catchup | V10, V11 | 1 | Catchup chạy đủ T1–T5 |
 | V13 | `ohs-lang-vi` M2+M3: view `norm`/`fold`, `analyzeQuery`, `restore`, `rescore`; chốt tham số bằng eval | V09, V10, V11 | 3,5 | Đạt mục tiêu G3 (mục 11.6) trên corpus sinh |
 | V14 | `review-upstream.mjs` + probe cho mọi bản vá + hoàn thiện skill `ohs-upstream-review` | V06–V08, V12 | 2 | Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục |
 | V15 | Eval trên vault thật của user (golden set riêng 60 câu) | V13; user 2 giờ gán nhãn | 0,5 + user | Số tổng hợp trong `vantt/reviews/` |
-| V16 | Phía dự án: `note_knn.mjs`, `similar_pairs.mjs`, `related.py`, `material.py` dùng P03, P04; bộ cài trỏ gói dựng sẵn (L12 làm cùng lúc) | V07, V08, V03 | 1 | Không còn đọc bảng nội bộ của OHS |
-| | **Cộng** | | **~23** | |
+| V16 | Phía dự án: `note_knn.mjs`, `similar_pairs.mjs`, `related.py`, `material.py` dùng P03, P04; bộ cài trỏ gói dựng sẵn; `material` gửi mọi câu tìm trong một lệnh `queries[]` qua stdio IPC, bỏ 8 tiến trình (trước đây N10) | V07, V08, V03 | 1,3 | Không còn đọc bảng nội bộ của OHS |
+| V17 | `ohs-lang-vi` M5a: `telex.ts`, `typo.ts` (G8) | V13 | 2,5 | `vi-telex`, `vi-typo` đạt mục 11.6; hạng mục khác không tụt |
+| V18 | `ohs-lang-vi` M5b: `lexicon.ts`, `abbr.ts`, lệnh `learn-abbr` (G8) | V13 | 2,5 | `vi-synonym`, `vi-abbr` đạt; đổi file lexicon không dựng lại index |
+| V19 | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
+| V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển (G8, mục 10.4) | V13, Q9 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
+| V21 | Gói ngôn ngữ thứ hai `ohs-lang-<x>` trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11, Q10 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
+| V22 | Eval reranker đa ngữ trên bộ `vi` (G10): mọi hạng mục, có và không rerank, thời gian mỗi câu trên máy CPU thường | V13 | 0,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất bật hay tắt mặc định trong bộ cài dự án |
+| | **Cộng** | | **~39** | |
 
-Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01.
+Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
 
 ### 14.2. Để sau
-Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc nhãn "ý mới" ở mục 2.2 cần user xác nhận trước khi bắt đầu.
+Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc nhãn "ý mới" ở mục 2.2 cần user xác nhận trước khi bắt đầu. L05, L16–L21 đã chuyển thành V17–V20 (bắt buộc).
 
 | ID | Nhãn | Việc | Làm khi | Công |
 |---|---|---|---|---|
@@ -817,23 +853,13 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L02 | Có thì tốt (N02) | P06 `restrict-paths` | Khi cần "tìm trong vùng" | 0,5–1 |
 | L03 | Có thì tốt (N03) | P07 `index-events` | Khi dự án bỏ vòng đọc lại 5 s | 1 |
 | L04 | Có thì tốt (N04) | Thử model và `restoreForEmbedding` | Sau V13 | 1–2 |
-| L05 | Có thì tốt (N05) | Tách từ (view `seg`) | Nếu `vi-compound` còn kém sau V13 | 3–5 |
 | L06 | Đã chốt, làm sau | `pkm-web` cho điện thoại (phía dự án, mục 13) | Sau khi desktop có người dùng | 5–8 |
 | L07 | Có thì tốt (N06) | Gói "đầy đủ" có sẵn model | Khi khách cài ở nơi mạng kém | 0,5 |
 | L08 | Đã chốt, làm sau | Gửi issue/PR lên upstream cho P02, P09, P03 (và bản vá khác có ích chung) | **Chỉ sau khi chúng ta đã làm xong bản vá**, nó đã qua ít nhất một bản phát hành của fork và một lần catchup xanh (user chốt 2026-11-02). Gửi kèm test và mô tả từ spec; đổi `upstream_status` | 0,5 mỗi cái |
 | L09 | Có thì tốt (N07) | Phát hành `ohs-lang-vi` công khai, README cho cộng đồng OHS | Gói ổn định qua 3 bản upstream | 0,5 |
-| L10 | Có thì tốt (N08) | Gói ngôn ngữ thứ hai | Khi có nhu cầu | — |
-| L11 | Có thì tốt (N09) | Eval reranker trên bộ `vi` (mọi hạng mục, thời gian mỗi câu) | Sau V13 | 0,5 |
-| L12 | Có thì tốt (N10) | `material` dùng `queries[]` qua stdio IPC | Cùng V16 | 0,3 |
 | L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án | Sau V08 | 2–3 |
 | L14 | Có thì tốt (N12) | OCR ảnh và PDF | Khi thành phàn nàn thật | 5+ (dự án riêng) |
 | L15 | Có thì tốt (N13) | Viết lại phần tìm bằng Rust | Khi điều kiện ở N13 xảy ra | 10–14 |
-| L16 | Có thì tốt (N14), ý mới | Sửa Telex/VNI gõ dở trong `analyzeQuery` (bảng quy tắc Telex, VNI; chỉ áp khi chuỗi không phải chữ có trong từ vựng) | Sau V13 | 1 |
-| L17 | Có thì tốt (N15), ý mới | Sửa gõ sai theo từ vựng vault (khoảng cách sửa 1 trên dạng bỏ dấu, giới hạn ứng viên) | Sau V13 | 1–1,5 |
-| L18 | Có thì tốt (N16), ý mới | File đồng nghĩa trong vault (đường dẫn qua tuỳ chọn gói), mở rộng câu ở `analyzeQuery` | Khi `vi-mixed-en` còn kém | 1 |
-| L19 | Có thì tốt (N17), ý mới | Mở viết tắt (học từ vault và danh sách khai báo) | Sau L18 | 1–1,5 |
-| L20 | Có thì tốt (N18), ý mới | Nhánh alias chính xác dùng thêm dạng bỏ dấu (mở rộng hợp đồng P01, tăng `apiVersion` nếu cần) | Sau V13 | 1 |
-| L21 | Có thì tốt (N19), ý mới | Tô chữ khớp trong snippet theo dạng bỏ dấu | Sau V13 | 1 |
 | L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy | Sau V15 | 1 |
 | L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
 | L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
@@ -852,6 +878,9 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | Q5 | Gói tiếng Việt để trong fork hay tách repo riêng | Trong fork (`vantt/packages/`) cho tới L09 | User |
 | Q6 | ~~Có gửi issue lên upstream không, khi nào~~ | **Đã chốt (user 2026-11-02):** gửi sau khi đã làm xong và chạy ổn trong fork (L08); không gửi trước | — |
 | Q7 | Người gán nhãn golden set riêng trên vault thật | User, khoảng 2 giờ | User |
+| Q8 | Định dạng file lexicon (đồng nghĩa, viết tắt, từ ghép) | Markdown trong vault, mặc định `_ohs/lexicon.md`, mỗi dòng một nhóm nối bằng ` = `; mục `## Chờ duyệt` cho đề xuất của `learn-abbr` | Agent, ghi trong spec gói |
+| Q9 | Nguồn từ điển từ ghép cho tách từ | Chọn danh sách từ có giấy phép cho phép đóng gói lại (MIT, Apache, CC-BY, CC0); ghi nguồn và giấy phép trong gói; không dùng nguồn không rõ giấy phép | Agent đề xuất, user duyệt |
+| Q10 | Ngôn ngữ của gói thứ hai (V21) | Tiếng Đức: bỏ umlaut (`ä→a`, `ae`), `ß→ss`, từ ghép dài; nhỏ, khác tiếng Việt đủ để thử hợp đồng | User |
 
 ## 16. Rủi ro
 | Rủi ro | Khả năng | Ảnh hưởng | Giảm thiểu |
