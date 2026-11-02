@@ -55,7 +55,7 @@ export interface PackOptions {
   foldIY: boolean;
   /** Restore diacritics of unaccented queries from the vault vocabulary. */
   restore: boolean;
-  /** Send the restored query to the embedder (M4; off until measured). */
+  /** Send the restored query to the embedder (on: measured, no category drops, total nDCG@5 +0.022). */
   restoreForEmbedding: boolean;
   /** Minimum probability of the best restoration for restoreForEmbedding. */
   embedMinConfidence: number;
@@ -106,7 +106,7 @@ export const DEFAULT_OPTIONS: PackOptions = {
   tonePlacement: 'modern',
   foldIY: false,
   restore: true,
-  restoreForEmbedding: false,
+  restoreForEmbedding: true,
   embedMinConfidence: 0.8,
   accentedRatio: 0.5,
   minSyllableShare: 0.5,

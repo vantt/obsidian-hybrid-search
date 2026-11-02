@@ -128,6 +128,8 @@ export interface RestoredToken {
   variants: Variant[];
   /** True when at least one accented form came from the vault. */
   restored: boolean;
+  /** Notes containing the token exactly as typed (norm view); 0 for pinned tokens. */
+  literalDocs: number;
 }
 
 export interface Restoration {
@@ -268,6 +270,7 @@ export function restoreTokens(
       folded: input.folded,
       pinned: input.pinned,
       restored: opts[0]!.docs > 0,
+      literalDocs: input.pinned ? 0 : cache.termDocs(ctx, 'norm', input.norm),
       variants: opts
         .map((o, v) => ({ form: o.form, docs: o.docs, marginal: marginals[v]! }))
         .sort((x, y) => y.marginal - x.marginal || y.docs - x.docs),
