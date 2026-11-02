@@ -62,7 +62,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N13 | Phương án dự phòng: viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node; không liên quan tới việc chuyển script Python của dự án (V16) | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
 | N20 | Sổ câu tìm cục bộ (chỉ trên máy user, tắt mặc định): câu không ra kết quả, câu không mở note nào | Nguồn câu thật để bổ sung golden set | dự án | ý mới | Sau V15 | L22 |
 | N21 | LLM đề xuất câu hỏi và đáp án ứng viên từ vault để user duyệt nhanh khi làm golden set riêng | Giảm 2 giờ gán nhãn của user | dự án hoặc script fork | ý mới | Cùng V15 | L23 |
-| N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 |
+| N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 | Bắt buộc (user xác nhận 2026-11-02, trước là N22) 
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 

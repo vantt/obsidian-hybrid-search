@@ -17,6 +17,7 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 
 | ID | Việc | Cần | Mức | Công | PRD |
 |---|---|---|---|---|---|
+| L24 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review (N22): gom `vantt/reviews/*.data.json`, vẽ xu hướng nDCG@5, Hit@5 tổng, hạng mục `vi-*` chính, eval upstream, thời gian index và mỗi câu; chèn vào báo cáo mới nhất. User xác nhận đưa vào goal 2026-11-02 | V14 | vừa | 0,5 | 2.2 (N22), 14.2 |
 | V14 | `vantt/scripts/review-upstream.mjs`: chạy probe mọi bản vá trên bản upstream mới, chạy eval upstream và eval `vi` ở cả hai bản, diff các điểm chạm của bản vá; hoàn thiện skill `.claude/skills/ohs-upstream-review/SKILL.md`; báo cáo theo mẫu PRD 12.5 ở `vantt/reviews/<tag>.md` | V06, V07, V08, V12 | vừa | 2 | 12 |
 
 ## Quy tắc riêng
@@ -31,9 +32,12 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 
 ## Todo
 
-- [x] V14 script review, probe đủ, skill hoàn thiện, báo cáo mẫu
+- [x] V14 script review
+- [ ] L24 biểu đồ chỉ số qua các bản, probe đủ, skill hoàn thiện, báo cáo mẫu
 
 ## Success Criteria
+
+- L24: báo cáo review mới nhất có biểu đồ xu hướng các chỉ số qua mọi bản đã review (ít nhất hai điểm: fork trên `v0.17.1` và `v0.17.2`); script tự sinh lại biểu đồ khi có bản mới; có test.
 
 - Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục của mẫu PRD 12.5.
 - Mọi bản vá có trong `series.toml` lúc chạy đều có kết quả probe.
