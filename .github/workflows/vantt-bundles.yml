@@ -238,13 +238,12 @@ jobs:
           (cd tree && npm ci --ignore-scripts --no-audit --no-fund && npm rebuild)
           cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
           (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
+      # npm 12 refuses git dependencies (EALLOWGIT), so the corpus generator (no dependencies of its own) is cloned.
       - name: Run the evals
-        env:
-          # tools/vantt/eval/vi/run-eval.mjs fetches the corpus generator with npx
-          npm_config_yes: 'true'
         run: |
+          git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
           node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/parity" \
-            --lang-pack "$RUNNER_TEMP/ohs-lang-vi"
+            --lang-pack "$RUNNER_TEMP/ohs-lang-vi" --otf "$RUNNER_TEMP/otf/bin/otf.mjs"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: parity-${{ matrix.platform }}

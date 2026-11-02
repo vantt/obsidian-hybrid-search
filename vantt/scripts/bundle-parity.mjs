@@ -3,7 +3,7 @@
 // against a reference platform that runs the release tree as locked. Zero dependencies.
 //
 //   node vantt/scripts/bundle-parity.mjs run --tree <release tree, npm ci done> --out <dir>
-//        [--pin name@version ...] [--lang-pack <built ohs-lang-vi dir>]
+//        [--pin name@version ...] [--lang-pack <built ohs-lang-vi dir>] [--otf <obsidian-test-fixture bin/otf.mjs>]
 //   node vantt/scripts/bundle-parity.mjs compare --ref <dir> --other <dir> [--tolerance 0.01] [--out <report.json>]
 //
 // `run` applies the same pins as the bundle to the tree's node_modules, then runs upstream's eval
@@ -42,6 +42,7 @@ function run(values) {
   writeFileSync(path.join(out, 'obsidian-help.json'), JSON.stringify({ ...help, parity: meta }, null, 2) + '\n');
 
   const viArgs = [path.join(here, '..', 'eval', 'vi', 'run-eval.mjs'), '--ohs', tree, '--out', path.join(out, 'vi.json')];
+  if (values.otf) viArgs.push('--otf', path.resolve(values.otf));
   if (values['lang-pack']) viArgs.push('--lang-pack', path.resolve(values['lang-pack']));
   const res = spawnSync(process.execPath, viArgs, { stdio: ['ignore', 2, 2], env: evalEnv({ TMPDIR: out }) });
   if (res.status !== 0) throw new Error(`vi eval failed (exit ${res.status})`);
@@ -76,7 +77,7 @@ const [cmd, ...rest] = process.argv.slice(2);
 const { values } = parseArgs({
   args: rest,
   options: {
-    tree: { type: 'string' }, out: { type: 'string' }, pin: { type: 'string', multiple: true }, 'lang-pack': { type: 'string' },
+    tree: { type: 'string' }, out: { type: 'string' }, pin: { type: 'string', multiple: true }, 'lang-pack': { type: 'string' }, otf: { type: 'string' },
     ref: { type: 'string' }, other: { type: 'string' }, tolerance: { type: 'string' },
   },
 });
