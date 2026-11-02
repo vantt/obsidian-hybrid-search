@@ -66,6 +66,13 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - Điểm cần sửa ở P01 (V13 nêu): view query luôn là tiền tố OR, không có khớp chính xác hay cụm; `readViewTermsWithPrefix` không có cận trên; `Candidate` của `rescore` thiếu `matchedTerms`; trọng số view không chỉnh theo câu.
 - `query.ts`, `index.ts` có điểm móc cho V17, V18, V19, V20.
 
+## Ghi chú sau V17–V20
+
+- Gói đủ M1–M5, eval mặc định (fixture `v0.10.0`): nDCG@5 tổng 0,666 (upstream) → 0,932; Hit@5 `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-alias` đều 1,00; `vi-snippet` 15/15 đoạn trích là chữ gốc và chứa chỗ khớp; `vi-compound` +0,156 so với baseline; eval tiếng Anh upstream giữ 0,735.
+- Mặc định: `telex`, `typo`, `segment` bật theo quy tắc eval. Câu lẫn tiếng Anh không dùng view `seg`.
+- Từ điển từ ghép: danh sách của `trungtv/pyvi` (MIT), 22.574 từ hai âm tiết, 266 KB; nguồn gốc gốc của pyvi chưa rõ (95% trùng Viet74K, GPL). Thay được bằng một file.
+- Test fast-check "token invariant for every view" trong `test/pack.test.ts` thỉnh thoảng hỏng do hàm đếm của chính test (ký tự kết hợp gắn vào `#`); cần sửa test helper.
+
 ## Risk
 
 - Phục hồi dấu đoán sai làm kết quả tệ hơn: nhánh `fold` luôn chạy, `rescore` không bỏ ứng viên, có hạng mục eval riêng.
