@@ -23,9 +23,10 @@ Fork của [flowing-abyss/obsidian-hybrid-search](https://github.com/flowing-aby
   | win32-x64 | zip | 102,6 | 279,3 | 632,3 | 4,8 |
   | darwin-arm64 | tar.gz | 99,5 | 326,3 | 656,9 | 2,4 |
   | linux-x64 | tar.gz | 99,0 | 295,7 | 942,7 | 2,4 |
-  | darwin-x64 | không dựng được | | | | |
+  | darwin-x64 | tar.gz | ~95 | chưa phát hành, xem dưới | | |
 
-  Mục tiêu PRD 8.2 (dưới 250 MB giải nén) chưa đạt: riêng Node là 85 đến 125 MB. macOS Intel: `onnxruntime-node` 1.30.0 không có binding `darwin/x64` trong gói npm, nên embedding cục bộ của upstream không chạy được trên Intel Mac dù dùng runner Intel hay Rosetta; `bundle.mjs` từ chối dựng và hàng này trong ma trận chạy ở chế độ không chặn release. Gói macOS chưa ký, smoke trên runner chưa kiểm cờ quarantine của Gatekeeper.
+  Kích thước giải nén ≈280–330 MB (nén ≈100 MB) đã được user chấp nhận 2026-11-02 (PRD 8.2). macOS Intel: `onnxruntime-node` 1.30.0 không có binding `darwin/x64`; bản mới nhất có binding là 1.23.2, và `bundle.mjs` chỉ cho `darwin-x64` thay `onnxruntime-node` và `onnxruntime-common` bằng bản đó lúc đóng gói. Gói dựng được và smoke xanh trên `macos-15-intel`, nhưng kiểm tương đương chất lượng (nDCG@5 mỗi hạng mục lệch không quá 0,01 so với Linux) chưa đạt, và đối chứng macOS ARM không thay gì cũng lệch tương tự (PRD 8.4 bước 6), nên gói Intel chưa được đưa lên Release. Cần user chốt tiêu chí. Gói macOS chưa ký, smoke trên runner chưa kiểm cờ quarantine của Gatekeeper.
+- `vantt-catchup.yml` gọi `vantt-bundles.yml` (`workflow_call`) khi một lần chạy không phải `dry_run` đẩy tag mới.
 - Chưa có script, bản vá hay gói nào. Lộ trình và thứ tự làm: [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md) (nguồn yêu cầu là PRD mục 14).
 
 ## Quy tắc

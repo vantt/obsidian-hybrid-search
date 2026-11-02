@@ -368,7 +368,9 @@ ohs-<version>-<platform>/
 └── LICENSES/             LICENSE của OHS (MIT), Node, và các phụ thuộc (tạo bằng license-checker hoặc tương đương lúc build)
 ```
 - Không đóng model vào gói (model tải lần đầu, khoảng 120 MB cho e5-small, vào thư mục cache của bộ cài). Tuỳ chọn sau: gói "đầy đủ" có model để cài không mạng (L07).
-- Thu gọn: bỏ `*.md`, test, bản đồ nguồn, header C trong `node_modules`; bỏ build của nền khác trong `onnxruntime-node` (ví dụ bỏ thư mục `linux`, `darwin` trên gói Windows). Ghi kích thước trước và sau vào release notes. Mục tiêu: dưới 250 MB giải nén (đo thật trên Windows trước đây: 529 MB `node_modules`).
+- Thu gọn: bỏ `*.md`, test, bản đồ nguồn, header C trong `node_modules`; bỏ build của nền khác trong `onnxruntime-node` (ví dụ bỏ thư mục `linux`, `darwin` trên gói Windows). Ghi kích thước trước và sau vào release notes. Kích thước đo thật (bản `0.17.2-vantt.1`, sau thu gọn): Windows 279 MB, macOS ARM 326 MB, Linux 296 MB giải nén; khoảng 100 MB sau khi nén (trước thu gọn 632 đến 943 MB). Riêng Node chiếm 85 đến 125 MB. Chỉ tiêu 250 MB cũ được thay bằng các số đo này: user chấp nhận 2026-11-02.
+- Thu gọn thêm, chỉ xoá file: provider CUDA và TensorRT của `onnxruntime-node` (cần driver NVIDIA và CUDA mà gói không có; OHS chạy CPU hoặc DirectML) và các file `.wasm` của `onnxruntime-web` (đường lùi cho trình duyệt; Node dùng `onnxruntime-node`).
+- macOS Intel (`darwin-x64`): `onnxruntime-node` 1.30.0 (bản `@huggingface/transformers` 4.3.1 ghim đúng) không có binding `darwin/x64`; bản mới nhất có binding là 1.23.2 (kiểm trong tarball npm của 1.21.1 đến 1.30.0). `bundle.mjs` chỉ cho nền này thay `onnxruntime-node` và `onnxruntime-common` bằng 1.23.2 lúc đóng gói (`PLATFORM_PINS`), không đụng mã hay lockfile của upstream; bản thay ghi trong `MANIFEST.json`, `.bundle.json` và release notes. Smoke xanh trên `macos-15-intel`. Kiểm tương đương chất lượng (mục 8.4, bước 6) chưa đạt: xem mục đó.
 - Không đổi mã của phụ thuộc. Thu gọn chỉ xoá file.
 
 ### 8.3. Ký mã
@@ -381,6 +383,7 @@ ohs-<version>-<platform>/
 3. `bin/ohs status`, `bin/ohs reindex` với model thật (cache model của CI), `bin/ohs search "giu chan khach" --json` khi bật gói tiếng Việt và khi tắt; kiểm số kết quả và note đứng đầu theo file kỳ vọng.
 4. `bin/ohs-mcp` bắt tay MCP qua stdio (gửi `initialize`, `tools/list`), có tool `search`.
 5. Đo: thời gian index, dung lượng gói, dung lượng DB; ghi vào artifact.
+6. Tương đương chất lượng của bản thay phụ thuộc (hiện chỉ `darwin-x64`): chạy eval upstream `obsidian-help` (không gói) và eval `vi-search` (có `ohs-lang-vi`) trên `macos-15-intel` với cây phát hành đã thay `onnxruntime-node`, so với cùng cây trên Linux dùng phụ thuộc theo lockfile; nDCG@5 của mọi hạng mục phải lệch không quá 0,01 (`vantt/scripts/bundle-parity.mjs`). Lần đo đầu (2026-11-02) lệch quá: `obsidian-help` multilingual +0,063, conceptual +0,029, `vi-unaccented` -0,024, `vi-semantic` +0,013. Đối chứng không thay phụ thuộc (macOS ARM, `onnxruntime-node` 1.30.0, theo lockfile) cũng lệch so với Linux: multilingual +0,063, conceptual +0,034, `vi-dd` -0,033, `vi-snippet` -0,012. Vậy ngưỡng 0,01 giữa hai nền khác nhau không đạt được ngay cả khi không thay gì, và bước này cần user chốt lại tiêu chí (ví dụ so với đối chứng ARM, hoặc nới ngưỡng) trước khi `darwin-x64` được phát hành.
 
 ---
 
