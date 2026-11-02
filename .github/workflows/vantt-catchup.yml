@@ -60,6 +60,9 @@ env:
 
 jobs:
   catchup:
+    outputs:
+      # Set only when this run pushed a new release tag (PRD 7.2): the bundles job below runs on it.
+      new_tag: ${{ steps.push.outputs.new_tag }}
     if: github.repository == 'vantt/obsidian-hybrid-search'
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -159,6 +162,7 @@ jobs:
           if [ "$istag" = true ]; then
             git tag "$tag" "$branch"
             git push origin "refs/tags/$tag:refs/tags/$tag"
+            echo "new_tag=$tag" >> "$GITHUB_OUTPUT"
           fi
 
       # PRD 6.4: patches re-exported after a conflict fix go to master through a PR.
@@ -230,3 +234,15 @@ jobs:
       - name: Fail the job when catchup failed
         if: ${{ always() && steps.catchup.outputs.code != '0' }}
         run: exit 1
+
+  # Prebuilt bundles for a freshly pushed tag (PRD 7.3). Not called on dry runs, when
+  # catchup failed, or when the tag already existed with identical content.
+  bundles:
+    needs: catchup
+    if: ${{ needs.catchup.outputs.new_tag != '' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/vantt-bundles.yml
+    with:
+      tag: ${{ needs.catchup.outputs.new_tag }}
+    secrets: inherit

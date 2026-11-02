@@ -31,12 +31,51 @@ export const PLATFORMS = {
   'linux-x64': { node: 'linux-x64', ext: 'tar.xz', os: 'linux', arch: 'x64' },
 };
 
+// Packages replaced by an exact older version at bundling time, per platform. The release tree and its lockfile
+// stay untouched. onnxruntime-node dropped its darwin/x64 binding after 1.23.2 (checked in the npm tarballs of
+// 1.21.1 to 1.30.0), while @huggingface/transformers pins 1.30.0 exactly; the bundle's smoke and eval parity
+// runs on macos-15-intel decide whether the substitution is good enough.
+export const PLATFORM_PINS = {
+  'darwin-x64': { 'onnxruntime-node': '1.23.2', 'onnxruntime-common': '1.23.2' },
+};
+
 const isWin = process.platform === 'win32';
 // GNU tar (Git for Windows) cannot read zip; the system bsdtar can.
 const TAR = isWin ? path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe') : 'tar';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 const log = (m) => process.stderr.write(`[bundle] ${m}\n`);
+
+/**
+ * Replace installed packages by exact versions from the npm registry (file replacement; the tree's lockfile is not
+ * touched). Returns {name: {from, to}}.
+ */
+export function applyPins(nodeModules, pins, scratch) {
+  const substitutions = {};
+  for (const [name, ver] of Object.entries(pins)) {
+    const installed = JSON.parse(readFileSync(path.join(nodeModules, name, 'package.json'), 'utf8')).version;
+    log(`replacing ${name}@${installed} with ${name}@${ver}`);
+    const pk = path.join(scratch, name);
+    rmSync(pk, { recursive: true, force: true });
+    mkdirSync(pk, { recursive: true });
+    const tgz = run('npm', ['pack', `${name}@${ver}`, '--silent', '--pack-destination', pk], { cwd: pk, capture: true }).trim().split('\n').pop();
+    run(TAR, ['-xf', path.join(pk, tgz)], { cwd: pk });
+    rmSync(path.join(nodeModules, name), { recursive: true, force: true });
+    cpSync(path.join(pk, 'package'), path.join(nodeModules, name), { recursive: true });
+    substitutions[name] = { from: installed, to: ver };
+  }
+  return substitutions;
+}
+
+export function parsePins(base, specs = []) {
+  const pins = { ...base };
+  for (const spec of specs) {
+    const at = spec.lastIndexOf('@');
+    if (at <= 0) throw new Error(`--pin expects name@version, got ${spec}`);
+    pins[spec.slice(0, at)] = spec.slice(at + 1);
+  }
+  return pins;
+}
 
 export function hostPlatform() {
   return `${process.platform}-${process.arch}`;
@@ -216,6 +255,7 @@ export async function main(argv) {
       out: { type: 'string' },
       work: { type: 'string' },
       version: { type: 'string' },
+      pin: { type: 'string', multiple: true },
       'no-lang': { type: 'boolean', default: false },
       'skip-build': { type: 'boolean', default: false },
       'keep-stage': { type: 'boolean', default: false },
@@ -266,6 +306,8 @@ export async function main(argv) {
   // 2. Production dependencies, built on this platform.
   log('installing production dependencies (npm ci --omit=dev)');
   run('npm', ['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: app });
+  const pins = parsePins(PLATFORM_PINS[platform] ?? {}, values.pin);
+  const substitutions = applyPins(path.join(app, 'node_modules'), pins, path.join(work, 'pins'));
   run('npm', ['rebuild'], { cwd: app });
   rmSync(path.join(app, 'package-lock.json'), { force: true });
   // Fail loudly when a dependency ships no native binary for this platform (onnxruntime-node 1.30 has none for darwin-x64).
@@ -335,6 +377,7 @@ export async function main(argv) {
     node_archive: { name: nodeInfo.archive, sha256: nodeInfo.sha256 },
     patches: patchList(tree),
     lang_packs: langVersion ? { vi: langVersion } : {},
+    substitutions,
     built_at: new Date().toISOString(),
     files,
   };
@@ -363,6 +406,7 @@ export async function main(argv) {
     node_version: nodeVersion,
     lang_packs: manifest.lang_packs,
     patches: manifest.patches.length,
+    substitutions,
     patch_list: manifest.patches,
     upstream_version: manifest.upstream_version,
     dir_sizes: Object.fromEntries(['node', 'app', 'lang', 'LICENSES'].filter((d) => existsSync(path.join(root, d))).map((d) => [d, dirSize(path.join(root, d))])),
