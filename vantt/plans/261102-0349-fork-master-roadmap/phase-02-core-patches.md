@@ -44,8 +44,8 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 
 - [x] V04 P00 `fork-identity`
 - [x] V05 P09 `unicode-inline-tags`
-- [ ] V06 P02 `db-path`
-- [ ] V07 P03 `vector-export`
+- [x] V06 P02 `db-path`
+- [x] V07 P03 `vector-export`
 - [ ] V08 P04 `stdio-parity`
 - [ ] V23 P05 `block-anchors`
 - [ ] V24 P06 `restrict-paths`
@@ -64,6 +64,9 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - `series.toml` giữ thứ tự P00, P01, P02, P03, P04, P09, P05, P06, P07: bản vá về sau chèn đúng vị trí, không chỉ nối cuối.
 - P09 (V05) xong: không tăng `INDEX_SCHEMA_VERSION`; note đã index trước bản vá giữ tag cũ tới khi note đổi hoặc chạy `ohs reindex --force` (ghi ở spec).
 - P00 (V04) xong: dựng trên tag `v0.17.2` để đứng đầu chuỗi; đã kiểm P00 → P01 → P09 áp sạch bằng `git am --3way`. Bản vá thêm `OHS_DISABLE_UPDATE_CHECK=1` (bộ cài dự án sẽ đặt biến này) và `build: "vantt"` trong `status` khi có dấu fork.
+- P02 (V06), P03 (V07) xong. Nhánh ghép `vantt/work/series` (worktree `/home/vantt/projects/ohs-wt/chk-series`) = P00, P01, P02, P03, P09: 117 file, 2049 test xanh, lint xanh. P03 xung đột import với P00 trong `cli.ts`, lead sửa và xuất lại P02, P03 từ nhánh ghép.
+- P02 lệch PRD: `--db` chỉ được nhận khi DB đã có và `vault_path` khớp (test upstream `vault-config` buộc vậy); đặt DB ở chỗ mới dùng `OBSIDIAN_DB_PATH`. Ghi trong spec.
+- P03: `ohs vectors`, `ohs neighbors`; hành động stdio làm ở P04 (V08). Chưa đo đầu-cuối trên vault 10.000 note.
 
 ## Risk
 

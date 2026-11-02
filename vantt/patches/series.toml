@@ -55,6 +55,34 @@ probe = "vantt/probes/language-pack-api.mjs"
 phase = "now"
 
 [[patches]]
+id = "db-path"
+name = "feat(storage): allow the index database outside the vault"
+patch_file = "0002-db-path.patch"
+metadata_file = "0002-db-path.spec.md"
+consumer = "pkm installer; Obsidian Sync users"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/runtime/config.ts", "src/vault/vault-config.ts", "src/storage/db.ts", "src/storage/vault-locator.ts", "src/transports/status-payload.ts", "src/transports/mcp-runtime.ts", "src/transports/cli.ts", "README.md"]
+test_command = "npx vitest run test/vantt/db-path.test.ts"
+capability_check = "node vantt/probes/db-path.mjs --ohs ."
+probe = "vantt/probes/db-path.mjs"
+phase = "now"
+
+[[patches]]
+id = "vector-export"
+name = "feat(search): export note vectors and nearest notes as JSON Lines"
+patch_file = "0003-vector-export.patch"
+metadata_file = "0003-vector-export.spec.md"
+consumer = "pkm project (note_knn, similar_pairs); stdio-parity; mobile server"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/transports/cli.ts", "src/storage/note-vectors.ts", "src/search/note-vectors.ts"]
+test_command = "npx vitest run test/vantt/vector-export.test.ts"
+capability_check = "node vantt/probes/vector-export.mjs --ohs ."
+probe = "vantt/probes/vector-export.mjs"
+phase = "now"
+
+[[patches]]
 id = "unicode-inline-tags"
 name = "fix(content): accept Unicode letters in inline tags"
 patch_file = "0009-unicode-inline-tags.patch"

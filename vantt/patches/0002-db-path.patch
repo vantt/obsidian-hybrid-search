@@ -1,0 +1,447 @@
+From 59c6d27f17b843f5be0f67031223cd81cea90b0b Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:08:16 +0700
+Subject: [PATCH] feat(storage): allow the index database outside the vault
+
+OBSIDIAN_DB_PATH (absolute path) places the index database, with its WAL and
+shared-memory files, outside the vault so sync tools no longer copy it. The
+parent directory is created on open. A database outside the default location
+is refused when the vault recorded in it differs from the active vault.
+
+With OBSIDIAN_VAULT_PATH set, --db now also selects an existing database that
+records that vault; the selection is exported through OBSIDIAN_DB_PATH so the
+daemon and every transport open the same file. status reports db_path.
+Nothing changes when neither is used.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+---
+ README.md                        |   3 +-
+ src/runtime/config.ts            |  11 ++
+ src/storage/db.ts                |  22 +++-
+ src/storage/vault-locator.ts     |  16 +++
+ src/transports/cli.ts            |   2 +-
+ src/transports/mcp-runtime.ts    |   1 +
+ src/transports/status-payload.ts |   1 +
+ src/vault/vault-config.ts        |  44 +++++++-
+ test/vantt/db-path.test.ts       | 167 +++++++++++++++++++++++++++++++
+ 9 files changed, 259 insertions(+), 8 deletions(-)
+ create mode 100644 test/vantt/db-path.test.ts
+
+diff --git a/README.md b/README.md
+index ef0392f..fbfdc80 100644
+--- a/README.md
++++ b/README.md
+@@ -154,7 +154,7 @@ ohs reindex
+ ohs "zettelkasten"
+ ```
+ 
+-From outside the vault, set `OBSIDIAN_VAULT_PATH` or pass `--db /path/to/vault/.obsidian-hybrid-search.db` explicitly.
++From outside the vault, set `OBSIDIAN_VAULT_PATH` or pass `--db /path/to/vault/.obsidian-hybrid-search.db` explicitly. With `OBSIDIAN_VAULT_PATH` set, `--db` also selects an existing database that records that vault.
+ 
+ ### Optional remote embeddings
+ 
+@@ -491,6 +491,7 @@ Set `OBSIDIAN_PREFIX` to add a prefix to every tool name. For example, `myvault_
+ | Environment variable               | Default                              | Description                                                                                                                              |
+ | ---------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+ | `OBSIDIAN_VAULT_PATH`              | Required for MCP; CLI auto-detects   | Absolute path to your vault                                                                                                              |
++| `OBSIDIAN_DB_PATH`                 | `<vault>/.obsidian-hybrid-search.db` | Absolute path of the index DB; keeps it out of the vault (sync tools). Refused if it records another vault.                              |
+ | `OBSIDIAN_PREFIX`                  | `""`                                 | Optional MCP tool prefix, e.g. `myvault_` → `myvault_search`, `myvault_read`                                                             |
+ | `OBSIDIAN_IGNORE_PATTERNS`         | `.obsidian/**,templates/**,*.canvas` | Comma-separated ignore patterns                                                                                                          |
+ | `OBSIDIAN_RESPECT_GITIGNORE`       | `true`                               | Read root and nested `.gitignore` files; set to `false` to disable                                                                       |
+diff --git a/src/runtime/config.ts b/src/runtime/config.ts
+index ea5bc5e..83d1b10 100644
+--- a/src/runtime/config.ts
++++ b/src/runtime/config.ts
+@@ -52,7 +52,18 @@ export const config = {
+   get rerankerModel(): string {
+     return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
+   },
++  /** Absolute path of an index database kept outside the default location; unset means the default. */
++  get dbPathOverride(): string | undefined {
++    const raw = process.env.OBSIDIAN_DB_PATH?.trim();
++    if (!raw) return undefined;
++    if (!path.isAbsolute(raw)) {
++      throw new Error(`OBSIDIAN_DB_PATH must be an absolute path (received "${raw}")`);
++    }
++    return path.normalize(raw);
++  },
+   get dbPath(): string {
++    const override = this.dbPathOverride;
++    if (override) return override;
+     const v = process.env.OBSIDIAN_VAULT_PATH;
+     if (!v) throw new Error('OBSIDIAN_VAULT_PATH environment variable is required');
+     return path.join(v, '.obsidian-hybrid-search.db');
+diff --git a/src/storage/db.ts b/src/storage/db.ts
+index 7a98c12..62fa1c2 100644
+--- a/src/storage/db.ts
++++ b/src/storage/db.ts
+@@ -1,6 +1,7 @@
+ import Database from 'better-sqlite3';
+ import { randomUUID } from 'node:crypto';
+-import { statSync } from 'node:fs';
++import { mkdirSync, statSync } from 'node:fs';
++import path from 'node:path';
+ import * as sqliteVec from 'sqlite-vec';
+ import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+ import { CONTENT_POLICY_IDENTITY, type SourcePart } from '../content/content-ignore.js';
+@@ -19,6 +20,7 @@ import {
+   type StalledOwner,
+ } from './index-ownership.js';
+ import { dropLanguageTables, writeNoteLexical, type NoteLexical } from './language-tables.js';
++import { isSameVaultPath } from './vault-locator.js';
+ 
+ type DB = InstanceType<typeof Database>;
+ 
+@@ -541,8 +543,25 @@ export class IndexStorageError extends Error {
+   }
+ }
+ 
++/**
++ * A database placed outside the vault is never trusted for a different vault than the
++ * one recorded in it: reusing it would index (and sweep) the wrong notes.
++ */
++function assertDatabaseBelongsToVault(db: DB): void {
++  const stored = db.prepare("SELECT value FROM settings WHERE key = 'vault_path'").get() as
++    { value: string } | undefined;
++  if (stored?.value && !isSameVaultPath(stored.value, config.vaultPath)) {
++    throw new Error(
++      `Index database ${config.dbPath} belongs to vault ${stored.value}, not ${config.vaultPath}. ` +
++        'Point OBSIDIAN_DB_PATH at a different file for this vault.',
++    );
++  }
++}
++
+ export function openDb(): DB {
+   closeDb();
++  const override = config.dbPathOverride;
++  if (override) mkdirSync(path.dirname(override), { recursive: true });
+   const db = new Database(config.dbPath, { timeout: 250 });
+   try {
+     sqliteVec.load(db);
+@@ -551,6 +570,7 @@ export function openDb(): DB {
+     _db = db;
+     _ownership = createIndexOwnership(db);
+     const settingsExist = db.prepare("SELECT 1 FROM sqlite_master WHERE name='settings'").get();
++    if (settingsExist && config.dbPathOverride) assertDatabaseBelongsToVault(db);
+     const revision = settingsExist
+       ? (db.prepare("SELECT value FROM settings WHERE key='index_ownership_schema'").get() as
+           { value: string } | undefined)
+diff --git a/src/storage/vault-locator.ts b/src/storage/vault-locator.ts
+index 5b42e8c..d6bcba3 100644
+--- a/src/storage/vault-locator.ts
++++ b/src/storage/vault-locator.ts
+@@ -1,4 +1,6 @@
+ import Database from 'better-sqlite3';
++import { realpathSync } from 'node:fs';
++import path from 'node:path';
+ 
+ /** Read a locator without acquiring the vault-bound singleton or provider defaults. */
+ export function readVaultLocator(dbFile: string): string | undefined {
+@@ -11,3 +13,17 @@ export function readVaultLocator(dbFile: string): string | undefined {
+     db.close();
+   }
+ }
++
++function canonicalPath(p: string): string {
++  const resolved = path.resolve(p);
++  try {
++    return realpathSync(resolved);
++  } catch {
++    return resolved;
++  }
++}
++
++/** True when both spellings name the same directory (symlinks and trailing slashes ignored). */
++export function isSameVaultPath(a: string, b: string): boolean {
++  return canonicalPath(a) === canonicalPath(b);
++}
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index be801d5..a9a993b 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -355,7 +355,7 @@ const program = new Command()
+   .version(version)
+   .option(
+     '--db <path>',
+-    'Path to .obsidian-hybrid-search.db (auto-discovered from CWD by default)',
++    'Path to .obsidian-hybrid-search.db (auto-discovered from CWD by default; an existing database of the active vault is used in place)',
+   );
+ 
+ // eslint-disable-next-line @typescript-eslint/require-await
+diff --git a/src/transports/mcp-runtime.ts b/src/transports/mcp-runtime.ts
+index a2720f9..2b99330 100644
+--- a/src/transports/mcp-runtime.ts
++++ b/src/transports/mcp-runtime.ts
+@@ -277,6 +277,7 @@ function callStatusTool(a: Record<string, unknown>, runtime: McpRuntime): McpToo
+     indexing_errors: getIndexFailures(),
+     links: stats.links,
+     last_indexed: stats.lastIndexed,
++    db_path: config.dbPath,
+     db_size_mb:
+       stats.dbSizeBytes !== null ? Math.round((stats.dbSizeBytes / 1024 / 1024) * 10) / 10 : null,
+     api_base_url: useRemoteEmbeddings() ? config.apiBaseUrl : null,
+diff --git a/src/transports/status-payload.ts b/src/transports/status-payload.ts
+index f65e66d..85fc43b 100644
+--- a/src/transports/status-payload.ts
++++ b/src/transports/status-payload.ts
+@@ -36,6 +36,7 @@ export function buildStatusPayload({
+     indexing_errors: getIndexFailures(),
+     links: stats.links,
+     last_indexed: stats.lastIndexed,
++    db_path: config.dbPath,
+     db_size_mb:
+       stats.dbSizeBytes !== null ? Math.round((stats.dbSizeBytes / 1024 / 1024) * 10) / 10 : null,
+     // Null in local mode: config.apiBaseUrl always holds the OpenAI default, so
+diff --git a/src/vault/vault-config.ts b/src/vault/vault-config.ts
+index 3e8f80e..b626024 100644
+--- a/src/vault/vault-config.ts
++++ b/src/vault/vault-config.ts
+@@ -1,6 +1,7 @@
+ import { existsSync, statSync } from 'node:fs';
+ import path from 'node:path';
+-import { readVaultLocator } from '../storage/vault-locator.js';
++import { config } from '../runtime/config.js';
++import { isSameVaultPath, readVaultLocator } from '../storage/vault-locator.js';
+ 
+ export function validateVaultPath(vaultPath: string | undefined): asserts vaultPath is string {
+   if (vaultPath === undefined) {
+@@ -31,18 +32,50 @@ function walkUpFind(name: string): string | undefined {
+   }
+ }
+ 
++const DEFAULT_DB_NAME = '.obsidian-hybrid-search.db';
++
++/** Read the vault a database file belongs to; undefined when it is missing, unreadable or unlabeled. */
++function readLocatorQuietly(dbFile: string): string | undefined {
++  try {
++    return readVaultLocator(dbFile) || undefined;
++  } catch {
++    return undefined;
++  }
++}
++
++/**
++ * Route the process to an index database outside the default location. The storage
++ * layer and the daemon it spawns read OBSIDIAN_DB_PATH, so setting it here makes
++ * every transport resolve the same file.
++ */
++function useExternalDatabase(dbFile: string, vaultPath: string): void {
++  if (path.resolve(dbFile) !== path.join(path.resolve(vaultPath), DEFAULT_DB_NAME)) {
++    process.env.OBSIDIAN_DB_PATH = path.resolve(dbFile);
++  }
++}
++
+ /** Select the vault; defaults are restored later from its actual database connection. */
+ export function discoverConfig(dbPathOpt?: string): void {
++  const configuredDb = config.dbPathOverride;
+   const explicitVault = process.env.OBSIDIAN_VAULT_PATH;
+   if (explicitVault !== undefined) {
+     validateVaultPath(explicitVault);
++    // An explicit vault keeps its own database unless --db names an existing database
++    // that records this very vault. A database of another vault is never adopted.
++    if (dbPathOpt) {
++      const stored = readLocatorQuietly(dbPathOpt);
++      if (stored && isSameVaultPath(stored, explicitVault)) {
++        useExternalDatabase(dbPathOpt, explicitVault);
++      }
++    }
+     return;
+   }
+ 
+   let dbFile: string | undefined = dbPathOpt;
+-  if (!dbFile) {
+-    const vaultDir = walkUpFind('.obsidian-hybrid-search.db');
+-    if (vaultDir) dbFile = path.join(vaultDir, '.obsidian-hybrid-search.db');
++  if (!dbFile && configuredDb && existsSync(configuredDb)) dbFile = configuredDb;
++  if (!dbFile && !configuredDb) {
++    const vaultDir = walkUpFind(DEFAULT_DB_NAME);
++    if (vaultDir) dbFile = path.join(vaultDir, DEFAULT_DB_NAME);
+   }
+ 
+   if (!dbFile) {
+@@ -58,7 +91,8 @@ export function discoverConfig(dbPathOpt?: string): void {
+   }
+ 
+   try {
+-    // A locator supplies only the target vault, never its provider or ignore defaults.
++    // A locator supplies only the target vault, never its provider, ignore defaults or
++    // database location; OBSIDIAN_DB_PATH (already in the environment) names those.
+     process.env.OBSIDIAN_VAULT_PATH = readVaultLocator(dbFile) || path.dirname(dbFile);
+   } catch {
+     // DB unreadable — let normal startup errors surface without inventing a target.
+diff --git a/test/vantt/db-path.test.ts b/test/vantt/db-path.test.ts
+new file mode 100644
+index 0000000..42db9e8
+--- /dev/null
++++ b/test/vantt/db-path.test.ts
+@@ -0,0 +1,167 @@
++import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { writeLanguagePackVault } from './fixtures/language-pack-vault.js';
++
++vi.mock('../../src/inference/embedder.js', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../../src/inference/embedder.js')>();
++  const { fixtureVector } = await import('./fixtures/language-pack-vault.js');
++  return {
++    ...actual,
++    activeModelName: () => 'fixture-model',
++    getEmbeddingDim: () => Promise.resolve(8),
++    getContextLength: () => Promise.resolve(512),
++    getDocumentTokenPolicy: () =>
++      Promise.resolve({ limit: 508, count: (text: string) => text.length / 4 }),
++    embedDetailed: vi.fn((texts: string[]) =>
++      Promise.resolve(texts.map((text) => ({ ok: true as const, embedding: fixtureVector(text) }))),
++    ),
++    embed: vi.fn((texts: string[]) => Promise.resolve(texts.map((t) => fixtureVector(t)))),
++  };
++});
++
++const { openIndexDatabase, createIndexService } =
++  await import('../../src/indexing/index-service.js');
++const { closeDb } = await import('../../src/storage/db.js');
++const { config } = await import('../../src/runtime/config.js');
++const { discoverConfig } = await import('../../src/vault/vault-config.js');
++const { buildStatusPayload } = await import('../../src/transports/status-payload.js');
++
++const root = mkdtempSync(path.join(tmpdir(), 'ohs-db-path-'));
++const vaultA = path.join(root, 'vault-a');
++const vaultB = path.join(root, 'vault-b');
++const external = path.join(root, 'state', 'nested', 'a.db');
++const DEFAULT_NAME = '.obsidian-hybrid-search.db';
++
++async function indexVault(): Promise<void> {
++  closeDb();
++  await openIndexDatabase();
++  const service = createIndexService();
++  try {
++    expect((await service.reindex()).errors).toEqual([]);
++  } finally {
++    await service.close();
++  }
++}
++
++function dbFilesIn(dir: string): string[] {
++  return readdirSync(dir).filter((name) => name.startsWith(DEFAULT_NAME));
++}
++
++beforeEach(() => {
++  rmSync(path.join(root, 'state'), { recursive: true, force: true });
++  for (const vault of [vaultA, vaultB]) {
++    rmSync(vault, { recursive: true, force: true });
++    mkdirSync(vault, { recursive: true });
++    writeLanguagePackVault(vault);
++  }
++  delete process.env.OBSIDIAN_DB_PATH;
++  process.env.OBSIDIAN_VAULT_PATH = vaultA;
++});
++
++afterEach(() => {
++  closeDb();
++  delete process.env.OBSIDIAN_DB_PATH;
++  vi.restoreAllMocks();
++});
++
++afterAll(() => {
++  rmSync(root, { recursive: true, force: true });
++});
++
++describe('db path resolution', () => {
++  it('defaults to the vault location when nothing is configured', () => {
++    expect(config.dbPath).toBe(path.join(vaultA, DEFAULT_NAME));
++    process.env.OBSIDIAN_DB_PATH = '   ';
++    expect(config.dbPath).toBe(path.join(vaultA, DEFAULT_NAME));
++  });
++
++  it('uses OBSIDIAN_DB_PATH and rejects a relative path', () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    expect(config.dbPath).toBe(external);
++    process.env.OBSIDIAN_DB_PATH = 'relative/a.db';
++    expect(() => config.dbPath).toThrow(/absolute/);
++  });
++});
++
++describe('external database', () => {
++  it('keeps every database file out of the vault and creates parent directories', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    expect(existsSync(external)).toBe(true);
++    expect(dbFilesIn(vaultA)).toEqual([]);
++    const payload = buildStatusPayload({ contextLength: 512, version: 'test' });
++    expect(payload.db_path).toBe(external);
++    expect(payload.total).toBeGreaterThan(0);
++  });
++
++  it('reports the default path in status when unconfigured', async () => {
++    await indexVault();
++    expect(buildStatusPayload({ contextLength: 512, version: 'test' }).db_path).toBe(
++      path.join(vaultA, DEFAULT_NAME),
++    );
++    expect(dbFilesIn(vaultA)).toContain(DEFAULT_NAME);
++  });
++
++  it('refuses a database that belongs to another vault', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    closeDb();
++    process.env.OBSIDIAN_VAULT_PATH = vaultB;
++    await expect(openIndexDatabase()).rejects.toThrow(/belongs to vault .*vault-a/);
++  });
++});
++
++describe('discoverConfig with --db', () => {
++  it('adopts an existing database that records the active vault', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    closeDb();
++    delete process.env.OBSIDIAN_DB_PATH;
++    discoverConfig(external);
++    expect(config.dbPath).toBe(external);
++  });
++
++  it('does not adopt another vault database or create one for an explicit vault', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    closeDb();
++    delete process.env.OBSIDIAN_DB_PATH;
++    process.env.OBSIDIAN_VAULT_PATH = vaultB;
++    discoverConfig(external);
++    discoverConfig(path.join(root, 'missing.db'));
++    expect(config.dbPath).toBe(path.join(vaultB, DEFAULT_NAME));
++  });
++
++  it('uses --db only to find the vault when no vault is set', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    closeDb();
++    delete process.env.OBSIDIAN_DB_PATH;
++    delete process.env.OBSIDIAN_VAULT_PATH;
++    discoverConfig(external);
++    expect(process.env.OBSIDIAN_VAULT_PATH).toBe(vaultA);
++    expect(process.env.OBSIDIAN_DB_PATH).toBeUndefined();
++    expect(config.dbPath).toBe(path.join(vaultA, DEFAULT_NAME));
++  });
++
++  it('finds the vault from an existing OBSIDIAN_DB_PATH database', async () => {
++    process.env.OBSIDIAN_DB_PATH = external;
++    await indexVault();
++    closeDb();
++    delete process.env.OBSIDIAN_VAULT_PATH;
++    vi.spyOn(process, 'cwd').mockReturnValue(root);
++    discoverConfig();
++    expect(process.env.OBSIDIAN_VAULT_PATH).toBe(vaultA);
++    expect(config.dbPath).toBe(external);
++  });
++
++  it('leaves the default location alone for an in-vault --db', () => {
++    const inVault = path.join(vaultA, DEFAULT_NAME);
++    writeFileSync(inVault, '');
++    delete process.env.OBSIDIAN_VAULT_PATH;
++    discoverConfig(inVault);
++    expect(process.env.OBSIDIAN_DB_PATH).toBeUndefined();
++  });
++});
+-- 
+2.53.0
+

@@ -1,0 +1,809 @@
+From 85658a1427c7cbc84e1386b6f22594399ba54c6d Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:09:15 +0700
+Subject: [PATCH] feat(search): export note vectors and nearest notes as JSON
+ Lines
+
+---
+ src/search/note-vectors.ts       | 312 +++++++++++++++++++++++++++++++
+ src/storage/note-vectors.ts      | 101 ++++++++++
+ src/transports/cli.ts            | 119 ++++++++++++
+ test/vantt/vector-export.test.ts | 222 ++++++++++++++++++++++
+ 4 files changed, 754 insertions(+)
+ create mode 100644 src/search/note-vectors.ts
+ create mode 100644 src/storage/note-vectors.ts
+ create mode 100644 test/vantt/vector-export.test.ts
+
+diff --git a/src/search/note-vectors.ts b/src/search/note-vectors.ts
+new file mode 100644
+index 0000000..304f013
+--- /dev/null
++++ b/src/search/note-vectors.ts
+@@ -0,0 +1,312 @@
++import { normalizeNotePath } from '../content/text-normalization.js';
++import { buildFilterPredicate } from '../contracts/filter-predicate.js';
++import { getBacklinksForPaths, getOutgoingLinksForPaths } from '../storage/db.js';
++import {
++  countNotesWithVectors,
++  findExistingNotePaths,
++  getStoredVectorSource,
++  iterateNoteChunkVectors,
++  listNotePathsMatching,
++  type NoteChunkVectors,
++} from '../storage/note-vectors.js';
++
++/**
++ * Note-level vectors derived from the stored chunk embeddings, and nearest-note search
++ * over them. Read-only: nothing is written and no embedding model is called. Transports
++ * (CLI today, stdio later) only format what these functions return.
++ */
++
++export type Pooling = 'mean' | 'max';
++
++interface VectorMeta {
++  model: string | null;
++  dim: number | null;
++  pooling: Pooling;
++  note_count: number;
++  ohs_version: string;
++}
++
++/** A requested note that cannot be answered; reported per note, never as a made-up vector. */
++interface NoteVectorError {
++  path: string;
++  error: string;
++}
++
++export interface NoteVector {
++  path: string;
++  dim: number;
++  model: string;
++  chunks: number;
++  vector: number[];
++}
++
++interface NeighborScore {
++  path: string;
++  score: number;
++}
++
++export interface NoteNeighbors {
++  path: string;
++  neighbors: NeighborScore[];
++}
++
++export interface NoteVectorsOptions {
++  /** Vault-relative paths; omitted means every note that has vectors. */
++  paths?: string[];
++  pooling?: Pooling;
++  /** L2-normalise the pooled vector. Default true. */
++  normalize?: boolean;
++  ohsVersion: string;
++}
++
++export interface NeighborsOptions {
++  paths?: string[];
++  /** Neighbours per note. Default 10. */
++  k?: number;
++  /** Drop neighbours with cosine below this value. */
++  minScore?: number;
++  /** Drop notes linked to or from the source note. */
++  excludeLinked?: boolean;
++  /** Same prefix semantics as the search `scope` filter; limits the candidate notes. */
++  scope?: string | string[];
++  pooling?: Pooling;
++  ohsVersion: string;
++}
++
++export interface VectorExport<T> {
++  meta: VectorMeta;
++  /** One entry per requested or indexed note, produced lazily. */
++  records: Iterable<T | NoteVectorError>;
++}
++
++export class VectorExportError extends Error {
++  override name = 'VectorExportError';
++}
++
++const DEFAULT_K = 10;
++const SOURCE_BLOCK = 500;
++
++function l2Normalize(vector: Float64Array): void {
++  let sum = 0;
++  for (const value of vector) sum += value * value;
++  const norm = Math.sqrt(sum);
++  if (norm === 0) return;
++  for (let i = 0; i < vector.length; i++) vector[i]! /= norm;
++}
++
++/** Combine chunk embeddings of one note into a single vector. */
++export function poolVectors(
++  vectors: readonly Float32Array[],
++  pooling: Pooling,
++  normalize: boolean,
++): Float64Array {
++  const dim = vectors[0]?.length ?? 0;
++  const pooled = new Float64Array(dim);
++  if (pooling === 'max') pooled.fill(-Infinity);
++  for (const vector of vectors) {
++    for (let i = 0; i < dim; i++) {
++      pooled[i] = pooling === 'max' ? Math.max(pooled[i]!, vector[i]!) : pooled[i]! + vector[i]!;
++    }
++  }
++  if (pooling === 'mean') for (let i = 0; i < dim; i++) pooled[i]! /= vectors.length;
++  if (normalize) l2Normalize(pooled);
++  return pooled;
++}
++
++interface Provenance {
++  model: string | null;
++  dim: number | null;
++}
++
++/** Refuse to export when vector provenance is unknown or the vectors disagree with it. */
++function assertConsistent(note: NoteChunkVectors, source: Provenance): void {
++  if (source.model === null) {
++    throw new VectorExportError(
++      'Embedding model is unknown for the stored vectors. Use full reindex --force to rebuild with a configured model.',
++    );
++  }
++  for (const vector of note.vectors) {
++    if (source.dim !== null && vector.length !== source.dim) {
++      throw new VectorExportError(
++        `Embedding dimension mismatch for ${note.path}: stored ${String(source.dim)}, vector ${String(vector.length)}.`,
++      );
++    }
++  }
++}
++
++function normalizePaths(paths: string[] | undefined): string[] | undefined {
++  return paths === undefined || paths.length === 0
++    ? undefined
++    : [...new Set(paths.map(normalizeNotePath))];
++}
++
++/** Explain why a requested path has no vector. */
++function missingNoteError(path: string, existing: Set<string>): NoteVectorError {
++  return {
++    path,
++    error: existing.has(path) ? 'note has no stored embeddings' : 'note not found in the index',
++  };
++}
++
++function* noteVectorRecords(
++  requested: string[] | undefined,
++  pooling: Pooling,
++  normalize: boolean,
++  source: Provenance,
++): Generator<NoteVector | NoteVectorError> {
++  const seen = new Set<string>();
++  for (const note of iterateNoteChunkVectors(requested)) {
++    assertConsistent(note, source);
++    seen.add(note.path);
++    const vector = poolVectors(note.vectors, pooling, normalize);
++    yield {
++      path: note.path,
++      dim: vector.length,
++      model: source.model!,
++      chunks: note.vectors.length,
++      vector: Array.from(vector),
++    };
++  }
++  if (requested) {
++    const missing = requested.filter((path) => !seen.has(path));
++    const existing = findExistingNotePaths(missing);
++    for (const path of missing) yield missingNoteError(path, existing);
++  }
++}
++
++/** Pooled vector per note: every note with vectors, or just the requested paths. */
++export function exportNoteVectors(options: NoteVectorsOptions): VectorExport<NoteVector> {
++  const pooling = options.pooling ?? 'mean';
++  const requested = normalizePaths(options.paths);
++  const source = getStoredVectorSource();
++  const meta: VectorMeta = {
++    model: source.model,
++    dim: source.dim,
++    pooling,
++    note_count: requested ? requested.length : countNotesWithVectors(),
++    ohs_version: options.ohsVersion,
++  };
++  return {
++    meta,
++    records: noteVectorRecords(requested, pooling, options.normalize ?? true, source),
++  };
++}
++
++interface Matrix {
++  paths: string[];
++  dim: number;
++  /** Row-major, unit-length rows. */
++  data: Float32Array;
++}
++
++/** Unit-length pooled vectors of every note with vectors, in one flat buffer. */
++function loadMatrix(pooling: Pooling, source: Provenance): Matrix {
++  const paths: string[] = [];
++  const rows: Float32Array[] = [];
++  let dim = 0;
++  for (const note of iterateNoteChunkVectors()) {
++    assertConsistent(note, source);
++    const pooled = poolVectors(note.vectors, pooling, true);
++    if (dim === 0) dim = pooled.length;
++    else if (pooled.length !== dim) {
++      throw new VectorExportError(
++        `Embedding dimension mismatch for ${note.path}: expected ${String(dim)}, vector ${String(pooled.length)}.`,
++      );
++    }
++    paths.push(note.path);
++    rows.push(Float32Array.from(pooled));
++  }
++  const data = new Float32Array(rows.length * dim);
++  rows.forEach((row, index) => data.set(row, index * dim));
++  return { paths, dim, data };
++}
++
++function dot(data: Float32Array, a: number, b: number, dim: number): number {
++  let sum = 0;
++  for (let i = 0, x = a * dim, y = b * dim; i < dim; i++) sum += data[x + i]! * data[y + i]!;
++  return sum;
++}
++
++/** Insert into a descending top-k list kept sorted; ties keep the earlier path first. */
++function pushTop(top: NeighborScore[], item: NeighborScore, k: number): void {
++  if (top.length === k && item.score <= top[k - 1]!.score) return;
++  let at = top.length;
++  while (at > 0 && top[at - 1]!.score < item.score) at--;
++  top.splice(at, 0, item);
++  if (top.length > k) top.pop();
++}
++
++function linkedPaths(paths: string[]): Map<string, Set<string>> {
++  const outgoing = getOutgoingLinksForPaths(paths);
++  const incoming = getBacklinksForPaths(paths);
++  const linked = new Map<string, Set<string>>();
++  for (const path of paths) {
++    linked.set(path, new Set([...(outgoing.get(path) ?? []), ...(incoming.get(path) ?? [])]));
++  }
++  return linked;
++}
++
++function* neighborRecords(
++  matrix: Matrix,
++  requested: string[] | undefined,
++  options: NeighborsOptions,
++): Generator<NoteNeighbors | NoteVectorError> {
++  const k = options.k ?? DEFAULT_K;
++  const minScore = options.minScore ?? -Infinity;
++  const index = new Map(matrix.paths.map((path, i) => [path, i]));
++
++  const scope = buildFilterPredicate({ scope: options.scope });
++  const allowed = scope.isEmpty ? undefined : listNotePathsMatching(scope);
++  const candidates: number[] = [];
++  matrix.paths.forEach((path, i) => {
++    if (!allowed || allowed.has(path)) candidates.push(i);
++  });
++
++  const sources = requested ?? matrix.paths;
++  for (let start = 0; start < sources.length; start += SOURCE_BLOCK) {
++    const block = sources.slice(start, start + SOURCE_BLOCK);
++    const linked = options.excludeLinked ? linkedPaths(block) : undefined;
++    const unknown = requested
++      ? findExistingNotePaths(block.filter((path) => !index.has(path)))
++      : new Set<string>();
++    for (const path of block) {
++      const self = index.get(path);
++      if (self === undefined) {
++        yield missingNoteError(path, unknown);
++        continue;
++      }
++      const skip = linked?.get(path);
++      const top: NeighborScore[] = [];
++      for (const other of candidates) {
++        if (other === self) continue;
++        const score = dot(matrix.data, self, other, matrix.dim);
++        if (score < minScore) continue;
++        const otherPath = matrix.paths[other]!;
++        if (skip?.has(otherPath)) continue;
++        pushTop(top, { path: otherPath, score }, k);
++      }
++      yield { path, neighbors: top };
++    }
++  }
++}
++
++/**
++ * The K most similar notes per note, by cosine over pooled note vectors. Without
++ * `paths`, every note with vectors is a source. `scope` limits the candidates only.
++ */
++export function findNoteNeighbors(options: NeighborsOptions): VectorExport<NoteNeighbors> {
++  const pooling = options.pooling ?? 'mean';
++  const requested = normalizePaths(options.paths);
++  const source = getStoredVectorSource();
++  const matrix = loadMatrix(pooling, source);
++  return {
++    meta: {
++      model: source.model,
++      dim: source.dim,
++      pooling,
++      note_count: requested ? requested.length : matrix.paths.length,
++      ohs_version: options.ohsVersion,
++    },
++    records: neighborRecords(matrix, requested, options),
++  };
++}
+diff --git a/src/storage/note-vectors.ts b/src/storage/note-vectors.ts
+new file mode 100644
+index 0000000..5f2a032
+--- /dev/null
++++ b/src/storage/note-vectors.ts
+@@ -0,0 +1,101 @@
++import type { FilterPredicate } from '../contracts/filter-predicate.js';
++import { getDb, getStoredEmbeddingDim, getStoredModel, hasVecTable } from './db.js';
++
++/** Read-only access to the stored chunk embeddings, grouped by note. */
++
++export interface NoteChunkVectors {
++  path: string;
++  /** Chunk embeddings in chunk order. */
++  vectors: Float32Array[];
++}
++
++export interface StoredVectorSource {
++  /** `embedding_model` recorded when the vectors were written. */
++  model: string | null;
++  /** `embedding_dim` recorded when the vec table was created. */
++  dim: number | null;
++}
++
++const PATH_BATCH = 500;
++
++export function getStoredVectorSource(): StoredVectorSource {
++  return { model: getStoredModel(), dim: getStoredEmbeddingDim() };
++}
++
++/** Number of notes that have at least one stored chunk embedding. */
++export function countNotesWithVectors(): number {
++  if (!hasVecTable()) return 0;
++  return getDb()
++    .prepare(
++      `SELECT COUNT(DISTINCT c.note_id) FROM chunks c
++       WHERE EXISTS (SELECT 1 FROM vec_chunks vc WHERE vc.chunk_id = c.id)`,
++    )
++    .pluck()
++    .get() as number;
++}
++
++/** The subset of `paths` that are indexed notes. */
++export function findExistingNotePaths(paths: string[]): Set<string> {
++  const db = getDb();
++  const found = new Set<string>();
++  for (let i = 0; i < paths.length; i += PATH_BATCH) {
++    const batch = paths.slice(i, i + PATH_BATCH);
++    const rows = db
++      .prepare(`SELECT path FROM notes WHERE path IN (${batch.map(() => '?').join(', ')})`)
++      .pluck()
++      .all(...batch) as string[];
++    for (const row of rows) found.add(row);
++  }
++  return found;
++}
++
++/** Paths of the notes matching a filter predicate (alias `n` over `notes`). */
++export function listNotePathsMatching(predicate: FilterPredicate): Set<string> {
++  const where = predicate.isEmpty ? '' : ` WHERE ${predicate.sql}`;
++  const rows = getDb()
++    .prepare(`SELECT n.path FROM notes n${where}`)
++    .pluck()
++    .all(...predicate.params) as string[];
++  return new Set(rows);
++}
++
++function* iterateRows(where: string, params: Array<string | number>): Generator<NoteChunkVectors> {
++  const rows = getDb()
++    .prepare(
++      `SELECT n.path AS path, vc.embedding AS embedding
++       FROM chunks c
++       JOIN notes n ON n.id = c.note_id
++       JOIN vec_chunks vc ON vc.chunk_id = c.id
++       ${where}
++       ORDER BY n.path, c.chunk_index`,
++    )
++    .iterate(...params) as IterableIterator<{ path: string; embedding: Buffer }>;
++  let current: NoteChunkVectors | undefined;
++  for (const row of rows) {
++    if (current?.path !== row.path) {
++      if (current) yield current;
++      current = { path: row.path, vectors: [] };
++    }
++    // Copy: the row buffer is reused by SQLite after the next step.
++    const bytes = new Uint8Array(row.embedding);
++    current.vectors.push(new Float32Array(bytes.buffer, 0, bytes.byteLength / 4));
++  }
++  if (current) yield current;
++}
++
++/**
++ * Chunk embeddings per note, ordered by path. With `paths`, only those notes that have
++ * vectors are produced; without, every note that has vectors.
++ */
++export function* iterateNoteChunkVectors(paths?: string[]): Generator<NoteChunkVectors> {
++  if (!hasVecTable()) return;
++  if (paths === undefined) {
++    yield* iterateRows('', []);
++    return;
++  }
++  const sorted = [...new Set(paths)].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0));
++  for (let i = 0; i < sorted.length; i += PATH_BATCH) {
++    const batch = sorted.slice(i, i + PATH_BATCH);
++    yield* iterateRows(`WHERE n.path IN (${batch.map(() => '?').join(', ')})`, batch);
++  }
++}
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index a9a993b..f7a7e7d 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -13,6 +13,12 @@ import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings
+ import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
+ import { config } from '../runtime/config.js';
+ import { packageIdentity, updateCheckDisabled } from '../runtime/package-identity.js';
++import {
++  exportNoteVectors,
++  findNoteNeighbors,
++  type Pooling,
++  type VectorExport,
++} from '../search/note-vectors.js';
+ import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
+ import {
+   applyDbConfigDefaults,
+@@ -728,6 +734,119 @@ program
+     },
+   );
+ 
++function parsePooling(raw: string): Pooling {
++  if (raw === 'mean' || raw === 'max') return raw;
++  throw new Error('Invalid --pooling: expected mean or max');
++}
++
++/** One JSON object per line: the meta line, then a line per note. */
++function printJsonLines<T>(result: VectorExport<T>): void {
++  process.stdout.write(`${JSON.stringify({ meta: result.meta })}\n`);
++  for (const record of result.records) {
++    if ('error' in (record as object)) process.exitCode = 1;
++    process.stdout.write(`${JSON.stringify(record)}\n`);
++  }
++}
++
++async function runVectorExport<T>(produce: () => VectorExport<T>): Promise<void> {
++  try {
++    await openIndexDatabase();
++    printJsonLines(produce());
++  } catch (err) {
++    failCliValidation(err);
++  } finally {
++    closeDb();
++  }
++}
++
++program
++  .command('vectors')
++  .description(
++    'Print note-level embedding vectors as JSON Lines (meta line, then one note per line)',
++  )
++  .option(
++    '--path <note>',
++    'Vault-relative note path; repeat for several (default: every note)',
++    collectOption,
++    [],
++  )
++  .option('--pooling <mode>', 'How chunk vectors are combined: mean or max', 'mean')
++  .option('--normalize', 'L2-normalise the pooled vector (default)')
++  .option('--no-normalize', 'Keep the raw pooled vector')
++  .action(async (opts: { path: string[]; pooling: string; normalize?: boolean }) => {
++    let pooling: Pooling;
++    try {
++      pooling = parsePooling(opts.pooling);
++    } catch (err) {
++      failCliValidation(err);
++    }
++    await runVectorExport(() =>
++      exportNoteVectors({
++        paths: opts.path,
++        pooling,
++        normalize: opts.normalize !== false,
++        ohsVersion: version,
++      }),
++    );
++  });
++
++program
++  .command('neighbors')
++  .description(
++    'Print the K nearest notes per note as JSON Lines (meta line, then one note per line)',
++  )
++  .option(
++    '--path <note>',
++    'Vault-relative note path; repeat for several (default: every note)',
++    collectOption,
++    [],
++  )
++  .option('--k <n>', 'Neighbours per note', '10')
++  .option('--min-score <x>', 'Drop neighbours with cosine similarity below x')
++  .option('--exclude-linked', 'Drop notes that link to or from the source note')
++  .option(
++    '--scope <prefix>',
++    'Only consider candidates under this folder; repeat or prefix - to exclude',
++    collectOption,
++    [],
++  )
++  .option('--pooling <mode>', 'How chunk vectors are combined: mean or max', 'mean')
++  .action(
++    async (opts: {
++      path: string[];
++      k: string;
++      minScore?: string;
++      excludeLinked?: boolean;
++      scope: string[];
++      pooling: string;
++    }) => {
++      let parsed: { k: number; minScore?: number; pooling: Pooling };
++      try {
++        parsed = {
++          k: parseCliIntegerOption('--k', opts.k, { min: 1 }),
++          minScore:
++            opts.minScore === undefined
++              ? undefined
++              : parseCliNumberOption('--min-score', opts.minScore, { min: -1, max: 1 }),
++          pooling: parsePooling(opts.pooling),
++        };
++      } catch (err) {
++        failCliValidation(err);
++      }
++      await runVectorExport(() =>
++        findNoteNeighbors({
++          paths: opts.path,
++          k: parsed.k,
++          minScore: parsed.minScore,
++          excludeLinked: opts.excludeLinked,
++          scope: opts.scope,
++          pooling: parsed.pooling,
++          ohsVersion: version,
++        }),
++      );
++    },
++  );
++
+ const serveCommand = program
+   .command('serve')
+   .description('Start a persistent search server')
+diff --git a/test/vantt/vector-export.test.ts b/test/vantt/vector-export.test.ts
+new file mode 100644
+index 0000000..7f3c72a
+--- /dev/null
++++ b/test/vantt/vector-export.test.ts
+@@ -0,0 +1,222 @@
++import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
++
++const vault = mkdtempSync(path.join(tmpdir(), 'ohs-vector-export-'));
++process.env.OBSIDIAN_VAULT_PATH = vault;
++
++const KEYWORDS = ['alpha', 'beta', 'gamma', 'delta'];
++/** Counts of four keywords: a hand-computable 4-dimensional embedding. */
++function keywordVector(text: string): Float32Array {
++  const words = text.toLowerCase().match(/[a-z]+/g) ?? [];
++  const vector = new Float32Array(4);
++  KEYWORDS.forEach((keyword, i) => {
++    vector[i] = words.filter((word) => word === keyword).length;
++  });
++  return vector;
++}
++
++vi.mock('../../src/inference/embedder.js', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../../src/inference/embedder.js')>();
++  return {
++    ...actual,
++    activeModelName: () => 'keyword-model',
++    getEmbeddingDim: () => Promise.resolve(4),
++    getContextLength: () => Promise.resolve(512),
++    getDocumentTokenPolicy: () =>
++      Promise.resolve({ limit: 508, count: (text: string) => text.length / 4 }),
++    embedDetailed: vi.fn((texts: string[]) =>
++      Promise.resolve(texts.map((text) => ({ ok: true as const, embedding: keywordVector(text) }))),
++    ),
++    embed: vi.fn((texts: string[]) => Promise.resolve(texts.map(keywordVector))),
++  };
++});
++
++const { openIndexDatabase, createIndexService } =
++  await import('../../src/indexing/index-service.js');
++const { closeDb, getDb } = await import('../../src/storage/db.js');
++const { exportNoteVectors, findNoteNeighbors, poolVectors, VectorExportError } =
++  await import('../../src/search/note-vectors.js');
++
++const FILLER = 'lorem ipsum dolor sit amet '.repeat(70);
++const NOTES: Record<string, string> = {
++  'a.md': 'alpha alpha beta\n',
++  'b.md': 'alpha beta\n',
++  'e.md': 'alpha and a link to [[a]]\n',
++  'sub/c.md': 'gamma\n',
++  'sub/d.md': 'gamma delta\n',
++  // Two chunks: the first is alpha only, the second gamma only.
++  'g.md': `alpha alpha alpha ${FILLER}\n\ngamma gamma ${FILLER}\n`,
++};
++
++const unit = (v: number[]) => v.map((x) => x / Math.hypot(...v));
++
++function rawChunkVectors(notePath: string): Float32Array[] {
++  const rows = getDb()
++    .prepare(
++      `SELECT vc.embedding AS embedding FROM vec_chunks vc
++       JOIN chunks c ON c.id = vc.chunk_id JOIN notes n ON n.id = c.note_id
++       WHERE n.path = ? ORDER BY c.chunk_index`,
++    )
++    .all(notePath) as Array<{ embedding: Buffer }>;
++  return rows.map((row) => {
++    const bytes = new Uint8Array(row.embedding);
++    return new Float32Array(bytes.buffer, 0, bytes.byteLength / 4);
++  });
++}
++
++beforeAll(async () => {
++  for (const [name, text] of Object.entries(NOTES)) {
++    const file = path.join(vault, name);
++    mkdirSync(path.dirname(file), { recursive: true });
++    writeFileSync(file, text);
++  }
++  await openIndexDatabase();
++  const service = createIndexService();
++  try {
++    expect((await service.reindex()).errors).toEqual([]);
++  } finally {
++    await service.close();
++  }
++});
++
++afterAll(() => {
++  closeDb();
++  rmSync(vault, { recursive: true, force: true });
++});
++
++describe('exportNoteVectors', () => {
++  it('emits meta plus the normalised mean vector of every note', () => {
++    const { meta, records } = exportNoteVectors({ ohsVersion: 'test' });
++    expect(meta).toEqual({
++      model: 'keyword-model',
++      dim: 4,
++      pooling: 'mean',
++      note_count: 6,
++      ohs_version: 'test',
++    });
++    const notes = [...records];
++    expect(notes.map((n) => n.path)).toEqual(Object.keys(NOTES).sort((x, y) => x.localeCompare(y)));
++    const a = notes.find((n) => n.path === 'a.md') as { vector: number[]; chunks: number };
++    expect(a.chunks).toBe(1);
++    a.vector.forEach((x, i) => expect(x).toBeCloseTo(unit([2, 1, 0, 0])[i]!, 6));
++  });
++
++  it('pools several chunks by mean and by max, against the stored chunk vectors', () => {
++    const chunks = rawChunkVectors('g.md').map((v) => [...v]);
++    expect(chunks.length).toBeGreaterThan(1);
++    const meanRaw = [0, 1, 2, 3].map(
++      (d) => chunks.reduce((sum, c) => sum + c[d]!, 0) / chunks.length,
++    );
++    const maxRaw = [0, 1, 2, 3].map((d) => Math.max(...chunks.map((c) => c[d]!)));
++    expect(meanRaw[0]).toBeGreaterThan(0);
++    expect(meanRaw[2]).toBeGreaterThan(0);
++
++    const mean = [...exportNoteVectors({ paths: ['g.md'], ohsVersion: 't' }).records][0] as {
++      vector: number[];
++      chunks: number;
++    };
++    expect(mean.chunks).toBe(chunks.length);
++    unit(meanRaw).forEach((x, i) => expect(mean.vector[i]).toBeCloseTo(x, 6));
++
++    const max = [
++      ...exportNoteVectors({ paths: ['g.md'], pooling: 'max', ohsVersion: 't' }).records,
++    ][0] as { vector: number[] };
++    unit(maxRaw).forEach((x, i) => expect(max.vector[i]).toBeCloseTo(x, 6));
++    expect(max.vector).not.toEqual(mean.vector);
++
++    const raw = [
++      ...exportNoteVectors({ paths: ['g.md'], normalize: false, ohsVersion: 't' }).records,
++    ][0] as { vector: number[] };
++    meanRaw.forEach((x, i) => expect(raw.vector[i]).toBeCloseTo(x, 6));
++  });
++
++  it('reports unknown notes per path instead of inventing vectors', () => {
++    const records = [...exportNoteVectors({ paths: ['nope.md', 'b.md'], ohsVersion: 't' }).records];
++    expect(records).toContainEqual({ path: 'nope.md', error: 'note not found in the index' });
++    expect(records.some((r) => 'vector' in r && r.path === 'b.md')).toBe(true);
++  });
++
++  it('refuses to export when the dimension or the model does not match the vectors', () => {
++    const db = getDb();
++    db.prepare("UPDATE settings SET value = '3' WHERE key = 'embedding_dim'").run();
++    expect(() => [...exportNoteVectors({ ohsVersion: 't' }).records]).toThrow(VectorExportError);
++    db.prepare("UPDATE settings SET value = '4' WHERE key = 'embedding_dim'").run();
++
++    const model = db
++      .prepare("SELECT value FROM settings WHERE key='embedding_model'")
++      .pluck()
++      .get();
++    db.prepare("DELETE FROM settings WHERE key = 'embedding_model'").run();
++    expect(() => [...exportNoteVectors({ ohsVersion: 't' }).records]).toThrow(/unknown/);
++    db.prepare("INSERT INTO settings(key, value) VALUES ('embedding_model', ?)").run(model);
++  });
++
++  it('is read-only', () => {
++    const db = getDb();
++    const before = db.prepare("SELECT value FROM settings WHERE key='db_version'").pluck().get();
++    expect([...exportNoteVectors({ ohsVersion: 't' }).records]).not.toHaveLength(0);
++    expect([...findNoteNeighbors({ ohsVersion: 't' }).records]).not.toHaveLength(0);
++    expect(db.prepare("SELECT value FROM settings WHERE key='db_version'").pluck().get()).toBe(
++      before,
++    );
++  });
++});
++
++describe('findNoteNeighbors', () => {
++  const neighborsOf = (options: Parameters<typeof findNoteNeighbors>[0], notePath: string) =>
++    [...findNoteNeighbors(options).records].find((r) => r.path === notePath) as {
++      neighbors: Array<{ path: string; score: number }>;
++    };
++
++  it('ranks by cosine over the pooled vectors', () => {
++    const { neighbors } = neighborsOf({ paths: ['a.md'], k: 3, ohsVersion: 't' }, 'a.md');
++    expect(neighbors.map((n) => n.path)).toEqual(['b.md', 'e.md', 'g.md']);
++    expect(neighbors[0]!.score).toBeCloseTo(3 / Math.sqrt(10), 6);
++    expect(neighbors[1]!.score).toBeCloseTo(2 / Math.sqrt(5), 6);
++    expect(neighbors[2]!.score).toBeLessThan(neighbors[1]!.score);
++  });
++
++  it('answers every note when no path is given, and counts them in meta', () => {
++    const { meta, records } = findNoteNeighbors({ k: 2, ohsVersion: 't' });
++    expect(meta.note_count).toBe(6);
++    const all = [...records];
++    expect(all).toHaveLength(6);
++    for (const record of all) {
++      expect((record as { neighbors: unknown[] }).neighbors.length).toBeLessThanOrEqual(2);
++    }
++  });
++
++  it('applies min-score, exclude-linked and scope', () => {
++    expect(
++      neighborsOf({ paths: ['a.md'], minScore: 0.9, ohsVersion: 't' }, 'a.md').neighbors.map(
++        (n) => n.path,
++      ),
++    ).toEqual(['b.md']);
++
++    const linked = neighborsOf({ paths: ['a.md'], excludeLinked: true, ohsVersion: 't' }, 'a.md');
++    expect(linked.neighbors.map((n) => n.path)).not.toContain('e.md');
++    const backlink = neighborsOf({ paths: ['e.md'], excludeLinked: true, ohsVersion: 't' }, 'e.md');
++    expect(backlink.neighbors.map((n) => n.path)).not.toContain('a.md');
++
++    const scoped = neighborsOf({ paths: ['a.md'], scope: 'sub', ohsVersion: 't' }, 'a.md');
++    expect(scoped.neighbors.map((n) => n.path).sort((x, y) => x.localeCompare(y))).toEqual([
++      'sub/c.md',
++      'sub/d.md',
++    ]);
++  });
++
++  it('never lists the note itself and reports unknown notes', () => {
++    const records = [...findNoteNeighbors({ paths: ['b.md', 'zzz.md'], ohsVersion: 't' }).records];
++    const b = records.find((r) => r.path === 'b.md') as { neighbors: Array<{ path: string }> };
++    expect(b.neighbors.map((n) => n.path)).not.toContain('b.md');
++    expect(records).toContainEqual({ path: 'zzz.md', error: 'note not found in the index' });
++  });
++});
++
++describe('poolVectors', () => {
++  it('leaves a zero vector at zero when normalising', () => {
++    expect([...poolVectors([new Float32Array(3)], 'mean', true)]).toEqual([0, 0, 0]);
++  });
++});
+-- 
+2.53.0
+
