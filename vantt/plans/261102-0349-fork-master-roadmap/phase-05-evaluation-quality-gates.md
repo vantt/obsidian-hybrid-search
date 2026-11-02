@@ -34,7 +34,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 
 ## File sở hữu
 
-- V10: `vantt/eval/vi/**`, `vantt/eval/baselines/**`; preset trong repo obsidian-test-fixture (nếu là repo khác thì lead xác nhận quyền đẩy với user).
+- V10: `vantt/eval/vi/**`, `vantt/eval/baselines/**`; preset `vi-search` trong repo `vantt/obsidian-test-fixture` (của user, nhánh `main`, công khai). User cho phép agent đẩy (2026-11-02); làm trên nhánh riêng rồi merge vào `main`, chỉ chứa dữ liệu sinh.
 - V12: `vantt/scripts/invariance.mjs`, `vantt/scripts/quality-gate.mjs`; móc vào `vantt/scripts/catchup.mjs` qua lead.
 - V15: `vantt/reviews/vault-eval-<date>.md`.
 - V22: `vantt/reviews/semantic-eval-<date>.md`, script đo ở `vantt/scripts/`.
@@ -55,5 +55,5 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 
 ## Risk
 
-- Repo obsidian-test-fixture không thuộc quyền đẩy của agent: lead hỏi user trước.
+- `vantt/obsidian-test-fixture` là repo công khai: preset chỉ chứa văn bản sinh, không chép nội dung vault thật hay câu hỏi riêng của user.
 - Model lớn quá chậm trên máy CPU thường: đo và ghi; không chọn model làm index vault 2.000 note quá 30 phút mà không báo user.
