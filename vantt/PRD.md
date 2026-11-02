@@ -649,7 +649,7 @@ Vị trí: `vantt/packages/ohs-lang-vi/` (package npm riêng, `"private": true` 
 | `rescore.ts` | Cộng điểm cho ứng viên có tổ hợp phục hồi xác suất cao xuất hiện đúng (theo `matchedViews` và snippet), cộng điểm cho khớp cụm hai âm tiết; công thức có tham số, chốt bằng eval. Không bao giờ bỏ ứng viên |
 | `telex.ts` | Giải chuỗi Telex và VNI gõ dở (bộ gõ tắt hoặc nhầm chế độ): "tieengs vieetj", "tie6ng vie65t" → "tiếng việt". Chỉ áp cho token **không** có trong từ vựng vault (view `fold`) mà dạng giải ra có trong từ vựng `norm`; nếu không thì giữ nguyên ("team", "seen" không bị đổi). Bảng quy tắc Telex (`s f r x j`, `aa ee oo aw ow uw dd w`) và VNI (`1–9`) đầy đủ |
 | `typo.ts` | Sửa gõ sai một chữ theo từ vựng vault: khoảng cách sửa 1 (thêm, bớt, thay, đảo hai chữ liền nhau) trên dạng bỏ dấu, chỉ cho token không có trong từ vựng, dài từ 3 chữ, tối đa 3 ứng viên theo tần suất. Dùng chung bảng từ vựng trong bộ nhớ với `restore.ts` (cache theo `db_version`); thêm dạng sửa vào câu view (nối OR), không thay câu gốc |
-| `lexicon.ts` | Đồng nghĩa và viết tắt do user khai báo trong một file của vault (đường dẫn qua tuỳ chọn `lexiconPath`, mặc định `_ohs/lexicon.md`; định dạng mỗi dòng một nhóm `khách hàng = customer = KH`, chốt ở Q8). Mở rộng câu ở `analyzeQuery`: thêm các dạng cùng nhóm vào câu view (nối OR, trọng số thấp hơn qua `rescore`), không đổi `embedQuery`. Đọc file qua `ctx.vaultPath`; `queryCacheKey()` = băm nội dung file |
+| `lexicon.ts` | Đồng nghĩa và viết tắt do user khai báo trong một file của vault (đường dẫn qua tuỳ chọn `lexiconPath`, mặc định `_ohs/lexicon.md`; định dạng mỗi dòng một nhóm `khách hàng = customer`, đã chốt ở Q8). Mở rộng câu ở `analyzeQuery`: thêm các dạng cùng nhóm vào câu view (nối OR, trọng số thấp hơn qua `rescore`), không đổi `embedQuery`. Đọc file qua `ctx.vaultPath`; `queryCacheKey()` = băm nội dung file |
 | `abbr.ts` + lệnh `ohs-lang-vi learn-abbr --vault <dir>` | Học viết tắt từ vault: quét Markdown tìm mẫu định nghĩa ("khách hàng (KH)", "KH: khách hàng", "KH = khách hàng") và cụm nhiều âm tiết hay gặp có chữ đầu khớp chữ viết tắt (KH → khách hàng, DN → doanh nghiệp, TP.HCM → thành phố Hồ Chí Minh). Ghi **đề xuất** vào file lexicon dưới mục chờ duyệt; chỉ dòng user đã chuyển lên mục chính mới được dùng. Chạy tay, không chạy lúc index |
 | `segment.ts` | Tách từ cho view `seg` (mục 10.4) |
 | `index.ts` | `createPack(options): LanguagePackV1`, export mặc định đọc `OHS_LANGUAGE_PACK_OPTIONS` |
@@ -658,7 +658,7 @@ Vị trí: `vantt/packages/ohs-lang-vi/` (package npm riêng, `"private": true` 
 - Bảng nguyên âm và dấu: 12 nguyên âm cơ bản × 6 thanh, dạng NFC và NFD.
 - Bảng đặt dấu cho vần `oa, oe, uy, uê, ươ, iê, yê, uô` và các ngoại lệ `qu`, `gi`; ít nhất 60 cặp kiểm (hòa/hoà, hỏa/hoả, thủy/thuỷ, khỏe/khoẻ, quý, giá, giường, người, khuỷu, ngoằn…).
 - Bảng Telex và VNI: mọi tổ hợp nguyên âm × dấu × thanh, kèm phản ví dụ chữ tiếng Anh không được đổi.
-- Từ điển từ ghép cho `segment.ts` (nguồn và giấy phép chốt ở Q9).
+- Từ điển từ ghép cho `segment.ts` (cách chọn nguồn đã chốt ở Q9).
 - Bảng i/y: danh sách phụ âm đầu áp dụng (`k, l, m, t, s, h, v, d, ng, qu?` theo quy tắc chốt khi soạn), kèm phản ví dụ.
 
 #### Tuỳ chọn
@@ -848,8 +848,8 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V17 | `ohs-lang-vi` M5a: `telex.ts`, `typo.ts` (G8) | V13 | 2,5 | `vi-telex`, `vi-typo` đạt mục 11.6; hạng mục khác không tụt |
 | V18 | `ohs-lang-vi` M5b: `lexicon.ts`, `abbr.ts`, lệnh `learn-abbr` (G8) | V13 | 2,5 | `vi-synonym`, `vi-abbr` đạt; đổi đồng nghĩa hay viết tắt trong file lexicon không dựng lại index |
 | V19 | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
-| V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển (G8, mục 10.4) | V13, Q9 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
-| V21 | Gói ngôn ngữ thứ hai `ohs-lang-<x>` trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11, Q10 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
+| V20 | `ohs-lang-vi` M5d: `segment.ts`, view `seg`, từ điển theo tiêu chí Q9 (G8, mục 10.4) | V13 | 4 | `vi-compound` đạt; chốt mặc định `segment` |
+| V21 | Gói ngôn ngữ thứ hai `ohs-lang-de` (tiếng Đức, Q10) trong `vantt/packages/` (G9): ít nhất một view, `analyzeQuery`, test riêng, golden set nhỏ; mọi chỗ phải sửa lõi để gói chạy được là lỗi của P01 và sửa trong P01 | V11 | 2 | Gói chạy qua hợp đồng P01 không sửa lõi; bất biến xanh; eval của ngôn ngữ đó không tụt so với không gói |
 | V22 | Đợt eval nhánh nghĩa trên bộ `vi` (G10), một đợt chạy chung: mỗi model nhúng × `restoreForEmbedding` bật/tắt × rerank có/không; mọi hạng mục (chú ý `vi-semantic`, `vi-unaccented`); đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu (cho `zones`, `related`), thời gian index, thời gian mỗi câu trên máy CPU thường, RAM, dung lượng tải. Mỗi model index một lần rồi chạy mọi biến thể câu tìm trên index đó | V13 | 2–2,5 | Báo cáo trong `vantt/reviews/`, kèm đề xuất cho bộ cài dự án: model, `restoreForEmbedding` (chốt Q3), bật hay tắt reranker; lõi không đổi model mặc định |
 | V23 | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
 | V24 | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
@@ -888,9 +888,9 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | Q5 | Gói tiếng Việt để trong fork hay tách repo riêng | Trong fork (`vantt/packages/`) cho tới L09 | User |
 | Q6 | ~~Có gửi issue lên upstream không, khi nào~~ | **Đã chốt (user 2026-11-02):** gửi sau khi đã làm xong và chạy ổn trong fork (L08); không gửi trước | — |
 | Q7 | Người gán nhãn golden set riêng trên vault thật | User, khoảng 2 giờ | User |
-| Q8 | Định dạng file lexicon (đồng nghĩa, viết tắt, từ ghép) | Markdown trong vault, mặc định `_ohs/lexicon.md`, mỗi dòng một nhóm nối bằng ` = `; mục `## Chờ duyệt` cho đề xuất của `learn-abbr` | Agent, ghi trong spec gói |
-| Q9 | Nguồn từ điển từ ghép cho tách từ | Chọn danh sách từ có giấy phép cho phép đóng gói lại (MIT, Apache, CC-BY, CC0); ghi nguồn và giấy phép trong gói; không dùng nguồn không rõ giấy phép | Agent đề xuất, user duyệt |
-| Q10 | Ngôn ngữ của gói thứ hai (V21) | Tiếng Đức: bỏ umlaut (`ä→a`, `ae`), `ß→ss`, từ ghép dài; nhỏ, khác tiếng Việt đủ để thử hợp đồng | User |
+| Q8 | ~~Định dạng file lexicon~~ | **Đã chốt (user giao agent, 2026-11-02):** Markdown trong vault, mặc định `_ohs/lexicon.md`; ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`, mỗi dòng một nhóm nối bằng ` = ` (từ ghép: mỗi dòng một từ); mục `## Chờ duyệt` cho đề xuất của `learn-abbr`, không được dùng. Bộ cài dự án thêm `_ohs/**` vào `OBSIDIAN_IGNORE_PATTERNS` để file này không thành kết quả tìm | — |
+| Q9 | ~~Nguồn từ điển từ ghép~~ | **Đã chốt (user giao agent, 2026-11-02):** agent làm V20 tự chọn, không cần user duyệt, theo tiêu chí: giấy phép cho phép đóng gói lại trong gói MIT (MIT, BSD, Apache-2.0, CC0, CC-BY; **không** GPL, không CC-BY-SA, không nguồn không rõ giấy phép), đọc file LICENSE của nguồn để xác nhận; ghi nguồn, giấy phép, phiên bản hoặc commit và cách lọc vào `vantt/packages/ohs-lang-vi/data/README.md`; chỉ giữ từ hai âm tiết trở lên. Không có nguồn nào đạt thì dựng từ điển từ thống kê cặp âm tiết trên corpus sinh và ghi rõ | — |
+| Q10 | ~~Ngôn ngữ của gói thứ hai~~ | **Đã chốt (user 2026-11-02): tiếng Đức**, gói `ohs-lang-de`: gộp umlaut (`ä` khớp `a` và `ae`), `ß→ss`, từ ghép dài; đủ khác tiếng Việt để thử hợp đồng | — |
 
 ## 16. Rủi ro
 | Rủi ro | Khả năng | Ảnh hưởng | Giảm thiểu |
