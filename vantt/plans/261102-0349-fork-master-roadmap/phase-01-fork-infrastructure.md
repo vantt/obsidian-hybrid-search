@@ -67,6 +67,12 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 - Cập nhật 2026-11-02 (user chốt "không cần follow upstream; khi upstream có thay đổi thì anh sẽ kêu"): bỏ `schedule` khỏi `vantt-catchup.yml`; tag upstream ghim trong `vantt/upstream.pin` (`v0.17.2`), push và chạy mặc định dựng trên tag đó; đồng bộ `master` với upstream chỉ khi dispatch với `sync_master`. Mô tả cron 6 giờ ở trên đã lỗi thời.
 - Chưa có secret `VANTT_PUSH_TOKEN`; đẩy đồng bộ `master` sẽ bị chặn nếu upstream đổi workflow. Đường đẩy nhánh phát hành và tag trên CI chưa chạy thử thật.
 
+## Ghi chú sau V03
+
+- Release `v0.17.2-vantt.1` có gói Windows x64, macOS ARM, Linux x64 kèm sha256, smoke xanh (đường dẫn có dấu cách và chữ Việt, `status`, `reindex`, `search`, stdio, MCP, nạp gói `vi`). Gói nén khoảng 100 MB, giải nén 280–330 MB; user chấp nhận vượt mục tiêu 250 MB (2026-11-02).
+- macOS Intel: `onnxruntime-node` 1.30.0 của upstream không có bản dựng darwin-x64. User chốt 2026-11-02: ghim bản `onnxruntime-node` cũ còn hỗ trợ Intel, chỉ cho gói darwin-x64 ở bước đóng gói; đạt khi smoke xanh trên `macos-15-intel` và eval lệch Linux tối đa 0,01 nDCG@5; không đạt thì bỏ nền này (đang làm, V03b).
+- `vantt-bundles` chạy bằng dispatch hoặc `workflow_call` từ `master` (tag đẩy bằng `GITHUB_TOKEN` không kích hoạt workflow); catchup chưa gọi bundles.
+
 ## Risk
 
 - Checkout tag làm mất `vantt/`: sao ra `vantt/.work/` rồi chép lại (bài học herdr, PRD 4.1).
