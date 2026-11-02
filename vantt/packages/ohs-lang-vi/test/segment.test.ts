@@ -73,7 +73,12 @@ describe('bundled dictionary', () => {
       encoding: 'utf8',
     });
     expect(res.status, res.stderr).toBe(0);
-    const files = (JSON.parse(res.stdout) as { files: { path: string }[] }[])[0]!.files.map((f) => f.path);
+    // npm 11 prints an array of packages, npm 12 an object keyed by package name.
+    type Packed = { files: { path: string }[] };
+    const parsed = JSON.parse(res.stdout) as Packed[] | Record<string, Packed>;
+    const packed = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
+    expect(packed, res.stdout).toBeDefined();
+    const files = packed!.files.map((f) => f.path);
     for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md', 'build/index.js']) expect(files).toContain(f);
   });
 
