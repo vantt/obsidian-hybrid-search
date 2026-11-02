@@ -43,7 +43,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 
 - [x] V10 bộ eval tiếng Việt và baseline upstream
 - [x] V12 bất biến và cổng chất lượng nối vào catchup
-- [ ] V15 eval trên vault thật (chờ user gán nhãn)
+- [x] V15 eval trên vault thật: `vantt/reviews/v0.17.2-vantt.2.private.md` (61 câu; có gói nDCG@5 0,600 lên 0,698; cổng theo hạng mục hỏng, chờ người quyết)
 - [x] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
 
 ## Success Criteria
@@ -61,7 +61,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - `run-eval.mjs` có `--ohs <dir>`, `--lang-pack`, `--lang-options`, `--compare`, `--accented-sanity`. Runner dựng vault dưới `os.tmpdir()`: đặt `TMPDIR` ra ngoài `/tmp`.
 - V12 xong: `catchup.mjs --with-lang vi --json` trên `v0.17.2`, đủ 9 bản vá, T1–T5 SUCCESS. T4: 58/58 câu trùng upstream khi không gói. T5: mọi mục tiêu G3, G8 bắt buộc và đạt (nDCG@5 `vi` 0,666 → 0,932; `vi-unaccented` Hit@5 0,267 → 1,0; `vi-dd` 0,4 → 1,0; `vi-snippet` 15/15; eval upstream có gói 0,735 không tụt). Baseline `obsidian-help` linux-x64 đã ghi. `evergreen-notes` tuỳ chọn (crawl web quá lâu), lý do ở plan con V12.
 - Sau release đầu, ghi baseline có gói bằng `quality-gate.mjs --with-lang vi --write-baseline` qua PR.
-- V15 (2026-11-02): user báo một agent khác (phía dự án) đang chuẩn bị golden set riêng và thử cài bản Windows; xong sẽ cập nhật lên remote. Lead chạy `quality-gate.mjs --private` khi có file; golden set và vault thật vẫn ở ngoài repo này.
+- V15 (2026-11-02): user báo một agent khác (phía dự án) đang chuẩn bị golden set riêng và thử cài bản Windows; xong sẽ cập nhật lên remote. Lead chạy `quality-gate.mjs --private` khi có file; golden set và vault thật vẫn ở ngoài repo này. Agent phía dự án đã chạy trên `0.17.2-vantt.2` và sửa lỗi NFD của chế độ `--private` (golden set NFC bị chấm trượt hết).
 - V22 xong: `vantt/reviews/semantic-eval-2026-11-02.md`. Đề xuất cho bộ cài: bật `restoreForEmbedding` (nDCG@5 +0,005 đến +0,018); reranker tắt mặc định (+0,05 đến +0,10 ở `vi-semantic` nhưng +150 ms mỗi câu, +616 MB); model mặc định giữ e5-small, hồ sơ chất lượng cao `Xenova/bge-m3` (tách cặp gần nghĩa AUC 0,968). Không model nào index 2.000 note quá 30 phút ở 4 luồng. Cần đo lại trên vault thật (V15).
 - V22 tìm ra hai lỗi của gói `vi`: `restoreForEmbedding` đổi nhầm chữ trong câu có đúng 50% âm tiết có dấu ("Hội An"); `package.json` thiếu `data` trong `files` nên gói đóng gói mất `data/compounds.txt` và chạy như không có gói. Lead giao sửa.
 
