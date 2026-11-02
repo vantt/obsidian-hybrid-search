@@ -46,9 +46,9 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - [x] V05 P09 `unicode-inline-tags`
 - [x] V06 P02 `db-path`
 - [x] V07 P03 `vector-export`
-- [ ] V08 P04 `stdio-parity`
-- [ ] V23 P05 `block-anchors`
-- [ ] V24 P06 `restrict-paths`
+- [x] V08 P04 `stdio-parity`
+- [x] V23 P05 `block-anchors`
+- [x] V24 P06 `restrict-paths`
 - [ ] V25 P07 `index-events`
 
 ## Success Criteria
@@ -67,6 +67,8 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - P02 (V06), P03 (V07) xong. Nhánh ghép `vantt/work/series` (worktree `/home/vantt/projects/ohs-wt/chk-series`) = P00, P01, P02, P03, P09: 117 file, 2049 test xanh, lint xanh. P03 xung đột import với P00 trong `cli.ts`, lead sửa và xuất lại P02, P03 từ nhánh ghép.
 - P02 lệch PRD: `--db` chỉ được nhận khi DB đã có và `vault_path` khớp (test upstream `vault-config` buộc vậy); đặt DB ở chỗ mới dùng `OBSIDIAN_DB_PATH`. Ghi trong spec.
 - P03: `ohs vectors`, `ohs neighbors`; hành động stdio làm ở P04 (V08). Chưa đo đầu-cuối trên vault 10.000 note.
+- P04 (V08), P05 (V23), P06 (V24) xong. Chuỗi P00, P01, P02, P03, P04, P09, P05, P06 trên `vantt/work/series`: 120 file, 2083 test xanh; build, lint, knip, tsc, format:check xanh. Các bản vá được xuất lại từ nhánh ghép.
+- P05 tăng `INDEX_SCHEMA_VERSION` 2 → 3; migration điền cột mới từ chữ đã lưu, không gọi embedder. P04 đổi ví dụ "action lạ" trong `test/serve-stdio.test.ts` từ `reindex` sang `bogus`.
 
 ## Risk
 

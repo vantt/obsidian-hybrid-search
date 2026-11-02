@@ -1,4 +1,4 @@
-From a17ab14e2722a66fe77e70a338ce805159c7e64e Mon Sep 17 00:00:00 2001
+From 3d9f985a066b04ab82eff433eae02b79618558b5 Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:06:50 +0700
 Subject: [PATCH] fix(content): accept Unicode letters in inline tags
