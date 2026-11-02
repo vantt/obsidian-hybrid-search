@@ -28,6 +28,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 - Remote `upstream` đã thêm, chỉ theo `master`, đẩy bị chặn. Không fetch nhánh khác của upstream.
 - Bật Actions và tạo release đầu tiên là việc ra ngoài: lead xin user xác nhận trước.
 - Issues trên fork đang tắt (mặc định của fork). User chốt 2026-11-02: agent V02 bật lại bằng `gh repo edit vantt/obsidian-hybrid-search --enable-issues` trước khi thử lần hỏng cố ý, vì catchup báo lỗi và review upstream đều dựa vào issue.
+- Actions đã bật 2026-11-02 theo yêu cầu user; `ci.yml`, `auto-tag.yml`, `release.yml` ở trạng thái `disabled_manually`, `update-deps.yml` ở `disabled_fork`. V02 chỉ còn thêm workflow `vantt-*` và kiểm lại danh sách.
 
 ## File sở hữu
 

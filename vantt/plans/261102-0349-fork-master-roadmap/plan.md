@@ -41,7 +41,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 | 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Pending |
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Pending |
 | 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | In progress (V09 xong) |
-| 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | Pending |
+| 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | In progress (V10 xong) |
 | 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14 | 2 | Pending |
 
 Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự chạy theo việc, ở bảng dưới.

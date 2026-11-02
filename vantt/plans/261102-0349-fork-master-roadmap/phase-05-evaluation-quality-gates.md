@@ -41,7 +41,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 
 ## Todo
 
-- [ ] V10 bộ eval tiếng Việt và baseline upstream
+- [x] V10 bộ eval tiếng Việt và baseline upstream
 - [ ] V12 bất biến và cổng chất lượng nối vào catchup
 - [ ] V15 eval trên vault thật (chờ user gán nhãn)
 - [ ] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
@@ -52,6 +52,12 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - V12: `catchup.mjs --with-lang vi` chạy đủ T1–T5; bất biến trùng 100% khi không gói.
 - V15: số tổng hợp trong `vantt/reviews/`, không có nội dung vault.
 - V22: báo cáo trong `vantt/reviews/` kèm đề xuất model, `restoreForEmbedding`, bật hay tắt reranker cho bộ cài dự án.
+
+## Ghi chú sau V10
+
+- Đường dẫn note trong DB upstream ở dạng NFD; golden set dùng NFD, `vantt/eval/vi/run-eval.mjs` đổi đầu ra NFC của fixture. V12, V15 phải theo cách này.
+- `npm run eval` bị npm từ chối khi bản npm khác `devEngines` (12.2.0); dùng `node vantt/eval/vi/run-eval.mjs`.
+- Baseline upstream linux-x64: Hit@5 `vi-unaccented` 0,93, `vi-dd` 0,87, nên điều kiện "gấp 2 lần baseline" của G3 không thể đạt. Chờ user quyết (xem câu hỏi mở của lead).
 
 ## Risk
 
