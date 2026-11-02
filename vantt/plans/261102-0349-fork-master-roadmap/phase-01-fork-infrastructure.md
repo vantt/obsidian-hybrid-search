@@ -1,0 +1,80 @@
+---
+phase: 1
+title: "Phase 1: Hạ tầng fork và theo upstream"
+status: todo
+priority: P1
+effort: "5d"
+dependencies: []
+---
+
+# Phase 1: Hạ tầng fork và theo upstream
+
+## Overview
+
+Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchup dựng nhánh phát hành từ mỗi tag upstream và áp chuỗi bản vá, CI chạy catchup và mở issue khi hỏng, gói dựng sẵn cho 4 nền. Phục vụ G1, G4. Mọi bản vá ở phase 2, 3 cần V01 để được áp và kiểm.
+
+## Việc
+
+| ID | Việc | Cần | Mức | Công | PRD |
+|---|---|---|---|---|---|
+| V00 | Phần còn lại của cài đặt fork: `.gitignore` cho `vantt/` (`vantt/.catchup-state.json`, `vantt/reports/*.json` trừ bản phát hành, `vantt/.work/`), cách clone submodule trên CI, ghi trạng thái vào `vantt/README.md`. Bật Actions và tắt workflow upstream làm cùng V02 khi đã có workflow `vantt-*` | — | rẻ | 0,5 | 5 |
+| V01 | `vantt/scripts/catchup.mjs` (Node ESM, không phụ thuộc), test vitest trên repo git tạm (PRD 11.2, T8 diễn tập xung đột), skill `.claude/skills/ohs-catchup/SKILL.md`, xuất lại bản vá sau khi sửa xung đột | V00 | mạnh | 2 | 4.1, 6, 11.2 |
+| V02 | `.github/workflows/vantt-catchup.yml` (cron và chạy tay, chỉ trên `vantt/obsidian-hybrid-search`, mở issue khi hỏng, không trùng), `vantt-pr-check.yml` (chặn commit trên `master` chạm file upstream). Sau đó bật Actions, tắt `ci.yml`, `auto-tag.yml`, `release.yml`, `update-deps.yml` | V01 | vừa | 0,5 | 5, 7.1, 7.2, 7.4 |
+| V03 | `vantt/scripts/bundle.mjs` và `vantt-bundles.yml`: gói cho Windows x64, macOS ARM, macOS Intel, Linux x64, sha256, smoke test trên runner sạch (gồm cả `ohs serve --stdio`), ghi kích thước | V02 | vừa | 2 | 7.3, 8 |
+
+## Quy tắc riêng
+
+- Catchup chỉ chọn tag nằm trên `upstream/master` (`git merge-base --is-ancestor`) và không bao giờ `git push --tags`; chỉ đẩy tag `vX.Y.Z-vantt.N` (PRD 5).
+- Remote `upstream` đã thêm, chỉ theo `master`, đẩy bị chặn. Không fetch nhánh khác của upstream.
+- Bật Actions và tạo release đầu tiên là việc ra ngoài: lead xin user xác nhận trước.
+- Issues trên fork đang tắt (mặc định của fork). User chốt 2026-11-02: agent V02 bật lại bằng `gh repo edit vantt/obsidian-hybrid-search --enable-issues` trước khi thử lần hỏng cố ý, vì catchup báo lỗi và review upstream đều dựa vào issue.
+- User đồng ý 2026-11-02 cho V03 tạo GitHub Release đầu tiên.
+- Actions đã bật 2026-11-02 theo yêu cầu user; `ci.yml`, `auto-tag.yml`, `release.yml` ở trạng thái `disabled_manually`, `update-deps.yml` ở `disabled_fork`. V02 chỉ còn thêm workflow `vantt-*` và kiểm lại danh sách.
+
+## File sở hữu
+
+- V00: `vantt/.gitignore`, `vantt/README.md`.
+- V01: `vantt/scripts/catchup.mjs`, `vantt/scripts/lib/*`, `vantt/scripts/test/catchup*.test.*`, `.claude/skills/ohs-catchup/`.
+- V02: `.github/workflows/vantt-catchup.yml`, `.github/workflows/vantt-pr-check.yml`.
+- V03: `vantt/scripts/bundle.mjs`, `.github/workflows/vantt-bundles.yml`.
+
+## Todo
+
+- [x] V00 cài đặt fork xong
+- [x] V01 catchup và skill `ohs-catchup`
+- [x] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
+- [ ] V03 gói dựng sẵn 4 nền và smoke
+
+## Success Criteria
+
+- V00: `gh workflow list --repo vantt/obsidian-hybrid-search --all` chỉ có `vantt-*` ở trạng thái active (kiểm sau V02).
+- V01: chạy trên `v0.17.2` ra nhánh `vantt/v0.17.2` xanh với chuỗi bản vá rỗng và với bản vá giả; diễn tập xung đột trả mã 3, `--abort` trả repo sạch, `--continue` sau khi sửa thì xanh và bản vá được xuất lại.
+- V02: chạy tay xanh; một lần hỏng cố ý mở đúng một issue.
+- V03: Release có 4 gói kèm sha256; smoke xanh cả 4 nền; kích thước được ghi.
+
+## Ghi chú sau V01
+
+- Nhánh `vantt/v0.17.2` đã đẩy lên origin (catchup thật, xanh, `0.17.2-vantt.1`).
+- Upstream đòi npm 12.2.0 qua `devEngines`; catchup tự cài npm 12.2.0 vào `vantt/.work/tools/`. Agent chạy `npm`/`npx` trong cây OHS phải dùng npm 12.2.0 (`npx -y npm@12.2.0 ...`). CI (V02, V03) cũng phải ghim npm 12.2.0.
+- Build chạy `npm ci --ignore-scripts && npm rebuild` vì `prepare` của upstream từ chối khi `.claude/skills` là thư mục thật.
+- Móc T4/T5 cho V12: `node vantt/scripts/{invariance,quality-gate}.mjs --target-ref <ref> --target-sha <sha> --branch <branch> --json [--with-lang <id>]`, mô tả ở đầu `vantt/scripts/lib/tiers.mjs`.
+- Đồng bộ `master` với upstream (PRD 6.6) đã viết trong skill `ohs-catchup`; V02 tự động hoá.
+
+## Ghi chú sau V02
+
+- `vantt-catchup.yml` (cron 6 giờ, chạy tay có `dry_run`, `force_rebuild`, `simulate_failure`; đồng bộ `master` với upstream; mở một issue khi hỏng, lần sau chỉ bình luận) và `vantt-pr-check.yml` đã chạy; Issues đã bật; actionlint sạch. Chỉ còn `vantt-*` active.
+- Lần hỏng cố ý mở đúng issue #1 (đã đóng). Issue #2 là lỗi thật: test tốc độ của gói vi đo 318 ms trên runner. Lead thêm `OHS_PERF_FACTOR` (mặc định 1, CI đặt 3): chỉ tiêu 200 ms của PRD vẫn kiểm trên máy thật.
+- Cập nhật 2026-11-02 (user chốt "không cần follow upstream; khi upstream có thay đổi thì anh sẽ kêu"): bỏ `schedule` khỏi `vantt-catchup.yml`; tag upstream ghim trong `vantt/upstream.pin` (`v0.17.2`), push và chạy mặc định dựng trên tag đó; đồng bộ `master` với upstream chỉ khi dispatch với `sync_master`. Mô tả cron 6 giờ ở trên đã lỗi thời.
+- Chưa có secret `VANTT_PUSH_TOKEN`; đẩy đồng bộ `master` sẽ bị chặn nếu upstream đổi workflow. Đường đẩy nhánh phát hành và tag trên CI chưa chạy thử thật.
+
+## Ghi chú sau V03
+
+- Release `v0.17.2-vantt.1` có gói Windows x64, macOS ARM, Linux x64 kèm sha256, smoke xanh (đường dẫn có dấu cách và chữ Việt, `status`, `reindex`, `search`, stdio, MCP, nạp gói `vi`). Gói nén khoảng 100 MB, giải nén 280–330 MB; user chấp nhận vượt mục tiêu 250 MB (2026-11-02).
+- macOS Intel: `onnxruntime-node` 1.30.0 của upstream không có bản dựng darwin-x64. User chốt 2026-11-02: ghim bản `onnxruntime-node` cũ còn hỗ trợ Intel, chỉ cho gói darwin-x64 ở bước đóng gói; đạt khi smoke xanh trên `macos-15-intel` và eval lệch Linux tối đa 0,01 nDCG@5; không đạt thì bỏ nền này (đang làm, V03b).
+- `vantt-bundles` chạy bằng dispatch hoặc `workflow_call` từ `master` (tag đẩy bằng `GITHUB_TOKEN` không kích hoạt workflow); catchup chưa gọi bundles.
+
+## Risk
+
+- Checkout tag làm mất `vantt/`: sao ra `vantt/.work/` rồi chép lại (bài học herdr, PRD 4.1).
+- Đẩy nhánh có workflow bị GitHub chặn: gỡ workflow upstream khỏi nhánh phát hành, cần PAT `VANTT_PUSH_TOKEN` nếu vẫn bị chặn (PRD 5 bước 7).
+- Gatekeeper, SmartScreen chặn trong smoke: báo user (Q4), không tự mua chứng chỉ.

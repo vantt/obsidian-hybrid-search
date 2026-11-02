@@ -1,0 +1,9 @@
+# Trạng thái catchup đang dở (PRD mục 6.2). Không commit.
+.catchup-state.json
+
+# Báo cáo JSON của catchup (PRD mục 6.5). Gốc .gitignore của upstream đã có `reports/`,
+# nên mục này chỉ là ghi chú. Báo cáo đã phát hành phải thêm bằng `git add -f`.
+reports/*.json
+
+# Thư mục làm việc tạm của catchup, gồm bản sao backup (PRD mục 6.2 bước 5).
+.work/
