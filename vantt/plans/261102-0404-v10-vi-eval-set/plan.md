@@ -41,3 +41,11 @@ created: 2026-11-02
 
 - Baseline theo nền: mới có `linux-x64`; macOS ARM phải chạy riêng.
 - `run-eval.mjs` cần mạng (model nhúng, `npx` tải fixture); chưa có chế độ ngoại tuyến ngoài `--otf` trỏ tới bản fixture đã clone.
+
+## Bổ sung (2026-11-02): corpus khó hơn và runner nhận bản OHS/gói khác
+
+- Quyết định của user: giữ ngưỡng PRD (G3), làm corpus khó hơn. Chẩn đoán: tiêu đề note chứa nguyên cụm tìm (`cap(phrase)`), nên nhánh khớp tiêu đề và nhánh vector tìm ra dù FTS5 không gộp được. Đo trực tiếp trên SQLite: `unicode61` gộp dấu khi chữ có một dấu (`ú`, `ê`) nhưng không gộp chữ hai dấu (`ế`, `ữ`, `ợ`) và `đ`; chữ NFC như upstream lưu.
+- Fixture `vantt/obsidian-test-fixture` thẻ `v0.10.0` (commit 5d18b8b, nhánh `feat/vi-search-hard-fold` đã vào `main`): `vi-unaccented` và `vi-dd` mỗi hạng là cụm 25 note cùng khuôn chữ khác một từ khoá (tên món toàn âm tiết hai dấu; tên phố có `đ`), tiêu đề chỉ có số; trình sinh kiểm câu đã bỏ dấu chỉ nằm trong đúng note đích. Câu có `query_accented`.
+- Baseline mới (363 note): Hit@5 `vi-unaccented` 0,27, `vi-dd` 0,40 (trước 0,93 và 0,87). Có dấu phục hồi: 1,00 cả hai. Hạng khác giữ trong khoảng cũ (xem README); `vi-telex` 0,53 thành 0,47, `vi-alias` 0,67 thành 0,73.
+- `run-eval.mjs` thêm `--ohs`, `--lang-pack`, `--lang-options` (đúng `OHS_LANGUAGE_PACK` / `OHS_LANGUAGE_PACK_OPTIONS` của P01), `--compare a b`, `--accented-sanity`; kết quả có `meta.runner`. Chi tiết ở `vantt/eval/vi/README.md`.
+- Việc còn lại cho người duyệt: baseline hạ chỉ qua PR có người duyệt (PRD 11.6); V12/V13 dùng các cờ trên.

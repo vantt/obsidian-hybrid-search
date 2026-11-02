@@ -10,16 +10,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-01",
-    "query": "giu chan khach hang",
-    "relevant_paths": [
-      "notes/Giữ chân khách hàng.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-01",
     "query": "giữ chan khach hang",
     "relevant_paths": [
@@ -73,16 +63,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-02",
-    "query": "sap xep thoi gian bieu",
-    "relevant_paths": [
-      "notes/Sắp xếp thời gian biểu.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-02",
@@ -140,16 +120,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-03",
-    "query": "phuong phap hoc tap hieu qua",
-    "relevant_paths": [
-      "notes/Phương pháp học tập hiệu quả.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-03",
     "query": "phương phap hoc tap hieu qua",
     "relevant_paths": [
@@ -203,16 +173,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-04",
-    "query": "chuan bi bua sang",
-    "relevant_paths": [
-      "notes/Chuẩn bị bữa sáng.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-04",
@@ -270,16 +230,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-05",
-    "query": "hanh trinh kham pha nui rung",
-    "relevant_paths": [
-      "notes/Hành trình khám phá núi rừng.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-05",
     "query": "hành trinh kham pha nui rung",
     "relevant_paths": [
@@ -333,16 +283,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-06",
-    "query": "nghe thuat thuyet trinh",
-    "relevant_paths": [
-      "notes/Nghệ thuật thuyết trình.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-06",
@@ -400,16 +340,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-07",
-    "query": "toi uu quy trinh lam viec",
-    "relevant_paths": [
-      "notes/Tối ưu quy trình làm việc.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-07",
     "query": "tối uu quy trinh lam viec",
     "relevant_paths": [
@@ -463,16 +393,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-08",
-    "query": "thoi quen ngu som day som",
-    "relevant_paths": [
-      "notes/Thói quen ngủ sớm dậy sớm.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-08",
@@ -530,16 +450,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-09",
-    "query": "bi quyet chup anh chan dung",
-    "relevant_paths": [
-      "notes/Bí quyết chụp ảnh chân dung.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-09",
     "query": "bí quyet chup anh chan dung",
     "relevant_paths": [
@@ -593,16 +503,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-10",
-    "query": "chien luoc tiep thi noi dung",
-    "relevant_paths": [
-      "notes/Chiến lược tiếp thị nội dung.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-10",
@@ -660,16 +560,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-11",
-    "query": "bao mat tai khoan truc tuyen",
-    "relevant_paths": [
-      "notes/Bảo mật tài khoản trực tuyến.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-11",
     "query": "bảo mat tai khoan truc tuyen",
     "relevant_paths": [
@@ -723,16 +613,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-12",
-    "query": "cach trong rau sach tai nha",
-    "relevant_paths": [
-      "notes/Cách trồng rau sạch tại nhà.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-12",
@@ -790,16 +670,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-13",
-    "query": "lo trinh on thi tot nghiep",
-    "relevant_paths": [
-      "notes/Lộ trình ôn thi tốt nghiệp.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-13",
     "query": "lộ trinh on thi tot nghiep",
     "relevant_paths": [
@@ -853,16 +723,6 @@
     "partial_paths": [],
     "category": "vi-accented",
     "notes": "Query is the accented phrase of the note."
-  },
-  {
-    "id": "vi-unaccented-14",
-    "query": "nhung luu y khi thue nha",
-    "relevant_paths": [
-      "notes/Những lưu ý khi thuê nhà.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
   },
   {
     "id": "vi-partial-accent-14",
@@ -920,16 +780,6 @@
     "notes": "Query is the accented phrase of the note."
   },
   {
-    "id": "vi-unaccented-15",
-    "query": "phan tich so lieu doanh thu",
-    "relevant_paths": [
-      "notes/Phân tích số liệu doanh thu.md"
-    ],
-    "partial_paths": [],
-    "category": "vi-unaccented",
-    "notes": "Query is the phrase of the note without any diacritics."
-  },
-  {
     "id": "vi-partial-accent-15",
     "query": "phân tich so lieu doanh thu",
     "relevant_paths": [
@@ -975,154 +825,334 @@
     ]
   },
   {
-    "id": "vi-dd-01",
-    "query": "duong di bo ven song",
+    "id": "vi-unaccented-01",
+    "query": "nuoc mam",
     "relevant_paths": [
-      "notes/Đường đi bộ ven sông.md"
+      "notes/Ghi chép món ăn 01.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "nước mắm"
+  },
+  {
+    "id": "vi-unaccented-02",
+    "query": "oc nuong",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 02.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "ốc nướng"
+  },
+  {
+    "id": "vi-unaccented-03",
+    "query": "ech nau",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 03.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "ếch nấu"
+  },
+  {
+    "id": "vi-unaccented-04",
+    "query": "muop hap",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 04.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "mướp hấp"
+  },
+  {
+    "id": "vi-unaccented-05",
+    "query": "buoi hong",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 05.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "bưởi hồng"
+  },
+  {
+    "id": "vi-unaccented-06",
+    "query": "sua nep",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 06.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "sữa nếp"
+  },
+  {
+    "id": "vi-unaccented-07",
+    "query": "bap nuong",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 07.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "bắp nướng"
+  },
+  {
+    "id": "vi-unaccented-08",
+    "query": "mut com",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 08.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "mứt cốm"
+  },
+  {
+    "id": "vi-unaccented-09",
+    "query": "nep cam",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 09.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "nếp cẩm"
+  },
+  {
+    "id": "vi-unaccented-10",
+    "query": "lau ech",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 10.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "lẩu ếch"
+  },
+  {
+    "id": "vi-unaccented-11",
+    "query": "ruou nep",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 11.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "rượu nếp"
+  },
+  {
+    "id": "vi-unaccented-12",
+    "query": "pho suon",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 12.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "phở sườn"
+  },
+  {
+    "id": "vi-unaccented-13",
+    "query": "chuoi nuong",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 13.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "chuối nướng"
+  },
+  {
+    "id": "vi-unaccented-14",
+    "query": "muc nuong",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 14.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "mực nướng"
+  },
+  {
+    "id": "vi-unaccented-15",
+    "query": "cuon nam",
+    "relevant_paths": [
+      "notes/Ghi chép món ăn 15.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
+    "query_accented": "cuốn nấm"
+  },
+  {
+    "id": "vi-dd-01",
+    "query": "Dong Khoi",
+    "relevant_paths": [
+      "notes/Ghi chép địa điểm 01.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đồng Khởi"
   },
   {
     "id": "vi-dd-02",
-    "query": "dau mua mua",
+    "query": "Dien Bien Phu",
     "relevant_paths": [
-      "notes/Đầu mùa mưa.md"
+      "notes/Ghi chép địa điểm 02.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Điện Biên Phủ"
   },
   {
     "id": "vi-dd-03",
-    "query": "dong ho co co dien",
+    "query": "Dinh Tien Hoang",
     "relevant_paths": [
-      "notes/Đồng hồ cơ cổ điển.md"
+      "notes/Ghi chép địa điểm 03.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đinh Tiên Hoàng"
   },
   {
     "id": "vi-dd-04",
-    "query": "dien thoai cu doi moi",
+    "query": "De Tham",
     "relevant_paths": [
-      "notes/Điện thoại cũ đổi mới.md"
+      "notes/Ghi chép địa điểm 04.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đề Thám"
   },
   {
     "id": "vi-dd-05",
-    "query": "dam cuoi ngoai troi",
+    "query": "Doi Can",
     "relevant_paths": [
-      "notes/Đám cưới ngoài trời.md"
+      "notes/Ghi chép địa điểm 05.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đội Cấn"
   },
   {
     "id": "vi-dd-06",
-    "query": "dia chi giao nhan",
+    "query": "Dao Duy Tu",
     "relevant_paths": [
-      "notes/Địa chỉ giao nhận.md"
+      "notes/Ghi chép địa điểm 06.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đào Duy Từ"
   },
   {
     "id": "vi-dd-07",
-    "query": "dat lich hen kham benh",
+    "query": "Dang Dung",
     "relevant_paths": [
-      "notes/Đặt lịch hẹn khám bệnh.md"
+      "notes/Ghi chép địa điểm 07.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đặng Dung"
   },
   {
     "id": "vi-dd-08",
-    "query": "dao tao nhan su moi",
+    "query": "Doan Thi Diem",
     "relevant_paths": [
-      "notes/Đào tạo nhân sự mới.md"
+      "notes/Ghi chép địa điểm 08.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đoàn Thị Điểm"
   },
   {
     "id": "vi-dd-09",
-    "query": "danh gia hieu suat nhom",
+    "query": "Doc Lap",
     "relevant_paths": [
-      "notes/Đánh giá hiệu suất nhóm.md"
+      "notes/Ghi chép địa điểm 09.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Độc Lập"
   },
   {
     "id": "vi-dd-10",
-    "query": "doc gia trung thanh",
+    "query": "Dai Co Viet",
     "relevant_paths": [
-      "notes/Độc giả trung thành.md"
+      "notes/Ghi chép địa điểm 10.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đại Cồ Việt"
   },
   {
     "id": "vi-dd-11",
-    "query": "dem khuya hoc bai",
+    "query": "De La Thanh",
     "relevant_paths": [
-      "notes/Đêm khuya học bài.md"
+      "notes/Ghi chép địa điểm 11.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đê La Thành"
   },
   {
     "id": "vi-dd-12",
-    "query": "do uong mua he",
+    "query": "Dong Cac",
     "relevant_paths": [
-      "notes/Đồ uống mùa hè.md"
+      "notes/Ghi chép địa điểm 12.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đông Các"
   },
   {
     "id": "vi-dd-13",
-    "query": "dao dien phim ngan",
+    "query": "Do Quang",
     "relevant_paths": [
-      "notes/Đạo diễn phim ngắn.md"
+      "notes/Ghi chép địa điểm 13.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đỗ Quang"
   },
   {
     "id": "vi-dd-14",
-    "query": "diem danh tu dong",
+    "query": "Dang Tat",
     "relevant_paths": [
-      "notes/Điểm danh tự động.md"
+      "notes/Ghi chép địa điểm 14.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đặng Tất"
   },
   {
     "id": "vi-dd-15",
-    "query": "doi gio lam viec",
+    "query": "Dinh Cong Trang",
     "relevant_paths": [
-      "notes/Đổi giờ làm việc.md"
+      "notes/Ghi chép địa điểm 15.md"
     ],
     "partial_paths": [],
     "category": "vi-dd",
-    "notes": "Phrase contains đ; the query writes it as d."
+    "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
+    "query_accented": "Đinh Công Tráng"
   },
   {
     "id": "vi-iy-01",
