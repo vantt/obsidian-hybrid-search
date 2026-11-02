@@ -166,11 +166,17 @@ export function createIndexService(): IndexService {
         ? error
         : new Error('Invalid content ignore configuration', { cause: error });
   }
-  const desired = configurationError
+  const contentPolicy = configurationError
     ? `invalid:${createHash('sha256')
         .update(raw ?? '')
         .digest('hex')}`
     : policySignature(patterns);
+  // A configured chunk size changes how every note is split, so it is part of the index
+  // identity and a change triggers a rebuild. Unset keeps upstream's signature unchanged.
+  const desired =
+    config.chunkTokens === undefined
+      ? contentPolicy
+      : `${contentPolicy}+chunk=${config.chunkTokens}`;
 
   async function withContentRun<T>(
     owner: OwnerRunContext,
