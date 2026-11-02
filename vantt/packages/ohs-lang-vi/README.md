@@ -45,8 +45,8 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `tonePlacement` | `"modern"` | có |
 | `foldIY` | `false` | có |
 | `restore` | `true` | không |
-| `restoreForEmbedding`, `embedMinConfidence` | `false`, `0.8` | không (M4, V22 chốt) |
-| `accentedRatio` | `0.5` | không |
+| `restoreForEmbedding`, `embedMinConfidence` | `true`, `0.8` | không (bật mặc định theo eval V13b: không hạng mục nào tụt, nDCG@5 tổng +0,022). Chữ gõ có dấu không bao giờ bị đổi; câu có dấu một phần (ví dụ "Hội An") chỉ phục hồi chữ không dấu mà vault không bao giờ viết trần và có độ tin cậy đủ |
+| `accentedRatio` | `0.5` | không (câu có dấu khi tỉ lệ âm tiết có dấu **lớn hơn** ngưỡng, đúng PRD 10.3 "hơn 50%"; đúng 0,5 là câu có dấu một phần) |
 | `minSyllableShare` | `0.5` | không |
 | `accentedNorm` | `false` | không |
 | `accentedFold` | `"auto"` | không |
@@ -140,3 +140,19 @@ Eval mặc định (lõi `chk-series` `4c69fbf`), nDCG@5 so với V17+V18+V19 đ
 - Chỉ giữ từ điển hai âm tiết: từ ba âm tiết trở lên nuốt âm tiết của từ sau khi khớp dài nhất (`an toàn khu` + `vực`).
 - Hiệu năng: `project` seg 1 MB 67–114 ms (tuỳ tải máy); nạp từ điển 30–100 ms một lần mỗi tiến trình; dung lượng `data/compounds.txt` 266 KB (gzip 86 KB).
 
+
+## Kết quả eval V13b: `restoreForEmbedding` (2026-11-02)
+
+Sửa lỗi câu có dấu một phần ("Hội An" thành "hội ăn" trong `embedQuery`). nDCG@5, bộ `vi` 363 note, e5-small, rerank tắt, cây OHS `wt-p01b`:
+
+| Hạng mục | `restoreForEmbedding` tắt | bật |
+|---|---|---|
+| Tổng | 0,932 | 0,954 (+0,022) |
+| `vi-snippet` | 0,777 | 0,975 |
+| `vi-dd` | 0,888 | 0,975 |
+| `vi-unaccented` | 0,951 | 1,000 |
+| `vi-typo` | 0,975 | 1,000 |
+| `vi-names`, `vi-partial-accent` | 1,000 | 1,000 |
+| các hạng mục còn lại | không đổi | không đổi |
+
+Không hạng mục nào tụt, Hit@5 tổng 0,976 → 0,984, nên mặc định đổi thành `true`.
