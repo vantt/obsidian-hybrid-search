@@ -12,7 +12,9 @@ Fork của [flowing-abyss/obsidian-hybrid-search](https://github.com/flowing-aby
 - Đã fork. Đã thêm PRD và skill [`ohs-upstream-review`](../.claude/skills/ohs-upstream-review/SKILL.md).
 - Remote `upstream` đã thêm, chỉ theo `master`, đẩy bị chặn (`git remote set-url --push upstream DISABLE`).
 - `vantt/.gitignore` đã có: trạng thái catchup, báo cáo JSON, thư mục `.work/`.
-- **GitHub Actions trên fork đang tắt**, để CI và cron của upstream không chạy. Bật lại theo PRD mục 5 khi đã có workflow `vantt-*` (việc V02, cần user xác nhận).
+- **GitHub Actions đang bật**; `ci.yml`, `auto-tag.yml`, `release.yml`, `update-deps.yml` của upstream đã tắt, chỉ `vantt-*` chạy. Issues đã bật.
+- CI của fork (V02): `vantt-catchup.yml` (cron 6 giờ, chạy tay với `target_ref`, `force_rebuild`, `dry_run`, `simulate_failure`; đồng bộ `master` theo upstream, dựng nhánh `vantt/<tag>`, đẩy nhánh và tag `v<version>`; hỏng thì mở đúng một issue `[catchup] <ref>: <status>` nhãn `catchup`, lần hỏng sau bình luận vào issue đó) và `vantt-pr-check.yml` (chặn commit trên `master` chạm file upstream).
+- Secret tuỳ chọn `VANTT_PUSH_TOKEN` (PAT `contents:write`, thêm `workflow` khi bản đồng bộ upstream mang theo file workflow upstream đã đổi): thiếu thì workflow dùng `GITHUB_TOKEN`, bị GitHub từ chối khi đẩy file workflow. Nhánh phát hành đã gỡ workflow upstream nên thường không cần PAT.
 - Submodule `obsidian-plugin` (SSH trong `.gitmodules`): CI không clone nó. Workflow dùng `actions/checkout` mặc định, không có `submodules:`. OHS không dùng plugin này để build. `.gitmodules` của upstream giữ nguyên.
 - Chưa có script, bản vá hay gói nào. Lộ trình và thứ tự làm: [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md) (nguồn yêu cầu là PRD mục 14).
 
