@@ -1,0 +1,278 @@
+{
+  "gate": "fail",
+  "private": true,
+  "pack": "vi",
+  "without_pack": {
+    "queries": 61,
+    "summary": {
+      "ndcg_5": 0.6,
+      "ndcg_k": 0.624,
+      "mrr": 0.595,
+      "hit_1": 0.508,
+      "hit_3": 0.672,
+      "hit_5": 0.721,
+      "recall_k": 0.77,
+      "evidence_coverage_k": 0.77,
+      "all_relevant_k": 0.77
+    },
+    "categories": {
+      "vi-accented": {
+        "n": 5,
+        "ndcg_5": 0.946,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-unaccented": {
+        "n": 6,
+        "ndcg_5": 0.604,
+        "mrr": 0.505,
+        "hit_1": 0.333,
+        "hit_5": 0.833
+      },
+      "vi-partial-accent": {
+        "n": 3,
+        "ndcg_5": 0.893,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-tone-placement": {
+        "n": 3,
+        "ndcg_5": 0.877,
+        "mrr": 0.833,
+        "hit_1": 0.667,
+        "hit_5": 1
+      },
+      "vi-iy": {
+        "n": 3,
+        "ndcg_5": 0.817,
+        "mrr": 0.778,
+        "hit_1": 0.667,
+        "hit_5": 1
+      },
+      "vi-dd": {
+        "n": 4,
+        "ndcg_5": 0.868,
+        "mrr": 0.875,
+        "hit_1": 0.75,
+        "hit_5": 1
+      },
+      "vi-tone-precision": {
+        "n": 4,
+        "ndcg_5": 0.673,
+        "mrr": 0.661,
+        "hit_1": 0.5,
+        "hit_5": 0.75
+      },
+      "vi-compound": {
+        "n": 4,
+        "ndcg_5": 0.926,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-mixed-en": {
+        "n": 4,
+        "ndcg_5": 0.375,
+        "mrr": 0.369,
+        "hit_1": 0.25,
+        "hit_5": 0.5
+      },
+      "vi-semantic": {
+        "n": 6,
+        "ndcg_5": 0.023,
+        "mrr": 0,
+        "hit_1": 0,
+        "hit_5": 0
+      },
+      "vi-names": {
+        "n": 3,
+        "ndcg_5": 0.626,
+        "mrr": 0.583,
+        "hit_1": 0.333,
+        "hit_5": 1
+      },
+      "vi-telex": {
+        "n": 4,
+        "ndcg_5": 0.159,
+        "mrr": 0.063,
+        "hit_1": 0,
+        "hit_5": 0.25
+      },
+      "vi-typo": {
+        "n": 4,
+        "ndcg_5": 0.891,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-synonym": {
+        "n": 3,
+        "ndcg_5": 0.167,
+        "mrr": 0.153,
+        "hit_1": 0,
+        "hit_5": 0.333
+      },
+      "vi-abbr": {
+        "n": 3,
+        "ndcg_5": 0.667,
+        "mrr": 0.667,
+        "hit_1": 0.667,
+        "hit_5": 0.667
+      },
+      "vi-alias": {
+        "n": 2,
+        "ndcg_5": 0.19,
+        "mrr": 0.167,
+        "hit_1": 0,
+        "hit_5": 0.5
+      }
+    }
+  },
+  "with_pack": {
+    "queries": 61,
+    "summary": {
+      "ndcg_5": 0.698,
+      "ndcg_k": 0.731,
+      "mrr": 0.715,
+      "hit_1": 0.656,
+      "hit_3": 0.77,
+      "hit_5": 0.787,
+      "recall_k": 0.836,
+      "evidence_coverage_k": 0.836,
+      "all_relevant_k": 0.836
+    },
+    "categories": {
+      "vi-accented": {
+        "n": 5,
+        "ndcg_5": 0.894,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-unaccented": {
+        "n": 6,
+        "ndcg_5": 0.907,
+        "mrr": 0.778,
+        "hit_1": 0.667,
+        "hit_5": 1
+      },
+      "vi-partial-accent": {
+        "n": 3,
+        "ndcg_5": 0.92,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-tone-placement": {
+        "n": 3,
+        "ndcg_5": 1,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-iy": {
+        "n": 3,
+        "ndcg_5": 0.557,
+        "mrr": 0.542,
+        "hit_1": 0.333,
+        "hit_5": 0.667
+      },
+      "vi-dd": {
+        "n": 4,
+        "ndcg_5": 0.868,
+        "mrr": 0.875,
+        "hit_1": 0.75,
+        "hit_5": 1
+      },
+      "vi-tone-precision": {
+        "n": 4,
+        "ndcg_5": 0.809,
+        "mrr": 0.8,
+        "hit_1": 0.75,
+        "hit_5": 1
+      },
+      "vi-compound": {
+        "n": 4,
+        "ndcg_5": 0.885,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-mixed-en": {
+        "n": 4,
+        "ndcg_5": 0.375,
+        "mrr": 0.333,
+        "hit_1": 0.25,
+        "hit_5": 0.5
+      },
+      "vi-semantic": {
+        "n": 6,
+        "ndcg_5": 0.02,
+        "mrr": 0,
+        "hit_1": 0,
+        "hit_5": 0
+      },
+      "vi-names": {
+        "n": 3,
+        "ndcg_5": 0.816,
+        "mrr": 0.833,
+        "hit_1": 0.667,
+        "hit_5": 1
+      },
+      "vi-telex": {
+        "n": 4,
+        "ndcg_5": 0.908,
+        "mrr": 0.875,
+        "hit_1": 0.75,
+        "hit_5": 1
+      },
+      "vi-typo": {
+        "n": 4,
+        "ndcg_5": 0.891,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      },
+      "vi-synonym": {
+        "n": 3,
+        "ndcg_5": 0,
+        "mrr": 0.089,
+        "hit_1": 0,
+        "hit_5": 0
+      },
+      "vi-abbr": {
+        "n": 3,
+        "ndcg_5": 0.667,
+        "mrr": 0.667,
+        "hit_1": 0.667,
+        "hit_5": 0.667
+      },
+      "vi-alias": {
+        "n": 2,
+        "ndcg_5": 0.874,
+        "mrr": 1,
+        "hit_1": 1,
+        "hit_5": 1
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "private-regression-categories",
+      "status": "fail",
+      "detail": "drop over 0.02 ndcg_5 vs the same vault without the pack: vi-accented 0.946 -> 0.894; vi-iy 0.817 -> 0.557; vi-compound 0.926 -> 0.885; vi-synonym 0.167 -> 0"
+    },
+    {
+      "id": "private-regression-overall",
+      "status": "pass",
+      "detail": "overall ndcg_5 0.6 -> 0.698 vs the same vault without the pack",
+      "ref": 0.6,
+      "now": 0.698
+    }
+  ],
+  "failed": [
+    "private-regression-categories"
+  ]
+}
