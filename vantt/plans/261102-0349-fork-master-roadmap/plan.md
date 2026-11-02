@@ -1,7 +1,7 @@
 ---
 title: "Lộ trình tổng của fork vantt/obsidian-hybrid-search"
 description: "Plan tổng cho agent lead: mọi việc bắt buộc V00–V25 (trừ V16) của PRD, xếp theo 6 nhóm và theo đợt chạy song song, để điều phối agent con qua /ak-plan và /ak-cook."
-status: pending
+status: in-progress
 priority: P1
 effort: "~44 ngày công agent"
 branch: master
@@ -37,7 +37,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 
 | # | Phase | Việc | Công | Status |
 |---|---|---|---|---|
-| 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | Pending |
+| 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | In progress (V00 xong) |
 | 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Pending |
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Pending |
 | 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Pending |

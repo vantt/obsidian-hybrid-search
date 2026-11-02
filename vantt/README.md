@@ -10,8 +10,11 @@ Fork của [flowing-abyss/obsidian-hybrid-search](https://github.com/flowing-aby
 
 ## Trạng thái (2026-11-02)
 - Đã fork. Đã thêm PRD và skill [`ohs-upstream-review`](../.claude/skills/ohs-upstream-review/SKILL.md).
-- **GitHub Actions trên fork đang tắt**, để CI và cron của upstream không chạy. Bật lại theo PRD mục 5 khi đã có workflow `vantt-*`.
-- Chưa có script, bản vá hay gói nào. Thứ tự làm: PRD mục 14.
+- Remote `upstream` đã thêm, chỉ theo `master`, đẩy bị chặn (`git remote set-url --push upstream DISABLE`).
+- `vantt/.gitignore` đã có: trạng thái catchup, báo cáo JSON, thư mục `.work/`.
+- **GitHub Actions trên fork đang tắt**, để CI và cron của upstream không chạy. Bật lại theo PRD mục 5 khi đã có workflow `vantt-*` (việc V02, cần user xác nhận).
+- Submodule `obsidian-plugin` (SSH trong `.gitmodules`): CI không clone nó. Workflow dùng `actions/checkout` mặc định, không có `submodules:`. OHS không dùng plugin này để build. `.gitmodules` của upstream giữ nguyên.
+- Chưa có script, bản vá hay gói nào. Lộ trình và thứ tự làm: [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md) (nguồn yêu cầu là PRD mục 14).
 
 ## Quy tắc
 - Commit trên `master` của fork không sửa file của upstream. Thay đổi mã OHS chỉ đi qua bản vá trong `vantt/patches/`.

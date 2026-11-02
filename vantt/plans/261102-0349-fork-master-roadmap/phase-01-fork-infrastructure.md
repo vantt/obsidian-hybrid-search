@@ -37,7 +37,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 
 ## Todo
 
-- [ ] V00 cài đặt fork xong
+- [x] V00 cài đặt fork xong
 - [ ] V01 catchup và skill `ohs-catchup`
 - [ ] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
 - [ ] V03 gói dựng sẵn 4 nền và smoke
