@@ -190,7 +190,8 @@ async function main() {
   // The vault path must reach the bundled Node intact (Vietnamese letters, spaces), with and without a shell in between.
   const probe = "const p = process.env.OBSIDIAN_VAULT_PATH; process.stdout.write(JSON.stringify({ p, dir: require('node:fs').statSync(p).isDirectory() }));";
   const direct = spawnSync(nodeBin, ['-e', probe], { encoding: 'utf8', env });
-  check('vault path is a directory for the bundled Node', existsSync(vault) && direct.status === 0 && direct.stdout.includes('"dir":true'), `${direct.stdout} ${direct.stderr}`.slice(0, 300) + ` codepoints=${[...path.basename(vault)].map((c) => c.codePointAt(0).toString(16))}`);
+  check('vault directory exists for the smoke process', existsSync(vault), `${vault} entries=${existsSync(vault) ? readdirSync(vault).length : '-'}`);
+  check('vault path is a directory for the bundled Node', direct.status === 0 && direct.stdout.includes('"dir":true'), `${direct.stdout} ${String(direct.stderr).split('\n').filter((l) => /Error|ENOENT|errno|path/i.test(l)).join(' | ')} codepoints=${[...path.basename(vault)].map((c) => c.codePointAt(0).toString(16))}`);
 
   // 3. CLI through launchers
   const ver = await runOnce(root, 'ohs', ['--version'], env, 60_000);
