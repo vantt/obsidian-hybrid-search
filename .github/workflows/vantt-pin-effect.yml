@@ -89,7 +89,10 @@ jobs:
           cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
           (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
           # npm 12 refuses git dependencies (EALLOWGIT), so the corpus generator (no dependencies of its own) is cloned.
-          git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
+          # the tag is the one run-eval.mjs and the committed golden set were generated with
+          fixture_tag=$(grep -m1 '^const FIXTURE_TAG' tools/vantt/eval/vi/run-eval.mjs | cut -d"'" -f2)
+          [ -n "$fixture_tag" ] || { echo "::error::no FIXTURE_TAG in run-eval.mjs"; exit 1; }
+          git clone --quiet --depth 1 --branch "$fixture_tag" https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
       # The locked run goes first: the pinned run replaces files in the tree's dependencies and they stay replaced.
       - name: Eval with the locked dependencies
         if: steps.cpu.outputs.inconclusive == 'false'

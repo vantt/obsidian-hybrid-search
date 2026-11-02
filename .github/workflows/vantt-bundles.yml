@@ -301,7 +301,10 @@ jobs:
           for attempt in 1 2 3; do (cd tree && npm rebuild) && break; [ "$attempt" = 3 ] && exit 1; sleep 15; done
           cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
           (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
-          git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
+          # the tag is the one run-eval.mjs and the committed golden set were generated with
+          fixture_tag=$(grep -m1 '^const FIXTURE_TAG' tools/vantt/eval/vi/run-eval.mjs | cut -d"'" -f2)
+          [ -n "$fixture_tag" ] || { echo "::error::no FIXTURE_TAG in run-eval.mjs"; exit 1; }
+          git clone --quiet --depth 1 --branch "$fixture_tag" https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
       - name: Eval with the bundle's dependencies
         run: |
           node tools/vantt/scripts/bundle-parity.mjs run --tree tree --out "$RUNNER_TEMP/eval" \
