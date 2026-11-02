@@ -46,7 +46,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - [x] V15 eval trên vault thật: `vantt/reviews/v0.17.2-vantt.2.private.md` (61 câu; có gói nDCG@5 0,600 lên 0,698; cổng theo hạng mục hỏng, chờ người quyết)
 - [x] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
 
-- [ ] V15b sửa hạng mục tụt trên vault thật (`--private-detail`, lexicon, đo lại)
+- [ ] V15b sửa hạng mục tụt trên vault thật: `--private-detail` xong (`6cda0fc`); chờ chạy trên máy user (chi tiết từng câu + `learn-abbr`), rồi sửa gói và đo lại
 
 ## Success Criteria
 
