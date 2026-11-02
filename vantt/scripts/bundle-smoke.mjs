@@ -154,7 +154,8 @@ async function main() {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(base, { recursive: true });
   const t0 = Date.now();
-  const ex = spawnSync(TAR, ['-xf', archive, '-C', base], { stdio: 'inherit' });
+  // bsdtar on Windows reads argv in the ANSI code page and cannot chdir to "Thư mục thử"; the working directory is passed wide.
+  const ex = spawnSync(TAR, ['-xf', archive], { cwd: base, stdio: 'inherit' });
   check('extract archive', ex.status === 0);
   report.extract_ms = Date.now() - t0;
   const roots = readdirSync(base).filter((d) => d.startsWith('ohs-'));
@@ -180,6 +181,11 @@ async function main() {
   cpSync(vaultSrc, vault, { recursive: true });
   const env = { ...process.env, OBSIDIAN_VAULT_PATH: vault, NODE_OPTIONS: '' };
   delete env.NODE_OPTIONS;
+
+  // The embedder loads this optional dependency lazily and hides the cause when it fails.
+  const nodeBin = path.join(root, 'node', isWin ? 'node.exe' : path.join('bin', 'node'));
+  const hf = spawnSync(nodeBin, ['--input-type=module', '-e', "await import('@huggingface/transformers'); process.stdout.write('ok')"], { cwd: path.join(root, 'app'), encoding: 'utf8', env });
+  check('bundled @huggingface/transformers imports', hf.status === 0, hf.status === 0 ? '' : `${hf.stderr}`.split('\n').slice(0, 6).join(' | '));
 
   // 3. CLI through launchers
   const ver = await runOnce(root, 'ohs', ['--version'], env, 60_000);
@@ -239,7 +245,6 @@ async function main() {
   check('ohs-mcp tools/list has search', tools.includes('search'), tools.join(','));
 
   // 6. bundled language pack loads under the bundled Node
-  const nodeBin = path.join(root, 'node', isWin ? 'node.exe' : path.join('bin', 'node'));
   if (manifest.lang_packs?.vi) {
     const entry = pathToFileURL(path.join(root, 'lang', 'ohs-lang-vi', 'build', 'index.js')).href;
     const code = `const m = await import(${JSON.stringify(entry)}); process.stdout.write(typeof m.fold === 'function' ? String(m.fold('Giữ chân khách')) : 'no-fold');`;
