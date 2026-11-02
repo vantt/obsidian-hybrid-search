@@ -13,7 +13,7 @@
 // 6. imports the bundled Vietnamese pack with the bundled Node
 // Exit code 0 only when every check passed. A JSON report with timings and sizes goes to --out.
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -178,7 +178,12 @@ async function main() {
 
   // vault copy next to the bundle, also with a Vietnamese name
   const vault = path.join(work, 'Kho thử');
-  cpSync(vaultSrc, vault, { recursive: true });
+  // File by file: the destination has a non-ASCII name and a whole-tree cpSync left no directory on the Windows runner.
+  mkdirSync(vault, { recursive: true });
+  for (const f of walk(vaultSrc)) {
+    mkdirSync(path.dirname(path.join(vault, f)), { recursive: true });
+    copyFileSync(path.join(vaultSrc, f), path.join(vault, f));
+  }
   const env = { ...process.env, OBSIDIAN_VAULT_PATH: vault, NODE_OPTIONS: '' };
   delete env.NODE_OPTIONS;
 

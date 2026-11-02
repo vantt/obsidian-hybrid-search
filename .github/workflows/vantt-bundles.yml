@@ -73,13 +73,17 @@ jobs:
             runner: windows-latest
           - platform: darwin-arm64
             runner: macos-14
-          # darwin-x64 (macos-15-intel) is left out: onnxruntime-node 1.30 ships no darwin/x64
-          # binding, so upstream's local embeddings cannot run on Intel Macs (smoke: "Cannot find
-          # module .../napi-v6/darwin/x64/onnxruntime_binding.node"). bundle.mjs refuses such a build.
-          # Add the row back (here and in smoke) once a dependency version has the binding.
+          # Intel macOS is still attempted but cannot gate the release: onnxruntime-node 1.30 ships no
+          # darwin/x64 binding in its package, so no runner or Rosetta setup can supply one and
+          # bundle.mjs refuses the build ("ships no native binding"). Remove `optional` once a
+          # dependency version has the binding.
+          - platform: darwin-x64
+            runner: macos-15-intel
+            optional: true
           - platform: linux-x64
             runner: ubuntu-latest
     runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.optional == true }}
     timeout-minutes: 45
     defaults:
       run:
@@ -129,9 +133,13 @@ jobs:
             runner: windows-latest
           - platform: darwin-arm64
             runner: macos-14
+          - platform: darwin-x64
+            runner: macos-15-intel
+            optional: true
           - platform: linux-x64
             runner: ubuntu-latest
     runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.optional == true }}
     timeout-minutes: 45
     defaults:
       run:
