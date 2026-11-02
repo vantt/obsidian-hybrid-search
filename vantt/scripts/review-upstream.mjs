@@ -11,6 +11,7 @@
 //        [--skip-eval] [--force] [--keep] [--fetch] [--seed 1] [--blind-max 20]
 //        [--out <dir>] [--work <dir>]
 //   node vantt/scripts/review-upstream.mjs --tag v0.17.2 --unblind    # tally verdicts written by the judge
+//   node vantt/scripts/review-upstream.mjs --trends-only [--out <dir>] # redraw trends.svg and refresh the newest report
 //
 // Run from a work clone (its remotes, tags and fork branches are used; worktrees and builds go to
 // <clone>/vantt/.work/review-<tag>). Probes, series, eval sets and the pack come from the repo that
@@ -20,7 +21,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { datasetDir, evalEnv, goldenFile, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
+import { evalEnv, goldenFile, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
 import { ensureNpm } from './lib/npm.mjs';
 import { git, sh } from './lib/proc.mjs';
 import {
@@ -37,16 +38,19 @@ import {
   upstreamTagOf,
 } from './lib/review-core.mjs';
 import {
+  buildPack,
   buildTree,
   checkApplicability,
   hookChanges,
   readJsonIfExists,
   runProbe,
+  runEvaluateTimed,
   runViEval,
   upstreamChanges,
   upstreamOverview,
   writeJson,
 } from './lib/review-run.mjs';
+import { writeTrends } from './lib/review-trends.mjs';
 import { parseSeries } from './lib/series.mjs';
 import { createUpstreamTree } from './lib/trees.mjs';
 
@@ -70,6 +74,7 @@ export function parseCli(argv) {
       keep: { type: 'boolean', default: false },
       fetch: { type: 'boolean', default: false },
       unblind: { type: 'boolean', default: false },
+      'trends-only': { type: 'boolean', default: false },
       seed: { type: 'string', default: '1' },
       'blind-max': { type: 'string', default: '20' },
       out: { type: 'string' },
@@ -138,7 +143,7 @@ function viVault(workDir, otf) {
     const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', path.join(workDir, 'vi-answers.json')];
     const res = otf
       ? sh(workDir, `node ${JSON.stringify(otf)} ${gen.join(' ')}`)
-      : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.10.0 ${gen.join(' ')}`);
+      : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.11.0 ${gen.join(' ')}`);
     if (!res.ok) throw new Error('could not generate the vi vault for snippets');
   }
   const files = new Map();
@@ -186,6 +191,11 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   } catch (e) {
     log(`review-upstream: ${e.message}`);
     return 2;
+  }
+  if (opts['trends-only']) {
+    const r = writeTrends(path.resolve(opts.out ?? path.join(forkDir, 'vantt/reviews')));
+    log(`Trends over ${r.tags.join(', ') || 'no releases'}: ${r.svg}${r.report ? `, refreshed ${r.report}` : ''}`);
+    return 0;
   }
   const root = git(cwd, ['rev-parse', '--show-toplevel']);
   const started = Date.now();
@@ -288,15 +298,15 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     let blind = null;
     if (!opts['skip-eval']) {
       const resDir = path.join(workDir, 'results');
-      const cached = (name, fn) => {
+      const cached = async (name, fn) => {
         const f = path.join(resDir, `${name}.json`);
         const hit = !opts.force && readJsonIfExists(f);
         if (hit) return hit;
-        const r = fn();
+        const r = await fn();
         writeJson(f, r);
         return r;
       };
-      const light = (r) => ({ summary: r.summary, by_category: r.by_category, note_count: r.meta?.note_count ?? null });
+      const light = (r) => ({ summary: r.summary, by_category: r.by_category, note_count: r.meta?.note_count ?? null, timing: r.review_timing ?? null });
       const available = (names) => names.filter((n) => trees[n]);
 
       if (trees.up_new) {
@@ -307,8 +317,8 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
         const sides = {};
         for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
           log(` side ${n}`);
-          sides[n] = cached(`obsidian-help-${n}`, () =>
-            runEvaluate({ tree: trees[n].dir, vault, golden, scratch: path.join(workDir, 'scratch'), env: evalEnv(), log }));
+          sides[n] = await cached(`obsidian-help-${n}`, () =>
+            runEvaluateTimed({ tree: trees[n].dir, vault, golden, scratch: path.join(workDir, 'scratch'), env: evalEnv() }));
         }
         const lightSides = Object.fromEntries(Object.entries(sides).map(([n, r]) => [n, light(r)]));
         const rows = buildQualityRows(lightSides);
@@ -316,20 +326,22 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
 
         log('Eval vi');
         const packDir = path.resolve(opts['lang-pack'] ?? path.join(forkDir, 'vantt/packages/ohs-lang-vi'));
-        const packOk = existsSync(path.join(packDir, 'package.json')) && readdirSync(packDir).includes('build');
-        if (!packOk) warnings.push(`language pack not found or not built at ${packDir}; vi fork sides run without it`);
-        const pack = packOk ? packDir : null;
+        const pack = packDir;
+        // A pack without its build output is silently ignored by OHS, which makes the fork look like upstream.
+        buildPack(packDir, log);
         const vi = {};
         const viRuns = [['up_new', null], ['fork_prev', pack], ['fork_new', pack], ['fork_new_nopack', null]];
         for (const [n, p] of viRuns) {
           const tree = trees[n === 'fork_new_nopack' ? 'fork_new' : n];
           if (!tree) continue;
           log(` side ${n}`);
-          vi[n] = cached(`vi-${n}`, () =>
+          vi[n] = await cached(`vi-${n}`, () =>
             runViEval({ forkDir, tree: tree.dir, out: path.join(workDir, 'scratch', `vi-${n}.json`), pack: p, otf: opts.otf }));
         }
         const lightVi = Object.fromEntries(Object.entries(vi).map(([n, r]) => [n, light(r)]));
         const rowsVi = buildQualityRows(lightVi);
+        if (vi.fork_new && vi.fork_new_nopack && JSON.stringify(vi.fork_new.summary) === JSON.stringify(vi.fork_new_nopack.summary))
+          warnings.push('vi eval of fork_new is identical with and without the language pack: the pack may not have loaded');
         quality.vi = { pack: pack ? path.relative(forkDir, packDir) : null, sides: lightVi, rows: rowsVi, flags: flagQuality(rowsVi) };
         if (vi.up_new && vi.fork_new) {
           log('Blind pairs');
@@ -373,6 +385,8 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     };
     writeJson(dataFile, data);
     log(`Wrote ${dataFile}`);
+    const tr = writeTrends(outDir);
+    log(`Trends over ${tr.tags.join(', ')}: ${tr.svg}${tr.report ? `, refreshed ${tr.report}` : ' (no report yet; rerun with --trends-only after writing it)'}`);
     return 0;
   } catch (e) {
     log(`review-upstream: ${e.message}`);

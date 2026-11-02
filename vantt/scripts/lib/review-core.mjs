@@ -132,30 +132,47 @@ export function shuffle(items, random) {
 }
 
 /**
- * Choose up to `max` query ids: largest nDCG@5 difference between the two sides first, then
- * the `priorityCategory` queries, then random ones. Queries whose top 5 are identical on both
- * sides are never chosen (nothing to judge).
+ * Choose up to `max` query ids spread over all categories: one random query per category that
+ * has any difference (so no category is missed and extremes do not dominate), then more random
+ * ones round-robin over the categories. Queries whose top 5 are identical on both sides are
+ * never chosen (nothing to judge). `diff` is kept in the result of `blindCandidates` for reports.
  */
-export function pickBlindQueries(perA, perB, { max = 20, seed = 1, priorityCategory = 'vi-unaccented' } = {}) {
+export function pickBlindQueries(perA, perB, { max = 20, seed = 1 } = {}) {
+  const random = rng(seed);
+  const byCat = new Map();
+  for (const c of blindCandidates(perA, perB)) {
+    if (!byCat.has(c.category)) byCat.set(c.category, []);
+    byCat.get(c.category).push(c.id);
+  }
+  const pools = [...byCat.keys()].sort().map((cat) => shuffle(byCat.get(cat), random));
+  const chosen = [];
+  for (let round = 0; chosen.length < max; round++) {
+    let any = false;
+    for (const pool of pools) {
+      if (round < pool.length && chosen.length < max) {
+        chosen.push(pool[round]);
+        any = true;
+      }
+    }
+    if (!any) break;
+  }
+  return chosen;
+}
+
+/** Queries whose top 5 differ between the two sides: [{id, category, diff}] where diff = |ndcg_5 difference|. */
+export function blindCandidates(perA, perB) {
   const b = new Map(perB.map((q) => [q.id, q]));
   const top5 = (q) => (q.top_paths ?? []).slice(0, 5);
-  const cands = [];
+  const out = [];
   for (const qa of perA) {
     const qb = b.get(qa.id);
     if (!qb) continue;
     const x = top5(qa);
     const y = top5(qb);
     if (x.length === y.length && x.every((p, i) => p === y[i])) continue;
-    cands.push({ id: qa.id, category: qa.category, diff: Math.abs((qa.ndcg_5 ?? 0) - (qb.ndcg_5 ?? 0)) });
+    out.push({ id: qa.id, category: qa.category, diff: Math.abs((qa.ndcg_5 ?? 0) - (qb.ndcg_5 ?? 0)) });
   }
-  const chosen = [];
-  const take = (list) => {
-    for (const c of list) if (chosen.length < max && !chosen.includes(c.id)) chosen.push(c.id);
-  };
-  take([...cands].filter((c) => c.diff > 0).sort((p, q) => q.diff - p.diff || p.id.localeCompare(q.id)));
-  take(cands.filter((c) => c.category === priorityCategory));
-  take(shuffle(cands, rng(seed)));
-  return chosen;
+  return out;
 }
 
 /**
@@ -236,4 +253,24 @@ export function makeSnippet(text, query, max = 200) {
 /** Aggregate-only view of an eval result: no query text, no paths, no per-query data. */
 export function scrubPrivate(result) {
   return { summary: result.summary, by_category: result.by_category, queries: result.per_query?.length ?? null };
+}
+
+// ---------------------------------------------------------------- timing
+
+/**
+ * Index and per-query time of one eval run from timestamped output lines [{t (ms), line}] of
+ * upstream's eval: index = "Reindexing vault" to "[eval] indexed", queries = from there to the
+ * summary rule, divided by the number of "[eval] running" lines. Null when the markers are missing.
+ */
+export function extractTiming(events) {
+  const find = (re) => events.find((e) => re.test(e.line));
+  const start = find(/^Reindexing vault/);
+  const indexed = find(/^\[eval\] indexed:/);
+  const queries = events.filter((e) => /^\[eval\] running /.test(e.line)).length;
+  const end = find(/^─{5,}/) ?? events.at(-1);
+  if (!start || !indexed || !end || !queries) return null;
+  const round = (x) => Math.round(x * 1000) / 1000;
+  const indexS = (indexed.t - start.t) / 1000;
+  const queryS = (end.t - indexed.t) / 1000;
+  return { index_s: round(indexS), query_s: round(queryS), queries, per_query_ms: round((queryS * 1000) / queries) };
 }

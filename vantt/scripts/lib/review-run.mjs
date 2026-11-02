@@ -1,12 +1,27 @@
 // Side-effecting helpers of the upstream review (PRD 12): worktrees and builds, patch
 // applicability, probes, upstream diffs, vi eval. Pure logic lives in review-core.mjs.
-import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { childEnv, git, sh } from './proc.mjs';
-import { probeVerdict, HOOK_FILES } from './review-core.mjs';
+import { probeVerdict, HOOK_FILES, extractTiming } from './review-core.mjs';
 
 const tail = (s, n = 600) => (s.length > n ? `…${s.slice(-n)}` : s);
+
+/**
+ * Build a language pack (its `main` is a build output, absent in a fresh clone). Same steps as the
+ * quality gate's pack build: install dependencies when missing, `npm run build`, check `main`.
+ * Throws when the pack cannot be built.
+ */
+export function buildPack(dir, log = () => {}) {
+  const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));
+  if (!pkg.scripts?.build) return;
+  log(`  building ${pkg.name}`);
+  if (!existsSync(path.join(dir, 'node_modules')) && !sh(dir, existsSync(path.join(dir, 'package-lock.json')) ? 'npm ci' : 'npm install').ok)
+    throw new Error(`npm install failed in ${pkg.name}`);
+  if (!sh(dir, 'npm run build').ok) throw new Error(`build of ${pkg.name} failed`);
+  if (pkg.main && !existsSync(path.join(dir, pkg.main))) throw new Error(`${pkg.name} has no ${pkg.main} after the build`);
+}
 
 /** Run `npm run build` (tsc) in a tree; returns {ok, log}. */
 export function buildTree(dir) {
@@ -99,21 +114,68 @@ export function upstreamOverview(root, oldRef, newRef) {
 }
 
 /**
- * Run vantt/eval/vi/run-eval.mjs on `tree`, optionally with a language pack. Returns the parsed result.
- * `otf` is a clone of obsidian-test-fixture's otf.mjs (otherwise run-eval uses npx and the network).
+ * Run a command, echo its output to stderr and record when each output line arrived (for
+ * extractTiming). Resolves {status, events: [{t, line}]}.
  */
-export function runViEval({ forkDir, tree, out, pack = null, otf = null, k = 10, env = {} }) {
+export function runLogged(cmd, argv, { cwd, env }) {
+  return new Promise((resolve, reject) => {
+    const events = [];
+    const child = spawn(cmd, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const feed = (stream) => {
+      let buf = '';
+      stream.on('data', (chunk) => {
+        process.stderr.write(chunk);
+        buf += chunk.toString('utf8');
+        const lines = buf.split(/\r?\n/);
+        buf = lines.pop();
+        const t = Date.now();
+        for (const line of lines) events.push({ t, line });
+      });
+      stream.on('end', () => buf && events.push({ t: Date.now(), line: buf }));
+    };
+    feed(child.stdout);
+    feed(child.stderr);
+    child.on('error', reject);
+    child.on('close', (status) => resolve({ status, events }));
+  });
+}
+
+/** Upstream's eval in `tree` on a copy of `vault`, with index and per-query timing. Returns the result JSON plus `review_timing`. */
+export async function runEvaluateTimed({ tree, vault, golden, scratch, k = 10, env }) {
+  mkdirSync(scratch, { recursive: true });
+  const work = mkdtempSync(path.join(scratch, 'eval-'));
+  try {
+    const copy = path.join(work, 'vault');
+    cpSync(vault, copy, {
+      recursive: true,
+      filter: (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src),
+    });
+    const out = path.join(work, 'result.json');
+    const res = await runLogged(
+      process.execPath,
+      ['--import', 'tsx', 'eval/evaluate.ts', '--vault', copy, '--golden-set', golden, '--output', out, '--k', String(k)],
+      { cwd: tree, env },
+    );
+    if (res.status !== 0) throw new Error(`eval failed in ${tree} (exit ${res.status})`);
+    return { ...JSON.parse(readFileSync(out, 'utf8')), review_timing: extractTiming(res.events) };
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Run vantt/eval/vi/run-eval.mjs on `tree`, optionally with a language pack. Returns the parsed
+ * result plus `review_timing`. `otf` is a clone of obsidian-test-fixture's otf.mjs (otherwise
+ * run-eval uses npx and the network).
+ */
+export async function runViEval({ forkDir, tree, out, pack = null, otf = null, k = 10, env = {} }) {
   mkdirSync(path.dirname(out), { recursive: true });
   const argv = [path.join(forkDir, 'vantt/eval/vi/run-eval.mjs'), '--ohs', tree, '--out', out, '--k', String(k)];
   if (pack) argv.push('--lang-pack', pack);
   if (otf) argv.push('--otf', otf);
-  const res = spawnSync(process.execPath, argv, {
-    env: childEnv(env),
-    stdio: ['ignore', 2, 2],
-    maxBuffer: 64 * 1024 * 1024,
-  });
+  const res = await runLogged(process.execPath, argv, { cwd: forkDir, env: childEnv(env) });
   if (res.status !== 0) throw new Error(`vi eval failed on ${tree} (exit ${res.status})`);
-  return JSON.parse(readFileSync(out, 'utf8'));
+  return { ...JSON.parse(readFileSync(out, 'utf8')), review_timing: extractTiming(res.events) };
 }
 
 export const readJsonIfExists = (file) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null);

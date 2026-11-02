@@ -90,9 +90,26 @@ describe('blind comparison', () => {
     q('q3', 'y', 0.5, ['a', 'b', 'c', 'd', 'e']), // identical: never chosen
     q('q4', 'y', 0.5, ['a', 'b', 'c', 'd', 'x']),
   ];
-  it('orders by difference, then category, then random; skips identical lists; honours max', () => {
-    expect(pickBlindQueries(A, B, { max: 20 })).toEqual(['q1', 'q2', 'q4']);
-    expect(pickBlindQueries(A, B, { max: 2 })).toEqual(['q1', 'q2']);
+  it('spreads over categories, skips identical lists, honours max', () => {
+    const all = pickBlindQueries(A, B, { max: 20 });
+    expect(all.sort()).toEqual(['q1', 'q2', 'q4']);
+    // q1 (x), q2 (vi-unaccented), one of q4 (y): one per category before a second of any
+    const two = pickBlindQueries(A, B, { max: 2 });
+    expect(two).toHaveLength(2);
+    expect(new Set(two.map((id) => ({ q1: 'x', q2: 'v', q4: 'y' })[id])).size).toBe(2);
+  });
+  it('covers every category with a difference when max allows', () => {
+    const many = [];
+    const other = [];
+    for (let c = 0; c < 5; c++)
+      for (let i = 0; i < 4; i++) {
+        many.push(q(`c${c}-${i}`, `cat${c}`, 1, ['a', 'b', 'c', 'd', 'e']));
+        other.push(q(`c${c}-${i}`, `cat${c}`, 0, ['z', 'b', 'c', 'd', 'e']));
+      }
+    const picked = pickBlindQueries(many, other, { max: 7, seed: 2 });
+    expect(picked).toHaveLength(7);
+    expect(new Set(picked.map((id) => id.split('-')[0])).size).toBe(5);
+    expect(pickBlindQueries(many, other, { max: 7, seed: 2 })).toEqual(picked);
   });
   it('is reproducible for a seed', () => {
     const r = rng(5);
