@@ -1,6 +1,6 @@
 {
   "tool": "review-upstream",
-  "generated_at": "2026-11-02T05:54:20.669Z",
+  "generated_at": "2026-11-02T08:35:16.520Z",
   "platform": "linux-x64",
   "new": {
     "tag": "v0.17.2",
@@ -14,7 +14,7 @@
     "sha": "97179171bdda08375618527d6056794cbdea486d",
     "fork_ref": "vantt/v0.17.1"
   },
-  "series_sha256": "333f8b26cee3e09d44f764e5b001326be6944534717f3b89f5fccd60bacad3a0",
+  "series_sha256": "ab6ba7af2bf9697d6a5b5e9f8fb90712f0cad6d4fc3c198fb66f1cdf2170df21",
   "trees": {
     "up_new": {
       "ref": "v0.17.2",
@@ -30,13 +30,13 @@
     },
     "fork_prev": {
       "ref": "vantt/v0.17.1",
-      "sha": "fe60d870047b009798277ea2e5d77c33414d3a07",
+      "sha": "4f6ba651c318e551de67c54e2a2a1e3ac0d8c37b",
       "built": true,
       "deps": "installed"
     },
     "fork_new": {
       "ref": "vantt/v0.17.2",
-      "sha": "5fb910b38fb7b8fffba001c53705ee90ef0ad140",
+      "sha": "ebb0129ff2bc7b91187d2b23577a1ccdfbada7a6",
       "built": true,
       "deps": "shared"
     }
@@ -422,6 +422,49 @@
       },
       "suggestion": "keep",
       "fork_probe_ok": true
+    },
+    {
+      "id": "index-events",
+      "name": "feat(stdio): emit indexed and removed events after index writes",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/indexing/indexer.ts",
+        "src/runtime/config.ts",
+        "src/transports/cli.ts"
+      ],
+      "probe": "vantt/probes/index-events.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "index-events probe: problem present (indexed: missing, removed: missing)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "index-events probe: problem present (indexed: missing, removed: missing)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "index-events probe: indexed and removed events received (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "index-events probe: indexed and removed events received (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
     }
   ],
   "quality": {
@@ -486,7 +529,13 @@
               "all_relevant_k": 1
             }
           },
-          "note_count": 171
+          "note_count": 171,
+          "timing": {
+            "index_s": 12.614,
+            "query_s": 0.615,
+            "queries": 58,
+            "per_query_ms": 10.603
+          }
         },
         "fork_prev": {
           "summary": {
@@ -546,7 +595,13 @@
               "all_relevant_k": 1
             }
           },
-          "note_count": 171
+          "note_count": 171,
+          "timing": {
+            "index_s": 13.778,
+            "query_s": 0.619,
+            "queries": 58,
+            "per_query_ms": 10.672
+          }
         },
         "fork_new": {
           "summary": {
@@ -606,7 +661,13 @@
               "all_relevant_k": 1
             }
           },
-          "note_count": 171
+          "note_count": 171,
+          "timing": {
+            "index_s": 12.692,
+            "query_s": 0.564,
+            "queries": 58,
+            "per_query_ms": 9.724
+          }
         }
       },
       "rows": [
@@ -843,15 +904,15 @@
       "sides": {
         "up_new": {
           "summary": {
-            "ndcg_5": 0.666,
-            "ndcg_k": 0.686,
-            "mrr": 0.643,
-            "hit_1": 0.557,
-            "hit_3": 0.702,
-            "hit_5": 0.761,
-            "recall_k": 0.824,
-            "evidence_coverage_k": 0.824,
-            "all_relevant_k": 0.824
+            "ndcg_5": 0.646,
+            "ndcg_k": 0.664,
+            "mrr": 0.617,
+            "hit_1": 0.526,
+            "hit_3": 0.685,
+            "hit_5": 0.756,
+            "recall_k": 0.811,
+            "evidence_coverage_k": 0.811,
+            "all_relevant_k": 0.811
           },
           "by_category": {
             "vi-accented": {
@@ -866,9 +927,9 @@
               "all_relevant_k": 1
             },
             "vi-partial-accent": {
-              "ndcg_5": 0.872,
-              "ndcg_k": 0.872,
-              "mrr": 0.83,
+              "ndcg_5": 0.863,
+              "ndcg_k": 0.863,
+              "mrr": 0.819,
               "hit_1": 0.733,
               "hit_3": 0.867,
               "hit_5": 1,
@@ -888,20 +949,20 @@
               "all_relevant_k": 0.533
             },
             "vi-typo": {
-              "ndcg_5": 0.488,
-              "ndcg_k": 0.534,
-              "mrr": 0.426,
-              "hit_1": 0.2,
-              "hit_3": 0.533,
-              "hit_5": 0.733,
+              "ndcg_5": 0.543,
+              "ndcg_k": 0.567,
+              "mrr": 0.469,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.8,
               "recall_k": 0.867,
               "evidence_coverage_k": 0.867,
               "all_relevant_k": 0.867
             },
             "vi-snippet": {
-              "ndcg_5": 0.463,
-              "ndcg_k": 0.507,
-              "mrr": 0.437,
+              "ndcg_5": 0.466,
+              "ndcg_k": 0.509,
+              "mrr": 0.44,
               "hit_1": 0.333,
               "hit_3": 0.467,
               "hit_5": 0.6,
@@ -921,10 +982,10 @@
               "all_relevant_k": 0.267
             },
             "vi-dd": {
-              "ndcg_5": 0.263,
-              "ndcg_k": 0.309,
-              "mrr": 0.24,
-              "hit_1": 0.133,
+              "ndcg_5": 0.239,
+              "ndcg_k": 0.285,
+              "mrr": 0.206,
+              "hit_1": 0.067,
               "hit_3": 0.267,
               "hit_5": 0.4,
               "recall_k": 0.533,
@@ -965,21 +1026,21 @@
               "all_relevant_k": 1
             },
             "vi-compound": {
-              "ndcg_5": 0.844,
-              "ndcg_k": 0.844,
-              "mrr": 0.789,
-              "hit_1": 0.6,
-              "hit_3": 1,
-              "hit_5": 1,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
+              "ndcg_5": 0.632,
+              "ndcg_k": 0.632,
+              "mrr": 0.543,
+              "hit_1": 0.333,
+              "hit_3": 0.767,
+              "hit_5": 0.9,
+              "recall_k": 0.9,
+              "evidence_coverage_k": 0.9,
+              "all_relevant_k": 0.9
             },
             "vi-mixed-en": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -987,15 +1048,15 @@
               "all_relevant_k": 1
             },
             "vi-semantic": {
-              "ndcg_5": 0.555,
-              "ndcg_k": 0.595,
-              "mrr": 0.509,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.867,
-              "evidence_coverage_k": 0.867,
-              "all_relevant_k": 0.867
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             },
             "vi-names": {
               "ndcg_5": 0.909,
@@ -1010,8 +1071,8 @@
             },
             "vi-synonym": {
               "ndcg_5": 0.067,
-              "ndcg_k": 0.149,
-              "mrr": 0.076,
+              "ndcg_k": 0.145,
+              "mrr": 0.073,
               "hit_1": 0,
               "hit_3": 0.133,
               "hit_5": 0.133,
@@ -1031,30 +1092,36 @@
               "all_relevant_k": 1
             },
             "vi-alias": {
-              "ndcg_5": 0.535,
-              "ndcg_k": 0.557,
-              "mrr": 0.478,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.8,
-              "evidence_coverage_k": 0.8,
-              "all_relevant_k": 0.8
+              "ndcg_5": 0.477,
+              "ndcg_k": 0.5,
+              "mrr": 0.424,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.667,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             }
           },
-          "note_count": 363
+          "note_count": 423,
+          "timing": {
+            "index_s": 2.967,
+            "query_s": 1.326,
+            "queries": 270,
+            "per_query_ms": 4.911
+          }
         },
         "fork_prev": {
           "summary": {
-            "ndcg_5": 0.813,
-            "ndcg_k": 0.828,
-            "mrr": 0.795,
-            "hit_1": 0.725,
-            "hit_3": 0.855,
-            "hit_5": 0.886,
-            "recall_k": 0.933,
-            "evidence_coverage_k": 0.933,
-            "all_relevant_k": 0.933
+            "ndcg_5": 0.944,
+            "ndcg_k": 0.948,
+            "mrr": 0.936,
+            "hit_1": 0.911,
+            "hit_3": 0.956,
+            "hit_5": 0.974,
+            "recall_k": 0.985,
+            "evidence_coverage_k": 0.985,
+            "all_relevant_k": 0.985
           },
           "by_category": {
             "vi-accented": {
@@ -1069,10 +1136,10 @@
               "all_relevant_k": 1
             },
             "vi-partial-accent": {
-              "ndcg_5": 0.933,
-              "ndcg_k": 0.933,
-              "mrr": 0.911,
-              "hit_1": 0.867,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -1080,39 +1147,28 @@
               "all_relevant_k": 1
             },
             "vi-telex": {
-              "ndcg_5": 0.333,
-              "ndcg_k": 0.355,
-              "mrr": 0.298,
-              "hit_1": 0.2,
-              "hit_3": 0.333,
-              "hit_5": 0.467,
-              "recall_k": 0.533,
-              "evidence_coverage_k": 0.533,
-              "all_relevant_k": 0.533
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
             },
             "vi-typo": {
-              "ndcg_5": 0.661,
-              "ndcg_k": 0.683,
-              "mrr": 0.578,
-              "hit_1": 0.333,
-              "hit_3": 0.867,
-              "hit_5": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
             "vi-snippet": {
-              "ndcg_5": 0.743,
-              "ndcg_k": 0.785,
-              "mrr": 0.719,
-              "hit_1": 0.6,
-              "hit_3": 0.8,
-              "hit_5": 0.867,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
-            },
-            "vi-unaccented": {
               "ndcg_5": 0.951,
               "ndcg_k": 0.951,
               "mrr": 0.933,
@@ -1123,12 +1179,23 @@
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
+            "vi-unaccented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
             "vi-dd": {
-              "ndcg_5": 0.888,
-              "ndcg_k": 0.888,
-              "mrr": 0.85,
-              "hit_1": 0.733,
-              "hit_3": 0.933,
+              "ndcg_5": 0.975,
+              "ndcg_k": 0.975,
+              "mrr": 0.967,
+              "hit_1": 0.933,
+              "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
@@ -1168,6 +1235,17 @@
               "all_relevant_k": 1
             },
             "vi-compound": {
+              "ndcg_5": 0.988,
+              "ndcg_k": 0.988,
+              "mrr": 0.983,
+              "hit_1": 0.967,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-mixed-en": {
               "ndcg_5": 1,
               "ndcg_k": 1,
               "mrr": 1,
@@ -1178,33 +1256,22 @@
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
-            "vi-mixed-en": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
-              "hit_3": 1,
-              "hit_5": 1,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
-            },
             "vi-semantic": {
-              "ndcg_5": 0.555,
-              "ndcg_k": 0.596,
-              "mrr": 0.511,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.867,
-              "evidence_coverage_k": 0.867,
-              "all_relevant_k": 0.867
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             },
             "vi-names": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -1212,52 +1279,58 @@
               "all_relevant_k": 1
             },
             "vi-synonym": {
-              "ndcg_5": 0.067,
-              "ndcg_k": 0.169,
-              "mrr": 0.084,
-              "hit_1": 0,
-              "hit_3": 0.133,
-              "hit_5": 0.133,
-              "recall_k": 0.467,
-              "evidence_coverage_k": 0.467,
-              "all_relevant_k": 0.467
-            },
-            "vi-abbr": {
-              "ndcg_5": 0.933,
-              "ndcg_k": 0.953,
-              "mrr": 0.94,
-              "hit_1": 0.933,
-              "hit_3": 0.933,
+              "ndcg_5": 0.689,
+              "ndcg_k": 0.708,
+              "mrr": 0.617,
+              "hit_1": 0.467,
+              "hit_3": 0.733,
               "hit_5": 0.933,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
+            "vi-abbr": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
             "vi-alias": {
-              "ndcg_5": 0.814,
-              "ndcg_k": 0.814,
-              "mrr": 0.752,
-              "hit_1": 0.6,
-              "hit_3": 0.867,
+              "ndcg_5": 0.959,
+              "ndcg_k": 0.959,
+              "mrr": 0.947,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
               "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             }
           },
-          "note_count": 363
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.225,
+            "query_s": 2.656,
+            "queries": 270,
+            "per_query_ms": 9.837
+          }
         },
         "fork_new": {
           "summary": {
-            "ndcg_5": 0.813,
-            "ndcg_k": 0.828,
-            "mrr": 0.795,
-            "hit_1": 0.725,
-            "hit_3": 0.855,
-            "hit_5": 0.886,
-            "recall_k": 0.933,
-            "evidence_coverage_k": 0.933,
-            "all_relevant_k": 0.933
+            "ndcg_5": 0.944,
+            "ndcg_k": 0.948,
+            "mrr": 0.936,
+            "hit_1": 0.911,
+            "hit_3": 0.956,
+            "hit_5": 0.974,
+            "recall_k": 0.985,
+            "evidence_coverage_k": 0.985,
+            "all_relevant_k": 0.985
           },
           "by_category": {
             "vi-accented": {
@@ -1272,10 +1345,10 @@
               "all_relevant_k": 1
             },
             "vi-partial-accent": {
-              "ndcg_5": 0.933,
-              "ndcg_k": 0.933,
-              "mrr": 0.911,
-              "hit_1": 0.867,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -1283,39 +1356,28 @@
               "all_relevant_k": 1
             },
             "vi-telex": {
-              "ndcg_5": 0.333,
-              "ndcg_k": 0.355,
-              "mrr": 0.298,
-              "hit_1": 0.2,
-              "hit_3": 0.333,
-              "hit_5": 0.467,
-              "recall_k": 0.533,
-              "evidence_coverage_k": 0.533,
-              "all_relevant_k": 0.533
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
             },
             "vi-typo": {
-              "ndcg_5": 0.661,
-              "ndcg_k": 0.683,
-              "mrr": 0.578,
-              "hit_1": 0.333,
-              "hit_3": 0.867,
-              "hit_5": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
             "vi-snippet": {
-              "ndcg_5": 0.743,
-              "ndcg_k": 0.785,
-              "mrr": 0.719,
-              "hit_1": 0.6,
-              "hit_3": 0.8,
-              "hit_5": 0.867,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
-            },
-            "vi-unaccented": {
               "ndcg_5": 0.951,
               "ndcg_k": 0.951,
               "mrr": 0.933,
@@ -1326,12 +1388,23 @@
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
+            "vi-unaccented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
             "vi-dd": {
-              "ndcg_5": 0.888,
-              "ndcg_k": 0.888,
-              "mrr": 0.85,
-              "hit_1": 0.733,
-              "hit_3": 0.933,
+              "ndcg_5": 0.975,
+              "ndcg_k": 0.975,
+              "mrr": 0.967,
+              "hit_1": 0.933,
+              "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
@@ -1371,6 +1444,17 @@
               "all_relevant_k": 1
             },
             "vi-compound": {
+              "ndcg_5": 0.988,
+              "ndcg_k": 0.988,
+              "mrr": 0.983,
+              "hit_1": 0.967,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-mixed-en": {
               "ndcg_5": 1,
               "ndcg_k": 1,
               "mrr": 1,
@@ -1381,33 +1465,22 @@
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
-            "vi-mixed-en": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
-              "hit_3": 1,
-              "hit_5": 1,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
-            },
             "vi-semantic": {
-              "ndcg_5": 0.555,
-              "ndcg_k": 0.596,
-              "mrr": 0.511,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.867,
-              "evidence_coverage_k": 0.867,
-              "all_relevant_k": 0.867
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             },
             "vi-names": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -1415,52 +1488,58 @@
               "all_relevant_k": 1
             },
             "vi-synonym": {
-              "ndcg_5": 0.067,
-              "ndcg_k": 0.169,
-              "mrr": 0.084,
-              "hit_1": 0,
-              "hit_3": 0.133,
-              "hit_5": 0.133,
-              "recall_k": 0.467,
-              "evidence_coverage_k": 0.467,
-              "all_relevant_k": 0.467
-            },
-            "vi-abbr": {
-              "ndcg_5": 0.933,
-              "ndcg_k": 0.953,
-              "mrr": 0.94,
-              "hit_1": 0.933,
-              "hit_3": 0.933,
+              "ndcg_5": 0.689,
+              "ndcg_k": 0.708,
+              "mrr": 0.617,
+              "hit_1": 0.467,
+              "hit_3": 0.733,
               "hit_5": 0.933,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             },
+            "vi-abbr": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
             "vi-alias": {
-              "ndcg_5": 0.814,
-              "ndcg_k": 0.814,
-              "mrr": 0.752,
-              "hit_1": 0.6,
-              "hit_3": 0.867,
+              "ndcg_5": 0.959,
+              "ndcg_k": 0.959,
+              "mrr": 0.947,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
               "hit_5": 1,
               "recall_k": 1,
               "evidence_coverage_k": 1,
               "all_relevant_k": 1
             }
           },
-          "note_count": 363
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.19,
+            "query_s": 2.314,
+            "queries": 270,
+            "per_query_ms": 8.57
+          }
         },
         "fork_new_nopack": {
           "summary": {
-            "ndcg_5": 0.666,
-            "ndcg_k": 0.686,
-            "mrr": 0.643,
-            "hit_1": 0.557,
-            "hit_3": 0.702,
-            "hit_5": 0.761,
-            "recall_k": 0.824,
-            "evidence_coverage_k": 0.824,
-            "all_relevant_k": 0.824
+            "ndcg_5": 0.646,
+            "ndcg_k": 0.664,
+            "mrr": 0.617,
+            "hit_1": 0.526,
+            "hit_3": 0.685,
+            "hit_5": 0.756,
+            "recall_k": 0.811,
+            "evidence_coverage_k": 0.811,
+            "all_relevant_k": 0.811
           },
           "by_category": {
             "vi-accented": {
@@ -1475,9 +1554,9 @@
               "all_relevant_k": 1
             },
             "vi-partial-accent": {
-              "ndcg_5": 0.872,
-              "ndcg_k": 0.872,
-              "mrr": 0.83,
+              "ndcg_5": 0.863,
+              "ndcg_k": 0.863,
+              "mrr": 0.819,
               "hit_1": 0.733,
               "hit_3": 0.867,
               "hit_5": 1,
@@ -1497,20 +1576,20 @@
               "all_relevant_k": 0.533
             },
             "vi-typo": {
-              "ndcg_5": 0.488,
-              "ndcg_k": 0.534,
-              "mrr": 0.426,
-              "hit_1": 0.2,
-              "hit_3": 0.533,
-              "hit_5": 0.733,
+              "ndcg_5": 0.543,
+              "ndcg_k": 0.567,
+              "mrr": 0.469,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.8,
               "recall_k": 0.867,
               "evidence_coverage_k": 0.867,
               "all_relevant_k": 0.867
             },
             "vi-snippet": {
-              "ndcg_5": 0.463,
-              "ndcg_k": 0.507,
-              "mrr": 0.437,
+              "ndcg_5": 0.466,
+              "ndcg_k": 0.509,
+              "mrr": 0.44,
               "hit_1": 0.333,
               "hit_3": 0.467,
               "hit_5": 0.6,
@@ -1530,10 +1609,10 @@
               "all_relevant_k": 0.267
             },
             "vi-dd": {
-              "ndcg_5": 0.263,
-              "ndcg_k": 0.309,
-              "mrr": 0.24,
-              "hit_1": 0.133,
+              "ndcg_5": 0.239,
+              "ndcg_k": 0.285,
+              "mrr": 0.206,
+              "hit_1": 0.067,
               "hit_3": 0.267,
               "hit_5": 0.4,
               "recall_k": 0.533,
@@ -1574,21 +1653,21 @@
               "all_relevant_k": 1
             },
             "vi-compound": {
-              "ndcg_5": 0.844,
-              "ndcg_k": 0.844,
-              "mrr": 0.789,
-              "hit_1": 0.6,
-              "hit_3": 1,
-              "hit_5": 1,
-              "recall_k": 1,
-              "evidence_coverage_k": 1,
-              "all_relevant_k": 1
+              "ndcg_5": 0.632,
+              "ndcg_k": 0.632,
+              "mrr": 0.543,
+              "hit_1": 0.333,
+              "hit_3": 0.767,
+              "hit_5": 0.9,
+              "recall_k": 0.9,
+              "evidence_coverage_k": 0.9,
+              "all_relevant_k": 0.9
             },
             "vi-mixed-en": {
-              "ndcg_5": 0.975,
-              "ndcg_k": 0.975,
-              "mrr": 0.967,
-              "hit_1": 0.933,
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
               "hit_3": 1,
               "hit_5": 1,
               "recall_k": 1,
@@ -1596,15 +1675,15 @@
               "all_relevant_k": 1
             },
             "vi-semantic": {
-              "ndcg_5": 0.555,
-              "ndcg_k": 0.595,
-              "mrr": 0.509,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.867,
-              "evidence_coverage_k": 0.867,
-              "all_relevant_k": 0.867
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             },
             "vi-names": {
               "ndcg_5": 0.909,
@@ -1619,8 +1698,8 @@
             },
             "vi-synonym": {
               "ndcg_5": 0.067,
-              "ndcg_k": 0.149,
-              "mrr": 0.076,
+              "ndcg_k": 0.145,
+              "mrr": 0.073,
               "hit_1": 0,
               "hit_3": 0.133,
               "hit_5": 0.133,
@@ -1640,136 +1719,142 @@
               "all_relevant_k": 1
             },
             "vi-alias": {
-              "ndcg_5": 0.535,
-              "ndcg_k": 0.557,
-              "mrr": 0.478,
-              "hit_1": 0.333,
-              "hit_3": 0.667,
-              "hit_5": 0.733,
-              "recall_k": 0.8,
-              "evidence_coverage_k": 0.8,
-              "all_relevant_k": 0.8
+              "ndcg_5": 0.477,
+              "ndcg_k": 0.5,
+              "mrr": 0.424,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.667,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
             }
           },
-          "note_count": 363
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.126,
+            "query_s": 1.261,
+            "queries": 270,
+            "per_query_ms": 4.67
+          }
         }
       },
       "rows": [
         {
           "category": "ALL",
           "metric": "ndcg_5",
-          "up_new": 0.666,
-          "fork_prev": 0.813,
-          "fork_new": 0.813,
-          "delta": 0.147,
+          "up_new": 0.646,
+          "fork_prev": 0.944,
+          "fork_new": 0.944,
+          "delta": 0.298,
           "delta_vs_prev": 0
         },
         {
           "category": "ALL",
           "metric": "mrr",
-          "up_new": 0.643,
-          "fork_prev": 0.795,
-          "fork_new": 0.795,
-          "delta": 0.152,
+          "up_new": 0.617,
+          "fork_prev": 0.936,
+          "fork_new": 0.936,
+          "delta": 0.319,
           "delta_vs_prev": 0
         },
         {
           "category": "ALL",
           "metric": "hit_1",
-          "up_new": 0.557,
-          "fork_prev": 0.725,
-          "fork_new": 0.725,
-          "delta": 0.168,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "ALL",
-          "metric": "hit_5",
-          "up_new": 0.761,
-          "fork_prev": 0.886,
-          "fork_new": 0.886,
-          "delta": 0.125,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "ALL",
-          "metric": "recall_k",
-          "up_new": 0.824,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0.109,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-accented",
-          "metric": "ndcg_5",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-accented",
-          "metric": "mrr",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-accented",
-          "metric": "hit_1",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-accented",
-          "metric": "hit_5",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-accented",
-          "metric": "recall_k",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-partial-accent",
-          "metric": "ndcg_5",
-          "up_new": 0.872,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0.061,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-partial-accent",
-          "metric": "mrr",
-          "up_new": 0.83,
+          "up_new": 0.526,
           "fork_prev": 0.911,
           "fork_new": 0.911,
-          "delta": 0.081,
+          "delta": 0.385,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "hit_5",
+          "up_new": 0.756,
+          "fork_prev": 0.974,
+          "fork_new": 0.974,
+          "delta": 0.218,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "recall_k",
+          "up_new": 0.811,
+          "fork_prev": 0.985,
+          "fork_new": 0.985,
+          "delta": 0.174,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "ndcg_5",
+          "up_new": 0.863,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.137,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "mrr",
+          "up_new": 0.819,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.181,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-partial-accent",
           "metric": "hit_1",
           "up_new": 0.733,
-          "fork_prev": 0.867,
-          "fork_new": 0.867,
-          "delta": 0.134,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.267,
           "delta_vs_prev": 0
         },
         {
@@ -1794,80 +1879,80 @@
           "category": "vi-telex",
           "metric": "ndcg_5",
           "up_new": 0.333,
-          "fork_prev": 0.333,
-          "fork_new": 0.333,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.667,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-telex",
           "metric": "mrr",
           "up_new": 0.298,
-          "fork_prev": 0.298,
-          "fork_new": 0.298,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.702,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-telex",
           "metric": "hit_1",
           "up_new": 0.2,
-          "fork_prev": 0.2,
-          "fork_new": 0.2,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.8,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-telex",
           "metric": "hit_5",
           "up_new": 0.467,
-          "fork_prev": 0.467,
-          "fork_new": 0.467,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.533,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-telex",
           "metric": "recall_k",
           "up_new": 0.533,
-          "fork_prev": 0.533,
-          "fork_new": 0.533,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.467,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-typo",
           "metric": "ndcg_5",
-          "up_new": 0.488,
-          "fork_prev": 0.661,
-          "fork_new": 0.661,
-          "delta": 0.173,
+          "up_new": 0.543,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.457,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-typo",
           "metric": "mrr",
-          "up_new": 0.426,
-          "fork_prev": 0.578,
-          "fork_new": 0.578,
-          "delta": 0.152,
+          "up_new": 0.469,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.531,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-typo",
           "metric": "hit_1",
-          "up_new": 0.2,
-          "fork_prev": 0.333,
-          "fork_new": 0.333,
-          "delta": 0.133,
+          "up_new": 0.267,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.733,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-typo",
           "metric": "hit_5",
-          "up_new": 0.733,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
+          "up_new": 0.8,
+          "fork_prev": 1,
+          "fork_new": 1,
           "delta": 0.2,
           "delta_vs_prev": 0
         },
@@ -1883,37 +1968,37 @@
         {
           "category": "vi-snippet",
           "metric": "ndcg_5",
-          "up_new": 0.463,
-          "fork_prev": 0.743,
-          "fork_new": 0.743,
-          "delta": 0.28,
+          "up_new": 0.466,
+          "fork_prev": 0.951,
+          "fork_new": 0.951,
+          "delta": 0.485,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-snippet",
           "metric": "mrr",
-          "up_new": 0.437,
-          "fork_prev": 0.719,
-          "fork_new": 0.719,
-          "delta": 0.282,
+          "up_new": 0.44,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.493,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-snippet",
           "metric": "hit_1",
           "up_new": 0.333,
-          "fork_prev": 0.6,
-          "fork_new": 0.6,
-          "delta": 0.267,
+          "fork_prev": 0.867,
+          "fork_new": 0.867,
+          "delta": 0.534,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-snippet",
           "metric": "hit_5",
           "up_new": 0.6,
-          "fork_prev": 0.867,
-          "fork_new": 0.867,
-          "delta": 0.267,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.4,
           "delta_vs_prev": 0
         },
         {
@@ -1929,27 +2014,27 @@
           "category": "vi-unaccented",
           "metric": "ndcg_5",
           "up_new": 0.133,
-          "fork_prev": 0.951,
-          "fork_new": 0.951,
-          "delta": 0.818,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.867,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-unaccented",
           "metric": "mrr",
           "up_new": 0.089,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0.844,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.911,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-unaccented",
           "metric": "hit_1",
           "up_new": 0,
-          "fork_prev": 0.867,
-          "fork_new": 0.867,
-          "delta": 0.867,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 1,
           "delta_vs_prev": 0
         },
         {
@@ -1973,28 +2058,28 @@
         {
           "category": "vi-dd",
           "metric": "ndcg_5",
-          "up_new": 0.263,
-          "fork_prev": 0.888,
-          "fork_new": 0.888,
-          "delta": 0.625,
+          "up_new": 0.239,
+          "fork_prev": 0.975,
+          "fork_new": 0.975,
+          "delta": 0.736,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-dd",
           "metric": "mrr",
-          "up_new": 0.24,
-          "fork_prev": 0.85,
-          "fork_new": 0.85,
-          "delta": 0.61,
+          "up_new": 0.206,
+          "fork_prev": 0.967,
+          "fork_new": 0.967,
+          "delta": 0.761,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-dd",
           "metric": "hit_1",
-          "up_new": 0.133,
-          "fork_prev": 0.733,
-          "fork_new": 0.733,
-          "delta": 0.6,
+          "up_new": 0.067,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.866,
           "delta_vs_prev": 0
         },
         {
@@ -2153,123 +2238,132 @@
         {
           "category": "vi-compound",
           "metric": "ndcg_5",
-          "up_new": 0.844,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0.156,
+          "up_new": 0.632,
+          "fork_prev": 0.988,
+          "fork_new": 0.988,
+          "delta": 0.356,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-compound",
           "metric": "mrr",
-          "up_new": 0.789,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0.211,
+          "up_new": 0.543,
+          "fork_prev": 0.983,
+          "fork_new": 0.983,
+          "delta": 0.44,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-compound",
-          "metric": "hit_1",
-          "up_new": 0.6,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0.4,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-compound",
-          "metric": "hit_5",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-compound",
-          "metric": "recall_k",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-mixed-en",
-          "metric": "ndcg_5",
-          "up_new": 0.975,
-          "fork_prev": 0.975,
-          "fork_new": 0.975,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-mixed-en",
-          "metric": "mrr",
-          "up_new": 0.967,
-          "fork_prev": 0.967,
-          "fork_new": 0.967,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-mixed-en",
-          "metric": "hit_1",
-          "up_new": 0.933,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-mixed-en",
-          "metric": "hit_5",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-mixed-en",
-          "metric": "recall_k",
-          "up_new": 1,
-          "fork_prev": 1,
-          "fork_new": 1,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-semantic",
-          "metric": "ndcg_5",
-          "up_new": 0.555,
-          "fork_prev": 0.555,
-          "fork_new": 0.555,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-semantic",
-          "metric": "mrr",
-          "up_new": 0.509,
-          "fork_prev": 0.511,
-          "fork_new": 0.511,
-          "delta": 0.002,
-          "delta_vs_prev": 0
-        },
-        {
-          "category": "vi-semantic",
           "metric": "hit_1",
           "up_new": 0.333,
-          "fork_prev": 0.333,
-          "fork_new": 0.333,
+          "fork_prev": 0.967,
+          "fork_new": 0.967,
+          "delta": 0.634,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "hit_5",
+          "up_new": 0.9,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.1,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "recall_k",
+          "up_new": 0.9,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.1,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "ndcg_5",
+          "up_new": 0.446,
+          "fork_prev": 0.446,
+          "fork_new": 0.446,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "mrr",
+          "up_new": 0.412,
+          "fork_prev": 0.412,
+          "fork_new": 0.412,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "hit_1",
+          "up_new": 0.267,
+          "fork_prev": 0.267,
+          "fork_new": 0.267,
           "delta": 0,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-semantic",
           "metric": "hit_5",
+          "up_new": 0.6,
+          "fork_prev": 0.6,
+          "fork_new": 0.6,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "recall_k",
           "up_new": 0.733,
           "fork_prev": 0.733,
           "fork_new": 0.733,
@@ -2277,39 +2371,30 @@
           "delta_vs_prev": 0
         },
         {
-          "category": "vi-semantic",
-          "metric": "recall_k",
-          "up_new": 0.867,
-          "fork_prev": 0.867,
-          "fork_new": 0.867,
-          "delta": 0,
-          "delta_vs_prev": 0
-        },
-        {
           "category": "vi-names",
           "metric": "ndcg_5",
           "up_new": 0.909,
-          "fork_prev": 0.975,
-          "fork_new": 0.975,
-          "delta": 0.066,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.091,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-names",
           "metric": "mrr",
           "up_new": 0.911,
-          "fork_prev": 0.967,
-          "fork_new": 0.967,
-          "delta": 0.056,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.089,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-names",
           "metric": "hit_1",
           "up_new": 0.867,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0.066,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.133,
           "delta_vs_prev": 0
         },
         {
@@ -2334,81 +2419,81 @@
           "category": "vi-synonym",
           "metric": "ndcg_5",
           "up_new": 0.067,
-          "fork_prev": 0.067,
-          "fork_new": 0.067,
-          "delta": 0,
+          "fork_prev": 0.689,
+          "fork_new": 0.689,
+          "delta": 0.622,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-synonym",
           "metric": "mrr",
-          "up_new": 0.076,
-          "fork_prev": 0.084,
-          "fork_new": 0.084,
-          "delta": 0.008,
+          "up_new": 0.073,
+          "fork_prev": 0.617,
+          "fork_new": 0.617,
+          "delta": 0.544,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-synonym",
           "metric": "hit_1",
           "up_new": 0,
-          "fork_prev": 0,
-          "fork_new": 0,
-          "delta": 0,
+          "fork_prev": 0.467,
+          "fork_new": 0.467,
+          "delta": 0.467,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-synonym",
           "metric": "hit_5",
           "up_new": 0.133,
-          "fork_prev": 0.133,
-          "fork_new": 0.133,
-          "delta": 0,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.8,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-synonym",
           "metric": "recall_k",
           "up_new": 0.4,
-          "fork_prev": 0.467,
-          "fork_new": 0.467,
-          "delta": 0.067,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.6,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-abbr",
           "metric": "ndcg_5",
           "up_new": 0.933,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-abbr",
           "metric": "mrr",
           "up_new": 0.94,
-          "fork_prev": 0.94,
-          "fork_new": 0.94,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.06,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-abbr",
           "metric": "hit_1",
           "up_new": 0.933,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-abbr",
           "metric": "hit_5",
           "up_new": 0.933,
-          "fork_prev": 0.933,
-          "fork_new": 0.933,
-          "delta": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
           "delta_vs_prev": 0
         },
         {
@@ -2423,46 +2508,46 @@
         {
           "category": "vi-alias",
           "metric": "ndcg_5",
-          "up_new": 0.535,
-          "fork_prev": 0.814,
-          "fork_new": 0.814,
-          "delta": 0.279,
+          "up_new": 0.477,
+          "fork_prev": 0.959,
+          "fork_new": 0.959,
+          "delta": 0.482,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-alias",
           "metric": "mrr",
-          "up_new": 0.478,
-          "fork_prev": 0.752,
-          "fork_new": 0.752,
-          "delta": 0.274,
+          "up_new": 0.424,
+          "fork_prev": 0.947,
+          "fork_new": 0.947,
+          "delta": 0.523,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-alias",
           "metric": "hit_1",
-          "up_new": 0.333,
-          "fork_prev": 0.6,
-          "fork_new": 0.6,
-          "delta": 0.267,
+          "up_new": 0.267,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.666,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-alias",
           "metric": "hit_5",
-          "up_new": 0.733,
+          "up_new": 0.667,
           "fork_prev": 1,
           "fork_new": 1,
-          "delta": 0.267,
+          "delta": 0.333,
           "delta_vs_prev": 0
         },
         {
           "category": "vi-alias",
           "metric": "recall_k",
-          "up_new": 0.8,
+          "up_new": 0.733,
           "fork_prev": 1,
           "fork_new": 1,
-          "delta": 0.2,
+          "delta": 0.267,
           "delta_vs_prev": 0
         }
       ],
@@ -2475,17 +2560,17 @@
     "pairs_file": "/home/vantt/projects/ohs-wt/v14-check/vantt/.work/review-v0.17.2/blind/pairs.json",
     "verdicts_file": "/home/vantt/projects/ohs-wt/v14-check/vantt/.work/review-v0.17.2/blind/verdicts.json",
     "tally": {
-      "fork_clear": 20,
-      "fork_slight": 0,
-      "tie": 0,
-      "other_slight": 0,
+      "fork_clear": 6,
+      "fork_slight": 8,
+      "tie": 5,
+      "other_slight": 1,
       "other_clear": 0,
       "judged": 20,
       "missing": [],
-      "fork_wins": 20,
-      "fork_losses": 0
+      "fork_wins": 14,
+      "fork_losses": 1
     }
   },
   "warnings": [],
-  "duration_s": 158
+  "duration_s": 202
 }
