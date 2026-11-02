@@ -152,7 +152,8 @@ jobs:
 
       - name: Smoke test
         run: |
-          archive=$(ls "$RUNNER_TEMP"/in/ohs-*.zip "$RUNNER_TEMP"/in/ohs-*.tar.gz 2>/dev/null | head -n1)
+          archive=$(find "$RUNNER_TEMP/in" -maxdepth 1 \( -name 'ohs-*.zip' -o -name 'ohs-*.tar.gz' \) | head -n1)
+          [ -n "$archive" ] || { echo "::error::no bundle archive in the downloaded artifact"; exit 1; }
           node tools/vantt/scripts/bundle-smoke.mjs --archive "$archive" --work "$RUNNER_TEMP/smoke" \
             --out "$RUNNER_TEMP/smoke.json" > /dev/null
 
