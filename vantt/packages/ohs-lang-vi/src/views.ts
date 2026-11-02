@@ -55,22 +55,31 @@ export function projectView(view: string, text: string, options: PackOptions): s
 
 const TOKEN_CACHE_MAX = 65_536;
 
+const unknownView = (view: string) => new Error(`ohs-lang-vi: unknown view "${view}"`);
+
+/** Per-token projection to `norm` or `fold`, with a per-view token cache. */
+export function createTokenProjector(options: PackOptions): (view: string, token: string) => string {
+  const caches: Record<string, Map<string, string>> = { norm: new Map(), fold: new Map() };
+  return (view, token) => {
+    const cache = caches[view];
+    if (!cache) throw unknownView(view);
+    if (ASCII_TOKEN_RE.test(token)) return token.toLowerCase();
+    let out = cache.get(token);
+    if (out === undefined) {
+      out = projectToken(view, token, options);
+      if (cache.size >= TOKEN_CACHE_MAX) cache.clear();
+      cache.set(token, out);
+    }
+    return out;
+  };
+}
+
 /** `projectView` bound to one options object, with a per-view token cache. */
 export function createProjector(options: PackOptions): (view: string, text: string) => string {
-  const caches: Record<string, Map<string, string>> = { norm: new Map(), fold: new Map() };
+  const projectOne = createTokenProjector(options);
   return (view, text) => {
-    const cache = caches[view];
-    if (!cache) throw new Error(`ohs-lang-vi: unknown view "${view}"`);
-    return text.replace(TOKEN_RE, (token) => {
-      if (ASCII_TOKEN_RE.test(token)) return token.toLowerCase();
-      let out = cache.get(token);
-      if (out === undefined) {
-        out = projectToken(view, token, options);
-        if (cache.size >= TOKEN_CACHE_MAX) cache.clear();
-        cache.set(token, out);
-      }
-      return out;
-    });
+    if (view !== 'norm' && view !== 'fold') throw unknownView(view);
+    return text.replace(TOKEN_RE, (token) => projectOne(view, token));
   };
 }
 

@@ -5,6 +5,8 @@ import { DEFAULT_LEXICON_PATH } from './lexicon.js';
 export interface ViewWeights {
   norm: number;
   fold: number;
+  /** Weight of the seg view branch (used only with `segment`). */
+  seg: number;
 }
 
 /** Parameters of `restore.ts` (query-time only). */
@@ -81,6 +83,11 @@ export interface PackOptions {
    * without diacritics, i.e. there are notes typed unaccented to find).
    */
   accentedFold: 'always' | 'auto' | 'never';
+  /**
+   * Add the `seg` view: compound words joined with `_` (index-affecting).
+   * Its branch searches the compound words of the query only.
+   */
+  segment: boolean;
   /** Lexicon file (synonyms, abbreviations, compound words), relative to the vault (V18). */
   lexiconPath: string;
   /** Probability mass given to a lexicon rewrite of the query in `rescore` (query-time only). */
@@ -105,11 +112,12 @@ export const DEFAULT_OPTIONS: PackOptions = {
   minSyllableShare: 0.5,
   accentedNorm: false,
   accentedFold: 'auto',
+  segment: true,
   lexiconPath: DEFAULT_LEXICON_PATH,
   lexiconWeight: 0.6,
   telex: true,
   typo: true,
-  viewWeights: { norm: 1.5, fold: 0.75 },
+  viewWeights: { norm: 1.5, fold: 0.75, seg: 1 },
   restoreParams: {
     maxVariants: 5,
     maxSyllables: 12,
@@ -174,7 +182,7 @@ function ratio(input: Record<string, unknown>, key: string, fallback: number): n
 
 /**
  * Validate `OHS_LANGUAGE_PACK_OPTIONS` and fill defaults. Options that later
- * milestones own (segment) are accepted and ignored
+ * milestones may own are accepted and ignored
  * here so a config written for a newer pack does not break this one.
  */
 export function resolveOptions(input: unknown = {}): PackOptions {
@@ -193,6 +201,7 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     minSyllableShare: ratio(input, 'minSyllableShare', DEFAULT_OPTIONS.minSyllableShare),
     accentedNorm: bool(input, 'accentedNorm', DEFAULT_OPTIONS.accentedNorm),
     accentedFold: oneOf(input, 'accentedFold', ['always', 'auto', 'never'] as const, DEFAULT_OPTIONS.accentedFold),
+    segment: bool(input, 'segment', DEFAULT_OPTIONS.segment),
     lexiconPath: lexiconPath(input),
     lexiconWeight: ratio(input, 'lexiconWeight', DEFAULT_OPTIONS.lexiconWeight),
     telex: bool(input, 'telex', DEFAULT_OPTIONS.telex),

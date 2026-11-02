@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createPack, parseLexicon } from '../src/index.js';
+import { bundledDictionary, createPack, packSignature, parseLexicon, resolveOptions } from '../src/index.js';
 import type { QueryAnalysis } from '../src/contract.js';
 import type { ViAnalysisData } from '../src/query.js';
 import { fakeContext } from './fake-context.js';
@@ -167,20 +167,31 @@ describe('lexicon in the pack', () => {
     expect(pack.signature()).toBe(signature);
   });
 
-  it('compound words change the signature, not the cache key', () => {
-    const pack = createPack();
+  it('compound words do not touch the index without segment', () => {
+    const signature = createPack({ segment: false }).signature();
+    write(LEXICON.replace('bạn hàng', 'bạn hàng\ngiữ chân khách'));
+    expect(createPack({ segment: false }).signature()).toBe(signature);
+  });
+
+  it('compound words change the signature (with segment), not the cache key', () => {
+    const pack = createPack({ segment: true });
     const signature = pack.signature();
     const key = pack.queryCacheKey!();
-    write(LEXICON.replace('bạn hàng', 'bạn hàng\nnhà hàng'));
+    // A compound the bundled dictionary does not have ("nhà hàng" is already there).
+    expect(pack.project('seg', 'content', 'Giữ chân khách')).toBe('giữ_chân khách');
+    write(LEXICON.replace('bạn hàng', 'bạn hàng\ngiữ chân khách'));
     expect(pack.signature()).not.toBe(signature);
+    // project() follows the dictionary the new signature stands for
+    expect(pack.project('seg', 'content', 'Giữ chân khách')).toBe('giữ_chân_khách');
     expect(pack.queryCacheKey!()).toBe(key);
     write(LEXICON.replace(/## Từ ghép[\s\S]*?## Chờ/, '## Chờ'));
-    expect(pack.signature()).toBe(createPack({}).signature());
+    expect(pack.signature()).toBe(createPack({ segment: true }).signature());
   });
 
   it('signature without a lexicon is the plain one', () => {
     rmSync(join(dir, '_ohs'), { recursive: true });
-    expect(createPack().signature()).not.toContain('compounds');
+    expect(createPack({ segment: false }).signature()).not.toContain('seg=');
+    expect(createPack().signature()).toBe(packSignature(resolveOptions(), bundledDictionary('modern').digest));
   });
 
   it('reports the file as read (sanity)', () => {
