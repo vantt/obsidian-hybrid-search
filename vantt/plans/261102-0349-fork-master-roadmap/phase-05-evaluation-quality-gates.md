@@ -57,7 +57,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 
 - Đường dẫn note trong DB upstream ở dạng NFD; golden set dùng NFD, `vantt/eval/vi/run-eval.mjs` đổi đầu ra NFC của fixture. V12, V15 phải theo cách này.
 - `npm run eval` bị npm từ chối khi bản npm khác `devEngines` (12.2.0); dùng `node vantt/eval/vi/run-eval.mjs`.
-- User chốt 2026-11-02: làm corpus khó hơn, giữ ngưỡng PRD. Fixture `v0.10.0`: baseline upstream Hit@5 `vi-unaccented` 0,27, `vi-dd` 0,40; khi phục hồi dấu đạt 1,00. SQLite `unicode61` đã tự bỏ dấu cho âm tiết một dấu; chỉ âm tiết hai dấu (`ế`, `ữ`) và `đ` là hỏng (PRD 3.5 cần sửa câu này).
+- User chốt 2026-11-02: làm corpus khó hơn, giữ ngưỡng PRD. Fixture `v0.10.0`: baseline upstream Hit@5 `vi-unaccented` 0,27, `vi-dd` 0,40; khi phục hồi dấu đạt 1,00. SQLite `unicode61` đã tự bỏ dấu cho âm tiết một dấu; chỉ âm tiết hai dấu (`ế`, `ữ`) và `đ` là hỏng (đúng như PRD 3.5; corpus cũ chưa tái hiện được vì tiêu đề lộ câu tìm).
 - `run-eval.mjs` có `--ohs <dir>`, `--lang-pack`, `--lang-options`, `--compare`, `--accented-sanity`. Runner dựng vault dưới `os.tmpdir()`: đặt `TMPDIR` ra ngoài `/tmp`.
 
 ## Risk
