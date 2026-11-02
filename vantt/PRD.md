@@ -66,7 +66,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 
-N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N04, N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22, gộp thử model N04 và đo reranker N09), và `material` gửi mọi câu tìm trong một lệnh làm trong V16 (việc của repo dự án, mục 14.3). Giữ ID để tra lại lịch sử.
+N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N04, N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22, gộp thử model N04 và đo reranker N09), và `material` dùng một tiến trình stdio cho mọi câu tìm, làm trong V16 (việc của repo dự án, mục 14.3). Giữ ID để tra lại lịch sử.
 
 Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
 
@@ -442,7 +442,7 @@ Thứ tự áp đúng như bảng. Bản vá giữ nhỏ, mỗi bản một vi�
 | P01 | `language-pack-api` | now (Bắt buộc) | Điểm cắm gói ngôn ngữ trong lõi (mục 10.2) | 2,5–3 |
 | P02 | `db-path` | now (Bắt buộc) | DB ngoài vault | 1 |
 | P03 | `vector-export` | now (Bắt buộc) | Xuất vector theo note và K note gần nhất | 1 |
-| P04 | `stdio-parity` | now (Bắt buộc) | IPC JSON-lines có đủ `search` (mọi tuỳ chọn), `similar`, `read`, `neighbors` | 1 |
+| P04 | `stdio-parity` | now (Bắt buộc) | IPC JSON-lines thêm `read`, `vectors`, `neighbors`, `reindex`; chờ request đang chạy trước khi thoát (`search` của upstream đã đủ tuỳ chọn) | 1 |
 | P09 | `unicode-inline-tags` | now (Bắt buộc) | Tag nội dòng nhận mọi chữ Unicode | 0,3 |
 | P05 | `block-anchors` | now (Bắt buộc) | Đoạn mang id block `^…` và cờ đoạn tô `==…==`; kích thước đoạn cấu hình được | 2 |
 | P06 | `restrict-paths` | now (Bắt buộc) | Giới hạn tìm trong một tập note cho trước | 0,5–1 |
@@ -487,11 +487,16 @@ Xem mục 10.2 (đặc tả đầy đủ). Bản vá chỉ chứa điểm cắm 
 - **Sau khi có:** sửa `note_knn.mjs`, `similar_pairs.mjs` trong repo dự án dùng lệnh này (việc của repo dự án, V16, mục 14.3).
 
 #### P04 `stdio-parity`
-- **Vấn đề:** IPC JSON-lines (`serve --stdio`) chỉ có `search`, `status`. Plugin của dự án và máy chủ điện thoại (mục 13) cần nạp model một lần rồi gọi nhiều lệnh; hiện phải mở tiến trình mới cho mỗi lệnh (khoảng 2 s nạp model).
-- **Yêu cầu:** thêm action `similar`, `read`, `vectors`, `neighbors` (P03), `reindex` (một file hoặc cả vault); `search` nhận đủ tuỳ chọn như MCP (`queries[]`, `scope`, `tag`, `frontmatter`, `rerank`, `mode`, `limit`, `snippetLength`). Mỗi request có `id`, phản hồi mang cùng `id`; nhiều request đồng thời được (xếp hàng nội bộ). Schema bằng zod trong `contracts/boundary-validation.ts`.
-- **Bất biến:** request cũ (`search`, `status`) giữ nguyên định dạng; `test/transport-parity.test.ts` phải được mở rộng để mọi tuỳ chọn mới đi qua mọi transport.
-- **Test:** mở rộng test parity; test request đồng thời; test lỗi schema trả `{id, error}`.
-- **Probe:** gửi `{"action":"similar"}` tới `serve --stdio`; có kết quả hợp lệ thì upstream đã có.
+- **Hiện trạng upstream (đã đọc mã `201dd1f`):** `ohs serve --stdio` là một tiến trình sống lâu, in `{"ready":true}` khi sẵn sàng, nhận JSON-lines (`src/transports/stdio-server.ts`, vòng đọc ở `src/transports/cli.ts:790-820`). Mỗi request có `id`, phản hồi mang cùng `id`. Request được xử lý **đồng thời** (fire-and-forget), phản hồi có thể về khác thứ tự. Chỉ có hai action: `search` và `status`; nhưng `search` **đã nhận đủ tuỳ chọn như MCP**: `queries`, `scope`, `tag`, `frontmatter`, `rerank`, `mode`, `limit`, `threshold`, `snippetLength`, `notePath` (note tương tự), `related`, `depth`, `direction`, `linkType`, `anchors`.
+- **Vấn đề:** thiếu action cho mọi việc khác ngoài tìm, nên plugin dự án và máy chủ điện thoại (mục 13) vẫn phải mở tiến trình mới (khoảng 2 s nạp model) để đọc note, lấy vector hay index lại. Thêm một lỗi: khi stdin đóng, `cleanup` gọi `process.exit(0)` ngay, **request đang chạy bị mất phản hồi** (client gửi N dòng rồi đóng stdin sẽ không nhận đủ N kết quả).
+- **Yêu cầu:**
+  1. Thêm action `read`, `vectors`, `neighbors` (P03), `reindex` (một file hoặc cả vault). Schema bằng zod trong `contracts/boundary-validation.ts`.
+  2. Khi stdin đóng: ngừng nhận request mới, chờ mọi request đang chạy trả phản hồi (giới hạn chờ, ví dụ 60 s), rồi mới đóng DB và thoát.
+  3. Không đổi `search`: nó đã đủ tuỳ chọn.
+- **Bất biến:** request cũ (`search`, `status`) giữ nguyên định dạng và hành vi; `test/transport-parity.test.ts` mở rộng để mọi action mới đi qua mọi transport có action đó.
+- **Test:** test parity mở rộng; gửi N request `search` liền nhau với `id` khác nhau rồi đóng stdin, nhận đủ N phản hồi đúng `id`; test lỗi schema trả `{id, error}`; action lạ vẫn trả `unknown action`.
+- **Cách dùng cho nhiều câu tìm có nhãn** (ví dụ `material` của dự án, mỗi đoạn bài nháp một câu): mở một tiến trình, chờ `ready`, gửi mỗi câu một request `search` với `id` riêng, ghép phản hồi theo `id`. **Không** dùng `queries[]` cho việc này: `queries[]` trộn mọi câu thành một danh sách bằng RRF (`searcher.ts:1309-1340`), mất thông tin câu nào ra kết quả nào.
+- **Probe:** gửi `{"id":"p","action":"read",...}` tới `serve --stdio`; không còn trả `unknown action` thì upstream đã có phần action. Probe thứ hai: gửi một `search` rồi đóng stdin ngay; nhận được phản hồi thì upstream đã sửa phần chờ.
 
 #### P09 `unicode-inline-tags`
 - **Vấn đề:** `note-extractor.ts:55` dùng khoảng `À-ɏ`; tag nội dòng có chữ Việt (ạ, ế, ộ, ữ… trong U+1EA0–1EF9) bị cắt hoặc bỏ. Cũng ảnh hưởng tiếng Hy Lạp, Cyrillic, CJK.
@@ -807,7 +812,7 @@ pkm-web (máy giữ vault; thuộc repo dự án, không thuộc fork)
 ```
 
 ### 13.2. Phần thuộc fork OHS
-- P04 `stdio-parity` là toàn bộ thứ fork cần cho điện thoại: `search` đủ tuỳ chọn, `similar`, `read`, `neighbors`, request đồng thời có `id`.
+- Fork cần cho điện thoại: `search` (upstream đã đủ tuỳ chọn, kể cả note tương tự qua `notePath`) và request đồng thời có `id` (upstream đã có), cộng phần P04 thêm: `read`, `neighbors`, chờ request đang chạy trước khi thoát.
 - **Không** mở HTTP của OHS ra mạng. `ohs serve --http` giữ nguyên mặc định 127.0.0.1. Một điểm xác thực duy nhất là `pkm-web`.
 - P06 (giới hạn tập note) giúp "tìm trong vùng" từ điện thoại; làm ở V24.
 
@@ -836,7 +841,7 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V05 | P09 `unicode-inline-tags` | V01 | 0,3 | Test xanh, probe trả 1 trên upstream, 0 trên fork |
 | V06 | P02 `db-path` | V01 | 1 | Test và probe |
 | V07 | P03 `vector-export` | V01 | 1 | Test và probe |
-| V08 | P04 `stdio-parity` | V07 | 1 | Test parity mở rộng xanh |
+| V08 | P04 `stdio-parity` | V07 | 1 | Test parity mở rộng xanh; N request rồi đóng stdin nhận đủ N phản hồi |
 | V09 | `ohs-lang-vi` M1: `normalize`, `fold`, `syllable`, bảng dữ liệu, test bảng và thuộc tính | — (song song) | 2,5 | Test của gói xanh, hiệu năng đạt |
 | V10 | Bộ eval tiếng Việt: preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set, smoke-vault, baseline upstream | — (song song) | 2,5 | Golden set đủ 17 hạng mục × 15 câu; baseline ghi trong `vantt/eval/baselines/` |
 | V11 | P01 `language-pack-api` (mục 10.2, gồm `aliasViews`, `queryCacheKey`, đoạn trích theo bất biến token) + test bằng gói giả | V01 | 4 | Toàn bộ test của P01 xanh; bất biến (V12) xanh |
@@ -881,7 +886,7 @@ Làm trong repo `vantt/obsidian-pkm-automation`, không commit vào fork. Ghi �
 
 | ID | Việc | Cần (phía fork) | Công | Xong khi |
 |---|---|---|---|---|
-| V16 | `scripts/e11/note_knn.mjs`, `scripts/e11/similar_pairs.mjs` dùng lệnh P03, không mượn `better-sqlite3` trong `node_modules` của OHS (`--ohs`); `scripts/kg/related.py` và `scripts/e11/material.py` gọi OHS qua P04 (một tiến trình stdio sống lâu, `queries[]` thay cho mỗi câu một tiến trình, trước đây N10) và **bỏ đường lùi đọc thẳng bảng FTS của OHS** bằng `sqlite3`; bộ cài trỏ gói dựng sẵn | V07, V08, V03 | 1,3 | Không script nào của dự án đọc bảng nội bộ hay `node_modules` của OHS |
+| V16 | `scripts/e11/note_knn.mjs`, `scripts/e11/similar_pairs.mjs` dùng lệnh P03, không mượn `better-sqlite3` trong `node_modules` của OHS (`--ohs`); `scripts/kg/related.py` và `scripts/e11/material.py` gọi OHS qua một tiến trình `ohs serve --stdio` sống lâu thay cho mỗi câu một tiến trình (trước đây N10): `material` gửi mỗi đoạn một request `search` có `id` riêng và ghép kết quả theo `id`, **không** dùng `queries[]` vì nó trộn mọi câu thành một danh sách và làm mất nhãn đoạn (mục 9.4, P04); phần tìm này chạy được ngay trên upstream, `read` và `neighbors` cần P04 và **bỏ đường lùi đọc thẳng bảng FTS của OHS** bằng `sqlite3`; bộ cài trỏ gói dựng sẵn | V07, V08, V03 | 1,3 | Không script nào của dự án đọc bảng nội bộ hay `node_modules` của OHS |
 
 Ghi chú cho repo dự án: các script trên là logic sản phẩm (graph, `related`, trang nguyên liệu) nên ở lại repo dự án (mục 2.3). Nếu khách không được phải cài Python, việc chuyển gói `kg` và `material.py` sang JS (chạy bằng Node có sẵn trong gói dựng sẵn của fork) là quyết định và việc của repo dự án.
 
