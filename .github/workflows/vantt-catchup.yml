@@ -1,22 +1,27 @@
 name: vantt-catchup
 
-# Build the release branch vantt/<tag> from the newest upstream tag (PRD 6, 7.2),
-# push it and the tag v<version>, and keep fork master in step with upstream/master
-# (PRD 6.6). On failure, open (or comment on) one issue per tag and status.
+# Build the release branch vantt/<tag> from the pinned upstream tag (PRD 6, 7.2),
+# push it and the tag v<version>. The fork does not follow upstream on its own (user
+# decision 2026-11-02): there is no schedule, push and default runs build the tag in
+# vantt/upstream.pin, and master is synced with upstream/master only by a dispatch
+# with sync_master (PRD 6.6). On failure, open (or comment on) one issue per tag and
+# status.
 #
 # Secret VANTT_PUSH_TOKEN (optional): PAT with contents:write (and workflow, when an
 # upstream sync brings changed upstream workflow files onto master). Falls back to
 # GITHUB_TOKEN, which GitHub refuses for pushes that create or change workflow files.
 
 on:
-  schedule:
-    - cron: '17 */6 * * *'
   workflow_dispatch:
     inputs:
       target_ref:
-        description: 'Upstream tag, upstream/master or sha (empty = newest stable tag)'
+        description: 'Upstream tag, upstream/master or sha (empty = the tag in vantt/upstream.pin)'
         required: false
         default: ''
+      sync_master:
+        description: 'Also sync fork master with upstream/master (never on push; use when moving to a new tag)'
+        type: boolean
+        default: false
       force_rebuild:
         description: 'Rebuild even if the branch is already green (--clean)'
         type: boolean
@@ -83,11 +88,11 @@ jobs:
           key: vantt-npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: vantt-npm-${{ runner.os }}-
 
-      # PRD 6.6: master follows upstream/master. Fast-forward when possible, else
-      # rebase the fork-only commits. Refuse when a fork commit touches upstream files.
+      # PRD 6.6: only on request (dispatch with sync_master). Fast-forward when possible,
+      # else rebase the fork-only commits. Refuse when a fork commit touches upstream files.
       - name: Sync master with upstream
         id: sync
-        if: ${{ !inputs.dry_run }}
+        if: ${{ inputs.sync_master && !inputs.dry_run }}
         run: |
           set -euo pipefail
           git remote add -t master upstream https://github.com/flowing-abyss/obsidian-hybrid-search 2>/dev/null || true
@@ -115,8 +120,9 @@ jobs:
           set +e
           args=(--with-lang vi --json --report "$GITHUB_WORKSPACE/catchup.json")
           ref="${{ inputs.target_ref }}"
+          [ -n "$ref" ] || ref="$(tr -d '[:space:]' < vantt/upstream.pin)"
           [ "${{ inputs.simulate_failure }}" = "true" ] && ref="v0.0.0-does-not-exist"
-          [ -n "$ref" ] && args+=(--ref "$ref")
+          args+=(--ref "$ref")
           [ "${{ inputs.force_rebuild }}" = "true" ] && args+=(--clean)
           node vantt/scripts/catchup.mjs "${args[@]}" > catchup.stdout.json 2> catchup.stderr.log
           code=$?

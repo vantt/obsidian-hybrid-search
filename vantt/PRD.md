@@ -40,7 +40,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 ### 2.1. Bắt buộc
 | ID | Mục tiêu | Đo bằng |
 |---|---|---|
-| G1 | Fork luôn có bản dựng trên tag upstream mới nhất trong vòng 24 giờ sau khi upstream phát hành, nếu không có xung đột | Thời điểm release `vX.Y.Z-vantt.N` so với tag upstream |
+| G1 | Fork có bản dựng trên tag upstream mà user chỉ định: theo upstream là việc thủ công, chỉ khi user yêu cầu (user chốt 2026-11-02, bỏ mục tiêu 24 giờ tự động) | Thời điểm release `vX.Y.Z-vantt.N` so với lúc user yêu cầu |
 | G2 | Không có gói ngôn ngữ thì kết quả tìm giống hệt upstream cùng tag | Bài kiểm "bất biến" (mục 11.4): `top_paths` từng câu trong eval của upstream trùng khớp 100% |
 | G3 | Có gói tiếng Việt thì tìm tiếng Việt tốt lên rõ, nhất là gõ không dấu | Bộ eval tiếng Việt (mục 11.5): ngưỡng ở mục 11.6 |
 | G4 | Khách không phải chạy `npm`; cài từ gói dựng sẵn cho Windows x64, macOS ARM, macOS Intel, Linux x64 | Smoke test trên runner sạch của từng nền (mục 8.4) |
@@ -307,7 +307,9 @@ Nhờ đó lần catchup sau áp sạch trên upstream mới.
 ```
 
 ### 6.6. Đồng bộ `master` của fork với upstream
-`master` của fork theo `upstream/master` và chỉ theo nhánh này; các nhánh khác của upstream không được theo dõi hay chép sang fork (để có mã mới nhất khi thử `--ref upstream/master`). Workflow catchup làm thêm một bước: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
+Fork không tự theo upstream (user chốt 2026-11-02: "không cần follow upstream; khi upstream có thay đổi thì anh sẽ kêu"). Tag upstream đang dùng được ghim trong `vantt/upstream.pin`. Chỉ khi user yêu cầu mới chuyển sang tag mới và đồng bộ `master`: chạy `workflow_dispatch` của `vantt-catchup.yml` với `target_ref` và `sync_master`, hoặc chạy catchup cục bộ, rồi cập nhật `vantt/upstream.pin` bằng commit hoặc PR.
+
+Khi được yêu cầu, `master` theo `upstream/master` và chỉ theo nhánh này; các nhánh khác của upstream không được theo dõi hay chép sang fork. Bước đồng bộ: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
 
 ---
 
@@ -320,9 +322,9 @@ Nhờ đó lần catchup sau áp sạch trên upstream mới.
 - Cache: `~/.npm`, `~/.cache/huggingface` (model). Không cache `node_modules` giữa các nền.
 
 ### 7.2. `vantt-catchup.yml`
-- Kích hoạt: `schedule` mỗi 6 giờ; `workflow_dispatch` với `target_ref`, `force_rebuild`; `push` lên `master` chạm `vantt/patches/**` hoặc `vantt/packages/**` (dựng lại bản cho tag hiện tại).
+- Kích hoạt (không có `schedule`, user chốt 2026-11-02): `workflow_dispatch` với `target_ref` (trống = tag trong `vantt/upstream.pin`), `sync_master` (mặc định tắt; bật mới đồng bộ `master` với upstream, mục 6.6), `force_rebuild`, `dry_run`, `simulate_failure`; `push` lên `master` chạm `vantt/patches/**` hoặc `vantt/packages/**` dựng lại bản cho tag ghim trong `vantt/upstream.pin`, không bao giờ lấy tag mới hơn và không đồng bộ `master`.
 - Runner: `ubuntu-latest`.
-- Bước: checkout (`fetch-depth: 0`) → Node → `node vantt/scripts/catchup.mjs --with-lang vi --json --report catchup.json` (bỏ `--ref` thì lấy tag mới nhất; nhánh đã xanh thì thoát sớm) → nếu xanh: gỡ workflow upstream (catchup đã làm), đẩy nhánh `vantt/<tag>` (`--force-with-lease`), tạo tag `v<version>` trên nhánh, gọi `vantt-bundles.yml` (`workflow_call`) → nếu có bản vá được xuất lại: mở PR vào `master` → tải `catchup.json` lên artifact.
+- Bước: checkout (`fetch-depth: 0`) → Node → `node vantt/scripts/catchup.mjs --with-lang vi --json --report catchup.json` (CI luôn truyền `--ref` là tag ghim hoặc `target_ref`; nhánh đã xanh thì thoát sớm) → nếu xanh: gỡ workflow upstream (catchup đã làm), đẩy nhánh `vantt/<tag>` (`--force-with-lease`), tạo tag `v<version>` trên nhánh, gọi `vantt-bundles.yml` (`workflow_call`) → nếu có bản vá được xuất lại: mở PR vào `master` → tải `catchup.json` lên artifact.
 - Hỏng: mở issue `[catchup] <tag>: <status>` kèm bản vá lỗi, file xung đột, link run; không mở trùng nếu đã có issue mở cùng tag. Gắn nhãn `catchup`.
 - Cổng chất lượng trên Linux chỉ so với baseline Linux (mục 11.6), vì số của ONNX lượng tử khác theo kiến trúc.
 

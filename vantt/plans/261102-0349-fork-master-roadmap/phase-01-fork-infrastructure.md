@@ -64,6 +64,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 
 - `vantt-catchup.yml` (cron 6 giờ, chạy tay có `dry_run`, `force_rebuild`, `simulate_failure`; đồng bộ `master` với upstream; mở một issue khi hỏng, lần sau chỉ bình luận) và `vantt-pr-check.yml` đã chạy; Issues đã bật; actionlint sạch. Chỉ còn `vantt-*` active.
 - Lần hỏng cố ý mở đúng issue #1 (đã đóng). Issue #2 là lỗi thật: test tốc độ của gói vi đo 318 ms trên runner. Lead thêm `OHS_PERF_FACTOR` (mặc định 1, CI đặt 3): chỉ tiêu 200 ms của PRD vẫn kiểm trên máy thật.
+- Cập nhật 2026-11-02 (user chốt "không cần follow upstream; khi upstream có thay đổi thì anh sẽ kêu"): bỏ `schedule` khỏi `vantt-catchup.yml`; tag upstream ghim trong `vantt/upstream.pin` (`v0.17.2`), push và chạy mặc định dựng trên tag đó; đồng bộ `master` với upstream chỉ khi dispatch với `sync_master`. Mô tả cron 6 giờ ở trên đã lỗi thời.
 - Chưa có secret `VANTT_PUSH_TOKEN`; đẩy đồng bộ `master` sẽ bị chặn nếu upstream đổi workflow. Đường đẩy nhánh phát hành và tag trên CI chưa chạy thử thật.
 
 ## Risk
