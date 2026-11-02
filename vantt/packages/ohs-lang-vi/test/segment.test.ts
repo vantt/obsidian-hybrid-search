@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -79,7 +79,12 @@ describe('bundled dictionary', () => {
     const packed = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
     expect(packed, res.stdout).toBeDefined();
     const files = packed!.files.map((f) => f.path);
-    for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md', 'build/index.js']) expect(files).toContain(f);
+    for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md']) expect(files).toContain(f);
+    // The compiled output only exists after the package is compiled, so check it is declared for packing.
+    const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8')) as {
+      files: string[];
+    };
+    expect(pkg.files).toContain('build');
   });
 
   it('follows the tone placement option', () => {

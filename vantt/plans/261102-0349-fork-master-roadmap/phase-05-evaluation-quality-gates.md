@@ -46,6 +46,8 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - [x] V15 eval trên vault thật: `vantt/reviews/v0.17.2-vantt.2.private.md` (61 câu; có gói nDCG@5 0,600 lên 0,698; cổng theo hạng mục hỏng, chờ người quyết)
 - [x] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
 
+- [ ] V15b sửa hạng mục tụt trên vault thật (`--private-detail`, lexicon, đo lại)
+
 ## Success Criteria
 
 - V10: golden set đủ 17 hạng mục × 15 câu; `npm run eval` chạy được trên corpus sinh; baseline ghi trong `vantt/eval/baselines/`.
@@ -64,6 +66,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - V15 (2026-11-02): user báo một agent khác (phía dự án) đang chuẩn bị golden set riêng và thử cài bản Windows; xong sẽ cập nhật lên remote. Lead chạy `quality-gate.mjs --private` khi có file; golden set và vault thật vẫn ở ngoài repo này. Agent phía dự án đã chạy trên `0.17.2-vantt.2` và sửa lỗi NFD của chế độ `--private` (golden set NFC bị chấm trượt hết).
 - V22 xong: `vantt/reviews/semantic-eval-2026-11-02.md`. Đề xuất cho bộ cài: bật `restoreForEmbedding` (nDCG@5 +0,005 đến +0,018); reranker tắt mặc định (+0,05 đến +0,10 ở `vi-semantic` nhưng +150 ms mỗi câu, +616 MB); model mặc định giữ e5-small, hồ sơ chất lượng cao `Xenova/bge-m3` (tách cặp gần nghĩa AUC 0,968). Không model nào index 2.000 note quá 30 phút ở 4 luồng. Cần đo lại trên vault thật (V15).
 - V22 tìm ra hai lỗi của gói `vi`: `restoreForEmbedding` đổi nhầm chữ trong câu có đúng 50% âm tiết có dấu ("Hội An"); `package.json` thiếu `data` trong `files` nên gói đóng gói mất `data/compounds.txt` và chạy như không có gói. Lead giao sửa.
+- User chốt sau V15 (2026-11-02): **dùng gói `vi`** cho bộ cài với vault thật (tổng nDCG@5 0,600 → 0,698). Việc theo dõi bắt buộc V15b: tìm và sửa các hạng mục tụt trên vault thật (`vi-iy` −0,260, `vi-accented` −0,052, `vi-compound` −0,041; `vi-synonym` chờ lexicon). Cách làm: thêm `quality-gate.mjs --private-detail` ghi kết quả từng câu ra file cục bộ ngoài repo (không in ra log, không commit) để điều tra trên máy user; lexicon khởi đầu bằng `ohs-lang-vi learn-abbr --vault <dir>` rồi user duyệt mục `## Chờ duyệt`, đo lại.
 
 ## Risk
 
