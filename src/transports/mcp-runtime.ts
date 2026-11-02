@@ -24,6 +24,7 @@ import {
   useRemoteEmbeddings,
 } from '../inference/embedder.js';
 import { config } from '../runtime/config.js';
+import { updateCheckDisabled } from '../runtime/package-identity.js';
 import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
 import {
   applyDbConfigDefaults,
@@ -63,6 +64,7 @@ type McpTextContent = { type: 'text'; text: string };
 type McpToolResult = { content: McpTextContent[]; isError?: true };
 
 export async function checkForUpdates(version = packageVersion): Promise<void> {
+  if (updateCheckDisabled()) return;
   try {
     const signal = AbortSignal.timeout(3000);
     const res = await fetch('https://registry.npmjs.org/obsidian-hybrid-search/latest', { signal });
