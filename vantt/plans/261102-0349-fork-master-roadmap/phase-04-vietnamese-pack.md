@@ -43,7 +43,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 ## Todo
 
 - [x] V09 M1 chuẩn hoá, bỏ dấu, âm tiết, bảng dữ liệu
-- [ ] V13 M2, M3 view, phân tích câu, phục hồi dấu, chấm lại
+- [x] V13 M2, M3 view, phân tích câu, phục hồi dấu, chấm lại
 - [ ] V17 Telex/VNI và gõ sai
 - [ ] V18 đồng nghĩa, viết tắt, `learn-abbr`
 - [ ] V19 alias không dấu, đoạn trích chữ gốc
@@ -57,6 +57,14 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - V18: `vi-synonym`, `vi-abbr` Hit@5 ≥ 0,8; đổi đồng nghĩa hay viết tắt không dựng lại index.
 - V19: `vi-alias` Hit@5 ≥ 0,8; `vi-snippet` 100% đoạn trích là chữ gốc và chứa chỗ khớp.
 - V20: `vi-compound` nDCG@5 hơn baseline upstream tối thiểu 0,1; chốt mặc định `segment`.
+
+## Ghi chú sau V13
+
+- Eval (fixture `v0.10.0`): Hit@5 `vi-unaccented` 0,27 → 1,00, `vi-dd` 0,40 → 1,00, MRR `vi-tone-precision` 1,00; không hạng mục nào tụt; eval tiếng Anh upstream nDCG@5 0,735 có và không có gói.
+- Lệch PRD 10.3: câu có dấu mặc định không dùng view (bật view làm `vi-semantic` tụt 0,083); `fold` tự bật khi vault có từ viết không dấu. `accentedNorm: true`, `accentedFold: "always"` trả về hành vi PRD. Chờ user chốt.
+- Đã sửa lỗi M1: `parseSyllable` từ chối `kỹ`, `lý`, `mỹ`, `hy`.
+- Điểm cần sửa ở P01 (V13 nêu): view query luôn là tiền tố OR, không có khớp chính xác hay cụm; `readViewTermsWithPrefix` không có cận trên; `Candidate` của `rescore` thiếu `matchedTerms`; trọng số view không chỉnh theo câu.
+- `query.ts`, `index.ts` có điểm móc cho V17, V18, V19, V20.
 
 ## Risk
 

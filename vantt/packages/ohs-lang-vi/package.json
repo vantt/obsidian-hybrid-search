@@ -1,8 +1,8 @@
 {
   "name": "ohs-lang-vi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Vietnamese language pack for obsidian-hybrid-search (M1: normalize, fold, syllable)",
+  "description": "Vietnamese language pack for obsidian-hybrid-search (norm and fold views, query analysis, diacritic restoration, rescore)",
   "type": "module",
   "main": "build/index.js",
   "types": "build/index.d.ts",

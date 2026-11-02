@@ -110,9 +110,10 @@ export interface NucleusEntry {
    * Onset constraint: 'any'; 'some' (needs a non-empty onset); 'none-or-qu'
    * (y-initial clusters: no onset, or the `qu` onset); 'no-qu' (glide-initial
    * clusters, which cannot follow `qu` because its `u` is the glide); 'gi'
-   * (only after the `gi` onset).
+   * (only after the `gi` onset); 'iy' (open `y` after the onsets that also
+   * spell it `i`: kỹ, lý, mỹ, tý, sỹ, hy, vy, dy; see `IY_ONSETS`).
    */
-  onset: 'any' | 'some' | 'none-or-qu' | 'no-qu' | 'gi';
+  onset: 'any' | 'some' | 'none-or-qu' | 'no-qu' | 'gi' | 'iy';
 }
 
 const OPEN = [''];
@@ -142,6 +143,7 @@ export const NUCLEI: readonly NucleusEntry[] = [
   n('u', 0, ['', 'c', 'm', 'n', 'ng', 'p', 't']),
   n('ư', 0, ['', 'c', 'ng', 'm']),
   n('y', 0, ['', 't', 'nh', 'ch'], 'none-or-qu'),
+  n('y', 0, OPEN, 'iy'), // kỹ, lý, mỹ, hy: open y after a consonant
   n('oo', 0, ['ng', 'c']),
   // descending diphthongs and open clusters (no coda)
   ...['ai', 'ao', 'au', 'ay', 'âu', 'ây', 'eo', 'êu', 'iu', 'oi', 'ôi', 'ơi', 'ui', 'ưi', 'ưu', 'ia', 'ua', 'ưa'].map((t) =>

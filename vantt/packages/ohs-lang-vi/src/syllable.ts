@@ -1,5 +1,6 @@
 import {
   BASE_VOWELS,
+  IY_ONSETS,
   CODAS,
   MODIFIED_VOWELS,
   NUCLEI,
@@ -47,6 +48,9 @@ function fits(onset: string, entry: NucleusEntry, coda: string): boolean {
       break;
     case 'gi':
       if (onset !== 'gi') return false;
+      break;
+    case 'iy':
+      if (!IY_ONSETS.includes(onset) || onset === 'qu') return false;
       break;
   }
   const first = entry.text[0] as string;

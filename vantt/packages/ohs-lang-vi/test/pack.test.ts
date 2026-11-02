@@ -1,0 +1,294 @@
+import fc from 'fast-check';
+import { describe, expect, it } from 'vitest';
+import createPackDefault, { createPack, PACK_VERSION } from '../src/index.js';
+import type { Candidate, QueryAnalysis } from '../src/contract.js';
+import { resolveOptions } from '../src/options.js';
+import type { ViAnalysisData } from '../src/query.js';
+import { tokenize } from '../src/views.js';
+import { fakeContext } from './fake-context.js';
+import { allSyllables, tokens as ftsTokens } from './helpers.js';
+import { composeSyllable } from '../src/syllable.js';
+import { TONES, type Tone } from '../src/data.js';
+
+const VAULT = [
+  'Kế hoạch bán hàng online cho quý một',
+  'Chiến lược bán hàng qua mạng xã hội',
+  'Bạn bè và bạn hàng của công ty',
+  'Bàn làm việc mới',
+  'Con đường đến trường',
+  'Giữ chân khách hàng thân thiết',
+  'Kỹ thuật phần mềm',
+];
+
+function analyze(query: string, raw: unknown = {}, docs = VAULT): QueryAnalysis {
+  const pack = createPack(raw);
+  return pack.analyzeQuery(query, fakeContext(docs, resolveOptions(raw))) as QueryAnalysis;
+}
+
+describe('createPack', () => {
+  it('builds a P01 v1 pack with norm and fold views', () => {
+    const pack = createPack();
+    expect(pack.apiVersion).toBe(1);
+    expect(pack.id).toBe('vi');
+    expect(pack.version).toBe(PACK_VERSION);
+    expect(pack.views.map((v) => v.name)).toEqual(['norm', 'fold']);
+    for (const v of pack.views) expect(v.name).toMatch(/^[a-z][a-z0-9_]{0,15}$/);
+    expect(typeof pack.rescore).toBe('function');
+    expect(createPackDefault).toBe(createPack);
+  });
+
+  it('signature follows index-affecting options only', () => {
+    const base = createPack().signature();
+    expect(createPack({ tonePlacement: 'classic' }).signature()).not.toBe(base);
+    expect(createPack({ foldIY: true }).signature()).not.toBe(base);
+    expect(createPack({ viewWeights: { norm: 3 } }).signature()).toBe(base);
+    expect(createPack({ restore: false, rescore: false }).signature()).toBe(base);
+    expect(base).toContain(PACK_VERSION);
+  });
+
+  it('applies view weights and disables rescore on request', () => {
+    const pack = createPack({ viewWeights: { norm: 2, fold: 0.5 }, rescore: false });
+    expect(pack.views.map((v) => v.weight)).toEqual([2, 0.5]);
+    expect(pack.rescore).toBeUndefined();
+  });
+
+  it('rejects invalid options with a clear error', () => {
+    expect(() => createPack({ tonePlacement: 'new' })).toThrow(/tonePlacement/);
+    expect(() => createPack({ foldIY: 'yes' })).toThrow(/foldIY/);
+    expect(() => createPack({ viewWeights: { nrom: 1 } })).toThrow(/viewWeights.nrom/);
+    expect(() => createPack({ restoreParams: { maxVariants: -1 } })).toThrow(/maxVariants/);
+    expect(() => createPack([])).toThrow(/object/);
+    expect(() => createPack({ accentedFold: 'sometimes' })).toThrow(/accentedFold/);
+    expect(() => createPack({ minSyllableShare: 2 })).toThrow(/minSyllableShare/);
+    expect(() => createPack(null)).not.toThrow();
+    expect(() => createPack({ telex: true, segment: false })).not.toThrow();
+  });
+});
+
+describe('project', () => {
+  const pack = createPack();
+
+  it('norm keeps diacritics, lowercases and fixes the tone position', () => {
+    expect(pack.project('norm', 'content', 'Hòa Bình, ĐƯỜNG Ðỏ')).toBe('hoà bình, đường đỏ');
+  });
+
+  it('fold removes diacritics and đ', () => {
+    expect(pack.project('fold', 'title', 'Hòa Bình, ĐƯỜNG Ðỏ')).toBe('hoa binh, duong do');
+  });
+
+  it('fold merges i/y only with foldIY', () => {
+    expect(createPack({ foldIY: true }).project('fold', 'content', 'kỹ thuật, tay')).toBe('ki thuat, tay');
+    expect(pack.project('fold', 'content', 'kỹ thuật')).toBe('ky thuat');
+  });
+
+  it('keeps token boundaries when Unicode normalization would move them', () => {
+    // U+1D15E is NFC-decomposed into a symbol plus a combining mark (a token
+    // character for unicode61); a lone combining mark is a token that folding would delete.
+    for (const t of ['a \u{1D15E} b', 'x \u0301 y', '\u0301']) {
+      for (const view of ['norm', 'fold']) expect(tokenize(pack.project(view, 'content', t))).toHaveLength(tokenize(t).length);
+    }
+  });
+
+  it('throws on an unknown view', () => {
+    expect(() => pack.project('seg', 'content', 'x')).toThrow(/unknown view/);
+  });
+
+  it('never changes English or code-like text beyond case', () => {
+    expect(pack.project('norm', 'content', 'Online C++ team #tag')).toBe('online c++ team #tag');
+    expect(pack.project('fold', 'content', 'Online C++ team #tag')).toBe('online c++ team #tag');
+  });
+
+  const syllables = allSyllables();
+  const word = fc
+    .tuple(fc.integer({ min: 0, max: syllables.length - 1 }), fc.constantFrom(...TONES), fc.boolean())
+    .map(([i, tone, upper]) => {
+      const w = composeSyllable({ ...syllables[i]!, tone: tone as Tone }, 'classic');
+      return upper ? w.toUpperCase() : w;
+    });
+  const sep = fc.constantFrom(' ', ', ', '.\n', ' - ', '_', ' c++ ', ' #x ', ' ', '🎉', '2026');
+  const text = fc.oneof(
+    fc.array(fc.tuple(word, sep), { maxLength: 15 }).map((parts) => parts.map(([w, s]) => w + s).join('')),
+    fc.string({ unit: 'grapheme', maxLength: 40 }),
+    fc.string({ unit: 'binary', maxLength: 40 }),
+  );
+
+  it('keeps the token invariant for every view, field and index option (fast-check)', () => {
+    const packs = [createPack(), createPack({ foldIY: true }), createPack({ tonePlacement: 'classic' })];
+    fc.assert(
+      fc.property(text, fc.constantFrom('title', 'aliases', 'content') as fc.Arbitrary<'title'>, (t, field) => {
+        const source = tokenize(t);
+        for (const p of packs) {
+          for (const view of ['norm', 'fold']) {
+            const projected = tokenize(p.project(view, field, t));
+            expect(projected.length).toBe(source.length);
+            // Same tokenization as the M1 helper that mirrors unicode61 (+# aside).
+            expect(ftsTokens(p.project(view, field, t).replace(/[+#]/g, ' ')).length).toBe(ftsTokens(t.replace(/[+#]/g, ' ')).length);
+            projected.forEach((tok, k) => {
+              // token k of the view is the projection of source token k
+              expect(tok.toLowerCase()).toBe(p.project(view, field, source[k]!).toLowerCase());
+            });
+          }
+        }
+      }),
+      { numRuns: 400 },
+    );
+  });
+
+  it('is pure and deterministic', () => {
+    fc.assert(
+      fc.property(text, (t) => {
+        expect(pack.project('norm', 'content', t)).toBe(pack.project('norm', 'content', t));
+        expect(pack.project('fold', 'content', t)).toBe(pack.project('fold', 'content', pack.project('norm', 'content', t)));
+      }),
+      { numRuns: 200 },
+    );
+  });
+});
+
+describe('analyzeQuery', () => {
+  const BOTH = { accentedNorm: true, accentedFold: 'always' };
+
+  it('accented query, both views on: norm is the normalized query, fold the folded one, no restoration', () => {
+    const a = analyze('Giữ chân khách hàng', BOTH);
+    expect(a.viewQueries).toEqual({ norm: 'giữ chân khách hàng', fold: 'giu chan khach hang' });
+    expect(a.embedQuery).toBeUndefined();
+    expect(a.baseQuery).toBeUndefined();
+    expect((a.data as ViAnalysisData).accented).toBe(true);
+    expect((a.data as ViAnalysisData).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
+  });
+
+  it('accented query, defaults: no view branch unless the vault has the words typed unaccented', () => {
+    const a = analyze('Giữ chân khách hàng');
+    expect(a.viewQueries).toEqual({ norm: null, fold: null });
+    expect((a.data as ViAnalysisData).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
+    const typedPlain = analyze('Giữ chân khách hàng', {}, [...VAULT, 'ghi chu: giu chan khach cu']);
+    expect(typedPlain.viewQueries).toEqual({ norm: null, fold: 'giu chan khach hang' });
+    expect(analyze('khách', {}, [...VAULT, 'khach moi']).viewQueries.fold).toBe('khach');
+    expect(analyze('Giữ chân khách hàng', { accentedFold: 'never' }, [...VAULT, 'giu chan khach']).viewQueries.fold).toBeNull();
+  });
+
+  it('accented query with classic tone placement normalizes to the index style', () => {
+    expect(analyze('hòa bình', BOTH).viewQueries.norm).toBe('hoà bình');
+  });
+
+  it('unaccented query: norm is the restoration from the vault', () => {
+    const a = analyze('giu chan khach hang');
+    expect(a.viewQueries.norm).toBe('giữ chân khách hàng');
+    expect(a.viewQueries.fold).toBe('giu chan khach hang');
+    expect((a.data as ViAnalysisData).accented).toBe(false);
+    expect((a.debug as { restore: unknown }).restore).toBeDefined();
+  });
+
+  it('restores đ: "con duong" -> "con đường"', () => {
+    expect(analyze('con duong').viewQueries.norm).toBe('con đường');
+  });
+
+  it('keeps English words: "ban hang online"', () => {
+    const a = analyze('ban hang online');
+    expect(a.viewQueries.norm?.split(' ')[0]).toBe('bán');
+    expect(a.viewQueries.norm?.split(' ')).toContain('online');
+    expect(a.viewQueries.fold).toBe('ban hang online');
+  });
+
+  it('adds close alternatives to the norm query', () => {
+    const a = analyze('ban hang', { restoreParams: { alternativeThreshold: 0.01 } });
+    const words = a.viewQueries.norm!.split(' ');
+    expect(words).toEqual(expect.arrayContaining(['bán', 'bạn', 'hàng']));
+  });
+
+  it('partially accented query restores the rest', () => {
+    const a = analyze('giữ chan khach');
+    expect(a.viewQueries.norm).toBe('giữ chân khách');
+    expect(a.viewQueries.fold).toBe('giu chan khach');
+  });
+
+  it('nothing to restore and no diacritics: both view branches are skipped', () => {
+    expect(analyze('online meeting').viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('xyz', {}, []).viewQueries.norm).toBeNull();
+  });
+
+  it('English query without Vietnamese evidence leaves the pack inert', () => {
+    const docs = [...VAULT, 'How to install plugins', 'Go to the settings'];
+    expect(analyze('how to install plugins', {}, docs).viewQueries).toEqual({ norm: null, fold: null });
+    // "to" has an accented form in this vault ("tô"), so it is Vietnamese evidence
+    // once enough of the query is made of syllables.
+    expect(analyze('how to install', {}, [...docs, 'bát tô lớn']).viewQueries.fold).toBeNull();
+    expect(analyze('to install', {}, [...docs, 'bát tô lớn']).viewQueries.fold).toBe('to install');
+  });
+
+  it('Telex keystrokes with few real syllables leave the pack inert (minSyllableShare)', () => {
+    const docs = [...VAULT, 'chân dung', 'sử dụng'];
+    expect(analyze('bis quyeets chupj anhr chaan dung', {}, docs).viewQueries).toEqual({ norm: null, fold: null });
+    expect(analyze('bis quyeets chupj anhr chaan dung', { minSyllableShare: 0 }, docs).viewQueries.fold).not.toBeNull();
+  });
+
+  it('restore: false never restores', () => {
+    expect(analyze('giu chan khach hang', { restore: false }).viewQueries.norm).toBeNull();
+  });
+
+  it('empty or punctuation-only query skips both views', () => {
+    expect(analyze('  ?! ').viewQueries).toEqual({ norm: null, fold: null });
+  });
+
+  it('foldIY folds the fold-view query too', () => {
+    expect(analyze('kĩ thuật', { ...BOTH, foldIY: true }).viewQueries.fold).toBe('ki thuat');
+  });
+
+  it('restoreForEmbedding sends the restored text (punctuation kept) when confident', () => {
+    const a = analyze('Giu chan, khach hang!', { restoreForEmbedding: true, embedMinConfidence: 0 });
+    expect(a.embedQuery).toBe('giữ chân, khách hàng!');
+    expect(analyze('giu chan khach hang').embedQuery).toBeUndefined();
+  });
+});
+
+describe('rescore', () => {
+  const pack = createPack();
+  function candidate(path: string, score: number, snippet: string, rank: Record<string, number | null> = {}): Candidate {
+    return { path, score, title: path, snippet, matchedViews: [], rank };
+  }
+
+  it('never drops or adds candidates and boosts the accent-exact phrase', async () => {
+    const analysis = analyze('bán hàng');
+    const candidates = [
+      candidate('ban-hang-decoy.md', 0.05, 'Bạn hàng của công ty'),
+      candidate('ban-hang.md', 0.04, 'Kế hoạch bán hàng online'),
+      candidate('other.md', 0.03, 'Không liên quan'),
+    ];
+    const out = await pack.rescore!(candidates, analysis, fakeContext(VAULT));
+    expect(out.map((c) => c.path).sort()).toEqual(candidates.map((c) => c.path).sort());
+    const score = Object.fromEntries(out.map((c) => [c.path, c.score]));
+    expect(score['ban-hang.md']).toBeGreaterThan(score['ban-hang-decoy.md']!);
+    expect(score['other.md']).toBe(0.03);
+  });
+
+  it('scales the bonus by restoration confidence for unaccented queries', async () => {
+    const analysis = analyze('ban hang');
+    const out = await pack.rescore!([candidate('a.md', 0.01, 'bán hàng'), candidate('b.md', 0.02, 'nothing')], analysis, fakeContext(VAULT));
+    expect(out[0]!.score).toBeGreaterThan(0.01);
+    expect(out[1]!.score).toBe(0.02);
+  });
+
+  it('passes scores through when the analysis carries no pack data', async () => {
+    const out = await pack.rescore!([candidate('a.md', 0.5, 'bán hàng')], { viewQueries: {} }, fakeContext(VAULT));
+    expect(out).toEqual([{ path: 'a.md', score: 0.5 }]);
+  });
+
+  it('keeps the candidate set for arbitrary inputs (fast-check)', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.tuple(fc.string(), fc.double({ min: 0, max: 1, noNaN: true }), fc.string({ unit: 'grapheme' })), { maxLength: 20 }),
+        fc.string({ unit: 'grapheme', maxLength: 30 }),
+        (rows, query) => {
+          const candidates = rows.map(([p, s, snip], i) => candidate(`${i}${p}`, s, snip));
+          const out = pack.rescore!(candidates, analyze(query), fakeContext(VAULT)) as Array<{ path: string; score: number }>;
+          expect(out.map((c) => c.path)).toEqual(candidates.map((c) => c.path));
+          out.forEach((c, i) => {
+            expect(Number.isFinite(c.score)).toBe(true);
+            expect(c.score).toBeGreaterThanOrEqual(candidates[i]!.score);
+          });
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});

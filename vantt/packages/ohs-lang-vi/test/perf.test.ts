@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { fold } from '../src/fold.js';
 import { normalize } from '../src/normalize.js';
 import { composeSyllable, isPossibleFoldedSyllable, parseSyllable } from '../src/syllable.js';
-import { allSyllables, vietnameseText } from './helpers.js';
+import { allSyllables, prng, vietnameseText } from './helpers.js';
+import { createPack } from '../src/index.js';
+import { fakeContextFromCounts } from './fake-context.js';
 
 const ONE_MB = 1024 * 1024;
 const PROJECT_BUDGET_MS = 200;
@@ -138,5 +140,83 @@ describe('performance: primitives that analyzeQuery (V13) will call', () => {
     });
     console.log(`parseSyllable x${sample.length} distinct: ${ms.toFixed(1)} ms`);
     expect(ms).toBeLessThan(500);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// M2/M3: project() and analyzeQuery() of the pack
+// ---------------------------------------------------------------------------
+
+describe('performance: pack project() on 1 MB', () => {
+  const nfc = vietnameseText(ONE_MB, 'NFC', 3);
+  const nfd = vietnameseText(ONE_MB, 'NFD', 4);
+
+  for (const view of ['norm', 'fold'] as const) {
+    it(`${view} view on 1 MB under 200 ms (NFC and NFD, fresh pack)`, () => {
+      const pack = createPack({ foldIY: true });
+      const msNfc = once(() => pack.project(view, 'content', nfc));
+      const msNfd = once(() => pack.project(view, 'content', nfd));
+      console.log(`project ${view} 1 MB: NFC ${msNfc.toFixed(1)} ms, NFD ${msNfd.toFixed(1)} ms`);
+      expect(msNfc).toBeLessThan(PROJECT_BUDGET_MS);
+      expect(msNfd).toBeLessThan(PROJECT_BUDGET_MS);
+    });
+  }
+});
+
+describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () => {
+  const rand = prng(7);
+  const syllables = allSyllables();
+  const norm = new Map<string, number>();
+  const foldCounts = new Map<string, number>();
+  // Every accented syllable that exists, then filler terms up to 50,000.
+  for (const s of syllables) {
+    for (const tone of [0, 1, 2, 3, 4, 5] as const) {
+      const w = composeSyllable({ ...s, tone });
+      norm.set(w, 1 + Math.floor(rand() * 500));
+    }
+  }
+  for (let i = 0; norm.size < 50_000; i++) norm.set(`term${i}x`, 1 + Math.floor(rand() * 20));
+  for (const [w, n] of norm) {
+    const f = fold(w);
+    foldCounts.set(f, (foldCounts.get(f) ?? 0) + n);
+  }
+  const terms = [...norm.keys()].filter((w) => !w.startsWith('term'));
+  const phrases = new Map<string, number>();
+  for (let i = 0; i < 200_000; i++) {
+    const a = terms[Math.floor(rand() * terms.length)]!;
+    const b = terms[Math.floor(rand() * terms.length)]!;
+    phrases.set(`${a} ${b}`, 1 + Math.floor(rand() * 5));
+  }
+  const ctx = fakeContextFromCounts(
+    new Map([
+      ['norm', norm],
+      ['fold', foldCounts],
+    ]),
+    new Map([['norm', phrases]]),
+    10_000,
+  );
+  const query = 'giu chan khach hang ban hang online ke hoach chien luoc duong pho';
+
+  it('has a 50,000-term vocabulary and a 12-syllable query', () => {
+    expect(norm.size).toBe(50_000);
+    expect(query.split(' ').filter((w) => isPossibleFoldedSyllable(w))).toHaveLength(12);
+  });
+
+  it('cold (fresh pack, empty caches) under 20 ms', () => {
+    const pack = createPack();
+    const ms = once(() => pack.analyzeQuery(query, ctx));
+    console.log(`analyzeQuery 12 syllables cold: ${ms.toFixed(2)} ms`);
+    expect(ms).toBeLessThan(20);
+  });
+
+  it('after an index change (caches reset) under 20 ms, warm well below', () => {
+    const pack = createPack();
+    pack.analyzeQuery(query, ctx);
+    ctx.bump();
+    const afterWrite = once(() => pack.analyzeQuery(query, ctx));
+    const warm = bestOf(5, () => pack.analyzeQuery(query, ctx));
+    console.log(`analyzeQuery 12 syllables after write: ${afterWrite.toFixed(2)} ms, warm: ${warm.toFixed(3)} ms`);
+    expect(afterWrite).toBeLessThan(20);
+    expect(warm).toBeLessThan(5);
   });
 });
