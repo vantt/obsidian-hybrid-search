@@ -5,12 +5,12 @@ name: vantt-bundles
 # only has the archive (no setup-node), then attach bundles and checksums to the
 # GitHub Release for the tag. Not signed on macOS (PRD 8.3, Q4).
 #
-# Tags pushed with the default GITHUB_TOKEN do not start workflows; the catchup
-# workflow can call this one (workflow_call) or an operator can dispatch it.
+# There is no push-tag trigger on purpose: a tag start would run the workflow file
+# of the tagged commit, but release branches carry no .github/workflows (upstream's
+# are removed), and tags pushed with GITHUB_TOKEN start nothing anyway. Run it from
+# master: dispatch with the tag, or call it from catchup (workflow_call).
 
 on:
-  push:
-    tags: ['v*-vantt.*']
   workflow_dispatch:
     inputs:
       tag:
