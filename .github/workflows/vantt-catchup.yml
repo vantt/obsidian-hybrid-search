@@ -207,8 +207,8 @@ jobs:
           - run: $run_url
 
           See skill \`ohs-catchup\`; the JSON report is the \`catchup-report\` artifact of the run."
-          gh label create catchup --color d93f0b --description "Catchup with upstream failed" 2>/dev/null || true
-          existing=$(gh issue list --label catchup --state open --limit 100 --json number,title \
+          gh label create catchup --color d93f0b --description "Catchup with upstream failed" || true
+          existing=$(gh issue list --state open --limit 200 --json number,title \
             --jq "map(select(.title == \"$title\")) | .[0].number // empty")
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "Failed again: $run_url"
