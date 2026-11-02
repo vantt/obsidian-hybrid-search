@@ -1,0 +1,169 @@
+[
+  {
+    "id": "smoke-01",
+    "query": "ke hoach quy ba doanh thu",
+    "relevant_paths": [
+      "notes/Q3 business plan.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-unaccented",
+    "notes": "unaccented query for accented text"
+  },
+  {
+    "id": "smoke-02",
+    "query": "ke hoach quy ba",
+    "relevant_paths": [
+      "notes/Q3 business plan.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-alias",
+    "notes": "alias in front matter; title is English"
+  },
+  {
+    "id": "smoke-03",
+    "query": "KH tiềm năng",
+    "relevant_paths": [
+      "notes/Q3 business plan.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "abbreviation from the lexicon"
+  },
+  {
+    "id": "smoke-04",
+    "query": "khách hàng mới quán cà phê",
+    "relevant_paths": [
+      "notes/ghi chu khong dau.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "accented query, note written without diacritics"
+  },
+  {
+    "id": "smoke-05",
+    "query": "hoà giải tranh chấp",
+    "relevant_paths": [
+      "notes/Hòa giải tranh chấp.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-tone-placement",
+    "notes": "new-style query, old-style note"
+  },
+  {
+    "id": "smoke-06",
+    "query": "kĩ thuật chụp ảnh",
+    "relevant_paths": [
+      "notes/Kỹ thuật chụp ảnh.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "i spelling query, y spelling note"
+  },
+  {
+    "id": "smoke-07",
+    "query": "duong ve nha",
+    "relevant_paths": [
+      "notes/Đường về nhà.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-dd",
+    "notes": "d for đ"
+  },
+  {
+    "id": "smoke-08",
+    "query": "bán hàng online",
+    "relevant_paths": [
+      "notes/Bán hàng online.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-tone-precision",
+    "notes": "must rank above the note about bạn hàng"
+  },
+  {
+    "id": "smoke-09",
+    "query": "bạn hàng cũ",
+    "relevant_paths": [
+      "notes/Bạn hàng cũ.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "compound that is not hàng hoá or khách hàng"
+  },
+  {
+    "id": "smoke-10",
+    "query": "họp sprint planning",
+    "relevant_paths": [
+      "notes/Họp sprint planning.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "English words inside Vietnamese; CRLF note"
+  },
+  {
+    "id": "smoke-11",
+    "query": "nguyen van an",
+    "relevant_paths": [
+      "notes/Nguyễn Văn An.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-names",
+    "notes": "unaccented name; note content is NFD"
+  },
+  {
+    "id": "smoke-12",
+    "query": "howpj ddoongf thuee vawn phongf",
+    "relevant_paths": [
+      "notes/Hợp đồng thuê văn phòng.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-telex",
+    "notes": "Telex"
+  },
+  {
+    "id": "smoke-13",
+    "query": "hop dogn theu van phong",
+    "relevant_paths": [
+      "notes/Hợp đồng thuê văn phòng.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-typo",
+    "notes": "swapped letters"
+  },
+  {
+    "id": "smoke-14",
+    "query": "contract thuê văn phòng",
+    "relevant_paths": [
+      "notes/Hợp đồng thuê văn phòng.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-synonym",
+    "notes": "lexicon: hợp đồng = contract"
+  },
+  {
+    "id": "smoke-15",
+    "query": "hieu luc hai nam",
+    "relevant_paths": [
+      "notes/Hợp đồng thuê văn phòng.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-snippet",
+    "notes": "snippet keeps the original marks",
+    "snippet_contains": "hiệu lực",
+    "matched_terms": [
+      "hieu",
+      "luc",
+      "hai",
+      "nam"
+    ]
+  },
+  {
+    "id": "smoke-16",
+    "query": "cuộc gặp để dàn xếp mâu thuẫn hàng xóm",
+    "relevant_paths": [
+      "notes/Hòa giải tranh chấp.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "paraphrase"
+  }
+]
