@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Phase 6: Kiểm mỗi bản upstream mới"
-status: in-progress
+status: done
 priority: P2
 effort: "2d"
 dependencies: [2, 5]
@@ -33,7 +33,7 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 ## Todo
 
 - [x] V14 script review
-- [ ] L24 biểu đồ chỉ số qua các bản, probe đủ, skill hoàn thiện, báo cáo mẫu
+- [x] L24 biểu đồ chỉ số qua các bản, probe đủ, skill hoàn thiện, báo cáo mẫu
 
 ## Success Criteria
 
@@ -45,7 +45,7 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 ## Ghi chú sau V14
 
 - `review-upstream.mjs` dựng 4 cây (upstream và fork của hai tag), chạy mọi probe, eval upstream và `vi`, diff điểm chạm, tạo cặp chấm mù; 22 test xanh. Báo cáo mẫu `vantt/reviews/v0.17.2.md` (cặp `v0.17.1` → `v0.17.2`): upstream chỉ nâng phụ thuộc, 8 bản vá đều còn cần, khuyên nâng.
-- Lượt chạy mẫu dựng fork với `--skip-tests --skip-quality`, chưa có P07, và số `vi` (nDCG@5 0,813) thấp hơn gói đầy đủ (0,932). Lead chạy lại báo cáo ở bước kiểm cuối trên chuỗi đủ 9 bản vá.
+- Lượt chạy mẫu dựng fork với `--skip-tests --skip-quality`, chưa có P07, và số `vi` (nDCG@5 0,813) thấp hơn gói đầy đủ (0,932). Đã chạy lại (`5eed3d4`) trên chuỗi đủ 9 bản vá, fixture `v0.11.0`, gói cuối: `vi` nDCG@5 0,646 → 0,944; chấm mù 20 cặp rải mọi hạng mục: fork thắng 14, hoà 5, thua 1. L24: `vantt/reviews/trends.svg`, tự vẽ lại sau mỗi lần review.
 
 ## Risk
 
