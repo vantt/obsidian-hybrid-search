@@ -31,7 +31,7 @@ Ba vấn đề đã thấy khi dùng OHS với tiếng Việt và với sản ph
 ## 2. Mục tiêu và không làm
 
 Mọi mục tiêu, việc và bản vá trong tài liệu mang một trong ba nhãn:
-- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V25).
+- **Bắt buộc**: phải có để fork dùng được cho dự án (mục 2.1; việc V00–V25, trừ V16 là việc của repo dự án, mục 14.3).
 - **Có thì tốt**: có giá trị nhưng không chặn ai; làm khi đủ điều kiện ghi ở cột "Làm khi" (mục 2.2; việc L01–L26).
 - **Không làm**: đã cân nhắc và loại, ghi lý do để khỏi bàn lại (mục 2.3).
 
@@ -45,7 +45,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | G3 | Có gói tiếng Việt thì tìm tiếng Việt tốt lên rõ, nhất là gõ không dấu | Bộ eval tiếng Việt (mục 11.5): ngưỡng ở mục 11.6 |
 | G4 | Khách không phải chạy `npm`; cài từ gói dựng sẵn cho Windows x64, macOS ARM, macOS Intel, Linux x64 | Smoke test trên runner sạch của từng nền (mục 8.4) |
 | G5 | Mỗi bản upstream mới đều có báo cáo: bản vá nào còn cần, upstream đã tự giải chỗ nào, chất lượng tìm tốt lên hay xấu đi | File `vantt/reviews/<tag>.md` (mục 12) |
-| G6 | Dự án lấy vector và K note gần nhất qua lệnh chính thức của fork, không đọc bảng nội bộ | Bản vá P03 (mục 9) |
+| G6 | Dự án lấy vector và K note gần nhất qua lệnh chính thức của fork, không đọc bảng nội bộ | Phía fork: bản vá P03, P04 (mục 9). Phía dự án chuyển sang dùng: V16, làm ở repo dự án (mục 14.3) |
 | G7 | DB index đặt được ngoài vault | Bản vá P02 |
 | G8 | Gói tiếng Việt xử lý cả cách người Việt gõ và viết thật: chuỗi Telex/VNI gõ dở, gõ sai một chữ, đồng nghĩa và Việt–Anh, viết tắt, từ ghép, alias và tiêu đề không dấu; đoạn trích luôn là chữ gốc, đúng chỗ khớp (user chốt 2026-11-02, trước đây là N05, N14–N19) | Hạng mục `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-compound`, `vi-alias`, `vi-snippet` của bộ eval (mục 11.5), ngưỡng ở mục 11.6 |
 | G9 | Hợp đồng gói ngôn ngữ P01 thật sự chung: một gói ngôn ngữ thứ hai chạy được qua đúng hợp đồng đó mà không sửa lõi (user chốt 2026-11-02, trước đây N08) | Test của gói thứ hai và bài kiểm bất biến xanh khi bật gói đó (V21) |
@@ -66,7 +66,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N23 | Gói cho Windows ARM64 | Máy Windows ARM (Snapdragon) đang tăng | fork (bundle) | ý mới | Khi có khách dùng | L25 |
 | N24 | Nâng cấp tại chỗ và quay lui bản OHS cho khách (giữ bản cũ, đổi khi bản mới qua smoke) như `install.py --rollback` của herdr | Nâng cấp không làm hỏng máy khách | dự án (bộ cài) | ý mới | Khi phát hành bản thứ hai cho khách | L26 |
 
-N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N04, N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22, gộp thử model N04 và đo reranker N09), và `material` gửi mọi câu tìm trong một lệnh làm trong V16. Giữ ID để tra lại lịch sử.
+N05, N14–N19 đã chuyển thành **bắt buộc** trong gói `ohs-lang-vi` (user chốt 2026-11-02): mục tiêu G8, việc V17–V20, thiết kế ở mục 10. N01, N02, N03 thành bắt buộc (user chốt 2026-11-02): G11, bản vá P05–P07, việc V23–V25. N04, N08, N09, N10 cũng thành bắt buộc (user chốt 2026-11-02): G9 (V21), G10 (V22, gộp thử model N04 và đo reranker N09), và `material` gửi mọi câu tìm trong một lệnh làm trong V16 (việc của repo dự án, mục 14.3). Giữ ID để tra lại lịch sử.
 
 Đã chốt nhưng làm sau (không phải "có thì tốt"): điện thoại qua `pkm-web` (L06, mục 13), gửi issue/PR lên upstream sau khi đã làm (L08).
 
@@ -484,7 +484,7 @@ Xem mục 10.2 (đặc tả đầy đủ). Bản vá chỉ chứa điểm cắm 
 - **Điểm chạm:** `storage/db.ts` (dùng `getChunkEmbeddingsByPath` và một hàm đọc theo lô mới trong `storage/`), lệnh mới trong `transports/cli.ts`, logic gộp trong `search/` (không để `transports` tính toán).
 - **Test:** vault tạm với embedder giả (vector cố định) → so vector trung bình và thứ tự láng giềng với kết quả tính tay.
 - **Probe:** gọi `ohs vectors --help`; upstream có lệnh tương đương thì kiểm đầu ra có đủ trường cần.
-- **Sau khi có:** sửa `note_knn.mjs`, `similar_pairs.mjs` trong repo dự án dùng lệnh này (việc phía dự án, V14).
+- **Sau khi có:** sửa `note_knn.mjs`, `similar_pairs.mjs` trong repo dự án dùng lệnh này (việc của repo dự án, V16, mục 14.3).
 
 #### P04 `stdio-parity`
 - **Vấn đề:** IPC JSON-lines (`serve --stdio`) chỉ có `search`, `status`. Plugin của dự án và máy chủ điện thoại (mục 13) cần nạp model một lần rồi gọi nhiều lệnh; hiện phải mở tiến trình mới cho mỗi lệnh (khoảng 2 s nạp model).
@@ -844,7 +844,6 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V13 | `ohs-lang-vi` M2+M3: view `norm`/`fold`, `analyzeQuery`, `restore`, `rescore`; chốt tham số bằng eval | V09, V10, V11 | 3,5 | Đạt mục tiêu G3 (mục 11.6) trên corpus sinh |
 | V14 | `review-upstream.mjs` + probe cho mọi bản vá + hoàn thiện skill `ohs-upstream-review` | V06–V08, V12 | 2 | Chạy trên cặp `v0.17.1` → `v0.17.2` ra báo cáo đủ mục |
 | V15 | Eval trên vault thật của user (golden set riêng 60 câu) | V13; user 2 giờ gán nhãn | 0,5 + user | Số tổng hợp trong `vantt/reviews/` |
-| V16 | Phía dự án: `note_knn.mjs`, `similar_pairs.mjs`, `related.py`, `material.py` dùng P03, P04; bộ cài trỏ gói dựng sẵn; `material` gửi mọi câu tìm trong một lệnh `queries[]` qua stdio IPC, bỏ 8 tiến trình (trước đây N10) | V07, V08, V03 | 1,3 | Không còn đọc bảng nội bộ của OHS |
 | V17 | `ohs-lang-vi` M5a: `telex.ts`, `typo.ts` (G8) | V13 | 2,5 | `vi-telex`, `vi-typo` đạt mục 11.6; hạng mục khác không tụt |
 | V18 | `ohs-lang-vi` M5b: `lexicon.ts`, `abbr.ts`, lệnh `learn-abbr` (G8) | V13 | 2,5 | `vi-synonym`, `vi-abbr` đạt; đổi đồng nghĩa hay viết tắt trong file lexicon không dựng lại index |
 | V19 | `ohs-lang-vi` M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích (G8) | V13 | 1 | `vi-alias`, `vi-snippet` đạt |
@@ -854,7 +853,7 @@ Một "ngày" là một phiên làm việc cả ngày của agent có người d
 | V23 | P05 `block-anchors`: `block_id`, `has_highlight` cho mỗi đoạn, `OBSIDIAN_CHUNK_TOKENS` (G11). Theo dõi upstream issue #91; upstream làm phần kích thước đoạn thì bỏ phần đó khỏi bản vá | V01 | 2 | Test và probe xanh; không đặt `OBSIDIAN_CHUNK_TOKENS` thì cách chia đoạn và kết quả tìm y như upstream |
 | V24 | P06 `restrict-paths`: `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh (G11, mục 9.0) | V01 | 0,5–1 | Test và probe xanh; tìm trong tập 30 note trả đủ kết quả như tìm trên vault chỉ có 30 note đó |
 | V25 | P07 `index-events`: stdio IPC phát `indexed` và `removed` sau mỗi lô ghi (G11) | V08 | 1 | Test và probe xanh; dự án nhận sự kiện trong 1 s sau khi sửa note |
-| | **Cộng** | | **~45** | |
+| | **Cộng** | | **~44** | |
 
 Song song được: V09, V10 không cần fork chạy; V04–V08 song song sau V01; V23, V24 song song với V04–V08 sau V01; V25 sau V08; V17–V20 song song sau V13 (cùng sửa `query.ts` của gói thì làm lần lượt phần đó).
 
@@ -875,6 +874,16 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
 | L25 | Có thì tốt (N23), ý mới | Gói Windows ARM64 | Khi có khách dùng | 0,5 |
 | L26 | Có thì tốt (N24), ý mới | Nâng cấp tại chỗ và quay lui (phía bộ cài dự án) | Khi phát hành bản thứ hai cho khách | 1 |
+
+
+### 14.3. Việc phía dự án (không thuộc repo này)
+Làm trong repo `vantt/obsidian-pkm-automation`, không commit vào fork. Ghi ở đây vì chúng là lý do của G6 và chờ bản vá của fork.
+
+| ID | Việc | Cần (phía fork) | Công | Xong khi |
+|---|---|---|---|---|
+| V16 | `scripts/e11/note_knn.mjs`, `scripts/e11/similar_pairs.mjs` dùng lệnh P03, không mượn `better-sqlite3` trong `node_modules` của OHS (`--ohs`); `scripts/kg/related.py` và `scripts/e11/material.py` gọi OHS qua P04 (một tiến trình stdio sống lâu, `queries[]` thay cho mỗi câu một tiến trình, trước đây N10) và **bỏ đường lùi đọc thẳng bảng FTS của OHS** bằng `sqlite3`; bộ cài trỏ gói dựng sẵn | V07, V08, V03 | 1,3 | Không script nào của dự án đọc bảng nội bộ hay `node_modules` của OHS |
+
+Ghi chú cho repo dự án: các script trên là logic sản phẩm (graph, `related`, trang nguyên liệu) nên ở lại repo dự án (mục 2.3). Nếu khách không được phải cài Python, việc chuyển gói `kg` và `material.py` sang JS (chạy bằng Node có sẵn trong gói dựng sẵn của fork) là quyết định và việc của repo dự án.
 
 ---
 
