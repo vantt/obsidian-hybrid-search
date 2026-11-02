@@ -212,6 +212,18 @@ export class LexiconStore {
     return this.parsed.lexicon;
   }
 
+  /**
+   * Words the user wrote in synonym and abbreviation forms, folded: the query
+   * rewriter treats them as known words (so "phone" is not "corrected").
+   */
+  knownWords(foldWord: (word: string) => string, vaultPath?: string): ReadonlySet<string> {
+    const lexicon = this.load(vaultPath);
+    const words = new Set<string>();
+    for (const group of [...lexicon.synonyms, ...lexicon.abbreviations])
+      for (const form of group) for (const w of form) words.add(foldWord(w));
+    return words;
+  }
+
   /** `queryCacheKey()` component. */
   queryKey(): string {
     return queryDigest(this.load());

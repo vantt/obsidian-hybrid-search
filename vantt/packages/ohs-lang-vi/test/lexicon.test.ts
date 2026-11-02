@@ -108,6 +108,18 @@ describe('lexicon in the pack', () => {
     expect(analyze('khách hàng').viewQueries.norm ?? '').not.toMatch(/\bkh\b/);
   });
 
+  it('a lexicon word is never typo-corrected', () => {
+    write('## Đồng nghĩa\nphone = dế\n');
+    const docs = ['phong khach rong', 'phong ngu'];
+    const pack = createPack({ typo: true });
+    const a = pack.analyzeQuery('phone', { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    expect(a.debug?.rewrite).toBeUndefined();
+    expect(a.viewQueries.norm).toBe('dế');
+    write('');
+    const b = pack.analyzeQuery('phone', { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    expect(JSON.stringify(b.debug?.rewrite)).toContain('typo');
+  });
+
   it('a word typed with diacritics does not match another diacritic form', () => {
     write('## Đồng nghĩa\nlương = salary\n');
     expect(analyze('lượng').viewQueries.norm ?? '').not.toContain('salary');
