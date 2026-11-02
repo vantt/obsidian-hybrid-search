@@ -34,6 +34,7 @@ import {
   getStoredModel,
 } from '../storage/db.js';
 import { validateVaultPath } from '../vault/vault-config.js';
+import { languagePackStatusField } from './status-payload.js';
 
 const _dir = dirname(fileURLToPath(import.meta.url));
 
@@ -229,6 +230,7 @@ async function callSearchTool(a: Record<string, unknown>): Promise<McpToolResult
       snippetLength: searchArgs.snippet_length,
       rerank: searchArgs.rerank,
       anchors: searchArgs.anchors,
+      ...(searchArgs.explain ? { explain: true } : {}),
       notePath,
       queries: allQueries.length > 1 ? allQueries : undefined,
     });
@@ -294,6 +296,7 @@ function callStatusTool(a: Record<string, unknown>, runtime: McpRuntime): McpToo
     ignore_patterns: config.ignorePatterns,
     respect_gitignore: config.respectGitignore,
     include_patterns: config.includePatterns,
+    ...languagePackStatusField(),
   };
   if (statusArgs.include_activity) {
     output.recent_activity = stats.recentActivity;
@@ -465,6 +468,12 @@ export function createMcpServer(runtime: McpRuntime): Server {
                 'Not needed for most MCP use cases — the snippet field is sufficient. ' +
                 'Use when building a UI that renders the note and needs to scroll to the matched region. ' +
                 'Default: false.',
+            },
+            explain: {
+              type: 'boolean',
+              description:
+                'When true, each result includes explain.ranks (1-based rank in every retrieval branch, null when missed) ' +
+                'and, with a language pack, explain.debug (the query analysis). For evaluation and debugging. Default: false.',
             },
           },
         },

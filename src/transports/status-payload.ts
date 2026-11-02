@@ -1,5 +1,7 @@
 import { getIndexingStatus } from '../indexing/indexer.js';
 import { activeModelName, useRemoteEmbeddings } from '../inference/embedder.js';
+import { languagePackStatus } from '../language/loader.js';
+import type { LanguagePackStatus } from '../language/types.js';
 import { config } from '../runtime/config.js';
 import { buildStatusField } from '../runtime/package-identity.js';
 import { getIndexFailures, getStats } from '../storage/db.js';
@@ -51,5 +53,12 @@ export function buildStatusPayload({
     ignore_patterns: config.ignorePatterns,
     respect_gitignore: config.respectGitignore,
     include_patterns: config.includePatterns,
+    ...languagePackStatusField(),
   };
+}
+
+/** `language_pack` status, present only when OHS_LANGUAGE_PACK is configured. */
+export function languagePackStatusField(): { language_pack?: LanguagePackStatus } {
+  const status = languagePackStatus();
+  return status ? { language_pack: status } : {};
 }
