@@ -57,6 +57,8 @@ export { normalize, type NormalizeOptions } from './normalize.js';
 export { DEFAULT_OPTIONS, resolveOptions, type PackOptions, type RescoreWeights, type RestoreParams, type ViewWeights } from './options.js';
 export { analyzeQuery, type ViAnalysisData } from './query.js';
 export { accentedForms, restoreTokens, VocabularyCache, type RestoreResult } from './restore.js';
+export { decodeKeystrokes, decodeTelex, decodeVni, telexForms, vniForms } from './telex.js';
+export { correctTypos, editNeighbours } from './typo.js';
 export { evidenceIn, rescoreCandidates } from './rescore.js';
 export {
   composeSyllable,

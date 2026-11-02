@@ -18,7 +18,9 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 |---|---|
 | `normalize.ts`, `fold.ts`, `syllable.ts`, `data.ts` | M1 (V09): chuẩn hoá giữ dấu, bỏ dấu, tách âm tiết, bảng dữ liệu |
 | `views.ts` | View `norm` (chuẩn hoá giữ dấu) và `fold` (bỏ dấu, `đ→d`, tuỳ chọn i/y). Chiếu từng token, giữ nguyên ký tự phân cách, nên bất biến token của P01 đúng theo cách dựng |
-| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho Telex/gõ sai (V17), lexicon (V18), alias (V19), tách từ (V20) |
+| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho lexicon (V18), alias (V19), tách từ (V20) |
+| `telex.ts`, `rewrite.ts` | V17: giải chuỗi Telex/VNI gõ dở (`tieengs`, `tie6ng1` thành `tiếng`; `uow` đọc cả `ươ` lẫn `uơ`). Chỉ áp cho token không có trong từ vựng vault (hai view) mà dạng giải ra có trong view `norm`, nên "team", "seen", "online" giữ nguyên. Câu có token được giải thì `baseQuery` và `embedQuery` là câu đã giải, và các token đã giải được tính là âm tiết có dấu cho cổng `minSyllableShare` |
+| `typo.ts` | V17: sửa gõ sai một chữ (thêm, bớt, thay, đảo hai chữ liền nhau) cho token không có trong vault, dài từ 3 chữ, chỉ nhận ứng viên là âm tiết Việt có trong view `fold`; tối đa 3 ứng viên, chọn theo tần suất cộng bằng chứng cặp từ liền nhau với từ bên cạnh (`phraseDocs`), dùng ứng viên tốt nhất. Chỉ đổi token của câu view và `rescore`, không đổi `baseQuery` |
 | `restore.ts` | Phục hồi dấu theo từ vựng vault: ứng viên là mọi âm tiết có dấu bỏ dấu ra đúng âm tiết gõ (sinh từ bảng âm tiết), giữ những dạng có trong view `norm` (`termStats`), cặp liền nhau có thật (`phraseDocs`) được cộng điểm; k-best Viterbi; cache theo `dbVersion` |
 | `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp, từng chữ. Không bỏ, không thêm ứng viên |
 | `options.ts` | Tuỳ chọn và mặc định |
@@ -47,10 +49,12 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `accentedFold` | `"auto"` | không |
 | `viewWeights` | `{norm: 1.5, fold: 0.75}` | không |
 | `restoreParams` | `{maxVariants: 5, maxSyllables: 12, bigramWeight: 3, unigramSmoothing: 0.5, bigramSmoothing: 0.1, maxPhraseLookups: 96, beamWidth: 16, alternativeThreshold: 0.15}` | không |
+| `telex` | `true` | không |
+| `typo` | `true` | không |
 | `rescore` | `true` | không |
 | `rescoreWeights` | `{phrase: 4, bigram: 1, coverage: 0.5, normRank: 0, unit: 1/61, semantic: 0}` | không |
 
-Tuỳ chọn sai kiểu hay khoá lạ trong nhóm số thì `createPack` ném lỗi rõ (lõi báo trong `status.language_pack.error`). Khoá cấp trên chưa biết (`telex`, `segment`…) được bỏ qua.
+Tuỳ chọn sai kiểu hay khoá lạ trong nhóm số thì `createPack` ném lỗi rõ (lõi báo trong `status.language_pack.error`). Khoá cấp trên chưa biết (`segment`…) được bỏ qua.
 
 ## Test
 
@@ -91,3 +95,16 @@ Chốt bằng eval (quét trên index dựng một lần, đổi tuỳ chọn l�
 - Câu có dấu: bật nhánh `norm` hoặc `fold` làm `vi-semantic` tụt 0,083 nDCG@5 (thêm nhánh chữ lấn nhánh vector), nên mặc định tắt cả hai; `fold` bật lại khi vault có chính các chữ viết không dấu (`accentedFold: "auto"`), để note gõ không dấu vẫn tìm được. Cộng bù cho nhánh vector trong `rescore` (`rescoreWeights.semantic`) không gỡ được tụt này nên để 0.
 - `minSyllableShare` 0,5: chuỗi Telex có vài âm tiết thật ("chaan dung") làm phục hồi sai và kéo `vi-telex` tụt 0,076; có ngưỡng thì về đúng baseline (V17 sẽ giải Telex trước bước này).
 - `rescoreWeights` {4, 1, 0,5} hơn {1, 0,5, 0,5}: `vi-compound` 0,917 → 1,000, `vi-dd` 0,820 → 0,888; `alternativeThreshold` 0,15 đưa `vi-tone-precision` MRR lên 1,00.
+
+## Kết quả eval V17 (2026-11-02)
+
+Cùng máy, corpus, model và lõi (`chk-series`) như V13; so với kết quả V13 (`vi-pack-final.json`). Mỗi dòng là một lần chạy đủ 255 câu.
+
+| Chạy | `vi-telex` nDCG@5 / Hit@5 | `vi-typo` nDCG@5 / Hit@5 | Hạng mục khác |
+|---|---|---|---|
+| V13 (không `telex`, `typo`) | 0,333 / 0,47 | 0,661 / 0,93 | |
+| `telex` | 1,000 / 1,00 | 0,661 / 0,93 | không đổi, tổng nDCG@5 0,853 |
+| `typo` | 0,677 / 0,87 | 0,722 / 1,00 | `vi-semantic` MRR -0,002, tổng 0,837 |
+| `telex` + `typo` | 1,000 / 1,00 | 0,722 / 1,00 | `vi-semantic` MRR -0,002, nDCG@5 không đổi, tổng 0,856 (V13: 0,813) |
+
+Quy tắc chốt (hạng mục tốt lên, không hạng mục nào tụt quá 0,01 nDCG@5): cả hai bật mặc định. Eval upstream (`obsidian-help`) với cả hai bật: nDCG@5 0,735, MRR 0,785, Hit@5 0,879, giống hệt V13. `vi-typo` Hit@1 còn 0,40 (Hit@3 0,93): ứng viên đúng thường đứng cạnh một ứng viên phổ biến hơn.
