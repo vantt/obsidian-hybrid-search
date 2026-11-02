@@ -37,7 +37,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 
 | # | Phase | Việc | Công | Status |
 |---|---|---|---|---|
-| 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | In progress (V00, V01 xong) |
+| 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | Done |
 | 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Done |
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Done |
 | 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done (V09, V13, V17–V20) |

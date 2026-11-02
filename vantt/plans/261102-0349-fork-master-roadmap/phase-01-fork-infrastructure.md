@@ -43,7 +43,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 - [x] V00 cài đặt fork xong
 - [x] V01 catchup và skill `ohs-catchup`
 - [x] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
-- [ ] V03 gói dựng sẵn 4 nền và smoke
+- [x] V03 gói dựng sẵn 4 nền và smoke
 
 ## Success Criteria
 
@@ -70,7 +70,8 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 ## Ghi chú sau V03
 
 - Release `v0.17.2-vantt.1` có gói Windows x64, macOS ARM, Linux x64 kèm sha256, smoke xanh (đường dẫn có dấu cách và chữ Việt, `status`, `reindex`, `search`, stdio, MCP, nạp gói `vi`). Gói nén khoảng 100 MB, giải nén 280–330 MB; user chấp nhận vượt mục tiêu 250 MB (2026-11-02).
-- macOS Intel: `onnxruntime-node` 1.30.0 của upstream không có bản dựng darwin-x64. User chốt 2026-11-02: ghim bản `onnxruntime-node` cũ còn hỗ trợ Intel, chỉ cho gói darwin-x64 ở bước đóng gói; đạt khi smoke xanh trên `macos-15-intel` và eval lệch Linux tối đa 0,01 nDCG@5; không đạt thì bỏ nền này (đang làm, V03b).
+- macOS Intel: `onnxruntime-node` 1.30.0 của upstream không có bản dựng darwin-x64. User chốt 2026-11-02: ghim bản `onnxruntime-node` cũ còn hỗ trợ Intel, chỉ cho gói darwin-x64 ở bước đóng gói; đạt khi smoke xanh trên `macos-15-intel` và eval lệch Linux tối đa 0,01 nDCG@5; không đạt thì bỏ nền này Kết quả: ghim 1.23.2; cùng máy so với 1.30.0 lệch `multilingual` +0,063 và `vi-synonym` −0,017, user chấp nhận 2026-11-02 (ghi thành danh sách cho phép trong `bundle-parity.mjs`, mọi hạng mục khác vẫn ≤ 0,01).
+- V03 xong: release `v0.17.2-vantt.1` có đủ 4 gói + sha256 + `.bundle.json`, smoke xanh cả 4 nền, đánh dấu latest. Catchup gọi `vantt-bundles` qua `workflow_call` khi đẩy tag mới; `v0.17.2-vantt.2` do catchup tạo, lượt dựng đầu hỏng ở bước so sánh cũ, lead chạy lại bằng workflow mới.
 - `vantt-bundles` chạy bằng dispatch hoặc `workflow_call` từ `master` (tag đẩy bằng `GITHUB_TOKEN` không kích hoạt workflow); catchup chưa gọi bundles.
 
 ## Risk
