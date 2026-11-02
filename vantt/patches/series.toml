@@ -83,6 +83,20 @@ probe = "vantt/probes/vector-export.mjs"
 phase = "now"
 
 [[patches]]
+id = "stdio-parity"
+name = "feat(stdio): add read, vectors, neighbors and reindex actions and drain requests on close"
+patch_file = "0004-stdio-parity.patch"
+metadata_file = "0004-stdio-parity.spec.md"
+consumer = "pkm plugin and phone server; any client holding a long-lived serve --stdio process"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/contracts/boundary-validation.ts", "src/transports/stdio-server.ts", "src/transports/cli.ts", "test/transport-parity.test.ts", "test/serve-stdio.test.ts"]
+test_command = "npx vitest run test/vantt/stdio-parity.test.ts test/transport-parity.test.ts test/serve-stdio.test.ts"
+capability_check = "node vantt/probes/stdio-parity.mjs --ohs ."
+probe = "vantt/probes/stdio-parity.mjs"
+phase = "now"
+
+[[patches]]
 id = "unicode-inline-tags"
 name = "fix(content): accept Unicode letters in inline tags"
 patch_file = "0009-unicode-inline-tags.patch"
@@ -94,4 +108,32 @@ touches = ["src/content/note-extractor.ts"]
 test_command = "npx vitest run test/vantt/unicode-inline-tags.test.ts test/indexer.test.ts test/indexer-edge-cases.test.ts"
 capability_check = "node vantt/probes/unicode-inline-tags.mjs --ohs ."
 probe = "vantt/probes/unicode-inline-tags.mjs"
+phase = "now"
+
+[[patches]]
+id = "block-anchors"
+name = "feat(index): store block ids and highlight flags per chunk, make chunk size configurable"
+patch_file = "0005-block-anchors.patch"
+metadata_file = "0005-block-anchors.spec.md"
+consumer = "project material pages (note#^block, highlighted passages); users wanting smaller chunks (upstream #91)"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/content/block-anchors.ts", "src/content/chunker.ts", "src/runtime/config.ts", "src/indexing/indexer.ts", "src/indexing/index-service.ts", "src/storage/db.ts", "src/storage/search-queries.ts", "src/search/searcher.ts"]
+test_command = "npx vitest run test/vantt/block-anchors.test.ts test/vantt/language-pack-baseline.test.ts"
+capability_check = "node vantt/probes/block-anchors.mjs --ohs ."
+probe = "vantt/probes/block-anchors.mjs"
+phase = "now"
+
+[[patches]]
+id = "restrict-paths"
+name = "feat(search): restrict search to a given set of note paths"
+patch_file = "0006-restrict-paths.patch"
+metadata_file = "0006-restrict-paths.spec.md"
+consumer = "pkm project: search within a region of notes"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/contracts/filter-predicate.ts", "src/search/searcher.ts", "src/contracts/boundary-validation.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/stdio-server.ts"]
+test_command = "npx vitest run test/vantt/restrict-paths.test.ts"
+capability_check = "node vantt/probes/restrict-paths.mjs --ohs ."
+probe = "vantt/probes/restrict-paths.mjs"
 phase = "now"
