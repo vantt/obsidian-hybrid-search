@@ -1,0 +1,2576 @@
+{
+  "tool": "review-upstream",
+  "generated_at": "2026-11-02T08:35:16.520Z",
+  "platform": "linux-x64",
+  "new": {
+    "tag": "v0.17.2",
+    "sha": "201dd1f40900d6b5641fa5544bd215d9a20d90c6",
+    "fork_ref": "vantt/v0.17.2"
+  },
+  "prev": {
+    "given": "v0.17.1",
+    "upstream_tag": "v0.17.1",
+    "fork_tag": null,
+    "sha": "97179171bdda08375618527d6056794cbdea486d",
+    "fork_ref": "vantt/v0.17.1"
+  },
+  "series_sha256": "ab6ba7af2bf9697d6a5b5e9f8fb90712f0cad6d4fc3c198fb66f1cdf2170df21",
+  "trees": {
+    "up_new": {
+      "ref": "v0.17.2",
+      "sha": "201dd1f40900d6b5641fa5544bd215d9a20d90c6",
+      "built": true,
+      "deps": "shared"
+    },
+    "up_prev": {
+      "ref": "v0.17.1",
+      "sha": "97179171bdda08375618527d6056794cbdea486d",
+      "built": true,
+      "deps": "installed"
+    },
+    "fork_prev": {
+      "ref": "vantt/v0.17.1",
+      "sha": "4f6ba651c318e551de67c54e2a2a1e3ac0d8c37b",
+      "built": true,
+      "deps": "installed"
+    },
+    "fork_new": {
+      "ref": "vantt/v0.17.2",
+      "sha": "ebb0129ff2bc7b91187d2b23577a1ccdfbada7a6",
+      "built": true,
+      "deps": "shared"
+    }
+  },
+  "upstream": {
+    "commits": [
+      "201dd1f chore: update dependencies (#90)"
+    ],
+    "diffstat_tail": "3 files changed, 378 insertions(+), 530 deletions(-)",
+    "changelog_diff": "",
+    "hook_files_changed": {
+      "commits": [],
+      "files": []
+    }
+  },
+  "patches": [
+    {
+      "id": "fork-identity",
+      "name": "feat(cli): report fork build identity and allow disabling update checks",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/runtime/package-identity.ts",
+        "src/transports/cli.ts",
+        "src/transports/mcp-runtime.ts",
+        "src/transports/status-payload.ts"
+      ],
+      "probe": "vantt/probes/fork-identity.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "0.17.2"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "0.17.1"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "0.17.1-vantt.1"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "0.17.2-vantt.1"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "language-pack-api",
+      "name": "feat(language): add a language-pack extension point",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/search/searcher.ts",
+        "src/storage/db.ts",
+        "src/indexing/index-service.ts",
+        "src/indexing/indexer.ts",
+        "src/runtime/config.ts",
+        "src/contracts/boundary-validation.ts",
+        "src/transports/cli.ts",
+        "src/transports/mcp-runtime.ts",
+        "src/transports/stdio-server.ts",
+        "src/transports/status-payload.ts",
+        "dependency-cruiser.config.cjs",
+        "knip.json",
+        "ARCHITECTURE.md",
+        "test/architecture/check.ts",
+        "test/architecture-boundaries.test.ts"
+      ],
+      "probe": "vantt/probes/language-pack-api.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "language-pack-api probe: \"grosse strasse\" does not find \"Große Straße\"; no language pack support (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "language-pack-api probe: \"grosse strasse\" does not find \"Große Straße\"; no language pack support (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "language-pack-api probe: a language pack makes \"grosse strasse\" find \"Große Straße\" (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "language-pack-api probe: a language pack makes \"grosse strasse\" find \"Große Straße\" (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "db-path",
+      "name": "feat(storage): allow the index database outside the vault",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/runtime/config.ts",
+        "src/vault/vault-config.ts",
+        "src/storage/db.ts",
+        "src/storage/vault-locator.ts",
+        "src/transports/status-payload.ts",
+        "src/transports/mcp-runtime.ts",
+        "src/transports/cli.ts",
+        "README.md"
+      ],
+      "probe": "vantt/probes/db-path.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "db-path probe: OBSIDIAN_DB_PATH is not honored (database in vault: .obsidian-hybrid-search.db; requested file exists: false) (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "db-path probe: OBSIDIAN_DB_PATH is not honored (database in vault: .obsidian-hybrid-search.db; requested file exists: false) (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "db-path probe: the database was written to OBSIDIAN_DB_PATH and not into the vault (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "db-path probe: the database was written to OBSIDIAN_DB_PATH and not into the vault (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "vector-export",
+      "name": "feat(search): export note vectors and nearest notes as JSON Lines",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/transports/cli.ts",
+        "src/storage/note-vectors.ts",
+        "src/search/note-vectors.ts"
+      ],
+      "probe": "vantt/probes/vector-export.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "vector-export probe: no `vectors` command (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "vector-export probe: no `vectors` command (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "vector-export probe: `vectors` and `neighbors` return per-note vectors and nearest notes (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "vector-export probe: `vectors` and `neighbors` return per-note vectors and nearest notes (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "stdio-parity",
+      "name": "feat(stdio): add read, vectors, neighbors and reindex actions and drain requests on close",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/contracts/boundary-validation.ts",
+        "src/transports/stdio-server.ts",
+        "src/transports/cli.ts",
+        "test/transport-parity.test.ts",
+        "test/serve-stdio.test.ts"
+      ],
+      "probe": "vantt/probes/stdio-parity.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "stdio-parity probe: problem present (actions: unknown action, drain: lost responses)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "stdio-parity probe: problem present (actions: unknown action, drain: lost responses)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "stdio-parity probe: new actions answered and stdin close drains requests (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "stdio-parity probe: new actions answered and stdin close drains requests (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "unicode-inline-tags",
+      "name": "fix(content): accept Unicode letters in inline tags",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/content/note-extractor.ts"
+      ],
+      "probe": "vantt/probes/unicode-inline-tags.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "unicode-inline-tags probe: --tag kếhoạch does not find the note with #kếhoạch (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "unicode-inline-tags probe: --tag kếhoạch does not find the note with #kếhoạch (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "unicode-inline-tags probe: --tag kếhoạch finds the note with #kếhoạch (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "unicode-inline-tags probe: --tag kếhoạch finds the note with #kếhoạch (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "block-anchors",
+      "name": "feat(index): store block ids and highlight flags per chunk, make chunk size configurable",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/content/block-anchors.ts",
+        "src/content/chunker.ts",
+        "src/runtime/config.ts",
+        "src/indexing/indexer.ts",
+        "src/indexing/index-service.ts",
+        "src/storage/db.ts",
+        "src/storage/search-queries.ts",
+        "src/search/searcher.ts"
+      ],
+      "probe": "vantt/probes/block-anchors.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "block-anchors probe: result anchors carry no block id or highlight flag (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "block-anchors probe: result anchors carry no block id or highlight flag (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "block-anchors probe: result anchors carry the block id and highlight flag (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "block-anchors probe: result anchors carry the block id and highlight flag (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "restrict-paths",
+      "name": "feat(search): restrict search to a given set of note paths",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/contracts/filter-predicate.ts",
+        "src/search/searcher.ts",
+        "src/contracts/boundary-validation.ts",
+        "src/transports/cli.ts",
+        "src/transports/mcp-runtime.ts",
+        "src/transports/stdio-server.ts"
+      ],
+      "probe": "vantt/probes/restrict-paths.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "restrict-paths probe: a search cannot be restricted to a set of notes (problem present)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "restrict-paths probe: a search cannot be restricted to a set of notes (problem present)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "restrict-paths probe: a search restricted to 3 notes returns them despite 60 stronger matches (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "restrict-paths probe: a search restricted to 3 notes returns them despite 60 stronger matches (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    },
+    {
+      "id": "index-events",
+      "name": "feat(stdio): emit indexed and removed events after index writes",
+      "upstream_status": "unsubmitted",
+      "touches": [
+        "src/indexing/indexer.ts",
+        "src/runtime/config.ts",
+        "src/transports/cli.ts"
+      ],
+      "probe": "vantt/probes/index-events.mjs",
+      "apply": {
+        "new": "applies",
+        "prev": "applies"
+      },
+      "upstream_changes": {
+        "commits": [],
+        "files": []
+      },
+      "probe_results": {
+        "up_new": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "index-events probe: problem present (indexed: missing, removed: missing)"
+        },
+        "up_prev": {
+          "verdict": "present",
+          "exit": 1,
+          "output": "index-events probe: problem present (indexed: missing, removed: missing)"
+        },
+        "fork_prev": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "index-events probe: indexed and removed events received (problem gone)"
+        },
+        "fork_new": {
+          "verdict": "solved",
+          "exit": 0,
+          "output": "index-events probe: indexed and removed events received (problem gone)"
+        }
+      },
+      "suggestion": "keep",
+      "fork_probe_ok": true
+    }
+  ],
+  "quality": {
+    "skipped": false,
+    "obsidian-help": {
+      "sides": {
+        "up_new": {
+          "summary": {
+            "ndcg_5": 0.735,
+            "ndcg_k": 0.765,
+            "mrr": 0.783,
+            "hit_1": 0.707,
+            "hit_3": 0.828,
+            "hit_5": 0.879,
+            "recall_k": 0.931,
+            "evidence_coverage_k": 0.931,
+            "all_relevant_k": 0.931
+          },
+          "by_category": {
+            "keyword": {
+              "ndcg_5": 0.849,
+              "ndcg_k": 0.879,
+              "mrr": 0.908,
+              "hit_1": 0.861,
+              "hit_3": 0.944,
+              "hit_5": 0.972,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "conceptual": {
+              "ndcg_5": 0.448,
+              "ndcg_k": 0.474,
+              "mrr": 0.484,
+              "hit_1": 0.4,
+              "hit_3": 0.5,
+              "hit_5": 0.6,
+              "recall_k": 0.7,
+              "evidence_coverage_k": 0.7,
+              "all_relevant_k": 0.7
+            },
+            "multilingual": {
+              "ndcg_5": 0.413,
+              "ndcg_k": 0.477,
+              "mrr": 0.486,
+              "hit_1": 0.333,
+              "hit_3": 0.5,
+              "hit_5": 0.667,
+              "recall_k": 0.833,
+              "evidence_coverage_k": 0.833,
+              "all_relevant_k": 0.833
+            },
+            "syntax": {
+              "ndcg_5": 0.85,
+              "ndcg_k": 0.85,
+              "mrr": 0.833,
+              "hit_1": 0.667,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            }
+          },
+          "note_count": 171,
+          "timing": {
+            "index_s": 12.614,
+            "query_s": 0.615,
+            "queries": 58,
+            "per_query_ms": 10.603
+          }
+        },
+        "fork_prev": {
+          "summary": {
+            "ndcg_5": 0.735,
+            "ndcg_k": 0.765,
+            "mrr": 0.783,
+            "hit_1": 0.707,
+            "hit_3": 0.828,
+            "hit_5": 0.879,
+            "recall_k": 0.931,
+            "evidence_coverage_k": 0.931,
+            "all_relevant_k": 0.931
+          },
+          "by_category": {
+            "keyword": {
+              "ndcg_5": 0.849,
+              "ndcg_k": 0.879,
+              "mrr": 0.908,
+              "hit_1": 0.861,
+              "hit_3": 0.944,
+              "hit_5": 0.972,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "conceptual": {
+              "ndcg_5": 0.448,
+              "ndcg_k": 0.474,
+              "mrr": 0.484,
+              "hit_1": 0.4,
+              "hit_3": 0.5,
+              "hit_5": 0.6,
+              "recall_k": 0.7,
+              "evidence_coverage_k": 0.7,
+              "all_relevant_k": 0.7
+            },
+            "multilingual": {
+              "ndcg_5": 0.413,
+              "ndcg_k": 0.477,
+              "mrr": 0.486,
+              "hit_1": 0.333,
+              "hit_3": 0.5,
+              "hit_5": 0.667,
+              "recall_k": 0.833,
+              "evidence_coverage_k": 0.833,
+              "all_relevant_k": 0.833
+            },
+            "syntax": {
+              "ndcg_5": 0.85,
+              "ndcg_k": 0.85,
+              "mrr": 0.833,
+              "hit_1": 0.667,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            }
+          },
+          "note_count": 171,
+          "timing": {
+            "index_s": 13.778,
+            "query_s": 0.619,
+            "queries": 58,
+            "per_query_ms": 10.672
+          }
+        },
+        "fork_new": {
+          "summary": {
+            "ndcg_5": 0.735,
+            "ndcg_k": 0.765,
+            "mrr": 0.783,
+            "hit_1": 0.707,
+            "hit_3": 0.828,
+            "hit_5": 0.879,
+            "recall_k": 0.931,
+            "evidence_coverage_k": 0.931,
+            "all_relevant_k": 0.931
+          },
+          "by_category": {
+            "keyword": {
+              "ndcg_5": 0.849,
+              "ndcg_k": 0.879,
+              "mrr": 0.908,
+              "hit_1": 0.861,
+              "hit_3": 0.944,
+              "hit_5": 0.972,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "conceptual": {
+              "ndcg_5": 0.448,
+              "ndcg_k": 0.474,
+              "mrr": 0.484,
+              "hit_1": 0.4,
+              "hit_3": 0.5,
+              "hit_5": 0.6,
+              "recall_k": 0.7,
+              "evidence_coverage_k": 0.7,
+              "all_relevant_k": 0.7
+            },
+            "multilingual": {
+              "ndcg_5": 0.413,
+              "ndcg_k": 0.477,
+              "mrr": 0.486,
+              "hit_1": 0.333,
+              "hit_3": 0.5,
+              "hit_5": 0.667,
+              "recall_k": 0.833,
+              "evidence_coverage_k": 0.833,
+              "all_relevant_k": 0.833
+            },
+            "syntax": {
+              "ndcg_5": 0.85,
+              "ndcg_k": 0.85,
+              "mrr": 0.833,
+              "hit_1": 0.667,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            }
+          },
+          "note_count": 171,
+          "timing": {
+            "index_s": 12.692,
+            "query_s": 0.564,
+            "queries": 58,
+            "per_query_ms": 9.724
+          }
+        }
+      },
+      "rows": [
+        {
+          "category": "ALL",
+          "metric": "ndcg_5",
+          "up_new": 0.735,
+          "fork_prev": 0.735,
+          "fork_new": 0.735,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "mrr",
+          "up_new": 0.783,
+          "fork_prev": 0.783,
+          "fork_new": 0.783,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "hit_1",
+          "up_new": 0.707,
+          "fork_prev": 0.707,
+          "fork_new": 0.707,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "hit_5",
+          "up_new": 0.879,
+          "fork_prev": 0.879,
+          "fork_new": 0.879,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "recall_k",
+          "up_new": 0.931,
+          "fork_prev": 0.931,
+          "fork_new": 0.931,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "keyword",
+          "metric": "ndcg_5",
+          "up_new": 0.849,
+          "fork_prev": 0.849,
+          "fork_new": 0.849,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "keyword",
+          "metric": "mrr",
+          "up_new": 0.908,
+          "fork_prev": 0.908,
+          "fork_new": 0.908,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "keyword",
+          "metric": "hit_1",
+          "up_new": 0.861,
+          "fork_prev": 0.861,
+          "fork_new": 0.861,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "keyword",
+          "metric": "hit_5",
+          "up_new": 0.972,
+          "fork_prev": 0.972,
+          "fork_new": 0.972,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "keyword",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "conceptual",
+          "metric": "ndcg_5",
+          "up_new": 0.448,
+          "fork_prev": 0.448,
+          "fork_new": 0.448,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "conceptual",
+          "metric": "mrr",
+          "up_new": 0.484,
+          "fork_prev": 0.484,
+          "fork_new": 0.484,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "conceptual",
+          "metric": "hit_1",
+          "up_new": 0.4,
+          "fork_prev": 0.4,
+          "fork_new": 0.4,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "conceptual",
+          "metric": "hit_5",
+          "up_new": 0.6,
+          "fork_prev": 0.6,
+          "fork_new": 0.6,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "conceptual",
+          "metric": "recall_k",
+          "up_new": 0.7,
+          "fork_prev": 0.7,
+          "fork_new": 0.7,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "multilingual",
+          "metric": "ndcg_5",
+          "up_new": 0.413,
+          "fork_prev": 0.413,
+          "fork_new": 0.413,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "multilingual",
+          "metric": "mrr",
+          "up_new": 0.486,
+          "fork_prev": 0.486,
+          "fork_new": 0.486,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "multilingual",
+          "metric": "hit_1",
+          "up_new": 0.333,
+          "fork_prev": 0.333,
+          "fork_new": 0.333,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "multilingual",
+          "metric": "hit_5",
+          "up_new": 0.667,
+          "fork_prev": 0.667,
+          "fork_new": 0.667,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "multilingual",
+          "metric": "recall_k",
+          "up_new": 0.833,
+          "fork_prev": 0.833,
+          "fork_new": 0.833,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "syntax",
+          "metric": "ndcg_5",
+          "up_new": 0.85,
+          "fork_prev": 0.85,
+          "fork_new": 0.85,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "syntax",
+          "metric": "mrr",
+          "up_new": 0.833,
+          "fork_prev": 0.833,
+          "fork_new": 0.833,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "syntax",
+          "metric": "hit_1",
+          "up_new": 0.667,
+          "fork_prev": 0.667,
+          "fork_new": 0.667,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "syntax",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "syntax",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        }
+      ],
+      "flags": []
+    },
+    "vi": {
+      "pack": "vantt/packages/ohs-lang-vi",
+      "sides": {
+        "up_new": {
+          "summary": {
+            "ndcg_5": 0.646,
+            "ndcg_k": 0.664,
+            "mrr": 0.617,
+            "hit_1": 0.526,
+            "hit_3": 0.685,
+            "hit_5": 0.756,
+            "recall_k": 0.811,
+            "evidence_coverage_k": 0.811,
+            "all_relevant_k": 0.811
+          },
+          "by_category": {
+            "vi-accented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-partial-accent": {
+              "ndcg_5": 0.863,
+              "ndcg_k": 0.863,
+              "mrr": 0.819,
+              "hit_1": 0.733,
+              "hit_3": 0.867,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-telex": {
+              "ndcg_5": 0.333,
+              "ndcg_k": 0.355,
+              "mrr": 0.298,
+              "hit_1": 0.2,
+              "hit_3": 0.333,
+              "hit_5": 0.467,
+              "recall_k": 0.533,
+              "evidence_coverage_k": 0.533,
+              "all_relevant_k": 0.533
+            },
+            "vi-typo": {
+              "ndcg_5": 0.543,
+              "ndcg_k": 0.567,
+              "mrr": 0.469,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.8,
+              "recall_k": 0.867,
+              "evidence_coverage_k": 0.867,
+              "all_relevant_k": 0.867
+            },
+            "vi-snippet": {
+              "ndcg_5": 0.466,
+              "ndcg_k": 0.509,
+              "mrr": 0.44,
+              "hit_1": 0.333,
+              "hit_3": 0.467,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-unaccented": {
+              "ndcg_5": 0.133,
+              "ndcg_k": 0.133,
+              "mrr": 0.089,
+              "hit_1": 0,
+              "hit_3": 0.133,
+              "hit_5": 0.267,
+              "recall_k": 0.267,
+              "evidence_coverage_k": 0.267,
+              "all_relevant_k": 0.267
+            },
+            "vi-dd": {
+              "ndcg_5": 0.239,
+              "ndcg_k": 0.285,
+              "mrr": 0.206,
+              "hit_1": 0.067,
+              "hit_3": 0.267,
+              "hit_5": 0.4,
+              "recall_k": 0.533,
+              "evidence_coverage_k": 0.533,
+              "all_relevant_k": 0.533
+            },
+            "vi-iy": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-placement": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-precision": {
+              "ndcg_5": 0.951,
+              "ndcg_k": 0.951,
+              "mrr": 0.933,
+              "hit_1": 0.867,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-compound": {
+              "ndcg_5": 0.632,
+              "ndcg_k": 0.632,
+              "mrr": 0.543,
+              "hit_1": 0.333,
+              "hit_3": 0.767,
+              "hit_5": 0.9,
+              "recall_k": 0.9,
+              "evidence_coverage_k": 0.9,
+              "all_relevant_k": 0.9
+            },
+            "vi-mixed-en": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-semantic": {
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-names": {
+              "ndcg_5": 0.909,
+              "ndcg_k": 0.932,
+              "mrr": 0.911,
+              "hit_1": 0.867,
+              "hit_3": 0.933,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-synonym": {
+              "ndcg_5": 0.067,
+              "ndcg_k": 0.145,
+              "mrr": 0.073,
+              "hit_1": 0,
+              "hit_3": 0.133,
+              "hit_5": 0.133,
+              "recall_k": 0.4,
+              "evidence_coverage_k": 0.4,
+              "all_relevant_k": 0.4
+            },
+            "vi-abbr": {
+              "ndcg_5": 0.933,
+              "ndcg_k": 0.953,
+              "mrr": 0.94,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-alias": {
+              "ndcg_5": 0.477,
+              "ndcg_k": 0.5,
+              "mrr": 0.424,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.667,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            }
+          },
+          "note_count": 423,
+          "timing": {
+            "index_s": 2.967,
+            "query_s": 1.326,
+            "queries": 270,
+            "per_query_ms": 4.911
+          }
+        },
+        "fork_prev": {
+          "summary": {
+            "ndcg_5": 0.944,
+            "ndcg_k": 0.948,
+            "mrr": 0.936,
+            "hit_1": 0.911,
+            "hit_3": 0.956,
+            "hit_5": 0.974,
+            "recall_k": 0.985,
+            "evidence_coverage_k": 0.985,
+            "all_relevant_k": 0.985
+          },
+          "by_category": {
+            "vi-accented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-partial-accent": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-telex": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-typo": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-snippet": {
+              "ndcg_5": 0.951,
+              "ndcg_k": 0.951,
+              "mrr": 0.933,
+              "hit_1": 0.867,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-unaccented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-dd": {
+              "ndcg_5": 0.975,
+              "ndcg_k": 0.975,
+              "mrr": 0.967,
+              "hit_1": 0.933,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-iy": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-placement": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-precision": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-compound": {
+              "ndcg_5": 0.988,
+              "ndcg_k": 0.988,
+              "mrr": 0.983,
+              "hit_1": 0.967,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-mixed-en": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-semantic": {
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-names": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-synonym": {
+              "ndcg_5": 0.689,
+              "ndcg_k": 0.708,
+              "mrr": 0.617,
+              "hit_1": 0.467,
+              "hit_3": 0.733,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-abbr": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-alias": {
+              "ndcg_5": 0.959,
+              "ndcg_k": 0.959,
+              "mrr": 0.947,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            }
+          },
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.225,
+            "query_s": 2.656,
+            "queries": 270,
+            "per_query_ms": 9.837
+          }
+        },
+        "fork_new": {
+          "summary": {
+            "ndcg_5": 0.944,
+            "ndcg_k": 0.948,
+            "mrr": 0.936,
+            "hit_1": 0.911,
+            "hit_3": 0.956,
+            "hit_5": 0.974,
+            "recall_k": 0.985,
+            "evidence_coverage_k": 0.985,
+            "all_relevant_k": 0.985
+          },
+          "by_category": {
+            "vi-accented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-partial-accent": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-telex": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-typo": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-snippet": {
+              "ndcg_5": 0.951,
+              "ndcg_k": 0.951,
+              "mrr": 0.933,
+              "hit_1": 0.867,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-unaccented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-dd": {
+              "ndcg_5": 0.975,
+              "ndcg_k": 0.975,
+              "mrr": 0.967,
+              "hit_1": 0.933,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-iy": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-placement": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-precision": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-compound": {
+              "ndcg_5": 0.988,
+              "ndcg_k": 0.988,
+              "mrr": 0.983,
+              "hit_1": 0.967,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-mixed-en": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-semantic": {
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-names": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-synonym": {
+              "ndcg_5": 0.689,
+              "ndcg_k": 0.708,
+              "mrr": 0.617,
+              "hit_1": 0.467,
+              "hit_3": 0.733,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-abbr": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-alias": {
+              "ndcg_5": 0.959,
+              "ndcg_k": 0.959,
+              "mrr": 0.947,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            }
+          },
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.19,
+            "query_s": 2.314,
+            "queries": 270,
+            "per_query_ms": 8.57
+          }
+        },
+        "fork_new_nopack": {
+          "summary": {
+            "ndcg_5": 0.646,
+            "ndcg_k": 0.664,
+            "mrr": 0.617,
+            "hit_1": 0.526,
+            "hit_3": 0.685,
+            "hit_5": 0.756,
+            "recall_k": 0.811,
+            "evidence_coverage_k": 0.811,
+            "all_relevant_k": 0.811
+          },
+          "by_category": {
+            "vi-accented": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-partial-accent": {
+              "ndcg_5": 0.863,
+              "ndcg_k": 0.863,
+              "mrr": 0.819,
+              "hit_1": 0.733,
+              "hit_3": 0.867,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-telex": {
+              "ndcg_5": 0.333,
+              "ndcg_k": 0.355,
+              "mrr": 0.298,
+              "hit_1": 0.2,
+              "hit_3": 0.333,
+              "hit_5": 0.467,
+              "recall_k": 0.533,
+              "evidence_coverage_k": 0.533,
+              "all_relevant_k": 0.533
+            },
+            "vi-typo": {
+              "ndcg_5": 0.543,
+              "ndcg_k": 0.567,
+              "mrr": 0.469,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.8,
+              "recall_k": 0.867,
+              "evidence_coverage_k": 0.867,
+              "all_relevant_k": 0.867
+            },
+            "vi-snippet": {
+              "ndcg_5": 0.466,
+              "ndcg_k": 0.509,
+              "mrr": 0.44,
+              "hit_1": 0.333,
+              "hit_3": 0.467,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-unaccented": {
+              "ndcg_5": 0.133,
+              "ndcg_k": 0.133,
+              "mrr": 0.089,
+              "hit_1": 0,
+              "hit_3": 0.133,
+              "hit_5": 0.267,
+              "recall_k": 0.267,
+              "evidence_coverage_k": 0.267,
+              "all_relevant_k": 0.267
+            },
+            "vi-dd": {
+              "ndcg_5": 0.239,
+              "ndcg_k": 0.285,
+              "mrr": 0.206,
+              "hit_1": 0.067,
+              "hit_3": 0.267,
+              "hit_5": 0.4,
+              "recall_k": 0.533,
+              "evidence_coverage_k": 0.533,
+              "all_relevant_k": 0.533
+            },
+            "vi-iy": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-placement": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-tone-precision": {
+              "ndcg_5": 0.951,
+              "ndcg_k": 0.951,
+              "mrr": 0.933,
+              "hit_1": 0.867,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-compound": {
+              "ndcg_5": 0.632,
+              "ndcg_k": 0.632,
+              "mrr": 0.543,
+              "hit_1": 0.333,
+              "hit_3": 0.767,
+              "hit_5": 0.9,
+              "recall_k": 0.9,
+              "evidence_coverage_k": 0.9,
+              "all_relevant_k": 0.9
+            },
+            "vi-mixed-en": {
+              "ndcg_5": 1,
+              "ndcg_k": 1,
+              "mrr": 1,
+              "hit_1": 1,
+              "hit_3": 1,
+              "hit_5": 1,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-semantic": {
+              "ndcg_5": 0.446,
+              "ndcg_k": 0.489,
+              "mrr": 0.412,
+              "hit_1": 0.267,
+              "hit_3": 0.533,
+              "hit_5": 0.6,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            },
+            "vi-names": {
+              "ndcg_5": 0.909,
+              "ndcg_k": 0.932,
+              "mrr": 0.911,
+              "hit_1": 0.867,
+              "hit_3": 0.933,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-synonym": {
+              "ndcg_5": 0.067,
+              "ndcg_k": 0.145,
+              "mrr": 0.073,
+              "hit_1": 0,
+              "hit_3": 0.133,
+              "hit_5": 0.133,
+              "recall_k": 0.4,
+              "evidence_coverage_k": 0.4,
+              "all_relevant_k": 0.4
+            },
+            "vi-abbr": {
+              "ndcg_5": 0.933,
+              "ndcg_k": 0.953,
+              "mrr": 0.94,
+              "hit_1": 0.933,
+              "hit_3": 0.933,
+              "hit_5": 0.933,
+              "recall_k": 1,
+              "evidence_coverage_k": 1,
+              "all_relevant_k": 1
+            },
+            "vi-alias": {
+              "ndcg_5": 0.477,
+              "ndcg_k": 0.5,
+              "mrr": 0.424,
+              "hit_1": 0.267,
+              "hit_3": 0.6,
+              "hit_5": 0.667,
+              "recall_k": 0.733,
+              "evidence_coverage_k": 0.733,
+              "all_relevant_k": 0.733
+            }
+          },
+          "note_count": 423,
+          "timing": {
+            "index_s": 3.126,
+            "query_s": 1.261,
+            "queries": 270,
+            "per_query_ms": 4.67
+          }
+        }
+      },
+      "rows": [
+        {
+          "category": "ALL",
+          "metric": "ndcg_5",
+          "up_new": 0.646,
+          "fork_prev": 0.944,
+          "fork_new": 0.944,
+          "delta": 0.298,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "mrr",
+          "up_new": 0.617,
+          "fork_prev": 0.936,
+          "fork_new": 0.936,
+          "delta": 0.319,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "hit_1",
+          "up_new": 0.526,
+          "fork_prev": 0.911,
+          "fork_new": 0.911,
+          "delta": 0.385,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "hit_5",
+          "up_new": 0.756,
+          "fork_prev": 0.974,
+          "fork_new": 0.974,
+          "delta": 0.218,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "ALL",
+          "metric": "recall_k",
+          "up_new": 0.811,
+          "fork_prev": 0.985,
+          "fork_new": 0.985,
+          "delta": 0.174,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-accented",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "ndcg_5",
+          "up_new": 0.863,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.137,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "mrr",
+          "up_new": 0.819,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.181,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "hit_1",
+          "up_new": 0.733,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.267,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-partial-accent",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-telex",
+          "metric": "ndcg_5",
+          "up_new": 0.333,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.667,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-telex",
+          "metric": "mrr",
+          "up_new": 0.298,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.702,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-telex",
+          "metric": "hit_1",
+          "up_new": 0.2,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.8,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-telex",
+          "metric": "hit_5",
+          "up_new": 0.467,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.533,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-telex",
+          "metric": "recall_k",
+          "up_new": 0.533,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.467,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-typo",
+          "metric": "ndcg_5",
+          "up_new": 0.543,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.457,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-typo",
+          "metric": "mrr",
+          "up_new": 0.469,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.531,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-typo",
+          "metric": "hit_1",
+          "up_new": 0.267,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.733,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-typo",
+          "metric": "hit_5",
+          "up_new": 0.8,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.2,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-typo",
+          "metric": "recall_k",
+          "up_new": 0.867,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.133,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-snippet",
+          "metric": "ndcg_5",
+          "up_new": 0.466,
+          "fork_prev": 0.951,
+          "fork_new": 0.951,
+          "delta": 0.485,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-snippet",
+          "metric": "mrr",
+          "up_new": 0.44,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.493,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-snippet",
+          "metric": "hit_1",
+          "up_new": 0.333,
+          "fork_prev": 0.867,
+          "fork_new": 0.867,
+          "delta": 0.534,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-snippet",
+          "metric": "hit_5",
+          "up_new": 0.6,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.4,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-snippet",
+          "metric": "recall_k",
+          "up_new": 0.733,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.267,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-unaccented",
+          "metric": "ndcg_5",
+          "up_new": 0.133,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.867,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-unaccented",
+          "metric": "mrr",
+          "up_new": 0.089,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.911,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-unaccented",
+          "metric": "hit_1",
+          "up_new": 0,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 1,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-unaccented",
+          "metric": "hit_5",
+          "up_new": 0.267,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.733,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-unaccented",
+          "metric": "recall_k",
+          "up_new": 0.267,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.733,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-dd",
+          "metric": "ndcg_5",
+          "up_new": 0.239,
+          "fork_prev": 0.975,
+          "fork_new": 0.975,
+          "delta": 0.736,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-dd",
+          "metric": "mrr",
+          "up_new": 0.206,
+          "fork_prev": 0.967,
+          "fork_new": 0.967,
+          "delta": 0.761,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-dd",
+          "metric": "hit_1",
+          "up_new": 0.067,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.866,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-dd",
+          "metric": "hit_5",
+          "up_new": 0.4,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.6,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-dd",
+          "metric": "recall_k",
+          "up_new": 0.533,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.467,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-iy",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-iy",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-iy",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-iy",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-iy",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-placement",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-placement",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-placement",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-placement",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-placement",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-precision",
+          "metric": "ndcg_5",
+          "up_new": 0.951,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.049,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-precision",
+          "metric": "mrr",
+          "up_new": 0.933,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-precision",
+          "metric": "hit_1",
+          "up_new": 0.867,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.133,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-precision",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-tone-precision",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "ndcg_5",
+          "up_new": 0.632,
+          "fork_prev": 0.988,
+          "fork_new": 0.988,
+          "delta": 0.356,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "mrr",
+          "up_new": 0.543,
+          "fork_prev": 0.983,
+          "fork_new": 0.983,
+          "delta": 0.44,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "hit_1",
+          "up_new": 0.333,
+          "fork_prev": 0.967,
+          "fork_new": 0.967,
+          "delta": 0.634,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "hit_5",
+          "up_new": 0.9,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.1,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-compound",
+          "metric": "recall_k",
+          "up_new": 0.9,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.1,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "ndcg_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "mrr",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "hit_1",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "hit_5",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-mixed-en",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "ndcg_5",
+          "up_new": 0.446,
+          "fork_prev": 0.446,
+          "fork_new": 0.446,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "mrr",
+          "up_new": 0.412,
+          "fork_prev": 0.412,
+          "fork_new": 0.412,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "hit_1",
+          "up_new": 0.267,
+          "fork_prev": 0.267,
+          "fork_new": 0.267,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "hit_5",
+          "up_new": 0.6,
+          "fork_prev": 0.6,
+          "fork_new": 0.6,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-semantic",
+          "metric": "recall_k",
+          "up_new": 0.733,
+          "fork_prev": 0.733,
+          "fork_new": 0.733,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-names",
+          "metric": "ndcg_5",
+          "up_new": 0.909,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.091,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-names",
+          "metric": "mrr",
+          "up_new": 0.911,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.089,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-names",
+          "metric": "hit_1",
+          "up_new": 0.867,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.133,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-names",
+          "metric": "hit_5",
+          "up_new": 0.933,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-names",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-synonym",
+          "metric": "ndcg_5",
+          "up_new": 0.067,
+          "fork_prev": 0.689,
+          "fork_new": 0.689,
+          "delta": 0.622,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-synonym",
+          "metric": "mrr",
+          "up_new": 0.073,
+          "fork_prev": 0.617,
+          "fork_new": 0.617,
+          "delta": 0.544,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-synonym",
+          "metric": "hit_1",
+          "up_new": 0,
+          "fork_prev": 0.467,
+          "fork_new": 0.467,
+          "delta": 0.467,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-synonym",
+          "metric": "hit_5",
+          "up_new": 0.133,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.8,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-synonym",
+          "metric": "recall_k",
+          "up_new": 0.4,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.6,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-abbr",
+          "metric": "ndcg_5",
+          "up_new": 0.933,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-abbr",
+          "metric": "mrr",
+          "up_new": 0.94,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.06,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-abbr",
+          "metric": "hit_1",
+          "up_new": 0.933,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-abbr",
+          "metric": "hit_5",
+          "up_new": 0.933,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.067,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-abbr",
+          "metric": "recall_k",
+          "up_new": 1,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-alias",
+          "metric": "ndcg_5",
+          "up_new": 0.477,
+          "fork_prev": 0.959,
+          "fork_new": 0.959,
+          "delta": 0.482,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-alias",
+          "metric": "mrr",
+          "up_new": 0.424,
+          "fork_prev": 0.947,
+          "fork_new": 0.947,
+          "delta": 0.523,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-alias",
+          "metric": "hit_1",
+          "up_new": 0.267,
+          "fork_prev": 0.933,
+          "fork_new": 0.933,
+          "delta": 0.666,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-alias",
+          "metric": "hit_5",
+          "up_new": 0.667,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.333,
+          "delta_vs_prev": 0
+        },
+        {
+          "category": "vi-alias",
+          "metric": "recall_k",
+          "up_new": 0.733,
+          "fork_prev": 1,
+          "fork_new": 1,
+          "delta": 0.267,
+          "delta_vs_prev": 0
+        }
+      ],
+      "flags": []
+    }
+  },
+  "blind": {
+    "pairs": 20,
+    "seed": 1,
+    "pairs_file": "/home/vantt/projects/ohs-wt/v14-check/vantt/.work/review-v0.17.2/blind/pairs.json",
+    "verdicts_file": "/home/vantt/projects/ohs-wt/v14-check/vantt/.work/review-v0.17.2/blind/verdicts.json",
+    "tally": {
+      "fork_clear": 6,
+      "fork_slight": 8,
+      "tie": 5,
+      "other_slight": 1,
+      "other_clear": 0,
+      "judged": 20,
+      "missing": [],
+      "fork_wins": 14,
+      "fork_losses": 1
+    }
+  },
+  "warnings": [],
+  "duration_s": 202
+}

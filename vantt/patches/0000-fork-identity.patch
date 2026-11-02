@@ -1,0 +1,250 @@
+From aa7e5dcc5cef7d1c1ea47fdb0bd47a5a66de0141 Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:07:40 +0700
+Subject: [PATCH] feat(cli): report fork build identity and allow disabling
+ update checks
+
+The version comes from package.json, so a release build stamped with a
+fork version reports it in --version and status. A stamped package.json
+("vanttFork": true) adds a build field to status. OHS_DISABLE_UPDATE_CHECK=1
+turns off the npm registry update check in the CLI and the MCP server.
+
+Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+---
+ src/runtime/package-identity.ts  | 47 ++++++++++++++++++++++
+ src/transports/cli.ts            | 24 ++---------
+ src/transports/mcp-runtime.ts    |  2 +
+ src/transports/status-payload.ts |  2 +
+ test/vantt/fork-identity.test.ts | 69 ++++++++++++++++++++++++++++++++
+ 5 files changed, 124 insertions(+), 20 deletions(-)
+ create mode 100644 src/runtime/package-identity.ts
+ create mode 100644 test/vantt/fork-identity.test.ts
+
+diff --git a/src/runtime/package-identity.ts b/src/runtime/package-identity.ts
+new file mode 100644
+index 0000000..64fb47d
+--- /dev/null
++++ b/src/runtime/package-identity.ts
+@@ -0,0 +1,47 @@
++import { existsSync, readFileSync } from 'node:fs';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++export interface PackageIdentity {
++  version: string;
++  /** True when the release build stamped `"vanttFork": true` into package.json (PRD 4.3). */
++  vanttFork: boolean;
++}
++
++/**
++ * Read the nearest package.json at or above `startDir`. The depth differs between the
++ * compiled and the source layout, so the file is located rather than assumed.
++ */
++export function readPackageIdentity(
++  startDir: string = path.dirname(fileURLToPath(import.meta.url)),
++): PackageIdentity {
++  let dir = startDir;
++  while (true) {
++    const candidate = path.join(dir, 'package.json');
++    if (existsSync(candidate)) {
++      const pkg = JSON.parse(readFileSync(candidate, 'utf-8')) as {
++        version: string;
++        vanttFork?: unknown;
++      };
++      return { version: pkg.version, vanttFork: pkg.vanttFork === true };
++    }
++    const parent = path.dirname(dir);
++    if (parent === dir) throw new Error('Could not locate package.json');
++    dir = parent;
++  }
++}
++
++export const packageIdentity = readPackageIdentity();
++
++/**
++ * Update checks query the public npm registry, which describes upstream releases.
++ * OHS_DISABLE_UPDATE_CHECK=1 turns them off; the fork installer always sets it.
++ */
++export function updateCheckDisabled(): boolean {
++  return process.env.OHS_DISABLE_UPDATE_CHECK === '1';
++}
++
++/** `build` status field, present only on fork builds. Pristine builds get no field. */
++export function buildStatusField(identity: PackageIdentity = packageIdentity): { build?: 'vantt' } {
++  return identity.vanttFork ? { build: 'vantt' } : {};
++}
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index 7014c9e..de5e39b 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -3,7 +3,6 @@ import { Command } from 'commander';
+ import { exec } from 'node:child_process';
+ import { existsSync, readFileSync } from 'node:fs';
+ import path from 'node:path';
+-import { fileURLToPath } from 'node:url';
+ import { promisify } from 'node:util';
+ import pc from 'picocolors';
+ import { parseCliIntegerOption, parseCliNumberOption } from '../contracts/boundary-validation.js';
+@@ -13,6 +12,7 @@ import { activeModelName, getContextLength, primeEmbeddingDim } from '../inferen
+ import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings.js';
+ import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
+ import { config } from '../runtime/config.js';
++import { packageIdentity, updateCheckDisabled } from '../runtime/package-identity.js';
+ import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
+ import {
+   applyDbConfigDefaults,
+@@ -38,25 +38,7 @@ import { handleStdioLine } from './stdio-server.js';
+ 
+ const execAsync = promisify(exec);
+ 
+-/**
+- * Read the package version from the nearest package.json above this module.
+- * The depth differs between the compiled layout (dist/src/) and running the
+- * sources directly (src/), so the file is located rather than assumed.
+- */
+-function readPackageVersion(): string {
+-  let dir = path.dirname(fileURLToPath(import.meta.url));
+-  while (true) {
+-    const candidate = path.join(dir, 'package.json');
+-    if (existsSync(candidate)) {
+-      return (JSON.parse(readFileSync(candidate, 'utf-8')) as { version: string }).version;
+-    }
+-    const parent = path.dirname(dir);
+-    if (parent === dir) throw new Error('Could not locate package.json for the CLI version');
+-    dir = parent;
+-  }
+-}
+-
+-const version = readPackageVersion();
++const version = packageIdentity.version;
+ 
+ function failCliValidation(err: unknown): never {
+   console.error('Error:', err instanceof Error ? err.message : String(err));
+@@ -339,7 +321,9 @@ async function fetchUpdateStatus(): Promise<
+   | { state: 'up_to_date' }
+   | { state: 'update_available'; latestVersion: string }
+   | { state: 'offline' }
++  | { state: 'disabled' }
+ > {
++  if (updateCheckDisabled()) return { state: 'disabled' };
+   try {
+     const signal = AbortSignal.timeout(3000);
+     const res = await fetch('https://registry.npmjs.org/obsidian-hybrid-search/latest', { signal });
+diff --git a/src/transports/mcp-runtime.ts b/src/transports/mcp-runtime.ts
+index b0e5f34..c6b1740 100644
+--- a/src/transports/mcp-runtime.ts
++++ b/src/transports/mcp-runtime.ts
+@@ -24,6 +24,7 @@ import {
+   useRemoteEmbeddings,
+ } from '../inference/embedder.js';
+ import { config } from '../runtime/config.js';
++import { updateCheckDisabled } from '../runtime/package-identity.js';
+ import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
+ import {
+   applyDbConfigDefaults,
+@@ -63,6 +64,7 @@ type McpTextContent = { type: 'text'; text: string };
+ type McpToolResult = { content: McpTextContent[]; isError?: true };
+ 
+ export async function checkForUpdates(version = packageVersion): Promise<void> {
++  if (updateCheckDisabled()) return;
+   try {
+     const signal = AbortSignal.timeout(3000);
+     const res = await fetch('https://registry.npmjs.org/obsidian-hybrid-search/latest', { signal });
+diff --git a/src/transports/status-payload.ts b/src/transports/status-payload.ts
+index 8f38d98..d69a8c5 100644
+--- a/src/transports/status-payload.ts
++++ b/src/transports/status-payload.ts
+@@ -1,6 +1,7 @@
+ import { getIndexingStatus } from '../indexing/indexer.js';
+ import { activeModelName, useRemoteEmbeddings } from '../inference/embedder.js';
+ import { config } from '../runtime/config.js';
++import { buildStatusField } from '../runtime/package-identity.js';
+ import { getIndexFailures, getStats } from '../storage/db.js';
+ 
+ export interface StatusPayloadOptions {
+@@ -46,6 +47,7 @@ export function buildStatusPayload({
+     embedding_dim: stats.embeddingDim,
+     context_length: contextLength,
+     version,
++    ...buildStatusField(),
+     ignore_patterns: config.ignorePatterns,
+     respect_gitignore: config.respectGitignore,
+     include_patterns: config.includePatterns,
+diff --git a/test/vantt/fork-identity.test.ts b/test/vantt/fork-identity.test.ts
+new file mode 100644
+index 0000000..8e1f01c
+--- /dev/null
++++ b/test/vantt/fork-identity.test.ts
+@@ -0,0 +1,69 @@
++import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import {
++  buildStatusField,
++  readPackageIdentity,
++  updateCheckDisabled,
++} from '../../src/runtime/package-identity.js';
++import { checkForUpdates } from '../../src/transports/mcp-runtime.js';
++
++describe('package identity (fork build marker)', () => {
++  let dir: string;
++
++  beforeEach(() => {
++    dir = mkdtempSync(path.join(tmpdir(), 'ohs-identity-'));
++  });
++
++  afterEach(() => {
++    rmSync(dir, { recursive: true, force: true });
++  });
++
++  it('reads the stamped version and the fork marker', () => {
++    writeFileSync(
++      path.join(dir, 'package.json'),
++      JSON.stringify({ version: '0.17.2-vantt.1', vanttFork: true }),
++    );
++    expect(readPackageIdentity(dir)).toEqual({ version: '0.17.2-vantt.1', vanttFork: true });
++  });
++
++  it('treats a pristine package.json as upstream', () => {
++    writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ version: '0.17.2' }));
++    expect(readPackageIdentity(dir)).toEqual({ version: '0.17.2', vanttFork: false });
++  });
++
++  it('adds the build field only on fork builds', () => {
++    expect(buildStatusField({ version: '0.17.2-vantt.1', vanttFork: true })).toEqual({
++      build: 'vantt',
++    });
++    expect(buildStatusField({ version: '0.17.2', vanttFork: false })).toEqual({});
++  });
++});
++
++describe('OHS_DISABLE_UPDATE_CHECK', () => {
++  const saved = process.env.OHS_DISABLE_UPDATE_CHECK;
++
++  afterEach(() => {
++    if (saved === undefined) delete process.env.OHS_DISABLE_UPDATE_CHECK;
++    else process.env.OHS_DISABLE_UPDATE_CHECK = saved;
++    vi.unstubAllGlobals();
++  });
++
++  it('is enabled only by the value 1', () => {
++    delete process.env.OHS_DISABLE_UPDATE_CHECK;
++    expect(updateCheckDisabled()).toBe(false);
++    process.env.OHS_DISABLE_UPDATE_CHECK = '0';
++    expect(updateCheckDisabled()).toBe(false);
++    process.env.OHS_DISABLE_UPDATE_CHECK = '1';
++    expect(updateCheckDisabled()).toBe(true);
++  });
++
++  it('sends no registry request when disabled', async () => {
++    process.env.OHS_DISABLE_UPDATE_CHECK = '1';
++    const fetchMock = vi.fn();
++    vi.stubGlobal('fetch', fetchMock);
++    await checkForUpdates('0.0.0');
++    expect(fetchMock).not.toHaveBeenCalled();
++  });
++});
+-- 
+2.53.0
+
