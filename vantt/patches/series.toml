@@ -137,3 +137,17 @@ test_command = "npx vitest run test/vantt/restrict-paths.test.ts"
 capability_check = "node vantt/probes/restrict-paths.mjs --ohs ."
 probe = "vantt/probes/restrict-paths.mjs"
 phase = "now"
+
+[[patches]]
+id = "index-events"
+name = "feat(stdio): emit indexed and removed events after index writes"
+patch_file = "0007-index-events.patch"
+metadata_file = "0007-index-events.spec.md"
+consumer = "pkm (event-driven graph update); stdio IPC clients"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/indexing/indexer.ts", "src/runtime/config.ts", "src/transports/cli.ts"]
+test_command = "npx vitest run test/vantt/index-events.test.ts"
+capability_check = "node vantt/probes/index-events.mjs --ohs ."
+probe = "vantt/probes/index-events.mjs"
+phase = "now"

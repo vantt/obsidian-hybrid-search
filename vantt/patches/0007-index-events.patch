@@ -1,21 +1,22 @@
-From df221fc146acfa9c1d7ca83006bd7447fb44f301 Mon Sep 17 00:00:00 2001
+From a5c5210028958868aaeba6a75e584ade4076875e Mon Sep 17 00:00:00 2001
 From: Van Tran <trantoanvan@outlook.com>
 Date: Mon, 2 Nov 2026 12:37:33 +0700
 Subject: [PATCH] feat(stdio): emit indexed and removed events after index
  writes
 
 ---
- src/indexing/indexer.ts         |  77 ++++++++++++++-
+ src/indexing/indexer.ts         |  77 ++++++++++++-
+ src/runtime/config.ts           |  15 ++-
  src/transports/cli.ts           |   5 +-
- test/vantt/index-events.test.ts | 169 ++++++++++++++++++++++++++++++++
- 3 files changed, 246 insertions(+), 5 deletions(-)
+ test/vantt/index-events.test.ts | 184 ++++++++++++++++++++++++++++++++
+ 4 files changed, 275 insertions(+), 6 deletions(-)
  create mode 100644 test/vantt/index-events.test.ts
 
 diff --git a/src/indexing/indexer.ts b/src/indexing/indexer.ts
-index 6933a22..1a42f4a 100644
+index 71e2fbf..772d8ab 100644
 --- a/src/indexing/indexer.ts
 +++ b/src/indexing/indexer.ts
-@@ -29,6 +29,7 @@ import {
+@@ -31,6 +31,7 @@ import {
    clearIndexFailures,
    commitIndexedNote,
    deleteNote,
@@ -23,7 +24,7 @@ index 6933a22..1a42f4a 100644
    getNoteMeta,
    getStoredEmbeddingDim,
    hasIndexFailure,
-@@ -89,6 +90,68 @@ export interface IndexResult {
+@@ -91,6 +92,68 @@ export interface IndexResult {
    errors: Array<{ path: string; error: string }>;
  }
  
@@ -92,7 +93,7 @@ index 6933a22..1a42f4a 100644
  function assertIndexRun(run: IndexRunContext): void {
    run.signal.throwIfAborted();
    const owner = readIndexOwner();
-@@ -551,6 +614,7 @@ export async function indexFile(
+@@ -554,6 +617,7 @@ export async function indexFile(
          );
          if (!removed) continue;
          bumpIndexVersion();
@@ -100,7 +101,7 @@ index 6933a22..1a42f4a 100644
          throw new Error(`ENOENT: note no longer exists, ${prepared.path}`);
        }
        if (prepared.kind === 'unchanged') {
-@@ -600,6 +664,7 @@ export async function indexFile(
+@@ -603,6 +667,7 @@ export async function indexFile(
        );
        if (published === 'changed') continue;
        bumpIndexVersion();
@@ -108,7 +109,7 @@ index 6933a22..1a42f4a 100644
        return published;
      }
      throw new Error(
-@@ -701,17 +766,20 @@ export function cleanupStaleNotes(
+@@ -704,17 +769,20 @@ export function cleanupStaleNotes(
  ): void {
    try {
      run.signal.throwIfAborted();
@@ -133,7 +134,7 @@ index 6933a22..1a42f4a 100644
      clearIndexFailures(run.lease, '', 'cleanup');
    } catch (error) {
      if (run.signal.aborted || error instanceof IndexLeaseLostError) throw error;
-@@ -1289,6 +1357,7 @@ export function startWatcher(contextLength: number, run: IndexRunContext): Watch
+@@ -1292,6 +1360,7 @@ export function startWatcher(contextLength: number, run: IndexRunContext): Watch
                  }
                  deleteNote(run.lease, rel);
                  bumpIndexVersion();
@@ -141,8 +142,39 @@ index 6933a22..1a42f4a 100644
                  return true;
                }),
              );
+diff --git a/src/runtime/config.ts b/src/runtime/config.ts
+index 9ca8982..e9b7104 100644
+--- a/src/runtime/config.ts
++++ b/src/runtime/config.ts
+@@ -2,6 +2,19 @@ import path from 'node:path';
+ 
+ export const DEFAULT_RERANKER_MODEL = 'onnx-community/gte-multilingual-reranker-base';
+ 
++const DEFAULT_WATCH_DEBOUNCE_MS = 5_000;
++
++/** Per-file watcher debounce; OBSIDIAN_WATCH_DEBOUNCE_MS overrides it (non-negative integer). */
++function watchDebounceMs(): number {
++  const raw = process.env.OBSIDIAN_WATCH_DEBOUNCE_MS?.trim();
++  if (!raw) return DEFAULT_WATCH_DEBOUNCE_MS;
++  if (!/^\d+$/.test(raw))
++    throw new Error(
++      `OBSIDIAN_WATCH_DEBOUNCE_MS must be a non-negative integer (received "${raw}")`,
++    );
++  return Number(raw);
++}
++
+ export const config = {
+   get obsidianPrefix(): string {
+     return process.env.OBSIDIAN_PREFIX ?? '';
+@@ -79,5 +92,5 @@ export const config = {
+   chunkMinLength: 50,
+   chunkHeadingLevel: 0,
+   batchSize: 10,
+-  debounce: 5_000,
++  debounce: watchDebounceMs(),
+ };
 diff --git a/src/transports/cli.ts b/src/transports/cli.ts
-index 0d29dae..290d058 100644
+index 2923779..fb73f0d 100644
 --- a/src/transports/cli.ts
 +++ b/src/transports/cli.ts
 @@ -7,7 +7,7 @@ import { promisify } from 'node:util';
@@ -154,7 +186,7 @@ index 0d29dae..290d058 100644
  import { activeModelName, getContextLength, primeEmbeddingDim } from '../inference/embedder.js';
  import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings.js';
  import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
-@@ -909,6 +909,9 @@ const serveCommand = program
+@@ -938,6 +938,9 @@ const serveCommand = program
        process.on('SIGINT', cleanup);
  
        const writeLine = (s: string) => process.stdout.write(s + '\n');
@@ -166,10 +198,10 @@ index 0d29dae..290d058 100644
          vectors: (params) => exportNoteVectors({ ...params, ohsVersion: version }),
 diff --git a/test/vantt/index-events.test.ts b/test/vantt/index-events.test.ts
 new file mode 100644
-index 0000000..766ca85
+index 0000000..0704e00
 --- /dev/null
 +++ b/test/vantt/index-events.test.ts
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,184 @@
 +import { spawn } from 'node:child_process';
 +import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 +import { createServer, type Server } from 'node:http';
@@ -237,7 +269,7 @@ index 0000000..766ca85
 +  ): Promise<Record<string, unknown>>;
 +}
 +
-+function startServer(events: boolean): Session {
++function startServer(events: boolean, debounceMs?: number): Session {
 +  const vault = mkdtempSync(path.join(tmpdir(), 'ohs-index-events-'));
 +  dirs.push(vault);
 +  writeFileSync(path.join(vault, 'apples.md'), 'Apples grow in the orchard.\n');
@@ -252,6 +284,7 @@ index 0000000..766ca85
 +    OHS_DISABLE_UPDATE_CHECK: '1',
 +    NO_COLOR: '1',
 +  };
++  if (debounceMs !== undefined) env.OBSIDIAN_WATCH_DEBOUNCE_MS = String(debounceMs);
 +  if (events) env.OHS_STDIO_EVENTS = '1';
 +  else delete env.OHS_STDIO_EVENTS;
 +  const child = spawn(process.execPath, [path.join(root, 'dist/src/cli.js'), 'serve', '--stdio'], {
@@ -301,6 +334,20 @@ index 0000000..766ca85
 +  line.event === name && Array.isArray(line.paths) && line.paths.includes(file);
 +
 +describe('serve --stdio index events', () => {
++  it('delivers an indexed event within 1 s of an edit with a low debounce', async () => {
++    const session = startServer(true, 250);
++    await session.waitFor((l) => l.ready === true, 30_000);
++    await session.waitFor(isEvent('indexed', 'apples.md'), 30_000);
++    await new Promise((r) => setTimeout(r, 1000));
++    session.lines.length = 0;
++    const started = Date.now();
++    writeFileSync(path.join(session.vault, 'apples.md'), 'Apples and plums grow in the orchard.\n');
++    await session.waitFor(isEvent('indexed', 'apples.md'), 5000);
++    expect(Date.now() - started).toBeLessThan(1000);
++    session.closeStdin();
++    expect(await session.exit).toBe(0);
++  }, 60_000);
++
 +  it('emits indexed and removed events without an id after note writes', async () => {
 +    const session = startServer(true);
 +    await session.waitFor((l) => l.ready === true, 30_000);

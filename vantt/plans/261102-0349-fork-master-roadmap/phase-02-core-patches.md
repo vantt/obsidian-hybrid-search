@@ -49,7 +49,7 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - [x] V08 P04 `stdio-parity`
 - [x] V23 P05 `block-anchors`
 - [x] V24 P06 `restrict-paths`
-- [ ] V25 P07 `index-events`
+- [x] V25 P07 `index-events`
 
 ## Success Criteria
 
@@ -69,6 +69,7 @@ Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. 
 - P03: `ohs vectors`, `ohs neighbors`; hành động stdio làm ở P04 (V08). Chưa đo đầu-cuối trên vault 10.000 note.
 - P04 (V08), P05 (V23), P06 (V24) xong. Chuỗi P00, P01, P02, P03, P04, P09, P05, P06 trên `vantt/work/series`: 120 file, 2083 test xanh; build, lint, knip, tsc, format:check xanh. Các bản vá được xuất lại từ nhánh ghép.
 - P05 tăng `INDEX_SCHEMA_VERSION` 2 → 3; migration điền cột mới từ chữ đã lưu, không gọi embedder. P04 đổi ví dụ "action lạ" trong `test/serve-stdio.test.ts` từ `reindex` sang `bogus`.
+- P07 (V25) xong, đứng cuối chuỗi, dựng trên `vantt/work/series-p01b`: 2091 test xanh. Bật bằng `OHS_STDIO_EVENTS=1`; `OBSIDIAN_WATCH_DEBOUNCE_MS` (mặc định 5000 như upstream, khuyên 250 cho client sự kiện) để sự kiện tới trong 1 giây. Chỉ phát cho lần ghi của chính tiến trình stdio.
 
 ## Risk
 
