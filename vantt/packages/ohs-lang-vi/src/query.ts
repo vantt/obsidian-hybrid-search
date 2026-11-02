@@ -14,6 +14,8 @@
 import type { QueryAnalysis, QueryContext } from './contract.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
+import type { LexiconStore } from './lexicon.js';
+import { applyLexicon } from './lexicon-query.js';
 import type { PackOptions } from './options.js';
 import { restoreTokens, type RestoreResult, type VocabularyCache } from './restore.js';
 import { isPossibleFoldedSyllable, isVietnameseSyllable } from './syllable.js';
@@ -24,6 +26,8 @@ export interface QueryEnvironment {
   options: PackOptions;
   cache: VocabularyCache;
   forms: ReadonlyMap<string, readonly string[]>;
+  /** User lexicon (V18); absent in environments built by hand. */
+  lexicon?: LexiconStore;
 }
 
 export interface QueryToken {
@@ -232,5 +236,7 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
   classifyAccents(state, env.options);
   restoreAccents(state, ctx, env);
   findUnaccentedSpelling(state, ctx, env);
-  return buildAnalysis(state, env.options);
+  const analysis = buildAnalysis(state, env.options);
+  if (env.lexicon) applyLexicon(analysis, state, ctx, env.lexicon, env.options); // V18 hook
+  return analysis;
 }
