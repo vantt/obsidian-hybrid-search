@@ -138,5 +138,21 @@ Eval mặc định (lõi `chk-series` `4c69fbf`), nDCG@5 so với V17+V18+V19 đ
 
 - Câu trộn tiếng Anh không dùng nhánh seg: bật cho mọi câu làm `vi-mixed-en` tụt 0,033 ("kiểm tra code trước khi merge" kéo note có "kiểm tra" lên trên note đích); trọng số 0,5 hay 0,75 không gỡ được.
 - Chỉ giữ từ điển hai âm tiết: từ ba âm tiết trở lên nuốt âm tiết của từ sau khi khớp dài nhất (`an toàn khu` + `vực`).
-- Hiệu năng: `project` seg 1 MB 67–114 ms (tuỳ tải máy); nạp từ điển 30–100 ms một lần mỗi tiến trình; dung lượng `data/compounds.txt` 266 KB (gzip 86 KB).
+- Hiệu năng: `project` seg 1 MB 67–114 ms (tuỳ tải máy); nạp từ điển 30–100 ms một lần mỗi tiến trình; dung lượng `data/compounds.txt` 266 KB (gzip 86 KB) ở bản V20.
+
+## Từ điển từ ghép học thống kê (V20b, 2026-11-02)
+
+Từ điển pyvi (MIT, nguồn gốc không rõ) được thay bằng 20.523 từ hai âm tiết chọn bằng thống kê cặp âm tiết trên ba dataset CC BY 4.0 (ALT, Nemotron-Personas-Vietnam, văn bản pháp luật vbpl.vn), dựng lại được bằng `scripts/build-compounds.mjs`; nguồn, cách chọn và ranh giới dùng pyvi (chỉ lúc phát triển, để đo) ở [`data/README.md`](data/README.md), ghi công ở [`data/ATTRIBUTION.md`](data/ATTRIBUTION.md). File 242 KB (gzip 78 KB). `segment` vẫn mặc định bật.
+
+Thiếu `data/compounds.txt` (gói cài thiếu thư mục `data/`) hay file rỗng thì `createPack` ném lỗi khi `segment` bật, nên lõi P01 báo lỗi trong `status.language_pack.error` thay vì chạy lặng lẽ như không có gói. Test kiểm `npm pack` có `data/compounds.txt`, `data/README.md`, `data/ATTRIBUTION.md`.
+
+Eval (fixture `vi-search@v0.11.0`: thêm 15 câu `vi-compound` khó, lõi `wt-p01b` `632209f`, mặc định), nDCG@5: baseline upstream / gói không tách từ / từ điển pyvi / từ điển mới.
+
+| Hạng mục | Baseline | Không seg | pyvi | Mới |
+|---|---|---|---|---|
+| Tổng | 0,646 | 0,889 | 0,921 | **0,926** |
+| `vi-compound` (30 câu) | 0,632 | 0,822 | 0,971 | **0,983** |
+| ↳ 15 câu khó | 0,421 | 0,645 | 0,942 | **0,967** |
+| `vi-snippet` | 0,466 | 0,752 | 0,777 | **0,843** |
+| 15 hạng còn lại | | | | bằng bản pyvi |
 

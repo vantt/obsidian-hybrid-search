@@ -12,7 +12,7 @@ import { LexiconStore } from './lexicon.js';
 import { analyzeQuery, type QueryEnvironment } from './query.js';
 import { accentedForms, VocabularyCache } from './restore.js';
 import { rescoreCandidates } from './rescore.js';
-import { CompoundSource, projectSegmented, SEG_TOKENIZER } from './segment.js';
+import { bundledDictionary, CompoundSource, projectSegmented, SEG_TOKENIZER } from './segment.js';
 import { SEG_VIEW } from './segment-query.js';
 import { createProjector, createTokenProjector, VIEW_TOKENIZER } from './views.js';
 
@@ -40,6 +40,8 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     forms: accentedForms(options.tonePlacement, options.foldIY),
     project: projector,
   };
+  // Load the bundled dictionary now so a pack without its data fails to load instead of running without it.
+  if (options.segment) bundledDictionary(options.tonePlacement);
   const compounds = options.segment ? new CompoundSource(options.tonePlacement, () => lexicon.load().compounds) : null;
   if (compounds) env.compounds = () => compounds.current();
   const normToken = createTokenProjector(options);

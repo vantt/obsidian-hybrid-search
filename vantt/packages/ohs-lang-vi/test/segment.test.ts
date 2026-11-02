@@ -1,3 +1,8 @@
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import type { QueryAnalysis } from '../src/contract.js';
@@ -7,6 +12,7 @@ import { resolveOptions } from '../src/options.js';
 import {
   buildDictionary,
   bundledCompounds,
+  readCompoundList,
   CompoundSource,
   compoundsOf,
   projectSegmented,
@@ -50,6 +56,27 @@ describe('bundled dictionary', () => {
       expect(set.has(w)).toBe(true);
   });
 
+  it('fails loudly when the data file is missing or empty', () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'ohs-lang-vi-'));
+    try {
+      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(/installed without its data/);
+      writeFileSync(path.join(dir, 'compounds.txt'), '# comment only\n');
+      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(/is empty/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('ships with the package: npm pack includes the dictionary, its notes and attribution', () => {
+    const res = spawnSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      encoding: 'utf8',
+    });
+    expect(res.status, res.stderr).toBe(0);
+    const files = (JSON.parse(res.stdout) as { files: { path: string }[] }[])[0]!.files.map((f) => f.path);
+    for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md', 'build/index.js']) expect(files).toContain(f);
+  });
+
   it('follows the tone placement option', () => {
     expect(buildDictionary(['hàng hoá'], 'classic').entries.has('hàng hóa')).toBe(true);
     expect(buildDictionary(['hàng hóa'], 'modern').entries.has('hàng hoá')).toBe(true);
@@ -76,8 +103,8 @@ describe('seg view projection', () => {
   it('joins compounds with _ and keeps everything else like the norm view', () => {
     expect(seg('Khách hàng mua hàng hoá')).toBe('khách_hàng mua hàng_hoá');
     expect(seg('Học sinh học sinh học.')).toBe('học_sinh học_sinh học.');
-    expect(seg('Hòa Bình, ĐƯỜNG Ðỏ')).toBe('hoà_bình, đường đỏ');
-    expect(seg('ĐƯỜNG Ðỏ C++ #tag')).toBe(segPack.project('norm', 'content', 'ĐƯỜNG Ðỏ C++ #tag'));
+    expect(seg('Hòa Bình, ĐƯỜNG Ðó')).toBe('hoà_bình, đường đó');
+    expect(seg('ĐƯỜNG Ðó C++ #tag')).toBe(segPack.project('norm', 'content', 'ĐƯỜNG Ðó C++ #tag'));
   });
 
   it('never joins across punctuation or line breaks', () => {
