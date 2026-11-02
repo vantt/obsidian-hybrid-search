@@ -12,6 +12,7 @@
  *      (hook) alias keys for aliasViews (V19) and the seg view query (V20) go here
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
+import { aliasKeys } from './alias.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
@@ -24,6 +25,8 @@ export interface QueryEnvironment {
   options: PackOptions;
   cache: VocabularyCache;
   forms: ReadonlyMap<string, readonly string[]>;
+  /** The pack's view projector (alias keys are projections of the query). */
+  project: (view: string, text: string) => string;
 }
 
 export interface QueryToken {
@@ -166,7 +169,7 @@ function restoredText(state: QueryState): string {
   return state.normalized.replace(TOKEN_RE, (token) => best[index++] ?? token);
 }
 
-export function buildAnalysis(state: QueryState, options: PackOptions): QueryAnalysis {
+export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pick<QueryEnvironment, 'project'>): QueryAnalysis {
   const restoration = state.restoration;
   const target =
     !state.accented && restoration?.candidates[0]
@@ -186,6 +189,8 @@ export function buildAnalysis(state: QueryState, options: PackOptions): QueryAna
     fold: useFold && state.tokens.length > 0 ? state.tokens.map((t) => t.folded).join(' ') : null,
   };
   const analysis: QueryAnalysis = { viewQueries };
+  // (V19) exact-alias keys for the alias views: the fold projection of the query
+  if (env) analysis.aliasKeys = aliasKeys(state.query, env.project);
   const restoredAny = restoration?.tokens.some((t) => t.restored) ?? false;
   if (options.restoreForEmbedding && restoredAny && confidence >= options.embedMinConfidence)
     analysis.embedQuery = restoredText(state);
@@ -232,5 +237,5 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
   classifyAccents(state, env.options);
   restoreAccents(state, ctx, env);
   findUnaccentedSpelling(state, ctx, env);
-  return buildAnalysis(state, env.options);
+  return buildAnalysis(state, env.options, env);
 }

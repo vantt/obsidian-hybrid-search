@@ -5,6 +5,7 @@
  * `OHS_LANGUAGE_PACK_OPTIONS` JSON. The M1 primitives stay exported for
  * standalone use and tests.
  */
+import { ALIAS_VIEWS } from './alias.js';
 import type { LanguagePackV1 } from './contract.js';
 import { resolveOptions, type PackOptions } from './options.js';
 import { analyzeQuery, type QueryEnvironment } from './query.js';
@@ -25,12 +26,13 @@ export function packSignature(options: PackOptions): string {
 
 export function createPack(rawOptions?: unknown): LanguagePackV1 {
   const options = resolveOptions(rawOptions);
+  const projector = createProjector(options);
   const env: QueryEnvironment = {
     options,
     cache: new VocabularyCache(),
     forms: accentedForms(options.tonePlacement, options.foldIY),
+    project: projector,
   };
-  const projector = createProjector(options);
   const pack: LanguagePackV1 = {
     apiVersion: 1,
     id: PACK_ID,
@@ -42,7 +44,8 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     ],
     project: (view, _field, text) => projector(view, text),
     analyzeQuery: (query, ctx) => analyzeQuery(query, ctx, env),
-    // aliasViews (V19) and queryCacheKey (V18, lexicon hash) are added here.
+    aliasViews: ALIAS_VIEWS,
+    // queryCacheKey (V18, lexicon hash) is added here.
   };
   if (options.rescore) pack.rescore = (candidates, analysis) => rescoreCandidates(candidates, analysis, options);
   return pack;
@@ -52,6 +55,7 @@ export default createPack;
 
 export type * from './contract.js';
 export * from './data.js';
+export { ALIAS_VIEWS, aliasKey, aliasKeys } from './alias.js';
 export { fold, type FoldOptions } from './fold.js';
 export { normalize, type NormalizeOptions } from './normalize.js';
 export { DEFAULT_OPTIONS, resolveOptions, type PackOptions, type RescoreWeights, type RestoreParams, type ViewWeights } from './options.js';

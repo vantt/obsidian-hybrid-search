@@ -18,7 +18,7 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 |---|---|
 | `normalize.ts`, `fold.ts`, `syllable.ts`, `data.ts` | M1 (V09): chuẩn hoá giữ dấu, bỏ dấu, tách âm tiết, bảng dữ liệu |
 | `views.ts` | View `norm` (chuẩn hoá giữ dấu) và `fold` (bỏ dấu, `đ→d`, tuỳ chọn i/y). Chiếu từng token, giữ nguyên ký tự phân cách, nên bất biến token của P01 đúng theo cách dựng |
-| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho Telex/gõ sai (V17), lexicon (V18), alias (V19), tách từ (V20) |
+| `query.ts` | `analyzeQuery`: tách token, phân loại câu có dấu, phục hồi dấu, dựng câu cho từng view, dữ liệu cho `rescore`. Có chỗ cắm ghi rõ cho Telex/gõ sai (V17), lexicon (V18), alias (V19, đã làm: `alias.ts`), tách từ (V20) |
 | `restore.ts` | Phục hồi dấu theo từ vựng vault: ứng viên là mọi âm tiết có dấu bỏ dấu ra đúng âm tiết gõ (sinh từ bảng âm tiết), giữ những dạng có trong view `norm` (`termStats`), cặp liền nhau có thật (`phraseDocs`) được cộng điểm; k-best Viterbi; cache theo `dbVersion` |
 | `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp, từng chữ. Không bỏ, không thêm ứng viên |
 | `options.ts` | Tuỳ chọn và mặc định |
