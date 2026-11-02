@@ -71,7 +71,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - Gói đủ M1–M5, eval mặc định (fixture `v0.10.0`): nDCG@5 tổng 0,666 (upstream) → 0,932; Hit@5 `vi-telex`, `vi-typo`, `vi-synonym`, `vi-abbr`, `vi-alias` đều 1,00; `vi-snippet` 15/15 đoạn trích là chữ gốc và chứa chỗ khớp; `vi-compound` +0,156 so với baseline; eval tiếng Anh upstream giữ 0,735.
 - Mặc định: `telex`, `typo`, `segment` bật theo quy tắc eval. Câu lẫn tiếng Anh không dùng view `seg`.
 - Từ điển từ ghép: danh sách của `trungtv/pyvi` (MIT), 22.574 từ hai âm tiết, 266 KB; nguồn gốc gốc của pyvi chưa rõ (95% trùng Viet74K, GPL). Thay được bằng một file.
-- Test fast-check "token invariant for every view" trong `test/pack.test.ts` thỉnh thoảng hỏng do hàm đếm của chính test (ký tự kết hợp gắn vào `#`); cần sửa test helper.
+- Test fast-check "token invariant for every view" trong `test/pack.test.ts` từng hỏng ngẫu nhiên do hàm đếm của chính test; đã sửa helper `viewTokens`, giữ nguyên thuộc tính, chạy ổn ở `FC_NUM_RUNS=20000`.
 
 ## Risk
 
