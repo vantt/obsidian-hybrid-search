@@ -1,0 +1,203 @@
+name: vantt-bundles
+
+# Prebuilt, self-contained OHS bundles for one fork release tag (PRD 7.3, 8):
+# build on each platform's native runner, smoke test the bundle on a runner that
+# only has the archive (no setup-node), then attach bundles and checksums to the
+# GitHub Release for the tag. Not signed on macOS (PRD 8.3, Q4).
+#
+# Tags pushed with the default GITHUB_TOKEN do not start workflows; the catchup
+# workflow can call this one (workflow_call) or an operator can dispatch it.
+
+on:
+  push:
+    tags: ['v*-vantt.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Fork release tag, e.g. v0.17.2-vantt.1'
+        required: true
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Fork release tag'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vantt-bundles-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  HUSKY: '0'
+  GH_TOKEN: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
+  # gh would otherwise resolve this fork's parent (flowing-abyss) as the default repo.
+  GH_REPO: ${{ github.repository }}
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  prepare:
+    if: github.repository == 'vantt/obsidian-hybrid-search'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate tag and make sure the release exists
+        run: |
+          set -euo pipefail
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-vantt\.[0-9]+$ ]]; then
+            echo "::error::$TAG is not a fork release tag (v<semver>-vantt.<N>)"
+            exit 1
+          fi
+          git ls-remote --exit-code --tags "https://github.com/$GH_REPO" "refs/tags/$TAG" >/dev/null \
+            || { echo "::error::tag $TAG does not exist on $GH_REPO"; exit 1; }
+          # Not marked latest until every platform has passed (done in the release job).
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --latest=false --title "OHS ${TAG#v}" \
+              --notes "Bundles for $TAG are being built: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
+
+  bundle:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: win32-x64
+            runner: windows-latest
+          - platform: darwin-arm64
+            runner: macos-14
+          # macos-13 (Intel) is retired by GitHub; macos-15-intel is the remaining native Intel runner.
+          - platform: darwin-x64
+            runner: macos-15-intel
+          - platform: linux-x64
+            runner: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The release tree is the tag; the scripts and smoke vault come from master.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          path: tree
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          path: tools
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: tree/.node-version
+          cache: ''
+
+      # Upstream refuses other npm versions (devEngines.packageManager).
+      - name: Pin npm 12.2.0
+        run: npm install -g npm@12.2.0 && npm --version
+
+      - name: Build bundle
+        run: |
+          node tools/vantt/scripts/bundle.mjs --platform "${{ matrix.platform }}" --tree tree \
+            --out "$RUNNER_TEMP/out" --work "$RUNNER_TEMP/w" --json > "$RUNNER_TEMP/bundle-result.json"
+          ls -l "$RUNNER_TEMP/out"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: bundle-${{ matrix.platform }}
+          path: ${{ runner.temp }}/out/*
+          if-no-files-found: error
+
+  smoke:
+    needs: bundle
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: win32-x64
+            runner: windows-latest
+          - platform: darwin-arm64
+            runner: macos-14
+          - platform: darwin-x64
+            runner: macos-15-intel
+          - platform: linux-x64
+            runner: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # No setup-node and no npm: the bundle must run on its own Node. The runner's
+      # own Node only drives the test script.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          path: tools
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: bundle-${{ matrix.platform }}
+          path: ${{ runner.temp }}/in
+
+      # The model is downloaded on the first run (about 120 MB) and cached after.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/huggingface
+          key: vantt-hf-model-${{ runner.os }}-e5-small-v1
+
+      - name: Smoke test
+        run: |
+          archive=$(ls "$RUNNER_TEMP"/in/ohs-*.zip "$RUNNER_TEMP"/in/ohs-*.tar.gz 2>/dev/null | head -n1)
+          node tools/vantt/scripts/bundle-smoke.mjs --archive "$archive" --work "$RUNNER_TEMP/smoke" \
+            --out "$RUNNER_TEMP/smoke.json" > /dev/null
+
+      - name: Smoke report
+        if: always()
+        run: |
+          [ -f "$RUNNER_TEMP/smoke.json" ] || exit 0
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            const out = ["### Smoke " + r.platform + ": " + (r.ok ? "pass" : "FAIL"), "",
+              "unpacked " + (r.size_unpacked / 1e6).toFixed(1) + " MB, index " + (r.index_ms / 1000).toFixed(1) + " s, db " + r.db_size_mb + " MB, Hit@5 " + r.hit5, ""];
+            for (const c of r.checks || []) out.push("- " + (c.ok ? "pass" : "FAIL") + " " + c.name + (c.ok ? "" : ": " + c.detail));
+            console.log(out.join("\n"));
+          ' "$RUNNER_TEMP/smoke.json" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: smoke-${{ matrix.platform }}
+          path: ${{ runner.temp }}/smoke.json
+          if-no-files-found: ignore
+
+  # Only bundles that passed the smoke test on every platform are published.
+  release:
+    needs: [bundle, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          path: tools
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: artifacts
+
+      - name: Upload to the release and mark it latest
+        run: |
+          set -euo pipefail
+          find artifacts -type f | sort
+          shopt -s nullglob
+          files=(artifacts/bundle-*/ohs-*)
+          [ "${#files[@]}" -ge 12 ] || { echo "::error::expected 4 bundles with .sha256 and .bundle.json, found ${#files[@]} files"; exit 1; }
+          node tools/vantt/scripts/bundle-notes.mjs --dir artifacts --tag "$TAG" > notes.md
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"
+          gh release upload "$TAG" "${files[@]}" --clobber
+          gh release edit "$TAG" --notes-file notes.md --latest
