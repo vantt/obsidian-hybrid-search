@@ -107,6 +107,17 @@ interface MatchAnchor {
   matchText: string; // first ~80 stripped chars of chunk body for DOM block lookup
   charStart: number | null; // null if chunk indexed before this migration
   charEnd: number | null;
+  /** Trailing Obsidian block id (`^abc`) of the matched chunk; present only when it has one. */
+  blockId?: string;
+  /** True when the matched chunk holds highlighted text; present only when true. */
+  hasHighlight?: true;
+}
+
+function anchorFlags(blockId: string | null, hasHighlight: number | boolean): Partial<MatchAnchor> {
+  return {
+    ...(blockId ? { blockId } : {}),
+    ...(hasHighlight ? { hasHighlight: true as const } : {}),
+  };
 }
 
 export interface SearchResult {
@@ -386,6 +397,7 @@ function enrichMarkedSnippets(
             ),
             charStart: data.charStart,
             charEnd: data.charEnd,
+            ...anchorFlags(data.blockId ?? null, data.hasHighlight ?? 0),
           };
         }
       }
@@ -647,6 +659,8 @@ type Bm25ChunkData = {
   chunkText: string;
   charStart: number | null;
   charEnd: number | null;
+  blockId?: string | null;
+  hasHighlight?: number;
 };
 
 function getChunkDataForBm25Results(results: RawResult[]): Map<string, Bm25ChunkData> {
@@ -697,6 +711,8 @@ function matchChunkDataFromRows(
     text: string;
     char_start: number | null;
     char_end: number | null;
+    block_id?: string | null;
+    has_highlight?: number;
   }>,
   snippetKeys: Map<string, string>,
 ): Map<string, Bm25ChunkData> {
@@ -714,6 +730,8 @@ function matchChunkDataFromRows(
       chunkText: row.text,
       charStart: row.char_start ?? null,
       charEnd: row.char_end ?? null,
+      blockId: row.block_id ?? null,
+      hasHighlight: row.has_highlight ?? 0,
     });
   }
   return result;
@@ -813,6 +831,7 @@ function searchVector(
             matchText: buildMatchText(row.chunk_text),
             charStart: row.char_start ?? null,
             charEnd: row.char_end ?? null,
+            ...anchorFlags(row.block_id, row.has_highlight),
           },
         };
       });

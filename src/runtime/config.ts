@@ -49,6 +49,11 @@ export const config = {
   get languagePackOptions(): string | undefined {
     return process.env.OHS_LANGUAGE_PACK_OPTIONS;
   },
+  /** Optional upper bound for the chunk size in estimated tokens; unset keeps the model limit. */
+  get chunkTokens(): number | undefined {
+    const parsed = Number.parseInt(process.env.OBSIDIAN_CHUNK_TOKENS?.trim() ?? '', 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  },
   get rerankerModel(): string {
     return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
   },
