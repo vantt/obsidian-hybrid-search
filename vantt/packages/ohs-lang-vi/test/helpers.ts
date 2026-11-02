@@ -10,6 +10,16 @@ export function tokens(text: string): string[] {
   return text.split(/[^\p{L}\p{N}\p{Co}\p{M}]+/u).filter((t) => t !== '');
 }
 
+/**
+ * Tokenization of the view tokenizer `unicode61 remove_diacritics 0
+ * tokenchars '+#'` (the P01 contract, emulated by the core in
+ * src/language/tokens.ts): `tokens` plus `+` and `#` as token characters.
+ * Written as a split, independently of the pack's own TOKEN_RE.
+ */
+export function viewTokens(text: string): string[] {
+  return text.split(/[^\p{L}\p{N}\p{Co}\p{M}+#]+/u).filter((t) => t !== '');
+}
+
 /** Every onset + cluster + coda combination that parses as a syllable (tone 0). */
 export function allSyllables(): Syllable[] {
   const seen = new Set<string>();
