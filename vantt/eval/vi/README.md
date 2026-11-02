@@ -124,3 +124,7 @@ Baseline phụ thuộc nền (ONNX lượng tử cho số khác nhau theo CPU), 
 
 - Fixture công khai chỉ chứa văn bản sinh; không có nội dung vault thật hay câu hỏi riêng của user. Golden set riêng trên vault thật (V15) lưu ngoài repo.
 - Đổi đầu ra của preset (kể cả một chữ trong note) là đổi golden set: tăng phiên bản minor của fixture, ghi CHANGELOG, đổi `FIXTURE_TAG` trong `run-eval.mjs`, chạy `--update-golden` rồi `--baseline` lại và duyệt số.
+
+### Kiểm đoạn trích (V19)
+
+`check-snippets.mjs` chạy các câu `vi-snippet` qua OHS thật có gói và kiểm đoạn trích của note đúng là chữ gốc (mảnh nguyên văn của note, còn dấu) và chứa `snippet_contains`; in thêm số câu có `matchedTerms` đúng. Dùng bản sao vault `vi-search` không có file `.db`. Thoát 0 khi đạt 100%. Lệnh chạy ở đầu file script.
