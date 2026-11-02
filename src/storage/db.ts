@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
-import { statSync } from 'node:fs';
+import { mkdirSync, statSync } from 'node:fs';
+import path from 'node:path';
 import * as sqliteVec from 'sqlite-vec';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { CONTENT_POLICY_IDENTITY, type SourcePart } from '../content/content-ignore.js';
@@ -19,6 +20,7 @@ import {
   type StalledOwner,
 } from './index-ownership.js';
 import { dropLanguageTables, writeNoteLexical, type NoteLexical } from './language-tables.js';
+import { isSameVaultPath } from './vault-locator.js';
 
 type DB = InstanceType<typeof Database>;
 
@@ -541,8 +543,25 @@ export class IndexStorageError extends Error {
   }
 }
 
+/**
+ * A database placed outside the vault is never trusted for a different vault than the
+ * one recorded in it: reusing it would index (and sweep) the wrong notes.
+ */
+function assertDatabaseBelongsToVault(db: DB): void {
+  const stored = db.prepare("SELECT value FROM settings WHERE key = 'vault_path'").get() as
+    { value: string } | undefined;
+  if (stored?.value && !isSameVaultPath(stored.value, config.vaultPath)) {
+    throw new Error(
+      `Index database ${config.dbPath} belongs to vault ${stored.value}, not ${config.vaultPath}. ` +
+        'Point OBSIDIAN_DB_PATH at a different file for this vault.',
+    );
+  }
+}
+
 export function openDb(): DB {
   closeDb();
+  const override = config.dbPathOverride;
+  if (override) mkdirSync(path.dirname(override), { recursive: true });
   const db = new Database(config.dbPath, { timeout: 250 });
   try {
     sqliteVec.load(db);
@@ -551,6 +570,7 @@ export function openDb(): DB {
     _db = db;
     _ownership = createIndexOwnership(db);
     const settingsExist = db.prepare("SELECT 1 FROM sqlite_master WHERE name='settings'").get();
+    if (settingsExist && config.dbPathOverride) assertDatabaseBelongsToVault(db);
     const revision = settingsExist
       ? (db.prepare("SELECT value FROM settings WHERE key='index_ownership_schema'").get() as
           { value: string } | undefined)
