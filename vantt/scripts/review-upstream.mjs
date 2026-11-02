@@ -138,7 +138,7 @@ function viVault(workDir, otf) {
     const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', path.join(workDir, 'vi-answers.json')];
     const res = otf
       ? sh(workDir, `node ${JSON.stringify(otf)} ${gen.join(' ')}`)
-      : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.10.0 ${gen.join(' ')}`);
+      : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.11.0 ${gen.join(' ')}`);
     if (!res.ok) throw new Error('could not generate the vi vault for snippets');
   }
   const files = new Map();

@@ -2653,5 +2653,170 @@
     "partial_paths": [],
     "category": "vi-alias",
     "notes": "Query is the alias \"Nhật ký tập luyện\" without diacritics; body is English."
+  },
+  {
+    "id": "vi-compound-16",
+    "query": "sân bay",
+    "relevant_paths": [
+      "notes/Nhật ký 01.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"sân bay\" once; three other notes have \"sân\" and \"bay\" more often, reversed or apart.",
+    "hard": "accented"
+  },
+  {
+    "id": "vi-compound-17",
+    "query": "bao tang",
+    "relevant_paths": [
+      "notes/Nhật ký 05.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"bảo tàng\" once; three other notes have \"bảo\" and \"tàng\" more often, reversed or apart.",
+    "hard": "folded"
+  },
+  {
+    "id": "vi-compound-18",
+    "query": "nói chuyện bóng đá",
+    "relevant_paths": [
+      "notes/Nhật ký 09.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"bóng đá\" once; three other notes have \"bóng\" and \"đá\" more often, reversed or apart.",
+    "hard": "context"
+  },
+  {
+    "id": "vi-compound-19",
+    "query": "bàn chải",
+    "relevant_paths": [
+      "notes/Nhật ký 13.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"bàn chải\" once; three other notes have \"bàn\" and \"chải\" more often, reversed or apart.",
+    "hard": "accented"
+  },
+  {
+    "id": "vi-compound-20",
+    "query": "cau thu",
+    "relevant_paths": [
+      "notes/Nhật ký 17.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"cầu thủ\" once; three other notes have \"cầu\" and \"thủ\" more often, reversed or apart.",
+    "hard": "folded"
+  },
+  {
+    "id": "vi-compound-21",
+    "query": "nói chuyện hải sản",
+    "relevant_paths": [
+      "notes/Nhật ký 21.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"hải sản\" once; three other notes have \"hải\" and \"sản\" more often, reversed or apart.",
+    "hard": "context"
+  },
+  {
+    "id": "vi-compound-22",
+    "query": "thời tiết",
+    "relevant_paths": [
+      "notes/Nhật ký 25.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"thời tiết\" once; three other notes have \"thời\" and \"tiết\" more often, reversed or apart.",
+    "hard": "accented"
+  },
+  {
+    "id": "vi-compound-23",
+    "query": "quan ao",
+    "relevant_paths": [
+      "notes/Nhật ký 29.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"quần áo\" once; three other notes have \"quần\" and \"áo\" more often, reversed or apart.",
+    "hard": "folded"
+  },
+  {
+    "id": "vi-compound-24",
+    "query": "nói chuyện bệnh nhân",
+    "relevant_paths": [
+      "notes/Nhật ký 33.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"bệnh nhân\" once; three other notes have \"bệnh\" and \"nhân\" more often, reversed or apart.",
+    "hard": "context"
+  },
+  {
+    "id": "vi-compound-25",
+    "query": "trái cây",
+    "relevant_paths": [
+      "notes/Nhật ký 37.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"trái cây\" once; three other notes have \"trái\" and \"cây\" more often, reversed or apart.",
+    "hard": "accented"
+  },
+  {
+    "id": "vi-compound-26",
+    "query": "cua hang",
+    "relevant_paths": [
+      "notes/Nhật ký 41.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"cửa hàng\" once; three other notes have \"cửa\" and \"hàng\" more often, reversed or apart.",
+    "hard": "folded"
+  },
+  {
+    "id": "vi-compound-27",
+    "query": "nói chuyện thư viện",
+    "relevant_paths": [
+      "notes/Nhật ký 45.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"thư viện\" once; three other notes have \"thư\" and \"viện\" more often, reversed or apart.",
+    "hard": "context"
+  },
+  {
+    "id": "vi-compound-28",
+    "query": "giày dép",
+    "relevant_paths": [
+      "notes/Nhật ký 49.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"giày dép\" once; three other notes have \"giày\" and \"dép\" more often, reversed or apart.",
+    "hard": "accented"
+  },
+  {
+    "id": "vi-compound-29",
+    "query": "ca si",
+    "relevant_paths": [
+      "notes/Nhật ký 53.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"ca sĩ\" once; three other notes have \"ca\" and \"sĩ\" more often, reversed or apart.",
+    "hard": "folded"
+  },
+  {
+    "id": "vi-compound-30",
+    "query": "nói chuyện mùa đông",
+    "relevant_paths": [
+      "notes/Nhật ký 57.md"
+    ],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "Harder: the note has \"mùa đông\" once; three other notes have \"mùa\" and \"đông\" more often, reversed or apart.",
+    "hard": "context"
   }
 ]
