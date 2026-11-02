@@ -35,7 +35,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: vantt-bundles-${{ inputs.tag || github.ref_name }}
+  group: vantt-bundles-${{ inputs.tag || github.ref_name }}${{ inputs.only && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: false
 
 env:
