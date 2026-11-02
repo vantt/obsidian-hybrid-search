@@ -1,7 +1,7 @@
 ---
 phase: 1
 title: "Phase 1: Hạ tầng fork và theo upstream"
-status: todo
+status: done
 priority: P1
 effort: "5d"
 dependencies: []

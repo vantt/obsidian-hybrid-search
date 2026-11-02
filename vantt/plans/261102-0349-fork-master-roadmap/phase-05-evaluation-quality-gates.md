@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Phase 5: Đo lường và cổng chất lượng"
-status: todo
+status: in-progress
 priority: P1
 effort: "6.5d"
 dependencies: []

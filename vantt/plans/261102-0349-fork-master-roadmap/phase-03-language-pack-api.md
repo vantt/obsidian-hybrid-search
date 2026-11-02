@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "Phase 3: Điểm cắm gói ngôn ngữ"
-status: todo
+status: done
 priority: P1
 effort: "6d"
 dependencies: [1]

@@ -1,3 +1,9 @@
+---
+title: "V22: đợt eval nhánh nghĩa"
+status: completed
+created: 2026-11-02
+---
+
 # V22: đợt eval nhánh nghĩa
 
 Trạng thái: hoàn thành (xem `vantt/reviews/semantic-eval-2026-11-02.md`).

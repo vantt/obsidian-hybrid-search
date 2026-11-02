@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Phase 2: Bản vá lõi phục vụ dự án"
-status: todo
+status: done
 priority: P1
 effort: "7.5d"
 dependencies: [1]

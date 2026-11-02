@@ -40,7 +40,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 | 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | Done |
 | 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Done |
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Done |
-| 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done (V09, V13, V17–V20) |
+| 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done |
 | 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | In progress (V10, V12, V22 xong; V15 chờ golden set của user) |
 | 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14, L24 | 2,5 | In progress (V14 xong, chạy lại báo cáo; L24 chờ) |
 
@@ -61,7 +61,7 @@ Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự ch
 
 ## Quy tắc điều phối (bắt buộc với lead và mọi agent con)
 
-1. **Một việc V-xx = một agent con = một plan con.** Plan con nằm ở `vantt/plans/<timestamp>-vNN-<slug>/` (tạo bằng `ak plan create <slug> --basedir vantt/plans`; **không** dùng thư mục mặc định `plans/` ở gốc repo vì nó nằm ngoài phần riêng của fork), trích đúng mục PRD, có điều kiện xong lấy từ phase file của plan này. Agent con kết thúc bằng khối `Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`.
+1. **Một việc V-xx = một agent con = một plan con.** Plan con nằm ở `vantt/plans/<timestamp>-vNN-<slug>/`; plan xong chuyển vào `vantt/plans/archive/` (user chốt 2026-11-02) (tạo bằng `ak plan create <slug> --basedir vantt/plans`; **không** dùng thư mục mặc định `plans/` ở gốc repo vì nó nằm ngoài phần riêng của fork), trích đúng mục PRD, có điều kiện xong lấy từ phase file của plan này. Agent con kết thúc bằng khối `Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`.
 2. **Commit trên `master` không chạm file của upstream.** Chỉ được sửa `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. File trong `.claude/` thêm bằng `git add -f`. Đặt `HUSKY=0` trong mọi script.
 3. **Mã OHS chỉ đổi qua bản vá.** Làm bản vá trên nhánh làm việc tạo từ nhánh phát hành `vantt/v0.17.2` của catchup (đã có các bản vá đứng trước trong `series.toml`), rồi xuất bằng `git format-patch` vào `vantt/patches/`, kèm spec theo mẫu PRD 9.3, probe ở `vantt/probes/`, test ở `test/vantt/` nằm trong bản vá. Spec ghi đường đã chọn (pack hay bản vá lõi) theo PRD 9.0.
 4. **File dùng chung, lead giữ và ghép tuần tự:** `vantt/patches/series.toml` (thứ tự P00, P01, P02, P03, P04, P09, P05, P06, P07), `vantt/scripts/catchup.mjs` (chủ là V01; V12 chỉ thêm móc), `vantt/packages/ohs-lang-vi/src/query.ts` (V13 trước, V17–V20 lần lượt). Bản vá chạm cùng file upstream (`src/search/searcher.ts`, `src/storage/db.ts`) phải dựng lại theo thứ tự series sau khi bản đứng trước đổi.

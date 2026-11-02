@@ -1,7 +1,7 @@
 ---
 phase: 6
 title: "Phase 6: Kiểm mỗi bản upstream mới"
-status: todo
+status: in-progress
 priority: P2
 effort: "2d"
 dependencies: [2, 5]

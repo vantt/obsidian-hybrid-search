@@ -1,3 +1,9 @@
+---
+title: "V19: alias không dấu, đoạn trích chữ gốc (M5c)"
+status: completed
+created: 2026-11-02
+---
+
 # V19: alias không dấu, đoạn trích chữ gốc (M5c)
 
 Trạng thái: hoàn tất (2026-11-02). Phụ thuộc: V13. PRD 10.2 (alias chính xác, đoạn trích, `matchedTerms`), 10.3.

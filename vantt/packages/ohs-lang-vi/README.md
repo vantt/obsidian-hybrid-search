@@ -134,7 +134,7 @@ Câu `vi-synonym` còn trượt: "xe hơi" (note ghi "ô tô"), "kinh phí" (h�
 
 ## Tách từ (V20, 2026-11-02)
 
-Eval mặc định (lõi `chk-series` `4c69fbf`), nDCG@5 so với V17+V18+V19 đã trộn: tổng 0,909 → 0,932; `vi-typo` 0,722 → 0,975; `vi-synonym` 0,645 → 0,729 (Hit@5 0,80 → 1,00); `vi-snippet` 0,743 → 0,777; `vi-alias` 0,975 → 1,000; 12 hạng còn lại không đổi. `vi-compound` 1,000 (baseline upstream 0,844) đã bão hoà từ V13; trên bộ từ ghép khó hơn (note mồi có hai âm tiết đảo hay rời nhau nhiều lần, `vantt/plans/261102-1221-v20-word-segmentation/hard-compound-gen.mjs`) seg đưa câu có dấu 0,779 → 1,000, câu không dấu 0,523 → 0,864, cụm trong câu dài 0,788 → 1,000. Eval tiếng Anh upstream giữ 0,735. Nên `segment` mặc định bật.
+Eval mặc định (lõi `chk-series` `4c69fbf`), nDCG@5 so với V17+V18+V19 đã trộn: tổng 0,909 → 0,932; `vi-typo` 0,722 → 0,975; `vi-synonym` 0,645 → 0,729 (Hit@5 0,80 → 1,00); `vi-snippet` 0,743 → 0,777; `vi-alias` 0,975 → 1,000; 12 hạng còn lại không đổi. `vi-compound` 1,000 (baseline upstream 0,844) đã bão hoà từ V13; trên bộ từ ghép khó hơn (note mồi có hai âm tiết đảo hay rời nhau nhiều lần, `vantt/plans/archive/261102-1221-v20-word-segmentation/hard-compound-gen.mjs`) seg đưa câu có dấu 0,779 → 1,000, câu không dấu 0,523 → 0,864, cụm trong câu dài 0,788 → 1,000. Eval tiếng Anh upstream giữ 0,735. Nên `segment` mặc định bật.
 
 - Câu trộn tiếng Anh không dùng nhánh seg: bật cho mọi câu làm `vi-mixed-en` tụt 0,033 ("kiểm tra code trước khi merge" kéo note có "kiểm tra" lên trên note đích); trọng số 0,5 hay 0,75 không gỡ được.
 - Chỉ giữ từ điển hai âm tiết: từ ba âm tiết trở lên nuốt âm tiết của từ sau khi khớp dài nhất (`an toàn khu` + `vực`).

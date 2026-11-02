@@ -1,3 +1,9 @@
+---
+title: "V05 — Bản vá P09 `unicode-inline-tags`"
+status: completed
+created: 2026-11-02
+---
+
 # V05 — Bản vá P09 `unicode-inline-tags`
 
 - Trạng thái: done (chờ lead ghép vào `series.toml`)

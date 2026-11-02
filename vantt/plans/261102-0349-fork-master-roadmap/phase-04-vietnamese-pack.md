@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Phase 4: Gói tiếng Việt ohs-lang-vi"
-status: todo
+status: done
 priority: P1
 effort: "16d"
 dependencies: []
@@ -83,5 +83,5 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 ## Ghi chú sau V20
 
 - Từ điển từ ghép: `pyvi` `words.txt` (MIT), 22.574 từ hai âm tiết; 95% mục trùng danh sách GPL `Viet74K` nên có thể cùng gốc (ghi ở `data/README.md`).
-- `segment` mặc định bật: tổng nDCG@5 0,909 → 0,932, không hạng nào tụt; `vi-compound` bão hoà (1,000), đo thêm trên bộ khó trong `vantt/plans/261102-1221-v20-word-segmentation/`. Đề xuất cho fixture: thêm câu `vi-compound` kiểu bộ khó (note mồi chứa hai âm tiết đảo, rời nhau, nhiều lần hơn note đích; câu không dấu; cụm trong câu dài).
+- `segment` mặc định bật: tổng nDCG@5 0,909 → 0,932, không hạng nào tụt; `vi-compound` bão hoà (1,000), đo thêm trên bộ khó trong `vantt/plans/archive/261102-1221-v20-word-segmentation/`. Đề xuất cho fixture: thêm câu `vi-compound` kiểu bộ khó (note mồi chứa hai âm tiết đảo, rời nhau, nhiều lần hơn note đích; câu không dấu; cụm trong câu dài).
 
