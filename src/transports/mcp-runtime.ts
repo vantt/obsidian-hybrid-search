@@ -277,6 +277,7 @@ function callStatusTool(a: Record<string, unknown>, runtime: McpRuntime): McpToo
     indexing_errors: getIndexFailures(),
     links: stats.links,
     last_indexed: stats.lastIndexed,
+    db_path: config.dbPath,
     db_size_mb:
       stats.dbSizeBytes !== null ? Math.round((stats.dbSizeBytes / 1024 / 1024) * 10) / 10 : null,
     api_base_url: useRemoteEmbeddings() ? config.apiBaseUrl : null,

@@ -52,7 +52,18 @@ export const config = {
   get rerankerModel(): string {
     return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
   },
+  /** Absolute path of an index database kept outside the default location; unset means the default. */
+  get dbPathOverride(): string | undefined {
+    const raw = process.env.OBSIDIAN_DB_PATH?.trim();
+    if (!raw) return undefined;
+    if (!path.isAbsolute(raw)) {
+      throw new Error(`OBSIDIAN_DB_PATH must be an absolute path (received "${raw}")`);
+    }
+    return path.normalize(raw);
+  },
   get dbPath(): string {
+    const override = this.dbPathOverride;
+    if (override) return override;
     const v = process.env.OBSIDIAN_VAULT_PATH;
     if (!v) throw new Error('OBSIDIAN_VAULT_PATH environment variable is required');
     return path.join(v, '.obsidian-hybrid-search.db');

@@ -154,7 +154,7 @@ ohs reindex
 ohs "zettelkasten"
 ```
 
-From outside the vault, set `OBSIDIAN_VAULT_PATH` or pass `--db /path/to/vault/.obsidian-hybrid-search.db` explicitly.
+From outside the vault, set `OBSIDIAN_VAULT_PATH` or pass `--db /path/to/vault/.obsidian-hybrid-search.db` explicitly. With `OBSIDIAN_VAULT_PATH` set, `--db` also selects an existing database that records that vault.
 
 ### Optional remote embeddings
 
@@ -491,6 +491,7 @@ Set `OBSIDIAN_PREFIX` to add a prefix to every tool name. For example, `myvault_
 | Environment variable               | Default                              | Description                                                                                                                              |
 | ---------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `OBSIDIAN_VAULT_PATH`              | Required for MCP; CLI auto-detects   | Absolute path to your vault                                                                                                              |
+| `OBSIDIAN_DB_PATH`                 | `<vault>/.obsidian-hybrid-search.db` | Absolute path of the index DB; keeps it out of the vault (sync tools). Refused if it records another vault.                              |
 | `OBSIDIAN_PREFIX`                  | `""`                                 | Optional MCP tool prefix, e.g. `myvault_` → `myvault_search`, `myvault_read`                                                             |
 | `OBSIDIAN_IGNORE_PATTERNS`         | `.obsidian/**,templates/**,*.canvas` | Comma-separated ignore patterns                                                                                                          |
 | `OBSIDIAN_RESPECT_GITIGNORE`       | `true`                               | Read root and nested `.gitignore` files; set to `false` to disable                                                                       |
