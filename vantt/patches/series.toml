@@ -1,0 +1,27 @@
+# Patch series applied by vantt/scripts/catchup.mjs on top of an upstream tag (PRD 6, 9.1).
+#
+# Patches are applied in file order. Planned order (PRD 9.4):
+#   P00 fork-identity, P01 language-pack-api, P02 db-path, P03 vector-export,
+#   P04 stdio-parity, P09 unicode-inline-tags, P05 block-anchors,
+#   P06 restrict-paths, P07 index-events
+#
+# Each patch is one [[patches]] table. Supported syntax: comments, strings
+# ("..." or '...'), arrays of strings (may span lines), booleans.
+#
+# [[patches]]
+# id = "db-path"                          # required, unique, kebab-case; commit gets "Patch-Id: <id>"
+# name = "feat(storage): allow the index database outside the vault"   # required, commit subject
+# patch_file = "0002-db-path.patch"      # required, `git format-patch` output, relative to vantt/patches/
+# metadata_file = "0002-db-path.spec.md" # spec (PRD 9.3): invariants, touch points, what to do on conflict
+# consumer = "pkm installer; Obsidian Sync users"
+# upstream_status = "unsubmitted"         # unsubmitted | issue_opened | pr_opened | merged | rejected
+#                                         # "merged" = catchup skips the patch
+# upstream_ref = ""                       # issue or PR link
+# touches = ["src/runtime/config.ts", "src/vault/vault-config.ts"]
+# test_command = "npx vitest run test/vantt/db-path.test.ts"         # tier T2
+# capability_check = "node dist/src/cli.js status --json | node vantt/scripts/expect.mjs db_path"
+# probe = "vantt/probes/db-path.mjs"      # PRD 9.2; run by the upstream review, not by catchup
+# phase = "now"                           # now | later
+#
+# After a conflict is fixed and the run goes green, catchup re-exports every
+# applied patch into this directory (PRD 6.4); commit the refreshed files on master.

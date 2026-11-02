@@ -40,7 +40,7 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 ## Todo
 
 - [x] V00 cài đặt fork xong
-- [ ] V01 catchup và skill `ohs-catchup`
+- [x] V01 catchup và skill `ohs-catchup`
 - [ ] V02 CI catchup và pr-check, Actions chỉ còn `vantt-*`
 - [ ] V03 gói dựng sẵn 4 nền và smoke
 
@@ -50,6 +50,14 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 - V01: chạy trên `v0.17.2` ra nhánh `vantt/v0.17.2` xanh với chuỗi bản vá rỗng và với bản vá giả; diễn tập xung đột trả mã 3, `--abort` trả repo sạch, `--continue` sau khi sửa thì xanh và bản vá được xuất lại.
 - V02: chạy tay xanh; một lần hỏng cố ý mở đúng một issue.
 - V03: Release có 4 gói kèm sha256; smoke xanh cả 4 nền; kích thước được ghi.
+
+## Ghi chú sau V01
+
+- Nhánh `vantt/v0.17.2` đã đẩy lên origin (catchup thật, xanh, `0.17.2-vantt.1`).
+- Upstream đòi npm 12.2.0 qua `devEngines`; catchup tự cài npm 12.2.0 vào `vantt/.work/tools/`. Agent chạy `npm`/`npx` trong cây OHS phải dùng npm 12.2.0 (`npx -y npm@12.2.0 ...`). CI (V02, V03) cũng phải ghim npm 12.2.0.
+- Build chạy `npm ci --ignore-scripts && npm rebuild` vì `prepare` của upstream từ chối khi `.claude/skills` là thư mục thật.
+- Móc T4/T5 cho V12: `node vantt/scripts/{invariance,quality-gate}.mjs --target-ref <ref> --target-sha <sha> --branch <branch> --json [--with-lang <id>]`, mô tả ở đầu `vantt/scripts/lib/tiers.mjs`.
+- Đồng bộ `master` với upstream (PRD 6.6) đã viết trong skill `ohs-catchup`; V02 tự động hoá.
 
 ## Risk
 
