@@ -72,6 +72,7 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 - Mặc định: `telex`, `typo`, `segment` bật theo quy tắc eval. Câu lẫn tiếng Anh không dùng view `seg`.
 - Từ điển từ ghép: danh sách của `trungtv/pyvi` (MIT), 22.574 từ hai âm tiết, 266 KB; nguồn gốc gốc của pyvi chưa rõ (95% trùng Viet74K, GPL). Thay được bằng một file. User chốt 2026-11-02: thay bằng danh sách học thống kê từ văn bản có giấy phép rõ, dùng pyvi chỉ lúc phát triển để chỉnh và đo (V20b). Giữ `segment` bật; thêm câu từ ghép khó vào fixture.
 - Test fast-check "token invariant for every view" trong `test/pack.test.ts` từng hỏng ngẫu nhiên do hàm đếm của chính test; đã sửa helper `viewTokens`, giữ nguyên thuộc tính, chạy ổn ở `FC_NUM_RUNS=20000`.
+- V13b (2026-11-02): sửa lỗi `restoreForEmbedding` đổi "Hội An" thành "hội ăn" (chữ gõ có dấu giữ nguyên; chữ không dấu trong câu có dấu một phần chỉ phục hồi khi vault không có dạng không dấu và đủ tin cậy). `restoreForEmbedding` bật mặc định: nDCG@5 0,932 → 0,954, không hạng mục nào tụt.
 
 ## Risk
 
