@@ -13,6 +13,8 @@ import { normalizeNotePath } from '../content/text-normalization.js';
 import {
   buildFilterPredicate,
   hasFilterValue,
+  hasPathsFilter,
+  normalizePathSet,
   type FilterPredicate,
 } from '../contracts/filter-predicate.js';
 import { activeModelName, embed } from '../inference/embedder.js';
@@ -163,6 +165,8 @@ export interface SearchOptions {
   threshold?: number;
   tag?: string | string[];
   frontmatter?: string | string[];
+  /** Restrict every retrieval arm to exactly these vault-relative note paths. */
+  paths?: string[];
   related?: boolean;
   depth?: number;
   direction?: 'outgoing' | 'backlinks' | 'both';
@@ -1292,6 +1296,13 @@ const searchCache = new LRUCache<SearchResult[]>(100);
  *  filter-only branch's FETCH_ALL so both paths cap the vault the same way. */
 const UNLIMITED_RESULTS = 10000;
 
+const compareCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+function pathsKey(paths: string[] | undefined): string {
+  if (!hasPathsFilter(paths)) return '';
+  return `\0paths\0${normalizePathSet(paths).sort(compareCodeUnit).join('\n')}`;
+}
+
 function cacheKey(input: string, options: SearchOptions): string {
   const scopeStr = Array.isArray(options.scope) ? options.scope.join(',') : (options.scope ?? '');
   const tagStr = Array.isArray(options.tag) ? options.tag.join(',') : (options.tag ?? '');
@@ -1302,6 +1313,8 @@ function cacheKey(input: string, options: SearchOptions): string {
   const rerankStr = options.rerank ? config.rerankerModel : '';
   const queriesStr = options.queries && options.queries.length > 1 ? options.queries.join('|') : '';
   const anchorsStr = options.anchors ? 'a' : '';
+  // Empty unless paths is set, so the key is unchanged otherwise.
+  const pathsStr = pathsKey(options.paths);
   // Empty unless explain or an active language pack applies, so the key is unchanged otherwise.
   const pack = activeLanguagePack();
   const languageStr =
@@ -1310,7 +1323,7 @@ function cacheKey(input: string, options: SearchOptions): string {
   //   getDbVersion() — shared via SQLite settings; any process that modifies the DB
   //                    bumps it, invalidating caches in all other processes.
   //   localVersion   — in-process counter; bumpIndexVersion() for test-suite isolation.
-  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}${languageStr}`;
+  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}${languageStr}${pathsStr}`;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity -- primary search entry-point; complexity is inherent in the multi-mode, multi-filter pipeline
@@ -1351,13 +1364,17 @@ export async function search(input: string, options: SearchOptions = {}): Promis
     const fmStr = Array.isArray(options.frontmatter)
       ? options.frontmatter.join(',')
       : (options.frontmatter ?? '');
-    const key = `related\0v${getDbVersion()}_${getIndexVersion()}\0${resolvedPath}\0${maxDepth}\0${direction}\0${linkType}\0${snippetLength}\0${scopeStr}\0${tagStr}\0${fmStr}`;
+    const key = `related\0v${getDbVersion()}_${getIndexVersion()}\0${resolvedPath}\0${maxDepth}\0${direction}\0${linkType}\0${snippetLength}\0${scopeStr}\0${tagStr}\0${fmStr}${pathsKey(options.paths)}`;
     const cached = searchCache.get(key);
     if (cached) return cached;
     let related = searchRelated(resolvedPath, maxDepth, direction, snippetLength, linkType);
     // Apply scope, tag, and frontmatter filters (related bypasses the normal pipeline)
     if (hasFilterValue(options.scope)) {
       related = related.filter((r) => matchesScopeFilter(r.path, options.scope!));
+    }
+    if (hasPathsFilter(options.paths)) {
+      const allowed = new Set(normalizePathSet(options.paths));
+      related = related.filter((r) => allowed.has(r.path));
     }
     if (hasFilterValue(options.tag)) {
       const allowedPaths = filterNotePathsByTag(
@@ -1397,8 +1414,13 @@ export async function search(input: string, options: SearchOptions = {}): Promis
   const hasFrontmatterFilter = hasFilterValue(options.frontmatter);
   const hasTagFilter = hasFilterValue(options.tag);
   const hasScopeFilter = hasFilterValue(options.scope);
+  const hasPaths = hasPathsFilter(options.paths);
 
-  if (!input && !isPathLookup && (hasFrontmatterFilter || hasTagFilter || hasScopeFilter)) {
+  if (
+    !input &&
+    !isPathLookup &&
+    (hasFrontmatterFilter || hasTagFilter || hasScopeFilter || hasPaths)
+  ) {
     const fmKey = cacheKey('', options);
     const cachedFm = searchCache.get(fmKey);
     if (cachedFm) return cachedFm;
@@ -1435,6 +1457,11 @@ export async function search(input: string, options: SearchOptions = {}): Promis
     // Apply scope filter
     if (hasScopeFilter) {
       fmResults = fmResults.filter((r) => matchesScopeFilter(r.path, options.scope!));
+    }
+
+    if (hasPaths) {
+      const allowed = new Set(normalizePathSet(options.paths!));
+      fmResults = fmResults.filter((r) => allowed.has(r.path));
     }
 
     // Apply tag filter
