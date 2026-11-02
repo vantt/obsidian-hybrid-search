@@ -18,6 +18,18 @@ export const datasetDir = (tree, corpus) => path.join(tree, 'fixtures', corpus, 
 export const goldenFile = (tree, corpus) => path.join(tree, 'fixtures', corpus, 'golden-set.json');
 
 /**
+ * Golden set in the form upstream's eval compares: upstream stores note paths in NFD
+ * (src/content/text-normalization.ts) and compares paths as strings, so an NFC path
+ * (what Linux and Windows file names and a hand-written golden set use) never matches.
+ */
+export const nfdGolden = (queries) =>
+  queries.map((q) => ({
+    ...q,
+    ...(q.relevant_paths && { relevant_paths: q.relevant_paths.map((p) => p.normalize('NFD')) }),
+    ...(q.partial_paths && { partial_paths: q.partial_paths.map((p) => p.normalize('NFD')) }),
+  }));
+
+/**
  * Environment of an eval run: local embedding model, no personal vault settings, and no
  * fork switches (language pack, db path...) unless passed in `extra`.
  */

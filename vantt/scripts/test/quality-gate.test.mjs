@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { baseVersion, compareVersions, pickBaseline, writeBaseline } from '../lib/baselines.mjs';
-import { platformKey } from '../lib/eval-run.mjs';
+import { nfdGolden, platformKey } from '../lib/eval-run.mjs';
 import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from '../lib/gates.mjs';
 import { main } from '../quality-gate.mjs';
 import { git, write } from './helpers.mjs';
@@ -21,6 +21,17 @@ const res = (summary, cats = {}, size = 10) => ({
   by_category: Object.fromEntries(Object.entries(cats).map(([k, v]) => [k, { ndcg_5: 0.8, ...v }])),
 });
 const byId = (checks) => Object.fromEntries(checks.map((c) => [c.id, c]));
+
+describe('nfdGolden', () => {
+  it('turns relevant and partial paths into NFD and keeps everything else', () => {
+    const nfc = 'Đường về nhà.md'.normalize('NFC');
+    const [q] = nfdGolden([{ id: 'a', query: nfc, relevant_paths: [nfc], partial_paths: [nfc, 'x.md'], category: 'c' }]);
+    expect(q.relevant_paths).toEqual([nfc.normalize('NFD')]);
+    expect(q.partial_paths).toEqual([nfc.normalize('NFD'), 'x.md']);
+    expect(q.query).toBe(nfc);
+    expect(nfdGolden([{ id: 'b' }])).toEqual([{ id: 'b' }]);
+  });
+});
 
 describe('upstreamChecks', () => {
   const cfg = CONFIG.upstream;
@@ -199,8 +210,10 @@ const a = process.argv;
 const get = (f) => a[a.indexOf(f) + 1];
 const pack = process.env.OHS_LANGUAGE_PACK;
 const worse = fs.existsSync('eval/behavior.txt');
-const score = pack ? Number(fs.readFileSync(path.join(pack, 'score.txt'), 'utf8')) : worse ? 0.7 : 0.8;
 const golden = JSON.parse(fs.readFileSync(get('--golden-set'), 'utf8'));
+// Like upstream, paths compare as NFD strings: an NFC path in the golden set never matches.
+const nfc = golden.some((q) => [...(q.relevant_paths ?? []), ...(q.partial_paths ?? [])].some((p) => p !== p.normalize('NFD')));
+const score = nfc ? 0 : pack ? Number(fs.readFileSync(path.join(pack, 'score.txt'), 'utf8')) : worse ? 0.7 : 0.8;
 console.log('SECRET-QUERY SECRET-PATH ' + get('--vault'));
 console.error('SECRET-STDERR');
 const per_query = golden.map((q) => ({ id: q.id, query: 'SECRET-QUERY', category: q.category, ndcg_5: score, top_paths: ['SECRET-PATH.md'] }));
@@ -323,6 +336,18 @@ describe('quality-gate CLI on a stub eval', () => {
     expect(report.with_pack.summary.ndcg_5).toBe(0.85);
     expect(out + err).not.toMatch(/SECRET/);
     expect(existsSync(path.join(root, 'vantt/.work/quality-private'))).toBe(false);
+  });
+
+  it('--private compares NFC golden paths the way upstream stores them (NFD)', async () => {
+    write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
+    const priv = path.join(dir, 'nfc.json');
+    const nfc = 'Hoà giải.md'.normalize('NFC');
+    writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'q', relevant_paths: [nfc], partial_paths: [nfc], category: 'c' }]));
+    const { code, report } = await run(['--private', priv, '--vault', path.join(root, 'fixtures/obsidian-help/dataset'), '--with-lang', 'de', '--json']);
+    expect(code).toBe(0);
+    expect(report.without_pack.summary.ndcg_5).toBe(0.8);
+    expect(report.with_pack.summary.ndcg_5).toBe(0.85);
+    expect(JSON.parse(readFileSync(priv, 'utf8'))[0].relevant_paths[0]).toBe(nfc);
   });
 
   it('--private fails when the pack regresses the private vault, still without content', async () => {
