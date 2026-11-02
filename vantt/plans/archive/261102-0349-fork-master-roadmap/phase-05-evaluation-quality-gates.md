@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Phase 5: Đo lường và cổng chất lượng"
-status: in-progress
+status: done
 priority: P1
 effort: "6.5d"
 dependencies: []
@@ -46,7 +46,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - [x] V15 eval trên vault thật: `vantt/reviews/v0.17.2-vantt.2.private.md` (61 câu; có gói nDCG@5 0,600 lên 0,698; cổng theo hạng mục hỏng, chờ người quyết)
 - [x] V22 đợt eval model nhúng, `restoreForEmbedding`, reranker
 
-- [ ] V15b sửa hạng mục tụt trên vault thật: `--private-detail` xong (`6cda0fc`); chờ chạy trên máy user (chi tiết từng câu + `learn-abbr`), rồi sửa gói và đo lại
+- [x] V15b tách sang plan riêng `vantt/plans/261102-1825-v15b-real-vault-regressions/`: `--private-detail` xong (`6cda0fc`); chờ chạy trên máy user (chi tiết từng câu + `learn-abbr`), rồi sửa gói và đo lại
 
 ## Success Criteria
 

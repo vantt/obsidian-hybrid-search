@@ -836,7 +836,7 @@ pkm-web (máy giữ vault; thuộc repo dự án, không thuộc fork)
 Một "ngày" là một phiên làm việc cả ngày của agent có người duyệt. Cột "Cần" là việc phải xong trước.
 
 ### 14.1. Làm ngay (nhãn: Bắt buộc)
-Trạng thái 2026-11-02: mọi việc bắt buộc đã xong (đánh dấu "(xong)"), theo [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md). Còn theo dõi: V15b (sửa các hạng mục tụt trên vault thật). L24 (mục 14.2) cũng đã xong.
+Trạng thái 2026-11-02: mọi việc bắt buộc đã xong (đánh dấu "(xong)"), theo [plan tổng](plans/archive/261102-0349-fork-master-roadmap/plan.md). Còn theo dõi: V15b (sửa các hạng mục tụt trên vault thật), plan riêng [`261102-1825-v15b-real-vault-regressions`](plans/261102-1825-v15b-real-vault-regressions/plan.md). L24 (mục 14.2) cũng đã xong.
 | ID | Việc | Cần | Công | Xong khi |
 |---|---|---|---|---|
 | V00 (xong) | Cài đặt fork (mục 5): remote, `.gitignore`, `vantt/README.md`, tắt workflow upstream, bật workflow `vantt-*` | — | 0,5 | `gh workflow list` chỉ có `vantt-*` bật |

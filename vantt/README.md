@@ -33,7 +33,7 @@ Fork của [flowing-abyss/obsidian-hybrid-search](https://github.com/flowing-aby
 - Script: [`scripts/catchup.mjs`](scripts/catchup.mjs) (skill [`ohs-catchup`](../.claude/skills/ohs-catchup/SKILL.md)), `invariance.mjs`, `quality-gate.mjs` (cả `--private` và `--private-detail` cho vault thật), `review-upstream.mjs`, `bundle.mjs`, `semantic-eval.mjs`.
 - Eval: bộ `vi` ở [`eval/vi/`](eval/vi/) (fixture `vi-search` `v0.11.0`, 270 câu, 17 hạng mục). Trên corpus sinh, gói `vi` nâng nDCG@5 từ 0,646 (upstream) lên 0,944; eval tiếng Anh của upstream giữ 0,735; không gói thì 58/58 câu trùng upstream.
 - Báo cáo trong [`reviews/`](reviews/): review upstream [`v0.17.2.md`](reviews/v0.17.2.md) kèm biểu đồ xu hướng, eval nhánh nghĩa [`semantic-eval-2026-11-02.md`](reviews/semantic-eval-2026-11-02.md), eval vault thật [`v0.17.2-vantt.2.private.md`](reviews/v0.17.2-vantt.2.private.md) (chỉ số tổng hợp).
-- Lộ trình: [plan tổng](plans/261102-0349-fork-master-roadmap/plan.md) (nguồn yêu cầu là PRD mục 14); plan con đã xong ở [`plans/archive/`](plans/archive/).
+- Lộ trình: [plan tổng](plans/archive/261102-0349-fork-master-roadmap/plan.md) (nguồn yêu cầu là PRD mục 14); plan con đã xong ở [`plans/archive/`](plans/archive/). Việc đang mở: [V15b](plans/261102-1825-v15b-real-vault-regressions/plan.md) (sửa các hạng mục gói `vi` tụt trên vault thật, chờ user chạy chi tiết trên máy).
 
 ## Quy tắc
 - Commit trên `master` của fork không sửa file của upstream. Thay đổi mã OHS chỉ đi qua bản vá trong `vantt/patches/`.

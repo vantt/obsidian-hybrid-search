@@ -29,7 +29,7 @@ PRD mục 5, bước 2, 3 và phần còn lại của bước 1; bảng V00 ở 
 ## Xong khi
 
 - [x] `git check-ignore` khớp cả ba mẫu trong `vantt/`.
-- [x] `vantt/README.md` có trạng thái khớp repo và link tới `plans/261102-0349-fork-master-roadmap/plan.md`.
+- [x] `vantt/README.md` có trạng thái khớp repo và link tới `plans/archive/261102-0349-fork-master-roadmap/plan.md`.
 - [x] Actions vẫn tắt, không sửa file upstream.
 
 ## Ghi chú

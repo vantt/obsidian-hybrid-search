@@ -1,7 +1,7 @@
 ---
 title: "Lộ trình tổng của fork vantt/obsidian-hybrid-search"
 description: "Plan tổng cho agent lead: mọi việc bắt buộc V00–V25 (trừ V16) của PRD, xếp theo 6 nhóm và theo đợt chạy song song, để điều phối agent con qua /ak-plan và /ak-cook."
-status: in-progress
+status: completed
 priority: P1
 effort: "~44 ngày công agent"
 branch: master
@@ -41,7 +41,7 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 | 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Done |
 | 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Done |
 | 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done |
-| 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | In progress (V10, V12, V15, V22 xong; V15 xong, user chốt dùng gói; V15b sửa hạng mục tụt đang làm) |
+| 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | Done (V10, V12, V15, V22 xong; V15 xong, user chốt dùng gói; V15b tách sang plan riêng) |
 | 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14, L24 | 2,5 | Done |
 
 Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự chạy theo việc, ở bảng dưới.
@@ -90,7 +90,7 @@ Bằng chứng (2026-11-02): catchup CI run 41419225358 (T1–T5, 9 bản vá, `
 - [x] `node vantt/scripts/catchup.mjs --with-lang vi --json` trên tag upstream mới nhất thoát 0, chạy đủ T1–T5, mọi bản vá P00–P09 được áp.
 - [x] Release `vX.Y.Z-vantt.N` có 4 gói dựng sẵn kèm sha256, smoke xanh cả 4 nền.
 - [x] Cổng chất lượng đạt mục tiêu G3 và G8 (PRD 11.6) trên corpus sinh; bất biến G2 trùng 100%.
-- [ ] V15b: tìm và sửa hạng mục tụt trên vault thật (user thêm 2026-11-02).
+- [x] V15b: tách sang plan riêng [`261102-1825-v15b-real-vault-regressions`](../../261102-1825-v15b-real-vault-regressions/plan.md) (user chốt 2026-11-02).
 - [x] L24: báo cáo review có biểu đồ chỉ số qua các bản (user thêm vào goal 2026-11-02).
 - [x] Có `vantt/reviews/v0.17.2.md` theo mẫu PRD 12.5, có báo cáo V22 và số tổng hợp V15.
 - [x] `vantt/README.md` cập nhật trạng thái; PRD mục 14 đánh dấu việc đã xong.
