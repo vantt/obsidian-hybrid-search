@@ -16,6 +16,10 @@ on:
       tag:
         description: 'Fork release tag, e.g. v0.17.2-vantt.1'
         required: true
+      reuse_run:
+        description: 'Run id of an earlier vantt-bundles run: skip the build and re-test/re-release its bundle artifacts'
+        required: false
+        default: ''
   workflow_call:
     inputs:
       tag:
@@ -60,6 +64,7 @@ jobs:
 
   bundle:
     needs: prepare
+    if: ${{ inputs.reuse_run == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -68,9 +73,10 @@ jobs:
             runner: windows-latest
           - platform: darwin-arm64
             runner: macos-14
-          # macos-13 (Intel) is retired by GitHub; macos-15-intel is the remaining native Intel runner.
-          - platform: darwin-x64
-            runner: macos-15-intel
+          # darwin-x64 (macos-15-intel) is left out: onnxruntime-node 1.30 ships no darwin/x64
+          # binding, so upstream's local embeddings cannot run on Intel Macs (smoke: "Cannot find
+          # module .../napi-v6/darwin/x64/onnxruntime_binding.node"). bundle.mjs refuses such a build.
+          # Add the row back (here and in smoke) once a dependency version has the binding.
           - platform: linux-x64
             runner: ubuntu-latest
     runs-on: ${{ matrix.runner }}
@@ -113,7 +119,8 @@ jobs:
           if-no-files-found: error
 
   smoke:
-    needs: bundle
+    needs: [prepare, bundle]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.bundle.result == 'success' || needs.bundle.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
@@ -122,8 +129,6 @@ jobs:
             runner: windows-latest
           - platform: darwin-arm64
             runner: macos-14
-          - platform: darwin-x64
-            runner: macos-15-intel
           - platform: linux-x64
             runner: ubuntu-latest
     runs-on: ${{ matrix.runner }}
@@ -143,6 +148,16 @@ jobs:
         with:
           name: bundle-${{ matrix.platform }}
           path: ${{ runner.temp }}/in
+          run-id: ${{ inputs.reuse_run || github.run_id }}
+          github-token: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
+
+      # A reused run keeps its artifacts in that run; the release job reads this run's.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ inputs.reuse_run != '' }}
+        with:
+          name: bundle-${{ matrix.platform }}
+          path: ${{ runner.temp }}/in/*
+          if-no-files-found: error
 
       # The model is downloaded on the first run (about 120 MB) and cached after.
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -179,6 +194,7 @@ jobs:
   # Only bundles that passed the smoke test on every platform are published.
   release:
     needs: [bundle, smoke]
+    if: ${{ !cancelled() && needs.smoke.result == 'success' && (needs.bundle.result == 'success' || needs.bundle.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -197,7 +213,7 @@ jobs:
           find artifacts -type f | sort
           shopt -s nullglob
           files=(artifacts/bundle-*/ohs-*)
-          [ "${#files[@]}" -ge 12 ] || { echo "::error::expected 4 bundles with .sha256 and .bundle.json, found ${#files[@]} files"; exit 1; }
+          [ "${#files[@]}" -ge 9 ] || { echo "::error::expected 3 bundles with .sha256 and .bundle.json, found ${#files[@]} files"; exit 1; }
           node tools/vantt/scripts/bundle-notes.mjs --dir artifacts --tag "$TAG" > notes.md
           cat notes.md >> "$GITHUB_STEP_SUMMARY"
           gh release upload "$TAG" "${files[@]}" --clobber

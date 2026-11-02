@@ -268,6 +268,10 @@ export async function main(argv) {
   run('npm', ['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: app });
   run('npm', ['rebuild'], { cwd: app });
   rmSync(path.join(app, 'package-lock.json'), { force: true });
+  // Fail loudly when a dependency ships no native binary for this platform (onnxruntime-node 1.30 has none for darwin-x64).
+  const ort = path.join(app, 'node_modules', 'onnxruntime-node', 'bin', 'napi-v6', PLATFORMS[platform].os, PLATFORMS[platform].arch);
+  if (existsSync(path.join(app, 'node_modules', 'onnxruntime-node')) && !existsSync(path.join(ort, 'onnxruntime_binding.node')))
+    throw new Error(`onnxruntime-node ships no native binding for ${platform}; local embeddings cannot run on this platform`);
 
   // 3. Licenses before pruning (PRD 8.2).
   const licenses = path.join(root, 'LICENSES');
