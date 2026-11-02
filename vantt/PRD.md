@@ -387,6 +387,20 @@ ohs-<version>-<platform>/
 
 ## 9. Bản vá
 
+### 9.0. Pack hay bản vá lõi (user chốt 2026-11-02)
+Mọi tính năng thêm vào OHS đi một trong hai đường. Chọn trước khi viết spec:
+
+| Đường | Khi nào | Ví dụ |
+|---|---|---|
+| **Pack** (package riêng, cắm qua điểm cắm có sẵn) | Tính năng là hàm thuần trên chữ, cắm vào một điểm cắm lõi đã có (hiện chỉ có P01), **không** đổi cách lưu và **không** đổi cách chọn ứng viên | Gói ngôn ngữ; đồng nghĩa, viết tắt, tách từ, sửa Telex/gõ sai (mục 10) |
+| **Bản vá lõi** (một mục trong `series.toml`) | Tính năng đổi schema hoặc cách chia đoạn, đổi cách chọn ứng viên (lọc phải đẩy vào SQL **trước** khi cắt top-K), hoặc chạm vòng đời index | P02 `db-path`, P03 `vector-export`, P05 `block-anchors` (chunker và bảng `chunks`), P06 `restrict-paths`, P07 `index-events` |
+
+Quy tắc:
+1. **Không lọc sau top-K trong pack.** Lọc phải đi cùng `buildFilterPredicate` (`src/contracts/filter-predicate.ts`), được đẩy vào BM25, trigram và vector (`k = ?` của `vec_chunks`, `src/storage/search-queries.ts`). Lọc sau khi lõi đã cắt ứng viên làm mất kết quả (vùng 30 note, lấy 50 ứng viên trên cả vault, có thể chỉ còn 2) và phải lấy thừa rất nhiều nên chậm.
+2. **Không làm "khung plugin tính năng" chung.** Hook vào chunker, schema, bộ lọc SQL, vòng index cùng lúc là bản vá lớn hơn chính các tính năng, xung đột mỗi khi upstream sửa `searcher.ts`, `db.ts`. Chỉ mở điểm cắm mới khi có ít nhất hai cách dùng thật cùng cần nó (như P01 dùng cho mọi ngôn ngữ).
+3. **Bản vá lõi chỉ chứa cơ chế chung, nhỏ, có ích cho mọi người dùng OHS** (ví dụ P06 thêm loại điều kiện `paths[]` vào `buildFilterPredicate`). Phần riêng của sản phẩm (chọn tập note nào, xử lý sự kiện ra sao) nằm ở phía dự án. Nhờ vậy bản vá dễ gửi lên upstream (L08) và bỏ được khi upstream nhận.
+4. Spec của mọi bản vá và mọi pack ghi rõ đã chọn đường nào và vì sao, theo bảng trên.
+
 ### 9.1. `series.toml`
 ```toml
 [[patches]]
