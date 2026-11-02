@@ -17,16 +17,19 @@
 //
 // Private mode (V15) evaluates the user's own vault with their own golden set, which
 // live outside the repository. Only aggregate numbers are printed or written: never
-// a query, a path or a note title; the child's own output is swallowed. `--private-detail`
-// is the one exception: it writes per-query content to a local file outside the repository
-// (refused otherwise) and prints only that the file was written.
+// a query, a path or a note title; the child's own output is swallowed, except that a failed
+// child's own stderr tail is printed on the terminal (never into the report) so the failure can
+// be diagnosed. The vault is indexed with the user's note selection (OBSIDIAN_IGNORE_PATTERNS...)
+// and `_ohs/**` (the lexicon) ignored. `--private-detail` is the one exception: it writes
+// per-query content to a local file outside the repository (refused otherwise) and prints only
+// that the file was written.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, realpathSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { baseVersion, pickBaseline, writeBaseline } from './lib/baselines.mjs';
-import { evalEnv, goldenFile, nfdGolden, platformKey, prepareDataset, runDetail, runEvaluate } from './lib/eval-run.mjs';
+import { evalEnv, goldenFile, nfdGolden, platformKey, prepareDataset, privateEvalEnv, runDetail, runEvaluate } from './lib/eval-run.mjs';
 import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from './lib/gates.mjs';
 import { ensureNpm } from './lib/npm.mjs';
 import { git, sh } from './lib/proc.mjs';
@@ -92,11 +95,11 @@ function buildPack(dir, log) {
   if (pkg.main && !existsSync(path.join(dir, pkg.main))) throw new Error(`${pkg.name} has no ${pkg.main} after the build`);
 }
 
-function packEnv(config, lang, dir) {
+function packEnv(config, lang, dir, base = evalEnv) {
   const extra = { OHS_LANGUAGE_PACK: dir };
   const options = config.pack_options?.[lang];
   if (options) extra.OHS_LANGUAGE_PACK_OPTIONS = JSON.stringify(options);
-  return evalEnv(extra);
+  return base(extra);
 }
 
 /** eval/quality.ts floors (macOS ARM, as upstream's own gate). */
@@ -314,8 +317,8 @@ async function privateMode(opts, root, config) {
     writeFileSync(evalGolden, JSON.stringify(nfdGolden(JSON.parse(readFileSync(golden, 'utf8')))));
     log('Private eval: without pack, then with pack (output suppressed).');
     const common = { tree: root, vault, golden: evalGolden, scratch, k, capture: true };
-    const without = runEvaluate({ ...common, env: evalEnv() });
-    const withPack = runEvaluate({ ...common, env: packEnv(config, lang, dir) });
+    const without = runEvaluate({ ...common, env: privateEvalEnv() });
+    const withPack = runEvaluate({ ...common, env: packEnv(config, lang, dir, privateEvalEnv) });
     report.without_pack = aggregate(without);
     report.with_pack = aggregate(withPack);
     report.checks = regressionChecks('private-regression', {
@@ -331,8 +334,8 @@ async function privateMode(opts, root, config) {
     report.failed = v.failed;
     if (opts['private-detail']) {
       log('Private detail: per-query search with explain (output suppressed).');
-      const detailWithout = runDetail({ ...common, env: evalEnv() });
-      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir) });
+      const detailWithout = runDetail({ ...common, env: privateEvalEnv() });
+      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir, privateEvalEnv) });
       const queries = JSON.parse(readFileSync(golden, 'utf8'));
       const file = path.resolve(opts['private-detail']);
       mkdirSync(path.dirname(file), { recursive: true });
@@ -342,6 +345,8 @@ async function privateMode(opts, root, config) {
   } catch (e) {
     report.gate = 'error';
     report.error = e.message;
+    // Terminal only: the child's own stderr may name notes, so it never goes into the report.
+    if (e.stderrTail) log(`--- end of the child's stderr (local terminal only, do not paste publicly) ---\n${e.stderrTail}\n---`);
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }

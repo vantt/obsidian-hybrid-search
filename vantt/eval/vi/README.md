@@ -145,6 +145,10 @@ Chế độ `--private` chỉ in số tổng hợp (không câu hỏi, đường
 
 Quy tắc an toàn: file phải nằm **ngoài repo** (ngoài cây làm việc git, nên cũng ngoài `vantt/`); đường dẫn trong repo hay trong cây git khác bị từ chối ngay, thoát 2, chưa chạy gì. File ghi với quyền `0600`. Stdout/stderr chỉ in đường dẫn file đã ghi. Đừng dán nội dung file vào issue, PR, log hay báo cáo; báo cáo chỉ nêu số tổng hợp. Chạy lại với `--k 30` nếu cần thấy note đúng nằm ở hạng sâu hơn (số ở top-k, nên đổi `k` làm đổi nDCG).
 
+Vault được đánh chỉ mục như khi bạn tìm: giữ `OBSIDIAN_IGNORE_PATTERNS` (không đặt thì dùng mặc định của OHS `.obsidian/**,templates/**,*.canvas`), `OBSIDIAN_INCLUDE_PATTERNS`, `OBSIDIAN_CONTENT_IGNORE_PATTERNS` trong môi trường của bạn, và luôn thêm `_ohs/**` để lexicon không thành kết quả tìm. Luật `.gitignore` không dùng (bản sao vault nằm dưới thư mục làm việc bị git bỏ qua của repo). Model nhúng vẫn cố định `Xenova/multilingual-e5-small`.
+
+Khi một lượt con (eval hoặc lượt chi tiết) hỏng, báo cáo chỉ ghi `eval failed in private run (exit N)` hay `detail run failed (exit N)`; terminal in thêm khoảng 40 dòng cuối **stderr của chính tiến trình con** (không in stdout, nơi eval của upstream in từng câu hỏi). Stderr đó có thể nêu tên note: chỉ đọc trên máy bạn, đừng dán nguyên văn vào issue hay báo cáo.
+
 Cách điều tra một hạng mục tụt (ví dụ `vi-iy`):
 
 1. Lọc các mục `category` đó, tìm câu mà `with_pack.relevant_ranks` tệ hơn `without_pack` (hạng lớn hơn hoặc `null`).

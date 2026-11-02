@@ -47,6 +47,47 @@ export function evalEnv(extra = {}) {
   return { ...env, ...extra };
 }
 
+/** OHS's own default ignore patterns (src/runtime/config.ts). */
+const OHS_DEFAULT_IGNORE = '.obsidian/**,templates/**,*.canvas';
+
+/**
+ * Environment of a private-vault eval (V15): like `evalEnv`, but the vault is indexed the way
+ * the user's own search indexes it. The user's note selection (OBSIDIAN_IGNORE_PATTERNS, else
+ * OHS's default, plus OBSIDIAN_INCLUDE_PATTERNS and OBSIDIAN_CONTENT_IGNORE_PATTERNS) is kept,
+ * and `_ohs/**` is always ignored so the lexicon file never becomes a search result. Git ignore
+ * rules stay off: the vault copy lives under the repository's ignored work directory, whose
+ * ignore rules would hide every note.
+ */
+export function privateEvalEnv(extra = {}, source = process.env) {
+  const ignore = (source.OBSIDIAN_IGNORE_PATTERNS ?? OHS_DEFAULT_IGNORE)
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (!ignore.includes('_ohs/**')) ignore.push('_ohs/**');
+  const env = evalEnv({
+    OBSIDIAN_IGNORE_PATTERNS: ignore.join(','),
+    OBSIDIAN_INCLUDE_PATTERNS: source.OBSIDIAN_INCLUDE_PATTERNS ?? '',
+  });
+  if (source.OBSIDIAN_CONTENT_IGNORE_PATTERNS !== undefined) env.OBSIDIAN_CONTENT_IGNORE_PATTERNS = source.OBSIDIAN_CONTENT_IGNORE_PATTERNS;
+  return { ...env, ...extra };
+}
+
+/** Last `lines` non-empty lines of a child's output. */
+export const outputTail = (text, lines = 40) => text.split(/\r?\n/).filter((l) => l.trim()).slice(-lines).join('\n');
+
+/**
+ * Error of a failed child run. `stderrTail` holds the end of the child's own stderr when it was
+ * captured (never its stdout, where upstream's eval echoes every query): the caller prints it
+ * on the user's terminal only, never into a report.
+ */
+class ChildRunError extends Error {
+  constructor(message, res) {
+    super(message);
+    this.name = 'ChildRunError';
+    this.stderrTail = outputTail(res.stderr ?? '');
+  }
+}
+
 const copyFilter = (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src);
 
 const tsx = (cwd, argv, env, capture) => {
@@ -57,8 +98,11 @@ const tsx = (cwd, argv, env, capture) => {
     stdio: ['ignore', capture ? 'pipe' : 2, capture ? 'pipe' : 2],
     maxBuffer: 512 * 1024 * 1024,
   });
-  return { ok: res.status === 0, status: res.status, stdout: res.stdout ?? '', stderr: res.stderr ?? '' };
+  return { ok: res.status === 0, status: res.status, signal: res.signal, error: res.error?.message, stdout: res.stdout ?? '', stderr: res.stderr ?? '' };
 };
+
+/** How a child run ended: exit code, signal, or spawn error (e.g. output over maxBuffer). */
+const exitText = (res) => (res.error ? `spawn error: ${res.error}` : res.signal ? `signal ${res.signal}` : `exit ${res.status}`);
 
 /** Make sure `<tree>/fixtures/<corpus>/dataset` exists (downloads on first use). Returns its path. */
 export function prepareDataset(tree, corpus, log) {
@@ -91,7 +135,7 @@ export function runEvaluate({ tree, vault, golden, scratch, k = 10, env = evalEn
       env,
       capture,
     );
-    if (!res.ok) throw new Error(`eval failed in ${capture ? 'private run' : tree} (exit ${res.status})`);
+    if (!res.ok) throw new ChildRunError(`eval failed in ${capture ? 'private run' : tree} (${exitText(res)})`, res);
     log('  eval done');
     return JSON.parse(readFileSync(out, 'utf8'));
   } finally {
@@ -113,7 +157,7 @@ export function runDetail({ tree, vault, golden, scratch, k = 10, env = evalEnv(
     const out = path.join(work, 'detail.json');
     const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'detail-search.mjs');
     const res = tsx(tree, [script, '--tree', tree, '--vault', copy, '--queries', golden, '--output', out, '--k', String(k)], env, true);
-    if (!res.ok) throw new Error(`detail run failed (exit ${res.status})`);
+    if (!res.ok) throw new ChildRunError(`detail run failed (${exitText(res)})`, res);
     return JSON.parse(readFileSync(out, 'utf8'));
   } finally {
     rmSync(work, { recursive: true, force: true });
