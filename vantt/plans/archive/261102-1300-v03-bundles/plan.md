@@ -54,3 +54,8 @@ Windows: `tar.exe` đọc argv theo code page ANSI nên không `chdir` được 
 - Đo: 3 runner (AMD EPYC 9V74, 7763, 7763) cho kết quả giống nhau từng số, và chạy lại cùng một phía trên cùng máy cho kết quả giống hệt. Vậy phép đo xác định theo từng loại CPU, không ngẫu nhiên; độ lệch phụ thuộc loại CPU.
 - Sửa: `vantt-pin-effect.yml` ghi CPU, chỉ kết luận khi là AMD EPYC (loại CPU của số đã được user chấp nhận), nếu không thì chạy lại trên runner mới, tối đa 3 lần; hết 3 lần thì báo đỏ và không phát hành gói Intel. Danh sách cho phép giữ nguyên, không nới ngưỡng.
 - Run 41411464446 cho `v0.17.2-vantt.2`: lần 1 gặp CPU khác (không kết luận), lần 2 đạt; đủ 4 gói (12 file) trên Release, `latest`.
+
+## v0.17.2-vantt.4 (2026-11-02)
+- Run 41419225358 đỏ do lỗi hạ tầng: job eval clone fixture `v0.10.0` cố định trong khi `run-eval.mjs` và golden set đã sang `v0.11.0` ("golden-set.json differs..."). Đã sửa: các job lấy tag từ `FIXTURE_TAG` trong `run-eval.mjs`.
+- Run 41422251427 (EPYC 7763, cùng máy, khoá 1.30.0 so với bản thay 1.23.2) trên gói vi mới: obsidian-help ALL +0,007, multilingual +0,063 (đã chấp nhận); vi ALL +0,001, vi-semantic +0,004, vi-synonym 0,689 xuống 0,668 (-0,021, vẫn trong danh sách cho phép -0,017 ± 0,005), **vi-snippet 0,951 lên 0,975 (+0,024) vượt ngưỡng 0,01 và chưa được chấp nhận**. Đây là độ lệch thật của bản thay trên bộ dữ liệu và gói mới, không phải lỗi eval. Theo quy tắc, danh sách cho phép không tự sửa; `darwin-x64` của `v0.17.2-vantt.4` chưa phát hành (3 gói kia đã lên), chờ user quyết.
+
