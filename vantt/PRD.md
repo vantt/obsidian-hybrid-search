@@ -59,7 +59,7 @@ Trong mục 2.2, cột "Nguồn" cho biết ý đã bàn với user (`đã bàn`
 | N07 | Phát hành `ohs-lang-vi` công khai | Cộng đồng OHS dùng được, có người báo lỗi | gói vi | đã bàn | Gói ổn định qua 3 bản upstream | L09 |
 | N11 | Gợi ý ngay khi đang viết: ô cạnh bài nháp hiện đoạn gần nghĩa với đoạn đang gõ, bấm để chèn link | Giúp bước "express" ngay trên note, không phải đi tìm | dự án (plugin), cần P04 | đã bàn | Sau V08 | L13 |
 | N12 | OCR ảnh và PDF đính kèm vào phần chữ để tìm | Note toàn ảnh hết là nguồn nhiễu, tìm được chữ trong ảnh | fork hoặc dự án | đã bàn (đã nói chưa nên) | Khi note toàn ảnh thành phàn nàn thật; dự án riêng | L14 |
-| N13 | Phương án dự phòng: viết lại phần tìm bằng Rust | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
+| N13 | Phương án dự phòng: viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node; không liên quan tới việc chuyển script Python của dự án (V16) | Một binary, một DB, không Node | dự án (kế hoạch E12.7 giai đoạn 8) | đã bàn | Khi gói Node quá nặng, lỗi cài OHS thành phàn nàn thật, hoặc upstream ngừng | L15 |
 | N20 | Sổ câu tìm cục bộ (chỉ trên máy user, tắt mặc định): câu không ra kết quả, câu không mở note nào | Nguồn câu thật để bổ sung golden set | dự án | ý mới | Sau V15 | L22 |
 | N21 | LLM đề xuất câu hỏi và đáp án ứng viên từ vault để user duyệt nhanh khi làm golden set riêng | Giảm 2 giờ gán nhãn của user | dự án hoặc script fork | ý mới | Cùng V15 | L23 |
 | N22 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review | Thấy xu hướng, không chỉ so hai bản | fork (review) | ý mới | Sau V14 | L24 |
@@ -875,7 +875,7 @@ Nhãn: **Có thì tốt** (mục 2.2) hoặc **Đã chốt, làm sau**. Việc n
 | L09 | Có thì tốt (N07) | Phát hành `ohs-lang-vi` công khai, README cho cộng đồng OHS | Gói ổn định qua 3 bản upstream | 0,5 |
 | L13 | Có thì tốt (N11) | Gợi ý khi đang viết trong plugin dự án. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02); phía fork đã đủ: P04 (`read`, `neighbors`, `search` qua stdio), P07 (sự kiện index), P06 (giới hạn tập note) | Sau V08 | 2–3 |
 | L14 | Có thì tốt (N12) | OCR ảnh và PDF | Khi thành phàn nàn thật | 5+ (dự án riêng) |
-| L15 | Có thì tốt (N13) | Viết lại phần tìm bằng Rust | Khi điều kiện ở N13 xảy ra | 10–14 |
+| L15 | Có thì tốt (N13) | Viết lại toàn bộ OHS (index và tìm) bằng Rust, thay cho OHS chạy bằng Node (không phải chuyển script Python của dự án, việc đó ở V16) | Khi điều kiện ở N13 xảy ra | 10–14 |
 | L22 | Có thì tốt (N20), ý mới | Sổ câu tìm cục bộ, tắt mặc định, không rời máy. **Thuộc repo `vantt/obsidian-pkm-automation`** (user chốt 2026-11-02): plugin ghi câu tìm và việc có mở note từ kết quả; xuất câu thành golden set riêng rồi chạy `quality-gate.mjs --private` của fork. Fork không thêm gì | Sau V15 | 1 |
 | L23 | Có thì tốt (N21), ý mới | LLM đề xuất câu hỏi và đáp án ứng viên cho golden set riêng | Cùng V15 | 0,5 |
 | L24 | Có thì tốt (N22), ý mới | Biểu đồ chỉ số qua các bản trong báo cáo review | Sau V14 | 0,5 |
