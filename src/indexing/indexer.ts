@@ -3,9 +3,11 @@ import { createHash } from 'node:crypto';
 import { readdirSync, statSync, type Stats } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { extractChunkAnchors } from '../content/block-anchors.js';
 import {
   chunkNote,
   createChunkBoundaryIndex,
+  effectiveChunkTokens,
   refineChunksToFit,
   type Chunk,
 } from '../content/chunker.js';
@@ -331,7 +333,7 @@ export async function prepareIndexFile(
     : null;
   const content = projection?.text ?? extracted.content;
   const tags = projection?.segments ? extractNoteTags(content, frontmatter) : extracted.tags;
-  const semanticChunks = chunkNote(content, contextLength).filter(
+  const semanticChunks = chunkNote(content, effectiveChunkTokens(contextLength)).filter(
     (chunk) => chunk.text.trim().length > 0,
   );
   let embeddedChunks: EmbeddedChunk[] = [];
@@ -444,6 +446,7 @@ export async function prepareIndexFile(
         text: chunk.text,
         headingPath: chunk.headingChain.length > 0 ? chunk.headingChain.join(' > ') : null,
         embedding,
+        ...extractChunkAnchors(chunk.text),
         ...(projection?.segments
           ? mapContentRange(projection, chunk.charStart, chunk.charEnd)
           : { charStart: chunk.charStart, charEnd: chunk.charEnd }),
