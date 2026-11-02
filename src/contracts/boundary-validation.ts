@@ -66,6 +66,42 @@ export const StdioStatusRequestSchema = z.object({
   action: z.literal('status'),
 });
 
+export const StdioReadRequestSchema = z.object({
+  id: z.string().optional(),
+  action: z.literal('read'),
+  paths: z.unknown(),
+  snippetLength: NonNegativeIntegerSchema.optional(),
+  related: z.boolean().optional(),
+});
+
+const PoolingSchema = z.enum(['mean', 'max']);
+
+export const StdioVectorsRequestSchema = z.object({
+  id: z.string().optional(),
+  action: z.literal('vectors'),
+  paths: z.array(z.string()).optional(),
+  pooling: PoolingSchema.optional(),
+  normalize: z.boolean().optional(),
+});
+
+export const StdioNeighborsRequestSchema = z.object({
+  id: z.string().optional(),
+  action: z.literal('neighbors'),
+  paths: z.array(z.string()).optional(),
+  k: FiniteNumberSchema.int().min(1).optional(),
+  minScore: FiniteNumberSchema.min(-1).max(1).optional(),
+  excludeLinked: z.boolean().optional(),
+  scope: z.unknown().optional(),
+  pooling: PoolingSchema.optional(),
+});
+
+export const StdioReindexRequestSchema = z.object({
+  id: z.string().optional(),
+  action: z.literal('reindex'),
+  path: z.string().optional(),
+  force: z.boolean().optional(),
+});
+
 export const StdioRequestSchema = z.object({
   id: z.string().optional(),
   query: z.string(),

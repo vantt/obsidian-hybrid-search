@@ -118,7 +118,7 @@ describe('handleStdioLine — explicit action dispatch', () => {
     return { response: parseResponse(lines[0] ?? null), searchFn, statusFn };
   }
 
-  for (const action of ['reindex', '', 'SEARCH', ' status ', null, false, 0, 1, [], {}]) {
+  for (const action of ['bogus', '', 'SEARCH', ' status ', null, false, 0, 1, [], {}]) {
     for (const fields of [{}, { query: 'alpha' }, { query: 42, options: { limit: 'x' } }]) {
       it(`rejects action ${JSON.stringify(action)} with ${JSON.stringify(fields)}`, async () => {
         const { response, searchFn, statusFn } = await dispatch({ id: 'bad', action, ...fields });
@@ -136,7 +136,7 @@ describe('handleStdioLine — explicit action dispatch', () => {
   }
 
   for (const id of [undefined, 9, '']) {
-    for (const action of ['reindex', false]) {
+    for (const action of ['bogus', false]) {
       it(`preserves ID convention for ${JSON.stringify({ id, action })}`, async () => {
         const { response, searchFn, statusFn } = await dispatch({ id, action, query: 42 });
         assert.deepEqual(response, {
