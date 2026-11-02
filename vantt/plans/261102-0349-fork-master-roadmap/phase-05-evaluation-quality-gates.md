@@ -61,6 +61,7 @@ Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, 
 - `run-eval.mjs` có `--ohs <dir>`, `--lang-pack`, `--lang-options`, `--compare`, `--accented-sanity`. Runner dựng vault dưới `os.tmpdir()`: đặt `TMPDIR` ra ngoài `/tmp`.
 - V12 xong: `catchup.mjs --with-lang vi --json` trên `v0.17.2`, đủ 9 bản vá, T1–T5 SUCCESS. T4: 58/58 câu trùng upstream khi không gói. T5: mọi mục tiêu G3, G8 bắt buộc và đạt (nDCG@5 `vi` 0,666 → 0,932; `vi-unaccented` Hit@5 0,267 → 1,0; `vi-dd` 0,4 → 1,0; `vi-snippet` 15/15; eval upstream có gói 0,735 không tụt). Baseline `obsidian-help` linux-x64 đã ghi. `evergreen-notes` tuỳ chọn (crawl web quá lâu), lý do ở plan con V12.
 - Sau release đầu, ghi baseline có gói bằng `quality-gate.mjs --with-lang vi --write-baseline` qua PR.
+- V15 (2026-11-02): user báo một agent khác (phía dự án) đang chuẩn bị golden set riêng và thử cài bản Windows; xong sẽ cập nhật lên remote. Lead chạy `quality-gate.mjs --private` khi có file; golden set và vault thật vẫn ở ngoài repo này.
 
 ## Risk
 
