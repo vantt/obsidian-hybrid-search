@@ -5,8 +5,10 @@
  * `OHS_LANGUAGE_PACK_OPTIONS` JSON. The M1 primitives stay exported for
  * standalone use and tests.
  */
+import { ALIAS_VIEWS } from './alias.js';
 import type { LanguagePackV1 } from './contract.js';
 import { resolveOptions, type PackOptions } from './options.js';
+import { LexiconStore } from './lexicon.js';
 import { analyzeQuery, type QueryEnvironment } from './query.js';
 import { accentedForms, VocabularyCache } from './restore.js';
 import { rescoreCandidates } from './rescore.js';
@@ -27,18 +29,18 @@ export function packSignature(options: PackOptions, compoundDigest?: string): st
   return options.segment && compoundDigest ? `${base};seg=${compoundDigest}` : base;
 }
 
-/** Compound words of the user lexicon (`## Từ ghép`), wired to the lexicon reader (V18). */
-const lexiconCompounds = (): ReadonlyArray<readonly string[]> => [];
-
 export function createPack(rawOptions?: unknown): LanguagePackV1 {
   const options = resolveOptions(rawOptions);
+  const lexicon = new LexiconStore(options);
+  const projector = createProjector(options);
   const env: QueryEnvironment = {
     options,
+    lexicon,
     cache: new VocabularyCache(),
     forms: accentedForms(options.tonePlacement, options.foldIY),
+    project: projector,
   };
-  const projector = createProjector(options);
-  const compounds = options.segment ? new CompoundSource(options.tonePlacement, lexiconCompounds) : null;
+  const compounds = options.segment ? new CompoundSource(options.tonePlacement, () => lexicon.load().compounds) : null;
   if (compounds) env.compounds = () => compounds.current();
   const normToken = createTokenProjector(options);
   const segToken = (token: string) => normToken('norm', token);
@@ -55,7 +57,9 @@ export function createPack(rawOptions?: unknown): LanguagePackV1 {
     project: (view, _field, text) =>
       compounds && view === SEG_VIEW ? projectSegmented(text, segToken, compounds.current()) : projector(view, text),
     analyzeQuery: (query, ctx) => analyzeQuery(query, ctx, env),
-    // aliasViews (V19) and queryCacheKey (V18, lexicon hash) are added here.
+    aliasViews: ALIAS_VIEWS,
+    // Synonyms and abbreviations only widen queries: they are part of the cache key, not of the signature.
+    queryCacheKey: () => lexicon.queryKey(),
   };
   if (options.rescore) pack.rescore = (candidates, analysis) => rescoreCandidates(candidates, analysis, options);
   return pack;
@@ -65,11 +69,22 @@ export default createPack;
 
 export type * from './contract.js';
 export * from './data.js';
+export { ALIAS_VIEWS, aliasKey, aliasKeys } from './alias.js';
 export { fold, type FoldOptions } from './fold.js';
+export {
+  compoundDigest,
+  expandQuery,
+  LexiconStore,
+  parseLexicon,
+  queryDigest,
+  type Lexicon,
+} from './lexicon.js';
 export { normalize, type NormalizeOptions } from './normalize.js';
 export { DEFAULT_OPTIONS, resolveOptions, type PackOptions, type RescoreWeights, type RestoreParams, type ViewWeights } from './options.js';
 export { analyzeQuery, type ViAnalysisData } from './query.js';
 export { accentedForms, restoreTokens, VocabularyCache, type RestoreResult } from './restore.js';
+export { decodeKeystrokes, decodeTelex, decodeVni, telexForms, vniForms } from './telex.js';
+export { correctTypos, editNeighbours } from './typo.js';
 export { evidenceIn, rescoreCandidates } from './rescore.js';
 export {
   composeSyllable,
