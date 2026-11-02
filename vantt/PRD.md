@@ -218,9 +218,16 @@ Viết script bằng **Node (ESM, `.mjs`), không thêm phụ thuộc**, thay ch
 - [x] Fork `flowing-abyss/obsidian-hybrid-search` thành `vantt/obsidian-hybrid-search`.
 - [x] **Tắt hẳn GitHub Actions trên fork** (`PUT /repos/vantt/obsidian-hybrid-search/actions/permissions enabled=false`). Lý do: fork vừa tạo đang bật Actions; đẩy lên `master` sẽ chạy `ci.yml` của upstream (9 job + job macOS), cron `update-deps.yml` sẽ lỗi mỗi tuần vì thiếu GitHub App, `auto-tag.yml` sẽ tự tạo tag và gọi `release.yml` (npm, MCP Registry).
 - [x] Thêm `vantt/PRD.md`, `vantt/README.md`, `.claude/skills/ohs-upstream-review/SKILL.md` lên `master`.
+- [x] **Fork chỉ theo `upstream/master`** (user chốt 2026-11-02). Đã xoá 4 nhánh thử nghiệm của upstream bị chép sang lúc fork (`experiment/local-embedding-models`, `feat/graph-hybrid-search`, `node-llama-cpp`, `verify-release-performance`); fork chỉ còn `master` và các nhánh `vantt/*` do catchup tạo. Không đẩy nhánh nào khác của upstream lên fork.
 
 Việc còn lại của V00 (máy làm code):
-1. Thêm remote `upstream` = `https://github.com/flowing-abyss/obsidian-hybrid-search`, fetch tag.
+1. Thêm remote `upstream` chỉ theo `master`, chặn đẩy nhầm lên upstream, fetch tag (tag phát hành nằm trên `master`):
+   ```bash
+   git remote add -t master upstream https://github.com/flowing-abyss/obsidian-hybrid-search
+   git remote set-url --push upstream DISABLE
+   git fetch upstream --tags
+   ```
+   Catchup và CI cũng fetch theo cách này, không fetch mọi nhánh của upstream.
 2. Sửa submodule `obsidian-plugin` nếu cần clone trên CI: URL đang là SSH (`git@github.com:…`). Không sửa `.gitmodules` của upstream trên `master`; trên CI dùng `git config --global url."https://github.com/".insteadOf "git@github.com:"` hoặc không clone submodule (OHS không cần nó để build).
 3. Thêm `.gitignore` riêng cho `vantt/` (`vantt/.catchup-state.json`, `vantt/reports/*.json` trừ bản phát hành, `vantt/.work/`).
 4. Thêm workflow `vantt-*.yml` (mục 7). Sau đó **bật lại Actions** và **tắt từng workflow của upstream**:
@@ -308,7 +315,7 @@ Nhờ đó lần catchup sau áp sạch trên upstream mới.
 ```
 
 ### 6.6. Đồng bộ `master` của fork với upstream
-`master` của fork nên theo `upstream/master` (để có mã mới nhất khi thử `--ref upstream/master`). Workflow catchup làm thêm một bước: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
+`master` của fork theo `upstream/master` và chỉ theo nhánh này; các nhánh khác của upstream không được theo dõi hay chép sang fork (để có mã mới nhất khi thử `--ref upstream/master`). Workflow catchup làm thêm một bước: `git merge --ff-only upstream/master` vào `master`; không fast-forward được (do `vantt/` là commit riêng) thì rebase các commit chỉ chạm `vantt/`, `.claude/skills/ohs-*`, `.github/workflows/vantt-*`. Quy tắc: **commit trên `master` của fork không bao giờ chạm file của upstream.** `vantt-pr-check.yml` (mục 7.4) chặn điều này.
 
 ---
 
