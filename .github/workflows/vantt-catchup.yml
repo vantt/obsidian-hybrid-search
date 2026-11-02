@@ -41,7 +41,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: vantt-catchup
+  group: vantt-catchup-${{ inputs.dry_run && github.run_id || 'main' }}
   cancel-in-progress: false
 
 env:
