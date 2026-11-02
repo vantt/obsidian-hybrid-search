@@ -14,7 +14,7 @@
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
 import { aliasKeys } from './alias.js';
-import { fold } from './fold.js';
+import { fold, iyVariant } from './fold.js';
 import { normalize } from './normalize.js';
 import type { LexiconStore } from './lexicon.js';
 import { applyLexicon } from './lexicon-query.js';
@@ -74,6 +74,8 @@ export interface ViAnalysisData {
   /** Probability that `target` is what the user meant (1 for accented queries). */
   confidence: number;
   accented: boolean;
+  /** The query has Vietnamese evidence (`isVietnameseQuery`); otherwise the pack only rescores. */
+  vietnamese: boolean;
 }
 
 /** Restorations handed to rescore (most probable first). */
@@ -121,7 +123,10 @@ export function restoreAccents(state: QueryState, ctx: QueryContext, env: QueryE
 /**
  * For an accented query: does the vault contain its words typed without
  * diacritics? Adjacent marked words folded and found as a phrase in the norm
- * view (or the single marked word, for a one-word query) are the evidence.
+ * view (or the single marked word, for a one-word query) are the evidence. A
+ * large vault almost always has some folded pair (a common pair of function
+ * words in an unaccented note), so at least `accentedFoldMinShare` of the
+ * query's pairs must be found that way.
  */
 export function findUnaccentedSpelling(state: QueryState, ctx: QueryContext, env: QueryEnvironment): void {
   if (!state.accented || env.options.accentedFold !== 'auto') return;
@@ -132,15 +137,16 @@ export function findUnaccentedSpelling(state: QueryState, ctx: QueryContext, env
     state.unaccentedInVault = env.cache.termDocs(ctx, 'norm', plain(marked[0]!)) > 0;
     return;
   }
+  let pairs = 0;
+  let found = 0;
   for (let i = 1; i < state.tokens.length; i++) {
     const a = state.tokens[i - 1]!;
     const b = state.tokens[i]!;
     if (!(a.marked || b.marked) || !a.syllable || !b.syllable) continue;
-    if (env.cache.phraseDocs(ctx, 'norm', `${plain(a)} ${plain(b)}`) > 0) {
-      state.unaccentedInVault = true;
-      return;
-    }
+    pairs++;
+    if (env.cache.phraseDocs(ctx, 'norm', `${plain(a)} ${plain(b)}`) > 0) found++;
   }
+  state.unaccentedInVault = found > 0 && found / pairs >= env.options.accentedFoldMinShare;
 }
 
 // 4. -------------------------------------------------------------------------
@@ -237,6 +243,7 @@ export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pic
     targetFolded: target.map((w) => foldToken(w, options)),
     confidence,
     accented: state.accented,
+    vietnamese,
   };
   analysis.data = data;
   // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25
@@ -280,7 +287,37 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
   findUnaccentedSpelling(state, ctx, env);
   const analysis = buildAnalysis(state, env.options, env);
   if (env.lexicon) applyLexicon(analysis, state, ctx, env.lexicon, env.options); // V18 hook
-  if (env.compounds)
-    analysis.viewQueries[SEG_VIEW] = segQuery(state, analysis.data as ViAnalysisData, ctx, env.compounds(), env.options);
+  addSpellingVariants(analysis, ctx, env.options);
+  if (env.compounds) {
+    const seg = segQuery(state, analysis.data as ViAnalysisData, ctx, env.compounds(), env.options);
+    analysis.viewQueries[SEG_VIEW] = seg?.query ?? null;
+    // The branch searches the compounds only: its vote counts as much as the share of the query they cover.
+    if (seg && env.options.segWeightByCoverage)
+      analysis.viewWeights = { ...analysis.viewWeights, [SEG_VIEW]: env.options.viewWeights.seg * seg.coverage };
+    if (seg && analysis.debug) analysis.debug.segCoverage = Number(seg.coverage.toFixed(3));
+  }
   return analysis;
+}
+
+/**
+ * The norm and fold views keep kĩ and kỹ apart (unless `foldIY`), so a query
+ * written one way would only find notes written the same way. The other i/y
+ * spelling of each query word joins the view query as an exact term when the
+ * vault has it (the query's own words stay prefix terms, as in `viewQueries`).
+ */
+export function addSpellingVariants(analysis: QueryAnalysis, ctx: QueryContext, options: PackOptions): void {
+  for (const view of ['norm', 'fold'] as const) {
+    if (view === 'fold' && options.foldIY) continue;
+    const query = analysis.viewQueries[view];
+    if (!query) continue;
+    const words = tokenize(query);
+    const variants: string[] = [];
+    for (const word of words) {
+      const variant = iyVariant(word);
+      if (variant && !words.includes(variant) && !variants.includes(variant) && ctx.termStats(view, variant).docs > 0)
+        variants.push(variant);
+    }
+    if (variants.length === 0) continue;
+    analysis.viewTerms = { ...analysis.viewTerms, [view]: [...words.map((text) => ({ text, prefix: true })), ...variants] };
+  }
 }

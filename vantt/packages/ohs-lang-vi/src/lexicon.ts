@@ -127,6 +127,8 @@ export interface Substitution {
   end: number;
   /** Replacement words (norm). */
   words: Form;
+  /** An abbreviation expanded (one way), not a synonym. */
+  abbreviation?: boolean;
 }
 
 export interface QueryTokenForms {
@@ -151,11 +153,11 @@ export function expandQuery(
   const substitutions: Substitution[] = [];
   if (tokens.length === 0) return substitutions;
   const seen = new Set<string>();
-  const add = (start: number, end: number, words: Form) => {
+  const add = (start: number, end: number, words: Form, abbreviation = false) => {
     const key = `${start}:${end}:${words.join(' ')}`;
     if (seen.has(key)) return;
     seen.add(key);
-    substitutions.push({ start, end, words });
+    substitutions.push(abbreviation ? { start, end, words, abbreviation } : { start, end, words });
   };
   const find = (form: Form): number[] => {
     const starts: number[] = [];
@@ -173,7 +175,7 @@ export function expandQuery(
   for (const group of lexicon.abbreviations) {
     const abbreviation = group[0]!;
     for (const start of find(abbreviation))
-      for (const words of group.slice(1)) add(start, start + abbreviation.length, words);
+      for (const words of group.slice(1)) add(start, start + abbreviation.length, words, true);
   }
   return substitutions;
 }

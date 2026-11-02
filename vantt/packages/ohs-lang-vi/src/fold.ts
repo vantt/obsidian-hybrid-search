@@ -48,3 +48,30 @@ export function fold(text: string, options?: FoldOptions): string {
   if (options?.foldIY) s = s.replace(IY_RE, foldIYWord);
   return s;
 }
+
+const I_FORMS = 'iíìỉĩị';
+const Y_FORMS = 'yýỳỷỹỵ';
+const IY_WORD_RE = new RegExp(`^(${IY_ONSETS.join('|')})([${I_FORMS}${Y_FORMS}])$`, 'u');
+
+/**
+ * The other spelling of a lowercase NFC syllable written with a final i or y
+ * after an onset of `IY_ONSETS` (kĩ <-> kỹ, lí <-> lý, quí <-> quý), keeping
+ * the tone; null for any other word. Both spellings are in use for the same
+ * word, so query-time matching treats them alike even when the index keeps
+ * them apart (`foldIY` off).
+ */
+export function iyVariant(word: string): string | null {
+  const m = IY_WORD_RE.exec(word);
+  if (!m) return null;
+  const vowel = m[2]!;
+  const i = I_FORMS.indexOf(vowel);
+  return m[1]! + (i >= 0 ? Y_FORMS[i]! : I_FORMS[Y_FORMS.indexOf(vowel)]!);
+}
+
+/** One spelling for both i/y forms of a syllable (the i one); other words unchanged. */
+export function iyCanonical(word: string): string {
+  const m = IY_WORD_RE.exec(word);
+  if (!m) return word;
+  const y = Y_FORMS.indexOf(m[2]!);
+  return y >= 0 ? m[1]! + I_FORMS[y]! : word;
+}

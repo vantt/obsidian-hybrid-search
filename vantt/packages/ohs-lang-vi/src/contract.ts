@@ -12,8 +12,25 @@ export interface LanguagePackView {
   tokenizer?: string;
 }
 
+/** One term of a structured view query (P01 contract addition). */
+export interface ViewQueryTerm {
+  text: string;
+  /** Prefix match; default false (exact token or phrase). */
+  prefix?: boolean;
+}
+
 export interface QueryAnalysis {
   viewQueries: Record<string, string | null>;
+  /**
+   * Structured query per view, ORed: a string is an exact term or phrase. A
+   * non-empty array replaces `viewQueries[view]`.
+   */
+  viewTerms?: Record<string, ReadonlyArray<string | ViewQueryTerm> | null>;
+  /**
+   * RRF weight per view for this query only; a finite number >= 0 replaces the
+   * declared `views[].weight`, null or a missing entry keeps it.
+   */
+  viewWeights?: Record<string, number | null>;
   baseQuery?: string;
   embedQuery?: string;
   aliasKeys?: Record<string, string | null>;
@@ -36,6 +53,8 @@ export interface Candidate {
   title: string;
   snippet: string;
   matchedViews: string[];
+  /** Original-text words matched through the views (whole title and content); empty when no view matched. */
+  matchedTerms?: string[];
   rank: Record<string, number | null>;
 }
 

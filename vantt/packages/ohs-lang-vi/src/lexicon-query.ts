@@ -6,7 +6,7 @@
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
 import { expandQuery, type Form } from './lexicon.js';
-import type { PackOptions } from './options.js';
+import { isCommon, type PackOptions } from './options.js';
 import type { LexiconStore } from './lexicon.js';
 import type { QueryState, ViAnalysisData } from './query.js';
 import { foldToken, tokenize } from './views.js';
@@ -42,10 +42,20 @@ export function applyLexicon(
   }
   if (substitutions.length === 0) return;
 
+  // An abbreviation whose expansion is a common phrase of the vault would vote for every note that
+  // uses the phrase; it stays a rescore target only.
+  const common = (s: (typeof substitutions)[number]) => {
+    if (!s.abbreviation || options.abbrMaxDocShare >= 1) return false;
+    const folded = s.words.map(foldWord);
+    const docs = folded.length === 1 ? ctx.termStats('fold', folded[0]!).docs : ctx.phraseDocs('fold', folded.join(' '));
+    return isCommon(docs, ctx.noteCount(), options.abbrMaxDocShare);
+  };
   const words: string[] = [];
-  for (const s of substitutions) for (const w of s.words) if (!words.includes(w)) words.push(w);
-  analysis.viewQueries.norm = extend(analysis.viewQueries.norm, words);
-  analysis.viewQueries.fold = extend(analysis.viewQueries.fold, words.map(foldWord));
+  for (const s of substitutions) if (!common(s)) for (const w of s.words) if (!words.includes(w)) words.push(w);
+  if (words.length > 0) {
+    analysis.viewQueries.norm = extend(analysis.viewQueries.norm, words);
+    analysis.viewQueries.fold = extend(analysis.viewQueries.fold, words.map(foldWord));
+  }
 
   const data = analysis.data as ViAnalysisData | undefined;
   const rewrites: Array<{ from: string; to: string }> = [];

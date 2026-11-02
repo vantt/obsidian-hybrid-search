@@ -22,7 +22,7 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `telex.ts`, `rewrite.ts` | V17: giải chuỗi Telex/VNI gõ dở (`tieengs`, `tie6ng1` thành `tiếng`; `uow` đọc cả `ươ` lẫn `uơ`). Chỉ áp cho token không có trong từ vựng vault (hai view) mà dạng giải ra có trong view `norm`, nên "team", "seen", "online" giữ nguyên. Câu có token được giải thì `baseQuery` và `embedQuery` là câu đã giải, và các token đã giải được tính là âm tiết có dấu cho cổng `minSyllableShare` |
 | `typo.ts` | V17: sửa gõ sai một chữ (thêm, bớt, thay, đảo hai chữ liền nhau) cho token không có trong vault, dài từ 3 chữ, chỉ nhận ứng viên là âm tiết Việt có trong view `fold`; tối đa 3 ứng viên, chọn theo tần suất cộng bằng chứng cặp từ liền nhau với từ bên cạnh (`phraseDocs`), dùng ứng viên tốt nhất. Chỉ đổi token của câu view và `rescore`, không đổi `baseQuery` |
 | `restore.ts` | Phục hồi dấu theo từ vựng vault: ứng viên là mọi âm tiết có dấu bỏ dấu ra đúng âm tiết gõ (sinh từ bảng âm tiết), giữ những dạng có trong view `norm` (`termStats`), cặp liền nhau có thật (`phraseDocs`) được cộng điểm; k-best Viterbi; cache theo `dbVersion` |
-| `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp, từng chữ. Không bỏ, không thêm ứng viên |
+| `rescore.ts` | Cộng điểm cho ứng viên có chữ đúng dấu của câu (hoặc của các tổ hợp phục hồi, nhân xác suất) trong tiêu đề hay đoạn trích: cả cụm, từng cặp (không nối qua ranh giới tiêu đề/đoạn trích), từng chữ; hai cách viết i/y (`kĩ`/`kỹ`) tính như nhau. Bỏ phiếu BM25 khi nhánh BM25 và nhánh vector không đồng thuận (`minBm25Agreement`). Không bỏ, không thêm ứng viên |
 | `lexicon.ts`, `lexicon-query.ts` | V18: đọc `_ohs/lexicon.md` (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` bị bỏ qua). Đồng nghĩa (hai chiều) và viết tắt (một chiều, `KH = khách hàng`) nối thêm dạng cùng nhóm vào câu view (OR) và thêm tổ hợp thay thế vào đích `rescore` (xác suất `lexiconWeight`). Chữ có dấu trong câu phải khớp đúng dấu (`lượng` không khớp `lương`), chữ không dấu khớp bỏ dấu. Từ ghép (`LexiconStore.load().compounds`) đi vào bộ tách từ V20 |
 | `segment.ts`, `segment-query.ts`, `data/compounds.txt` | V20: view `seg` (tokenizer có thêm `_`): âm tiết của từ ghép nối bằng `_` (`khách_hàng`), các token khác như view `norm`. Từ ghép: từ điển hai âm tiết đóng gói (nguồn, giấy phép, cách lọc ở [`data/README.md`](data/README.md)) cộng mục `## Từ ghép` của lexicon (độ dài bất kỳ). Tách theo đường ngắn nhất (ít từ nhất, hoà thì từ đầu dài hơn), chỉ nối qua khoảng trắng. Câu `seg` chỉ gồm các từ ghép của câu (câu có dấu: chính câu; câu không dấu: các tổ hợp phục hồi), tách cùng cách, cộng từ ghép khác trong câu mà view `seg` của vault có (`termStats`); null khi câu có từ không phải âm tiết Việt. Từ điển (cả từ ghép lexicon) băm vào `signature()` khi `segment` bật; lexicon đọc lại trong `signature()` |
 | `abbr.ts`, `cli.ts`, `bin.ts` | V18: `ohs-lang-vi learn-abbr --vault <dir> [--lexicon <path>] [--min-count <n>] [--dry-run]` (`bin` của package). Đề xuất viết tắt từ mẫu định nghĩa (`khách hàng (KH)`, `KH: khách hàng`, `KH = khách hàng`) và cụm hay gặp có chữ cái đầu khớp chữ viết tắt trong vault; ghi dưới `## Chờ duyệt`, không đụng mục khác, không đề xuất lại dòng đã có, bỏ `_ohs/`, thư mục ẩn, `node_modules` |
@@ -50,15 +50,20 @@ Export mặc định là `createPack(options)`; lõi gọi nó với JSON của 
 | `minSyllableShare` | `0.5` | không |
 | `accentedNorm` | `false` | không |
 | `accentedFold` | `"auto"` | không |
+| `accentedFoldMinShare` | `0.5` | không (`auto`: ít nhất tỉ lệ này các cặp chữ liền nhau có dấu của câu phải có trong vault ở dạng không dấu; trước đây một cặp là đủ, vault lớn gần như câu nào cũng bật) |
 | `segment` | `true` | có (bật/tắt view `seg`; băm từ điển và từ ghép lexicon) |
+| `segMaxDocShare` | `0.1` | không (nhánh `seg` bỏ từ ghép có trong hơn tỉ lệ này số note và ít nhất 20 note; `1` giữ hết). Từ ghép chỉ gồm từ chức năng (`vì vậy`, `cho nên`) luôn bị bỏ |
+| `segWeightByCoverage` | `true` | không (trọng số nhánh `seg` của câu nhân với tỉ lệ chữ của câu mà các từ ghép được tìm phủ) |
 | `viewWeights` | `{norm: 1.5, fold: 0.75, seg: 1}` | không |
-| `restoreParams` | `{maxVariants: 5, maxSyllables: 12, bigramWeight: 3, unigramSmoothing: 0.5, bigramSmoothing: 0.1, maxPhraseLookups: 96, beamWidth: 16, alternativeThreshold: 0.15}` | không |
+| `restoreParams` | `{maxVariants: 5, maxSyllables: 12, bigramWeight: 3, unigramSmoothing: 0.5, bigramSmoothing: 0.1, maxPhraseLookups: 96, beamWidth: 16, alternativeThreshold: 0.3}` | không (`alternativeThreshold` 0,15 → 0,3 ở V15b: bớt biến thể phục hồi sai vào nhánh `norm`) |
 | `lexiconPath` | `"_ohs/lexicon.md"` (so với vault) | không (từ ghép trong file: có) |
 | `lexiconWeight` | `0.6` | không |
+| `abbrMaxDocShare` | `0.05` | không (chữ viết tắt có dạng đầy đủ nằm trong hơn tỉ lệ này số note và ít nhất 20 note thì không thêm vào câu view, chỉ thành đích `rescore`; `1` thêm hết) |
 | `telex` | `true` | không |
 | `typo` | `true` | không |
 | `rescore` | `true` | không |
 | `rescoreWeights` | `{phrase: 4, bigram: 1, coverage: 0.5, normRank: 0, unit: 1/61, semantic: 0}` | không |
+| `minBm25Agreement` | `0.2` | không (bước trộn `hybrid`, câu tiếng Việt: khi dưới tỉ lệ này trong 5 kết quả đầu của nhánh BM25 nằm trong 10 kết quả đầu của nhánh vector, phiếu BM25 nhân với tỉ lệ / ngưỡng; `0` tắt) |
 
 Tuỳ chọn sai kiểu hay khoá lạ trong nhóm số thì `createPack` ném lỗi rõ (lõi báo trong `status.language_pack.error`). Khoá cấp trên chưa biết được bỏ qua.
 
@@ -172,3 +177,28 @@ Sửa lỗi câu có dấu một phần ("Hội An" thành "hội ăn" trong `em
 | các hạng mục còn lại | không đổi | không đổi |
 
 Không hạng mục nào tụt, Hit@5 tổng 0,976 → 0,984, nên mặc định đổi thành `true`.
+
+## V15b: sửa hạng mục tụt trên vault thật (2026-11-02)
+
+Nguyên nhân dạng chung đo trên vault thật ở `vantt/plans/261102-1825-v15b-real-vault-regressions/plan.md`; mọi thay đổi chỉ ở lúc tìm (`signature()` không đổi, không dựng lại index), qua hợp đồng P01 (`viewTerms`, `viewWeights`, thứ hạng theo nhánh trong `rescore`).
+
+- Bước trộn `hybrid` (`minBm25Agreement`): RRF tính phiếu theo hạng, nên note chỉ khớp vài chữ thường gặp của câu hỏi theo ý vẫn lấy phiếu BM25 hạng đầu và đè đáp án của nhánh vector. Khi không note nào trong 5 kết quả đầu của BM25 nằm trong 10 kết quả đầu của vector, `rescore` trừ phiếu BM25 (nhánh view của gói giữ phiếu: chúng mang bằng chứng dấu, từ ghép, lexicon mà vector không có). Chỉ cho câu tiếng Việt; câu tiếng Anh giữ nguyên.
+- i/y (`kĩ`/`kỹ`): khi `foldIY` tắt, cách viết kia (nếu vault có) vào câu `norm`/`fold` dạng term khớp đúng (`viewTerms`) và vào câu `seg`; `rescore` coi hai cách viết là một.
+- `accentedFold: "auto"` cần ít nhất nửa số cặp chữ của câu có trong vault ở dạng không dấu (`accentedFoldMinShare`).
+- Nhánh `seg`: bỏ từ ghép toàn từ chức năng và từ ghép phổ biến (`segMaxDocShare`); trọng số theo phần câu được phủ (`segWeightByCoverage`).
+- Viết tắt có dạng đầy đủ phổ biến (`abbrMaxDocShare`) chỉ là đích `rescore`, không vào câu view.
+- `restoreParams.alternativeThreshold` 0,15 → 0,3.
+
+Eval corpus sinh (`vi-search@v0.11.0`, lõi `v0.17.2-vantt.4`, e5-small, k = 10), nDCG@5: baseline upstream / gói trước V15b / gói V15b.
+
+| Hạng mục | Baseline | Trước | V15b |
+|---|---|---|---|
+| Tổng | 0,646 | 0,944 | **0,959** |
+| `vi-semantic` | 0,446 | 0,446 | **0,564** |
+| `vi-synonym` | 0,067 | 0,689 | **0,739** |
+| `vi-alias` | 0,477 | 0,959 | **1,000** |
+| `vi-compound` | 0,632 | 0,988 | **1,000** |
+| `vi-dd` | 0,239 | 0,975 | **1,000** |
+| 12 hạng còn lại | | | bằng gói trước |
+
+Eval tiếng Anh `obsidian-help`: 0,735, 58 danh sách top 10 giống hệt gói trước. Smoke-vault 0,906 như trước; `check-snippets` 15/15. Corpus sinh không tái hiện được các nguyên nhân i/y, `seg`, `accentedFold`, viết tắt của vault thật (các hạng đó đã 1,000), nên các thay đổi đó được kiểm bằng test tổng hợp (`test/fusion-and-spelling.test.ts`) và phải đo lại trên vault thật (V15b bước 5).
