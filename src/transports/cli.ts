@@ -40,7 +40,7 @@ import { runHttpMcpServerCli } from './mcp-http-server.js';
 import { runStdioMcpServer } from './mcp-stdio-server.js';
 import { ensureMcpServer, formatMcpInfo, getMcpStatus, stopMcpServer } from './mcp-supervisor.js';
 import { buildStatusPayload } from './status-payload.js';
-import { handleStdioLine } from './stdio-server.js';
+import { drainInFlight, handleStdioLine, type StdioActionHandlers } from './stdio-server.js';
 
 const execAsync = promisify(exec);
 
@@ -908,21 +908,34 @@ const serveCommand = program
       process.on('SIGTERM', cleanup);
       process.on('SIGINT', cleanup);
 
-      rl.on('close', cleanup);
-      rl.on('end', cleanup);
+      const writeLine = (s: string) => process.stdout.write(s + '\n');
+      const actions: StdioActionHandlers = {
+        read: (paths, options) => readNotes(paths, options),
+        vectors: (params) => exportNoteVectors({ ...params, ohsVersion: version }),
+        neighbors: (params) => findNoteNeighbors({ ...params, ohsVersion: version }),
+        reindex: (params) => cliIndexer.reindex(params),
+      };
+      const inFlight = new Set<Promise<void>>();
 
       for await (const line of rl) {
         // Fire-and-forget: process each request concurrently so that a slow in-flight
         // search (e.g. embedding API call) does not block reading and starting the next
         // one.  Responses carry their own `id` field so the plugin dispatches them
         // correctly regardless of arrival order.
-        void handleStdioLine(
+        const request: Promise<void> = handleStdioLine(
           line,
           search,
-          (s) => process.stdout.write(s + '\n'),
+          writeLine,
           () => buildStatusPayload({ contextLength, version }),
-        );
+          actions,
+        ).finally(() => inFlight.delete(request));
+        inFlight.add(request);
       }
+
+      // stdin closed: accept nothing new, but let every running request answer first.
+      await drainInFlight(inFlight);
+      await new Promise<void>((resolve) => process.stdout.write('', () => resolve()));
+      cleanup();
       return;
     }
 
