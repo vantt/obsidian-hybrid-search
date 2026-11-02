@@ -1,0 +1,48 @@
+name: vantt-pr-check
+
+# Commits on master of the fork must not touch upstream files (PRD 6.6, 7.4).
+# Merge commits are ignored: an upstream sync may bring upstream files in through
+# upstream's own commits, which are not part of upstream/master..HEAD.
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vantt-pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fork-files-only:
+    if: github.repository == 'vantt/obsidian-hybrid-search'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Fetch upstream master and tags
+        run: |
+          git remote add -t master upstream https://github.com/flowing-abyss/obsidian-hybrid-search
+          git fetch --quiet --no-recurse-submodules --tags upstream +refs/heads/master:refs/remotes/upstream/master
+      - name: Fork commits touch only fork files
+        run: |
+          allowed='^(vantt/|\.claude/skills/ohs-|\.github/workflows/vantt-)'
+          bad=$(git -c core.quotepath=off log --no-merges --name-only --format='commit %h %s' upstream/master..HEAD \
+            | awk -v re="$allowed" '/^commit /{c=$0; next} NF && $0 !~ re {print c " -> " $0}')
+          if [ -n "$bad" ]; then
+            echo "::error::Commits on master touch upstream files. Change OHS code only through vantt/patches."
+            echo "$bad"
+            exit 1
+          fi
+          echo "All fork commits touch only vantt/, .claude/skills/ohs-*, .github/workflows/vantt-*."
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Validate series.toml and plan the current tag (dry run)
+        run: node vantt/scripts/catchup.mjs --dry-run --with-lang vi

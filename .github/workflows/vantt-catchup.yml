@@ -1,0 +1,221 @@
+name: vantt-catchup
+
+# Build the release branch vantt/<tag> from the newest upstream tag (PRD 6, 7.2),
+# push it and the tag v<version>, and keep fork master in step with upstream/master
+# (PRD 6.6). On failure, open (or comment on) one issue per tag and status.
+#
+# Secret VANTT_PUSH_TOKEN (optional): PAT with contents:write (and workflow, when an
+# upstream sync brings changed upstream workflow files onto master). Falls back to
+# GITHUB_TOKEN, which GitHub refuses for pushes that create or change workflow files.
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: 'Upstream tag, upstream/master or sha (empty = newest stable tag)'
+        required: false
+        default: ''
+      force_rebuild:
+        description: 'Rebuild even if the branch is already green (--clean)'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Build and test, but push nothing (no branch, tag, master or PR)'
+        type: boolean
+        default: false
+      simulate_failure:
+        description: 'Test the failure path: run catchup on a ref that does not exist'
+        type: boolean
+        default: false
+  push:
+    branches: [master]
+    paths:
+      - 'vantt/patches/**'
+      - 'vantt/packages/**'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: vantt-catchup
+  cancel-in-progress: false
+
+env:
+  HUSKY: '0'
+  GH_TOKEN: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
+
+jobs:
+  catchup:
+    if: github.repository == 'vantt/obsidian-hybrid-search'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # Full history and tags; no submodules (vantt/README.md).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.VANTT_PUSH_TOKEN || github.token }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+          cache: ''
+
+      - name: Git identity
+        run: |
+          git config user.name 'vantt-catchup[bot]'
+          git config user.email 'vantt-catchup@users.noreply.github.com'
+
+      - name: Cache npm
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.npm
+          key: vantt-npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: vantt-npm-${{ runner.os }}-
+
+      # PRD 6.6: master follows upstream/master. Fast-forward when possible, else
+      # rebase the fork-only commits. Refuse when a fork commit touches upstream files.
+      - name: Sync master with upstream
+        id: sync
+        if: ${{ !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          git remote add -t master upstream https://github.com/flowing-abyss/obsidian-hybrid-search 2>/dev/null || true
+          git remote set-url --push upstream DISABLE
+          git fetch --quiet --no-recurse-submodules --tags upstream +refs/heads/master:refs/remotes/upstream/master
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo "master already contains upstream/master."
+            exit 0
+          fi
+          bad=$(git -c core.quotepath=off log --no-merges --name-only --format= upstream/master..HEAD \
+            | grep -Ev '^(vantt/|\.claude/skills/ohs-|\.github/workflows/vantt-)' | grep -v '^$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Fork commits on master touch upstream files; refusing to sync."
+            echo "$bad"
+            exit 1
+          fi
+          before=$(git rev-parse HEAD)
+          git merge --ff-only upstream/master || git rebase upstream/master
+          git push --force-with-lease="refs/heads/master:$before" origin HEAD:refs/heads/master
+          echo "master synced to $(git rev-parse --short HEAD)."
+
+      - name: Catchup
+        id: catchup
+        run: |
+          set +e
+          args=(--with-lang vi --json --report "$GITHUB_WORKSPACE/catchup.json")
+          ref="${{ inputs.target_ref }}"
+          [ "${{ inputs.simulate_failure }}" = "true" ] && ref="v0.0.0-does-not-exist"
+          [ -n "$ref" ] && args+=(--ref "$ref")
+          [ "${{ inputs.force_rebuild }}" = "true" ] && args+=(--clean)
+          node vantt/scripts/catchup.mjs "${args[@]}" > catchup.stdout.json 2> catchup.stderr.log
+          code=$?
+          tail -n 40 catchup.stderr.log
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      # Release branch and release tag only; never --tags (PRD 5). A tag that already
+      # exists with identical content means this build is already released: no-op.
+      - name: Push release branch and tag
+        id: push
+        if: ${{ steps.catchup.outputs.code == '0' && !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          read -r branch version istag < <(node -e '
+            const r = JSON.parse(require("fs").readFileSync("catchup.json", "utf8"));
+            console.log(r.release_branch, r.version, /-vantt\.\d+$/.test(r.version));
+          ')
+          tag="v$version"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ "$istag" = true ] && git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            git fetch --quiet origin "refs/tags/$tag:refs/tags/remote-$tag"
+            if [ "$(git rev-parse "remote-$tag^{tree}")" = "$(git rev-parse "$branch^{tree}")" ]; then
+              echo "$tag already released with identical content; nothing to push."
+              exit 0
+            fi
+            echo "::error::$tag exists on origin with different content; the fork inputs changed without a version bump."
+            exit 1
+          fi
+          old=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
+          git push --force-with-lease="refs/heads/$branch:$old" origin "refs/heads/$branch:refs/heads/$branch"
+          if [ "$istag" = true ]; then
+            git tag "$tag" "$branch"
+            git push origin "refs/tags/$tag:refs/tags/$tag"
+          fi
+
+      # PRD 6.4: patches re-exported after a conflict fix go to master through a PR.
+      - name: Open PR with refreshed patches
+        if: ${{ steps.catchup.outputs.code == '0' && !inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          n=$(node -e 'console.log((JSON.parse(require("fs").readFileSync("catchup.json","utf8")).reexported_patches||[]).length)')
+          [ "$n" != 0 ] || exit 0
+          tag=$(node -e 'console.log(JSON.parse(require("fs").readFileSync("catchup.json","utf8")).target_ref)')
+          b="vantt/refresh-patches-$tag"
+          git checkout -q -B "$b"
+          git add vantt/patches
+          git diff --cached --quiet && exit 0
+          git commit -q --no-verify -m "chore(vantt): refresh patches for $tag"
+          git push --force origin "$b"
+          gh pr create --base master --head "$b" --title "chore(vantt): refresh patches for $tag" \
+            --body "Patches re-exported by catchup after a conflict fix. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            || echo "PR already exists."
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: catchup-report
+          path: |
+            catchup.json
+            catchup.stdout.json
+            catchup.stderr.log
+          if-no-files-found: ignore
+
+      # One open issue per (tag, status); a repeat failure comments on it.
+      - name: Report failure as issue
+        if: ${{ always() && (steps.catchup.outputs.code != '0' || steps.sync.outcome == 'failure' || steps.push.outcome == 'failure') }}
+        env:
+          CODE: ${{ steps.catchup.outputs.code }}
+          REQ_REF: ${{ steps.catchup.outputs.ref }}
+        run: |
+          set -uo pipefail
+          read -r ref status failed files < <(node -e '
+            const fs = require("fs");
+            let r = {};
+            try { r = JSON.parse(fs.readFileSync("catchup.json", "utf8")); } catch {}
+            const out = (v) => String(v ?? "-").replace(/\s+/g, "_") || "-";
+            console.log(out(r.target_ref || process.env.REQ_REF || "latest"), out(r.status),
+              out(r.failed_patch), out((r.conflicted_files || []).join(",")));
+          ')
+          if [ "$status" = "-" ]; then
+            if [ "${CODE:-0}" != 0 ]; then status="EXIT_${CODE}"; else status="SYNC_OR_PUSH_FAILED"; fi
+          fi
+          title="[catchup] $ref: $status"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          body="Catchup failed for \`$ref\` with status \`$status\`.
+
+          - failed patch: \`$failed\`
+          - conflicted files: \`$files\`
+          - run: $run_url
+
+          See skill \`ohs-catchup\`; the JSON report is the \`catchup-report\` artifact of the run."
+          gh label create catchup --color d93f0b --description "Catchup with upstream failed" 2>/dev/null || true
+          existing=$(gh issue list --label catchup --state open --limit 100 --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Failed again: $run_url"
+          else
+            gh issue create --label catchup --title "$title" --body "$body"
+          fi
+
+      - name: Fail the job when catchup failed
+        if: ${{ always() && steps.catchup.outputs.code != '0' }}
+        run: exit 1
