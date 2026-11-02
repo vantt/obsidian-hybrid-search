@@ -17,6 +17,7 @@
  */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { TonePlacement } from './data.js';
 import { normalize } from './normalize.js';
 import { TOKEN_RE } from './views.js';
@@ -67,12 +68,34 @@ export function buildDictionary(
   return { entries, maxWords, digest: digestOf([...entries].sort()) };
 }
 
-let bundledText: string | null = null;
+/**
+ * Read a compound list file, one compound per line (`#` starts a comment).
+ * Throws when the file is missing or has no entry: a pack installed without
+ * its `data/` directory must fail to load (P01 then reports the error in
+ * `status`), never run quietly without its dictionary.
+ */
+export function readCompoundList(url: URL): string[] {
+  let text: string;
+  try {
+    text = readFileSync(url, 'utf8');
+  } catch (e) {
+    throw new Error(
+      `ohs-lang-vi: cannot read the bundled compound dictionary ${fileURLToPath(url)} (${(e as Error).message}); ` +
+        'the package was installed without its data/ directory',
+      { cause: e },
+    );
+  }
+  const entries = text.split('\n').filter((line) => line !== '' && !line.startsWith('#'));
+  if (entries.length === 0) throw new Error(`ohs-lang-vi: the bundled compound dictionary ${fileURLToPath(url)} is empty`);
+  return entries;
+}
+
+let bundledEntries: string[] | null = null;
 
 /** The bundled two-syllable compounds (read once per process). */
 export function bundledCompounds(): string[] {
-  bundledText ??= readFileSync(DICTIONARY_URL, 'utf8');
-  return bundledText.split('\n').filter((line) => line !== '' && !line.startsWith('#'));
+  bundledEntries ??= readCompoundList(DICTIONARY_URL);
+  return bundledEntries;
 }
 
 const bundledDictionaries = new Map<TonePlacement, CompoundDictionary>();

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "date": "2026-11-02T05:02:27.538Z",
+    "date": "2026-11-02T06:29:35.485Z",
     "ohs_version": "0.17.2",
     "runtime": {
       "platform": "linux",
@@ -10,31 +10,31 @@
     "model": "Xenova/multilingual-e5-small",
     "rerank": false,
     "rerank_model": null,
-    "vault": "../ohs-wt/tmp/ohs-vi-eval-gzQKew/vault",
-    "note_count": 363,
-    "chunk_count": 363,
-    "golden_set": "vantt/eval/vi/golden-set.json",
-    "golden_set_size": 255,
+    "vault": "../ohs-wt/tmp/v20b/eval/ohs-vi-eval-enppM0/vault",
+    "note_count": 423,
+    "chunk_count": 423,
+    "golden_set": "../ohs-wt/m-v20b/vantt/eval/vi/golden-set.json",
+    "golden_set_size": 270,
     "k": 10,
     "runner": {
       "ohs_tree": "/home/vantt/projects/obsidian-hybrid-search",
-      "ohs_head": "a2b96b8",
+      "ohs_head": "7df17ef",
       "lang_pack": null,
       "lang_options": null,
-      "corpus": "vi-search@v0.10.0",
+      "corpus": "vi-search@v0.11.0",
       "accented_sanity": false
     }
   },
   "summary": {
-    "ndcg_5": 0.666,
-    "ndcg_k": 0.686,
-    "mrr": 0.643,
-    "hit_1": 0.557,
-    "hit_3": 0.702,
-    "hit_5": 0.761,
-    "recall_k": 0.824,
-    "evidence_coverage_k": 0.824,
-    "all_relevant_k": 0.824
+    "ndcg_5": 0.646,
+    "ndcg_k": 0.664,
+    "mrr": 0.617,
+    "hit_1": 0.526,
+    "hit_3": 0.685,
+    "hit_5": 0.756,
+    "recall_k": 0.811,
+    "evidence_coverage_k": 0.811,
+    "all_relevant_k": 0.811
   },
   "by_category": {
     "vi-accented": {
@@ -49,9 +49,9 @@
       "all_relevant_k": 1
     },
     "vi-partial-accent": {
-      "ndcg_5": 0.872,
-      "ndcg_k": 0.872,
-      "mrr": 0.83,
+      "ndcg_5": 0.863,
+      "ndcg_k": 0.863,
+      "mrr": 0.819,
       "hit_1": 0.733,
       "hit_3": 0.867,
       "hit_5": 1,
@@ -71,20 +71,20 @@
       "all_relevant_k": 0.533
     },
     "vi-typo": {
-      "ndcg_5": 0.488,
-      "ndcg_k": 0.534,
-      "mrr": 0.426,
-      "hit_1": 0.2,
-      "hit_3": 0.533,
-      "hit_5": 0.733,
+      "ndcg_5": 0.543,
+      "ndcg_k": 0.567,
+      "mrr": 0.469,
+      "hit_1": 0.267,
+      "hit_3": 0.6,
+      "hit_5": 0.8,
       "recall_k": 0.867,
       "evidence_coverage_k": 0.867,
       "all_relevant_k": 0.867
     },
     "vi-snippet": {
-      "ndcg_5": 0.463,
-      "ndcg_k": 0.507,
-      "mrr": 0.437,
+      "ndcg_5": 0.466,
+      "ndcg_k": 0.509,
+      "mrr": 0.44,
       "hit_1": 0.333,
       "hit_3": 0.467,
       "hit_5": 0.6,
@@ -104,10 +104,10 @@
       "all_relevant_k": 0.267
     },
     "vi-dd": {
-      "ndcg_5": 0.263,
-      "ndcg_k": 0.309,
-      "mrr": 0.24,
-      "hit_1": 0.133,
+      "ndcg_5": 0.239,
+      "ndcg_k": 0.285,
+      "mrr": 0.206,
+      "hit_1": 0.067,
       "hit_3": 0.267,
       "hit_5": 0.4,
       "recall_k": 0.533,
@@ -148,21 +148,21 @@
       "all_relevant_k": 1
     },
     "vi-compound": {
-      "ndcg_5": 0.844,
-      "ndcg_k": 0.844,
-      "mrr": 0.789,
-      "hit_1": 0.6,
-      "hit_3": 1,
-      "hit_5": 1,
-      "recall_k": 1,
-      "evidence_coverage_k": 1,
-      "all_relevant_k": 1
+      "ndcg_5": 0.632,
+      "ndcg_k": 0.632,
+      "mrr": 0.543,
+      "hit_1": 0.333,
+      "hit_3": 0.767,
+      "hit_5": 0.9,
+      "recall_k": 0.9,
+      "evidence_coverage_k": 0.9,
+      "all_relevant_k": 0.9
     },
     "vi-mixed-en": {
-      "ndcg_5": 0.975,
-      "ndcg_k": 0.975,
-      "mrr": 0.967,
-      "hit_1": 0.933,
+      "ndcg_5": 1,
+      "ndcg_k": 1,
+      "mrr": 1,
+      "hit_1": 1,
       "hit_3": 1,
       "hit_5": 1,
       "recall_k": 1,
@@ -170,15 +170,15 @@
       "all_relevant_k": 1
     },
     "vi-semantic": {
-      "ndcg_5": 0.555,
-      "ndcg_k": 0.595,
-      "mrr": 0.509,
-      "hit_1": 0.333,
-      "hit_3": 0.667,
-      "hit_5": 0.733,
-      "recall_k": 0.867,
-      "evidence_coverage_k": 0.867,
-      "all_relevant_k": 0.867
+      "ndcg_5": 0.446,
+      "ndcg_k": 0.489,
+      "mrr": 0.412,
+      "hit_1": 0.267,
+      "hit_3": 0.533,
+      "hit_5": 0.6,
+      "recall_k": 0.733,
+      "evidence_coverage_k": 0.733,
+      "all_relevant_k": 0.733
     },
     "vi-names": {
       "ndcg_5": 0.909,
@@ -193,8 +193,8 @@
     },
     "vi-synonym": {
       "ndcg_5": 0.067,
-      "ndcg_k": 0.149,
-      "mrr": 0.076,
+      "ndcg_k": 0.145,
+      "mrr": 0.073,
       "hit_1": 0,
       "hit_3": 0.133,
       "hit_5": 0.133,
@@ -214,15 +214,15 @@
       "all_relevant_k": 1
     },
     "vi-alias": {
-      "ndcg_5": 0.535,
-      "ndcg_k": 0.557,
-      "mrr": 0.478,
-      "hit_1": 0.333,
-      "hit_3": 0.667,
-      "hit_5": 0.733,
-      "recall_k": 0.8,
-      "evidence_coverage_k": 0.8,
-      "all_relevant_k": 0.8
+      "ndcg_5": 0.477,
+      "ndcg_k": 0.5,
+      "mrr": 0.424,
+      "hit_1": 0.267,
+      "hit_3": 0.6,
+      "hit_5": 0.667,
+      "recall_k": 0.733,
+      "evidence_coverage_k": 0.733,
+      "all_relevant_k": 0.733
     }
   },
   "per_query": [
@@ -251,10 +251,10 @@
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Mẹo bán hàng online.md",
         "notes/Cãi tiến độ với khách.md",
-        "notes/Sàn thương mại điện tử.md",
+        "notes/Nhật ký 42.md",
         "notes/Bí quyết chụp ảnh chân dung.md",
         "notes/Giữ sạch vở ghi.md",
-        "notes/Bạn hàng lâu năm.md",
+        "notes/Quà cam kết tặng khách.md",
         "notes/Trương Quốc Khánh.md"
       ]
     },
@@ -284,8 +284,8 @@
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Giữ sạch vở ghi.md",
         "notes/Tránh đổ xe giữa dốc.md",
-        "notes/Thực đơn chay.md",
         "notes/Trương Quốc Khánh.md",
+        "notes/Thực đơn chay.md",
         "notes/Thuỷ sản xuất khẩu.md",
         "notes/Bí quyết chụp ảnh chân dung.md"
       ]
@@ -351,9 +351,9 @@
         "notes/Thuỷ sản xuất khẩu.md",
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Mẹo bán hàng online.md",
-        "notes/Nấu cháo cho người ốm.md",
         "notes/Ghi chép 026 góc bếp.md",
-        "notes/Bạn hàng lâu năm.md"
+        "notes/Bạn hàng lâu năm.md",
+        "notes/Ghi chép 068 quán quen.md"
       ]
     },
     {
@@ -384,8 +384,8 @@
         "notes/Quà cam kết tặng khách.md",
         "notes/Chuyến đi Hội An cuối tuần.md",
         "notes/Bí quyết chụp ảnh chân dung.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Danh sách khách hàng tiềm năng.md"
+        "notes/Danh sách khách hàng tiềm năng.md",
+        "notes/An toàn cá nhân.md"
       ]
     },
     {
@@ -409,15 +409,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Sắp xếp thời gian biểu.md",
+        "notes/Nhật ký 27.md",
+        "notes/Nhật ký 28.md",
         "notes/Buổi sáng.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 095 quán quen.md",
         "notes/Nổi tiếng một thời.md",
         "notes/Sống biển đảo thời nay.md",
-        "notes/Ghi chép 016 đèn lồng.md",
+        "notes/Nhật ký 51.md",
         "notes/Đánh giá nhà cung cấp mới.md",
-        "notes/Ghi chép 029 quán quen.md",
-        "notes/Lịch hẹn gia đình.md"
+        "notes/Ghi chép 016 đèn lồng.md"
       ]
     },
     {
@@ -481,7 +481,7 @@
         "notes/Budget sheet.md",
         "notes/Ghi chép 037 sổ tay.md",
         "notes/Ghi chép 108 chiếc ô xanh.md",
-        "notes/Ghi chép 078 đèn lồng.md"
+        "notes/Nhật ký 51.md"
       ]
     },
     {
@@ -737,13 +737,13 @@
         "notes/Chuẩn bị bữa sáng.md",
         "notes/Buổi sáng.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Ghi chép 058 bánh nướng.md",
         "notes/Chuẩn bị nhập học.md",
         "notes/Interview prep.md",
         "notes/Mở cửa sổ mỗi sáng.md",
-        "notes/Ghi chép 097 hiên nhà.md",
-        "notes/Biên bản hội đồng quản trị.md"
+        "notes/Biên bản hội đồng quản trị.md",
+        "notes/Nhật ký 14.md",
+        "notes/Ven biển.md",
+        "notes/Ghi chép 097 hiên nhà.md"
       ]
     },
     {
@@ -772,10 +772,10 @@
         "notes/Interview prep.md",
         "notes/Mở cửa sổ mỗi sáng.md",
         "notes/Sóng biển lúc bình minh.md",
+        "notes/Ven biển.md",
         "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Ghi chép 010 bài hát cũ.md",
         "notes/Sống biển đảo thời nay.md",
-        "notes/Ven biển.md"
+        "notes/Ghi chép 010 bài hát cũ.md"
       ]
     },
     {
@@ -821,27 +821,27 @@
         "notes/Chuẩn bị bữa sáng.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0,
-      "ndcg_k": 0.333,
-      "mrr": 0.143,
+      "ndcg_5": 0.387,
+      "ndcg_k": 0.387,
+      "mrr": 0.2,
       "hit_1": false,
       "hit_3": false,
-      "hit_5": false,
+      "hit_5": true,
       "recall_k": 1,
       "evidence_coverage_k": 1,
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 088 sổ tay.md",
-        "notes/Ghi chép 054 quán quen.md",
         "notes/Sóng biển lúc bình minh.md",
         "notes/Sống biển đảo thời nay.md",
         "notes/Ven biển.md",
         "notes/Chuẩn bị bữa sáng.md",
         "notes/Sắp xếp thời gian biểu.md",
         "notes/Ghi chép 026 góc bếp.md",
-        "notes/Chuẩn bị nhập học.md"
+        "notes/Chuẩn bị nhập học.md",
+        "notes/Ghi chép 101 sổ tay.md",
+        "notes/Biên bản hội đồng quản trị.md"
       ]
     },
     {
@@ -854,28 +854,26 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0,
-      "mrr": 0,
+      "ndcg_k": 0.289,
+      "mrr": 0.1,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
-      "recall_k": 0,
-      "evidence_coverage_k": 0,
-      "all_relevant_k": false,
-      "missed_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 088 sổ tay.md",
         "notes/Sóng biển lúc bình minh.md",
         "notes/Chuẩn bị nhập học.md",
         "notes/Biên bản hội đồng quản trị.md",
         "notes/Sống biển đảo thời nay.md",
         "notes/Ven biển.md",
         "notes/Interview prep.md",
+        "notes/Sắp xếp thời gian biểu.md",
         "notes/An toàn cá nhân.md",
-        "notes/Sắp xếp thời gian biểu.md"
+        "notes/Chuẩn bị bữa sáng.md"
       ]
     },
     {
@@ -1063,11 +1061,11 @@
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Mĩ thuật ứng dụng.md",
         "notes/Ngành công nghệ thông tin.md",
+        "notes/Kỹ thuật nấu ăn.md",
+        "notes/Tối ưu quy trình làm việc.md",
+        "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
         "notes/Hành trình khám phá núi rừng.md",
-        "notes/Kỹ thuật nấu ăn.md",
-        "notes/Quy trình chăm sóc khách hàng sau bán.md",
-        "notes/Tối ưu quy trình làm việc.md",
         "notes/Bùi Thanh Tú.md",
         "notes/Văn hóa doanh nghiệp.md"
       ]
@@ -1224,14 +1222,14 @@
       "top_paths": [
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Quy chế nhân viên thử việc.md",
+        "notes/Nhật ký 16.md",
+        "notes/Nhật ký 09.md",
+        "notes/Nhật ký 43.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
         "notes/Hành trình khám phá núi rừng.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Buổi tối.md",
-        "notes/Lý do chuyển việc.md",
-        "notes/Bí quyết chụp ảnh chân dung.md"
+        "notes/Phỏng vấn xin việc.md"
       ]
     },
     {
@@ -1256,10 +1254,10 @@
       "top_paths": [
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
-        "notes/Buổi tối.md",
         "notes/Bí quyết chụp ảnh chân dung.md",
         "notes/Quy chế nhân viên thử việc.md",
         "notes/Đặng Minh Quân.md",
+        "notes/Buổi tối.md",
         "notes/Ghi chép 016 đèn lồng.md",
         "notes/Ghi chép 022 sổ tay.md",
         "notes/Nghệ thuật thuyết trình.md",
@@ -1320,13 +1318,13 @@
       "top_paths": [
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
-        "notes/Quy chế nhân viên thử việc.md",
         "notes/Bí quyết chụp ảnh chân dung.md",
-        "notes/Biên bản hội đồng quản trị.md",
         "notes/Ghi chép 029 quán quen.md",
+        "notes/Quy chế nhân viên thử việc.md",
         "notes/Gift ideas.md",
         "notes/Báo cáo tài chính quý ba.md",
         "notes/Ghi chép 016 đèn lồng.md",
+        "notes/Nhật ký 05.md",
         "notes/Ghi chép 090 quán quen.md"
       ]
     },
@@ -1359,7 +1357,7 @@
         "notes/Ghi chép 110 quán quen.md",
         "notes/Ghi chép 029 quán quen.md",
         "notes/Báo cáo tài chính quý ba.md",
-        "notes/Ghi chép 054 quán quen.md"
+        "notes/Nhật ký 51.md"
       ]
     },
     {
@@ -1385,8 +1383,8 @@
         "notes/Thói quen ngủ sớm dậy sớm.md",
         "notes/Thói quen đọc sách.md",
         "notes/Ghi chép 077 chợ phiên.md",
-        "notes/Ghi chép 097 hiên nhà.md",
         "notes/Ghi chép 095 quán quen.md",
+        "notes/Ghi chép 097 hiên nhà.md",
         "notes/Ghi chép 041 chiếc ô xanh.md",
         "notes/Mĩ thuật ứng dụng.md",
         "notes/Mất ngủ về đêm.md",
@@ -1416,14 +1414,14 @@
       "top_paths": [
         "notes/Thói quen đọc sách.md",
         "notes/Ghi chép 080 quán quen.md",
-        "notes/Ghi chép 076 ngõ nhỏ.md",
+        "notes/Ghi chép 069 hiên nhà.md",
         "notes/Thói quen ngủ sớm dậy sớm.md",
         "notes/Ghi chép 094 quán quen.md",
         "notes/Ghi chép 110 quán quen.md",
-        "notes/Ghi chép 069 hiên nhà.md",
         "notes/Ghi chép 074 giá sách.md",
         "notes/Ghi chép 077 chợ phiên.md",
-        "notes/Phạm Đức Thành.md"
+        "notes/Ghi chép 029 quán quen.md",
+        "notes/Ghi chép 060 hiên nhà.md"
       ]
     },
     {
@@ -1489,8 +1487,8 @@
         "notes/Ghi chép 090 quán quen.md",
         "notes/Việc cuối năm.md",
         "notes/Ghi chép 101 sổ tay.md",
-        "notes/Brainstorm ý tưởng khởi nghiệp.md",
         "notes/Chuyến đi Hội An cuối tuần.md",
+        "notes/Brainstorm ý tưởng khởi nghiệp.md",
         "notes/Ghi chép 029 quán quen.md"
       ]
     },
@@ -1504,26 +1502,28 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0.301,
-      "mrr": 0.111,
+      "ndcg_k": 0,
+      "mrr": 0,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
-      "recall_k": 1,
-      "evidence_coverage_k": 1,
-      "all_relevant_k": true,
-      "missed_paths": [],
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Thói quen ngủ sớm dậy sớm.md"
+      ],
       "top_paths": [
         "notes/Ghi chép 080 quán quen.md",
         "notes/Ghi chép 029 quán quen.md",
         "notes/Ghi chép 023 quán quen.md",
+        "notes/Ghi chép 110 quán quen.md",
+        "notes/Ghi chép 054 quán quen.md",
         "notes/Ghi chép 083 quán quen.md",
-        "notes/Ghi chép 090 quán quen.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 094 quán quen.md",
-        "notes/Ghi chép 026 góc bếp.md",
-        "notes/Thói quen ngủ sớm dậy sớm.md",
-        "notes/Ghi chép 110 quán quen.md"
+        "notes/Ghi chép 090 quán quen.md",
+        "notes/Ghi chép 095 quán quen.md"
       ]
     },
     {
@@ -1709,13 +1709,13 @@
         "notes/Chiến lược tiếp thị nội dung.md",
         "notes/Giao nhận nội thành.md",
         "notes/Landing page cho chiến dịch mới.md",
-        "notes/Kỳ thi cuối năm.md",
-        "notes/Onboarding checklist.md",
         "notes/Bàn đồ gỗ nội thất.md",
-        "notes/Kĩ năng giao tiếp.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Võ Thị Ngọc Anh.md",
-        "notes/Lê Thị Thanh Hương.md"
+        "notes/Kĩ năng giao tiếp.md",
+        "notes/Onboarding checklist.md",
+        "notes/Giữ chân khách hàng.md",
+        "notes/Mẹo bán hàng online.md",
+        "notes/Nhật ký 23.md"
       ]
     },
     {
@@ -1739,15 +1739,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Landing page cho chiến dịch mới.md",
-        "notes/Thất thiệt.md",
         "notes/Phạm Đức Thịnh.md",
+        "notes/Thất thiệt.md",
         "notes/Kỳ thi cuối năm.md",
         "notes/Chiến lược tiếp thị nội dung.md",
-        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
-        "notes/Workshop thiết kế sản phẩm.md",
+        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Ghi chép 079 đèn lồng.md",
-        "notes/Ghi chép 016 đèn lồng.md"
+        "notes/Ghi chép 016 đèn lồng.md",
+        "notes/Workshop thiết kế sản phẩm.md"
       ]
     },
     {
@@ -1807,11 +1807,11 @@
         "notes/Chiến lược tiếp thị nội dung.md",
         "notes/Thất thiệt.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
-        "notes/Workshop thiết kế sản phẩm.md",
-        "notes/Kỳ thi cuối năm.md",
         "notes/Ghi chép 076 ngõ nhỏ.md",
+        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Đặng Minh Quân.md",
-        "notes/Ghi chép 090 quán quen.md"
+        "notes/Ghi chép 090 quán quen.md",
+        "notes/Update phiên bản ứng dụng.md"
       ]
     },
     {
@@ -1870,14 +1870,14 @@
       "top_paths": [
         "notes/Bảo mật tài khoản trực tuyến.md",
         "notes/Đóng bảo hiểm xã hội.md",
-        "notes/Tiết kiệm chi tiêu.md",
         "notes/Báo cáo feedback của người dùng.md",
-        "notes/Ghi chép 015 bài hát cũ.md",
+        "notes/Nhật ký 08.md",
         "notes/Báo cáo tài chính quý ba.md",
         "notes/Tuyến huyện.md",
         "notes/Khoản vay mua nhà.md",
         "notes/Podcast về tài chính cá nhân.md",
-        "notes/An toàn cá nhân.md"
+        "notes/An toàn cá nhân.md",
+        "notes/Tiết kiệm chi tiêu.md"
       ]
     },
     {
@@ -1903,13 +1903,13 @@
         "notes/Bảo mật tài khoản trực tuyến.md",
         "notes/Nguyễn Hữu Phước.md",
         "notes/Báo cáo feedback của người dùng.md",
+        "notes/Nhật ký 07.md",
         "notes/Khoản vay mua nhà.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Đóng bảo hiểm xã hội.md",
         "notes/Báo cáo tài chính quý ba.md",
         "notes/Tiết kiệm chi tiêu.md",
-        "notes/Ghi chép 060 hiên nhà.md",
-        "notes/Cách trồng rau sạch tại nhà.md"
+        "notes/Ghi chép 060 hiên nhà.md"
       ]
     },
     {
@@ -1939,11 +1939,11 @@
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Gift ideas.md",
-        "notes/Ghi chép 049 sổ tay.md",
         "notes/Ghi chép 099 bài hát cũ.md",
         "notes/Ghi chép 022 sổ tay.md",
         "notes/Ghi chép 060 hiên nhà.md",
-        "notes/Thuỷ sản xuất khẩu.md"
+        "notes/Thuỷ sản xuất khẩu.md",
+        "notes/Ghi chép 062 góc bếp.md"
       ]
     },
     {
@@ -1955,10 +1955,10 @@
         "notes/Bảo mật tài khoản trực tuyến.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.631,
-      "ndcg_k": 0.631,
-      "mrr": 0.5,
-      "hit_1": false,
+      "ndcg_5": 1,
+      "ndcg_k": 1,
+      "mrr": 1,
+      "hit_1": true,
       "hit_3": true,
       "hit_5": true,
       "recall_k": 1,
@@ -1966,10 +1966,10 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Thuỷ sản xuất khẩu.md",
         "notes/Bảo mật tài khoản trực tuyến.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Báo cáo tài chính quý ba.md",
+        "notes/Thuỷ sản xuất khẩu.md",
         "notes/Landing page cho chiến dịch mới.md",
         "notes/Cách trồng rau sạch tại nhà.md",
         "notes/Ghi chép 090 quán quen.md",
@@ -2065,10 +2065,10 @@
         "notes/Cách trồng rau sạch tại nhà.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Ghi chép 028 góc bếp.md",
-        "notes/Ghi chép 083 quán quen.md",
         "notes/Ghi chép 006 tách trà.md",
         "notes/Ghi chép 002 tách trà.md",
         "notes/Phương pháp học tập hiệu quả.md",
+        "notes/Sách vở đầu năm.md",
         "notes/Báo cáo tài chính quý ba.md",
         "notes/Nấu cháo cho người ốm.md",
         "notes/Bảo mật tài khoản trực tuyến.md"
@@ -2164,10 +2164,10 @@
         "notes/Ghi chép 083 quán quen.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 006 tách trà.md",
-        "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 098 góc bếp.md",
-        "notes/Ghi chép 071 hoa giấy.md",
+        "notes/Ghi chép 068 quán quen.md",
         "notes/Phòng chứa bệnh phẩm.md",
+        "notes/Ghi chép 071 hoa giấy.md",
         "notes/Trương Quốc Khánh.md",
         "notes/Ghi chép 039 mưa chiều.md"
       ]
@@ -2197,11 +2197,11 @@
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Brainstorm ý tưởng khởi nghiệp.md",
         "notes/Thất thiệt.md",
-        "notes/Lê Thị Thanh Hường.md",
-        "notes/Phạm Đức Thịnh.md",
-        "notes/Kỳ thi cuối năm.md",
+        "notes/Nhật ký 46.md",
         "notes/Doanh nghiệp vừa và nhỏ.md",
-        "notes/Ngành công nghệ thông tin.md"
+        "notes/Ngành công nghệ thông tin.md",
+        "notes/Quy trình chăm sóc khách hàng sau bán.md",
+        "notes/Tối ưu quy trình làm việc.md"
       ]
     },
     {
@@ -2226,12 +2226,12 @@
       "top_paths": [
         "notes/Lộ trình ôn thi tốt nghiệp.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Kỳ thi cuối năm.md",
         "notes/Lê Thị Thanh Hường.md",
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Thất thiệt.md",
-        "notes/Chuyến đi Phan Thiết cuối tuần.md",
+        "notes/Kỳ thi cuối năm.md",
         "notes/Ghi chép 017 tách trà.md",
+        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Ghi chép 037 sổ tay.md"
       ]
@@ -2277,11 +2277,11 @@
         "notes/Lộ trình ôn thi tốt nghiệp.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.431,
-      "ndcg_k": 0.431,
-      "mrr": 0.25,
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
       "hit_1": false,
-      "hit_3": false,
+      "hit_3": true,
       "hit_5": true,
       "recall_k": 1,
       "evidence_coverage_k": 1,
@@ -2290,14 +2290,14 @@
       "top_paths": [
         "notes/Thất thiệt.md",
         "notes/Kỳ thi cuối năm.md",
-        "notes/Phạm Đức Thịnh.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
-        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Ghi chép 037 sổ tay.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Budget sheet.md",
+        "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Workshop thiết kế sản phẩm.md",
-        "notes/Ghi chép 016 đèn lồng.md"
+        "notes/Ghi chép 016 đèn lồng.md",
+        "notes/Ghi chép 079 đèn lồng.md",
+        "notes/Nổi tiếng một thời.md"
       ]
     },
     {
@@ -2309,9 +2309,9 @@
         "notes/Lộ trình ôn thi tốt nghiệp.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.387,
-      "ndcg_k": 0.387,
-      "mrr": 0.2,
+      "ndcg_5": 0.431,
+      "ndcg_k": 0.431,
+      "mrr": 0.25,
       "hit_1": false,
       "hit_3": false,
       "hit_5": true,
@@ -2321,15 +2321,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Mẹo bán hàng online.md",
-        "notes/Thất thiệt.md",
         "notes/Bug triage.md",
         "notes/Hành trình khám phá núi rừng.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
+        "notes/Thất thiệt.md",
         "notes/Nghệ thuật thuyết trình.md",
-        "notes/Bùi Thanh Tú.md",
         "notes/Reading list.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
-        "notes/Ghi chép 037 sổ tay.md"
+        "notes/Ghi chép 037 sổ tay.md",
+        "notes/Tối ưu quy trình làm việc.md"
       ]
     },
     {
@@ -2357,11 +2357,11 @@
         "notes/Ghi chép 059 góc bếp.md",
         "notes/Hợp đồng thuê văn phòng.md",
         "notes/Review code trước khi merge.md",
-        "notes/Thuỷ tinh cường lực.md",
         "notes/Pháp lý nhà ở.md",
         "notes/Trồng cây trong nhà.md",
-        "notes/Bài tập về nhà.md",
-        "notes/Ghi chép 097 hiên nhà.md"
+        "notes/Thuỷ tinh cường lực.md",
+        "notes/Ghi chép 097 hiên nhà.md",
+        "notes/Doanh nghiệp vừa và nhỏ.md"
       ]
     },
     {
@@ -2373,9 +2373,9 @@
         "notes/Những lưu ý khi thuê nhà.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.631,
-      "ndcg_k": 0.631,
-      "mrr": 0.5,
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
       "hit_1": false,
       "hit_3": true,
       "hit_5": true,
@@ -2385,15 +2385,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 029 quán quen.md",
+        "notes/Nấu cháo cho người ốm.md",
         "notes/Những lưu ý khi thuê nhà.md",
         "notes/Hợp đồng thuê văn phòng.md",
         "notes/Review code trước khi merge.md",
-        "notes/Thuỷ tinh cường lực.md",
         "notes/Kỉ luật bản thân.md",
+        "notes/Nhật ký 36.md",
+        "notes/Thuỷ tinh cường lực.md",
         "notes/Sức khoẻ tinh thần.md",
-        "notes/Ghi chép 076 ngõ nhỏ.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Lê Thị Thanh Hường.md"
+        "notes/Ghi chép 076 ngõ nhỏ.md"
       ]
     },
     {
@@ -2484,12 +2484,12 @@
         "notes/Những lưu ý khi thuê nhà.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Doanh nghiệp vừa và nhỏ.md",
-        "notes/Ghi chép 041 chiếc ô xanh.md",
+        "notes/Nhật ký 25.md",
         "notes/Brainstorm ý tưởng khởi nghiệp.md",
-        "notes/Ghi chép 010 bài hát cũ.md",
-        "notes/Kỉ luật bản thân.md",
+        "notes/Nhật ký 18.md",
+        "notes/Ghi chép 041 chiếc ô xanh.md",
         "notes/Ghi chép 069 hiên nhà.md",
-        "notes/Ghi chép 090 quán quen.md"
+        "notes/Ghi chép 010 bài hát cũ.md"
       ]
     },
     {
@@ -2611,8 +2611,8 @@
         "notes/Phân tích số liệu doanh thu.md",
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Doanh nghiệp vừa và nhỏ.md",
-        "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Giấy đăng ký kinh doanh.md",
+        "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Liên lạc đối tác.md",
         "notes/Phạm Đức Thịnh.md",
@@ -2641,15 +2641,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 003 tách trà.md",
-        "notes/Workflow duyệt chi phí.md",
         "notes/Ghi chép 085 hoa giấy.md",
+        "notes/Workflow duyệt chi phí.md",
         "notes/Phân tích số liệu doanh thu.md",
         "notes/Ghi chép 006 tách trà.md",
         "notes/Landing page cho chiến dịch mới.md",
         "notes/Lịch hẹn gia đình.md",
-        "notes/Ghi chép 070 tách trà.md",
-        "notes/Ghi chép 032 hoa giấy.md",
-        "notes/Sóng biển lúc bình minh.md"
+        "notes/Nhật ký 23.md",
+        "notes/Sóng biển lúc bình minh.md",
+        "notes/Ghi chép 032 hoa giấy.md"
       ]
     },
     {
@@ -2675,15 +2675,15 @@
       ],
       "top_paths": [
         "notes/Quà cho bố mẹ.md",
+        "notes/Nhật ký 15.md",
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Ghi chép 081 ngõ nhỏ.md",
+        "notes/Nhật ký 36.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 018 giá sách.md",
-        "notes/Ghi chép 028 góc bếp.md"
+        "notes/Nhật ký 34.md",
+        "notes/Ghi chép 090 quán quen.md"
       ]
     },
     {
@@ -2742,16 +2742,16 @@
         "notes/Ghi chép món ăn 03.md"
       ],
       "top_paths": [
+        "notes/Nhật ký 49.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Ghi chép 099 bài hát cũ.md",
+        "notes/Nhật ký 21.md",
         "notes/Ghi chép 082 bài hát cũ.md",
+        "notes/Nhật ký 25.md",
+        "notes/Nhật ký 41.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 108 chiếc ô xanh.md",
-        "notes/Ghi chép 049 sổ tay.md",
-        "notes/Ghi chép 101 sổ tay.md",
-        "notes/Ghi chép 037 sổ tay.md",
-        "notes/Ghi chép 081 ngõ nhỏ.md",
-        "notes/Ghi chép 090 quán quen.md"
+        "notes/Ghi chép 049 sổ tay.md"
       ]
     },
     {
@@ -2845,13 +2845,13 @@
         "notes/Gift ideas.md",
         "notes/Ghi chép món ăn 09.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 15.md",
         "notes/Ngành công nghệ thông tin.md",
         "notes/Ghi chép món ăn 11.md",
         "notes/Tối ưu quy trình làm việc.md",
-        "notes/Ghi chép 081 ngõ nhỏ.md",
-        "notes/Kỉ luật bản thân.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Ghi chép 042 ngõ nhỏ.md"
+        "notes/Nhật ký 14.md"
       ]
     },
     {
@@ -2911,13 +2911,13 @@
         "notes/Update phiên bản ứng dụng.md",
         "notes/Interview prep.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Bùi Thanh Tú.md",
+        "notes/Nhật ký 51.md",
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Đóng bảo hiểm xã hội.md",
+        "notes/Nhật ký 34.md",
         "notes/Weekly sync.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Máy văn phòng.md"
+        "notes/An toàn cá nhân.md"
       ]
     },
     {
@@ -3010,12 +3010,12 @@
         "notes/Ghi chép món ăn 11.md",
         "notes/Ghi chép món ăn 09.md",
         "notes/Ghi chép 076 ngõ nhỏ.md",
+        "notes/Nhật ký 51.md",
         "notes/Ghi chép 079 đèn lồng.md",
         "notes/Ghi chép món ăn 21.md",
         "notes/An toàn cá nhân.md",
         "notes/Ghi chép 074 giá sách.md",
-        "notes/Ghi chép 026 góc bếp.md",
-        "notes/Ghi chép 081 ngõ nhỏ.md"
+        "notes/Ghi chép 026 góc bếp.md"
       ]
     },
     {
@@ -3040,16 +3040,16 @@
         "notes/Ghi chép món ăn 12.md"
       ],
       "top_paths": [
-        "notes/Máy văn phòng.md",
-        "notes/Ghi chép 101 sổ tay.md",
+        "notes/Nhật ký 04.md",
+        "notes/Nhật ký 58.md",
+        "notes/Nhật ký 41.md",
+        "notes/Nhật ký 28.md",
+        "notes/Nhật ký 14.md",
+        "notes/Nhật ký 52.md",
+        "notes/Nhật ký 45.md",
         "notes/Tối ưu quy trình làm việc.md",
-        "notes/Thất thiệt.md",
-        "notes/Hợp đồng thuê văn phòng.md",
-        "notes/Hồi đáp thư mời.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Đặng Minh Quân.md",
-        "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Ghi chép 094 quán quen.md"
+        "notes/Nhật ký 17.md",
+        "notes/Thất thiệt.md"
       ]
     },
     {
@@ -3143,15 +3143,15 @@
       ],
       "top_paths": [
         "notes/Thất thiệt.md",
-        "notes/Phạm Đức Thành.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Mùa hè năm nay.md",
         "notes/Địa lý Việt Nam.md",
-        "notes/Mentor hướng dẫn người mới.md",
         "notes/Đặng Minh Quân.md",
         "notes/Việc cuối năm.md",
+        "notes/Nhật ký 49.md",
         "notes/Ghi chép 080 quán quen.md",
-        "notes/Ghi chép 069 hiên nhà.md"
+        "notes/Sách vở đầu năm.md",
+        "notes/Ghi chép 090 quán quen.md",
+        "notes/Bạn hàng lâu năm.md"
       ]
     },
     {
@@ -3261,10 +3261,10 @@
         "notes/Ghi chép địa điểm 04.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 1,
-      "ndcg_k": 1,
-      "mrr": 1,
-      "hit_1": true,
+      "ndcg_5": 0.631,
+      "ndcg_k": 0.631,
+      "mrr": 0.5,
+      "hit_1": false,
       "hit_3": true,
       "hit_5": true,
       "recall_k": 1,
@@ -3272,16 +3272,16 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
+        "notes/Nhật ký 49.md",
         "notes/Ghi chép địa điểm 04.md",
-        "notes/Phạm Đức Thành.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ven biển.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 18.md",
+        "notes/Nhật ký 12.md",
+        "notes/Nhật ký 15.md",
+        "notes/Nhật ký 25.md",
         "notes/Deadline nộp hồ sơ visa.md",
-        "notes/Thất thiệt.md",
-        "notes/Ghi chép 068 quán quen.md",
-        "notes/Bug triage.md",
-        "notes/Gift ideas.md",
-        "notes/Ghi chép 049 sổ tay.md"
+        "notes/Nhật ký 52.md",
+        "notes/Ghi chép 068 quán quen.md"
       ]
     },
     {
@@ -3309,13 +3309,13 @@
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Expense tracker.md",
-        "notes/Ghi chép 080 quán quen.md",
+        "notes/Nhật ký 51.md",
         "notes/Lịch hẹn gia đình.md",
-        "notes/Ghi chép 029 quán quen.md",
+        "notes/Ghi chép 080 quán quen.md",
         "notes/Giảm cân lành mạnh.md",
-        "notes/Ghi chép 090 quán quen.md",
+        "notes/Ghi chép 029 quán quen.md",
         "notes/Trồng cây trong nhà.md",
-        "notes/Đặng Minh Quân.md"
+        "notes/Ghi chép 090 quán quen.md"
       ]
     },
     {
@@ -3338,8 +3338,8 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Bản đồ tư duy.md",
         "notes/Workflow duyệt chi phí.md",
+        "notes/Bản đồ tư duy.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép địa điểm 06.md",
         "notes/Ghi chép 029 quán quen.md",
@@ -3406,14 +3406,14 @@
       "top_paths": [
         "notes/Phạm Đức Thịnh.md",
         "notes/Thất thiệt.md",
-        "notes/Nấu cháo cho người ốm.md",
         "notes/Doanh nghiệp vừa và nhỏ.md",
         "notes/Giấy đăng ký kinh doanh.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Phân tích số liệu doanh thu.md",
         "notes/Chuyến đi Phan Thiết cuối tuần.md",
-        "notes/Ghi chép 082 bài hát cũ.md"
+        "notes/Ghi chép 082 bài hát cũ.md",
+        "notes/Workshop thiết kế sản phẩm.md"
       ]
     },
     {
@@ -3442,12 +3442,12 @@
         "notes/Đặng Minh Quân.md",
         "notes/Phạm Đức Thịnh.md",
         "notes/Võ Thị Ngọc Anh.md",
-        "notes/Hoàng Mỹ Lan.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Ghi chép 099 bài hát cũ.md",
         "notes/Travel packing.md",
         "notes/Fitness log.md",
-        "notes/Ghi chép 082 bài hát cũ.md"
+        "notes/Ghi chép 082 bài hát cũ.md",
+        "notes/Ghi chép 095 quán quen.md"
       ]
     },
     {
@@ -3475,13 +3475,13 @@
         "notes/Ghi chép 080 quán quen.md",
         "notes/Ghi chép 029 quán quen.md",
         "notes/Ghi chép 062 góc bếp.md",
-        "notes/Ghi chép 014 sổ tay.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Expense tracker.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 072 chiếc ô xanh.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/An toàn cá nhân.md"
+        "notes/An toàn cá nhân.md",
+        "notes/Ghi chép 099 bài hát cũ.md"
       ]
     },
     {
@@ -3510,12 +3510,12 @@
         "notes/Lê Thị Thanh Hương.md",
         "notes/Bùi Thanh Tú.md",
         "notes/Hoàng Mỹ Lan.md",
-        "notes/Landing page cho chiến dịch mới.md",
         "notes/Bùi Thanh Tùng.md",
         "notes/Phạm Đức Thành.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Deadline nộp hồ sơ visa.md",
-        "notes/Bug triage.md"
+        "notes/Ghi chép 090 quán quen.md",
+        "notes/Ghi chép 068 quán quen.md"
       ]
     },
     {
@@ -3546,8 +3546,8 @@
         "notes/Ghi chép 090 quán quen.md",
         "notes/Giảm cân lành mạnh.md",
         "notes/Kiềm chế cơn giận.md",
-        "notes/Ngành công nghệ thông tin.md",
-        "notes/Ghi chép 026 góc bếp.md"
+        "notes/Ghi chép 026 góc bếp.md",
+        "notes/Tiết kiệm chi tiêu.md"
       ]
     },
     {
@@ -3576,9 +3576,9 @@
         "notes/Trương Quốc Khánh.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Lý do chuyển việc.md",
-        "notes/Trương Quốc Khang.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Đặng Minh Quân.md",
+        "notes/Trương Quốc Khang.md",
         "notes/Chuyến đi Quảng Ngãi cuối tuần.md"
       ]
     },
@@ -3612,7 +3612,7 @@
         "notes/Tuyến huyện.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Địa lý Việt Nam.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
+        "notes/Nhật ký 18.md",
         "notes/Cách trồng rau sạch tại nhà.md"
       ]
     },
@@ -3734,14 +3734,14 @@
       "top_paths": [
         "notes/Lý do chuyển việc.md",
         "notes/Xin nghỉ việc.md",
-        "notes/Tỷ lệ chuyển đổi.md",
         "notes/Đợt tuyển dụng.md",
-        "notes/Tối ưu quy trình làm việc.md",
-        "notes/Liên lạc đối tác.md",
         "notes/Checklist chuyển nhà.md",
+        "notes/Tỷ lệ chuyển đổi.md",
         "notes/Áp lực công việc.md",
+        "notes/Chuyển hóa năng lượng.md",
         "notes/Phỏng vấn xin việc.md",
-        "notes/Chuyển hóa năng lượng.md"
+        "notes/Quy chế nhân viên thử việc.md",
+        "notes/Quản lí rủi ro.md"
       ]
     },
     {
@@ -3803,9 +3803,9 @@
         "notes/Chuyến đi Hà Tĩnh cuối tuần.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Ghi chép 105 giá sách.md",
-        "notes/Ghi chép 108 chiếc ô xanh.md",
+        "notes/Nhật ký 38.md",
         "notes/Tiết kiệm chi tiêu.md",
-        "notes/Ghi chép 080 quán quen.md"
+        "notes/Ghi chép 108 chiếc ô xanh.md"
       ]
     },
     {
@@ -3829,15 +3829,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Kỉ luật bản thân.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Giảm cân lành mạnh.md",
-        "notes/Đặng Minh Quân.md",
-        "notes/Kỹ thuật nấu ăn.md",
-        "notes/Fitness log.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Kiềm chế cơn giận.md",
-        "notes/Giấy đăng ký kinh doanh.md",
-        "notes/Giấy tờ cần ký.md"
+        "notes/Áp lực công việc.md",
+        "notes/Nhật ký 51.md",
+        "notes/Cuối tháng mười.md",
+        "notes/Quy chế nhân viên thử việc.md",
+        "notes/Nhật ký 13.md",
+        "notes/Phạm Đức Thành.md",
+        "notes/Nhật ký 34.md",
+        "notes/Bùi Thanh Tùng.md",
+        "notes/Nhật ký 17.md"
       ]
     },
     {
@@ -3862,14 +3862,14 @@
       "top_paths": [
         "notes/Kỳ thi cuối năm.md",
         "notes/Việc cuối năm.md",
-        "notes/Lộ trình ôn thi tốt nghiệp.md",
-        "notes/Thất thiệt.md",
         "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Tiết kiệm chi tiêu.md",
+        "notes/Thất thiệt.md",
         "notes/Ngành công nghệ thông tin.md",
+        "notes/Mùa hè năm nay.md",
         "notes/Tâm lý học hành vi.md",
-        "notes/Ghi chép 091 sổ tay.md",
-        "notes/Kí hiệu toán học.md"
+        "notes/Kí hiệu toán học.md",
+        "notes/Ghi chép 091 sổ tay.md"
       ]
     },
     {
@@ -3894,14 +3894,14 @@
       "top_paths": [
         "notes/Kĩ năng giao tiếp.md",
         "notes/Giao nhận nội thành.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Đặng Minh Quân.md",
-        "notes/Kỳ thi cuối năm.md",
+        "notes/Nhật ký 13.md",
         "notes/Danh sách khách hàng tiềm năng.md",
-        "notes/Onboarding checklist.md",
         "notes/Chuyển hóa năng lượng.md",
-        "notes/Chiến lược tiếp thị nội dung.md",
-        "notes/Giấy đăng ký kinh doanh.md"
+        "notes/Weekly sync.md",
+        "notes/Phỏng vấn xin việc.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 14.md",
+        "notes/Nhật ký 25.md"
       ]
     },
     {
@@ -3925,15 +3925,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Địa lý Việt Nam.md",
-        "notes/Máy văn phòng.md",
-        "notes/Ghi chép địa điểm 10.md",
         "notes/Ghi chép địa điểm 01.md",
         "notes/Ghi chép địa điểm 04.md",
         "notes/Ghi chép địa điểm 05.md",
         "notes/Ghi chép địa điểm 07.md",
-        "notes/Ven biển.md",
-        "notes/Ghi chép địa điểm 20.md",
-        "notes/Ghi chép địa điểm 25.md"
+        "notes/Ghi chép địa điểm 09.md",
+        "notes/Nhật ký 14.md",
+        "notes/Ghi chép địa điểm 10.md",
+        "notes/Nhật ký 25.md",
+        "notes/Ghi chép địa điểm 20.md"
       ]
     },
     {
@@ -3991,13 +3991,13 @@
         "notes/Chi phí hợp lý.md",
         "notes/Workflow duyệt chi phí.md",
         "notes/Tính toán chi phí xây nhà.md",
-        "notes/Giấy tờ cần ký.md",
         "notes/Ghi chép 033 chợ phiên.md",
+        "notes/Giấy tờ cần ký.md",
         "notes/Chọn nghề phù hợp.md",
         "notes/Hợp đồng thuê văn phòng.md",
         "notes/Budget sheet.md",
-        "notes/Ghi chép 105 giá sách.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md"
+        "notes/Ghi chép 034 chợ phiên.md",
+        "notes/Ghi chép 105 giá sách.md"
       ]
     },
     {
@@ -4022,14 +4022,14 @@
       "top_paths": [
         "notes/Quản lí rủi ro.md",
         "notes/Ban quản lý dự án xây dựng cầu.md",
-        "notes/Biên bản hội đồng quản trị.md",
-        "notes/Liên lạc đối tác.md",
-        "notes/Q4 roadmap.md",
-        "notes/Travel packing.md",
-        "notes/Tâm lý học hành vi.md",
         "notes/Pháp lý nhà ở.md",
+        "notes/Travel packing.md",
         "notes/Nguyên lý hoạt động.md",
-        "notes/Chi phí hợp lý.md"
+        "notes/Chi phí hợp lý.md",
+        "notes/Địa lý Việt Nam.md",
+        "notes/Lý do chuyển việc.md",
+        "notes/Tâm lý học hành vi.md",
+        "notes/Q4 roadmap.md"
       ]
     },
     {
@@ -4053,15 +4053,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Tâm lý học hành vi.md",
-        "notes/Phương pháp học tập hiệu quả.md",
-        "notes/Tiết thực hành.md",
         "notes/Bài tập về nhà.md",
-        "notes/Ghi chép 098 góc bếp.md",
-        "notes/Ghi chép 068 quán quen.md",
+        "notes/Tiết thực hành.md",
+        "notes/Phương pháp học tập hiệu quả.md",
         "notes/Kí hiệu toán học.md",
         "notes/Hành trình khám phá núi rừng.md",
         "notes/Giám đốc điều hành.md",
-        "notes/Tiết giảm vận hành.md"
+        "notes/Tiết giảm vận hành.md",
+        "notes/Du học sau đại học.md",
+        "notes/Kỉ luật bản thân.md"
       ]
     },
     {
@@ -4087,13 +4087,13 @@
         "notes/Kí hiệu toán học.md",
         "notes/Ghi chú tỉnh toán lại.md",
         "notes/Bài tập về nhà.md",
-        "notes/Giấy tờ cần ký.md",
-        "notes/Chuẩn bị nhập học.md",
         "notes/Phương pháp học tập hiệu quả.md",
         "notes/Tính toán chi phí xây nhà.md",
         "notes/An toàn cá nhân.md",
         "notes/Budget sheet.md",
-        "notes/Giấy đăng ký kinh doanh.md"
+        "notes/Du học sau đại học.md",
+        "notes/Chuẩn bị nhập học.md",
+        "notes/Tâm lý học hành vi.md"
       ]
     },
     {
@@ -4151,13 +4151,13 @@
         "notes/Hòa giải mâu thuẫn.md",
         "notes/Hoàng Mỹ Lan.md",
         "notes/Hoàng Mỹ Linh.md",
-        "notes/Hoà bình thế giới.md",
         "notes/Ghi chép 050 hoa giấy.md",
-        "notes/Ghi chép 085 hoa giấy.md",
+        "notes/Hoà bình thế giới.md",
         "notes/Chuyển hóa năng lượng.md",
         "notes/Ghi chép 056 mưa chiều.md",
         "notes/Văn hóa doanh nghiệp.md",
-        "notes/Hồi đáp thư mời.md"
+        "notes/Hồi đáp thư mời.md",
+        "notes/Ghi chép 053 hoa giấy.md"
       ]
     },
     {
@@ -4184,12 +4184,12 @@
         "notes/Hòa giải mâu thuẫn.md",
         "notes/Sóng biển lúc bình minh.md",
         "notes/Ghi chép 082 bài hát cũ.md",
+        "notes/Nhật ký 51.md",
         "notes/Du học sau đại học.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Hoả hoạn tại chung cư.md",
-        "notes/Ghi chép 108 chiếc ô xanh.md",
+        "notes/Nhật ký 49.md",
         "notes/Hoàng Mỹ Linh.md",
-        "notes/Ghi chép 063 mưa chiều.md"
+        "notes/Nhật ký 14.md"
       ]
     },
     {
@@ -4221,7 +4221,7 @@
         "notes/Thủy điện nhỏ.md",
         "notes/Ghi chép 089 giá sách.md",
         "notes/Ghi chép 014 sổ tay.md",
-        "notes/Xin nghỉ việc.md"
+        "notes/Ghi chép 106 hoa giấy.md"
       ]
     },
     {
@@ -4247,13 +4247,13 @@
         "notes/Hoá học hữu cơ.md",
         "notes/Nguyễn Hữu Phước.md",
         "notes/Bài tập về nhà.md",
-        "notes/Phương pháp học tập hiệu quả.md",
         "notes/Nguyễn Hữu Phúc.md",
         "notes/Chuyển hóa năng lượng.md",
         "notes/Tâm lý học hành vi.md",
         "notes/Du học sau đại học.md",
         "notes/Học ngoại ngữ nhanh.md",
-        "notes/Tiết thực hành.md"
+        "notes/Chuẩn bị nhập học.md",
+        "notes/Ghi chép 082 bài hát cũ.md"
       ]
     },
     {
@@ -4311,13 +4311,13 @@
         "notes/Thuỷ sản xuất khẩu.md",
         "notes/Thủy điện nhỏ.md",
         "notes/An toàn cá nhân.md",
+        "notes/Nhật ký 22.md",
+        "notes/Nhật ký 24.md",
+        "notes/Nhật ký 23.md",
         "notes/Workshop thiết kế sản phẩm.md",
         "notes/Cải tiến sản phẩm.md",
-        "notes/Ghi chép 108 chiếc ô xanh.md",
-        "notes/Nghệ thuật thuyết trình.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Thuỷ tinh cường lực.md",
-        "notes/Ghi chép 026 góc bếp.md"
+        "notes/Nhật ký 21.md",
+        "notes/Nghệ thuật thuyết trình.md"
       ]
     },
     {
@@ -4345,11 +4345,11 @@
         "notes/Sức khoẻ tinh thần.md",
         "notes/Lịch hẹn gia đình.md",
         "notes/Ghi chép 074 giá sách.md",
-        "notes/Thói quen đọc sách.md",
         "notes/Tuyến huyện.md",
         "notes/Mở cửa sổ mỗi sáng.md",
         "notes/Học ngoại ngữ nhanh.md",
-        "notes/Việc cuối năm.md"
+        "notes/Việc cuối năm.md",
+        "notes/Ngành công nghệ thông tin.md"
       ]
     },
     {
@@ -4375,13 +4375,13 @@
         "notes/Sức khoẻ tinh thần.md",
         "notes/Khỏe mạnh mỗi ngày.md",
         "notes/Cơn đau đầu mãn tính.md",
-        "notes/Lịch hẹn gia đình.md",
         "notes/Phạm Đức Thịnh.md",
         "notes/Thuỷ tinh cường lực.md",
-        "notes/Giảm cân lành mạnh.md",
+        "notes/Lịch hẹn gia đình.md",
+        "notes/Nhật ký 34.md",
         "notes/Chuyến đi Hà Tĩnh cuối tuần.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Liên lạc đối tác.md"
+        "notes/Giảm cân lành mạnh.md",
+        "notes/Nhật ký 45.md"
       ]
     },
     {
@@ -4441,11 +4441,11 @@
         "notes/Võ Thị Ngọc Anh.md",
         "notes/Lớp mười hai.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Lê Thị Thanh Hương.md",
-        "notes/Mĩ thuật ứng dụng.md",
+        "notes/Nhật ký 56.md",
         "notes/Đặng Minh Quân.md",
-        "notes/Tiết thực hành.md",
-        "notes/Trương Quốc Khang.md"
+        "notes/Trương Quốc Khang.md",
+        "notes/Phạm Đức Thành.md",
+        "notes/Nhật ký 54.md"
       ]
     },
     {
@@ -4475,8 +4475,8 @@
         "notes/Ghi chép 035 sổ tay.md",
         "notes/Ghi chép 088 sổ tay.md",
         "notes/Ghi chép 101 sổ tay.md",
-        "notes/Hoá học hữu cơ.md",
         "notes/Ghi chép 103 sổ tay.md",
+        "notes/Hoá học hữu cơ.md",
         "notes/Mở cửa sổ mỗi sáng.md"
       ]
     },
@@ -4572,8 +4572,8 @@
         "notes/Ghi chép 080 quán quen.md",
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Chạy điện.md",
-        "notes/Đặng Minh Quân.md",
-        "notes/Ghi chép 041 chiếc ô xanh.md"
+        "notes/Ghi chép 041 chiếc ô xanh.md",
+        "notes/Chuyến đi Hà Tĩnh cuối tuần.md"
       ]
     },
     {
@@ -4631,13 +4631,13 @@
         "notes/Mẹo bán hàng online.md",
         "notes/Giữ chân khách hàng.md",
         "notes/Danh sách khách hàng tiềm năng.md",
+        "notes/Nhật ký 42.md",
+        "notes/Nhật ký 43.md",
+        "notes/Nhật ký 41.md",
+        "notes/Bạn hàng lâu năm.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Mua bán xe cũ.md",
-        "notes/Bạn hàng lâu năm.md",
-        "notes/Tiết giảm vận hành.md",
-        "notes/Múa bán nguyệt.md",
-        "notes/Ghi chép 068 quán quen.md",
-        "notes/Ghi chép 026 góc bếp.md"
+        "notes/Tiết giảm vận hành.md"
       ]
     },
     {
@@ -4694,14 +4694,14 @@
       "top_paths": [
         "notes/Chữa bệnh bằng thảo dược.md",
         "notes/Phòng chứa bệnh phẩm.md",
+        "notes/Nhật ký 35.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 36.md",
+        "notes/Nhật ký 33.md",
         "notes/Tuyến huyện.md",
         "notes/Home repairs.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Sức khoẻ tinh thần.md",
-        "notes/Nấu cháo cho người ốm.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Cơn đau đầu mãn tính.md",
-        "notes/Ghi chép 017 tách trà.md"
+        "notes/Nhật ký 45.md"
       ]
     },
     {
@@ -4826,10 +4826,10 @@
         "notes/Ngành công nghệ thông tin.md",
         "notes/Ghi chép 010 bài hát cũ.md",
         "notes/Ghi chép 019 mưa chiều.md",
-        "notes/Ghi chép 003 tách trà.md",
-        "notes/Ghi chép 004 bài hát cũ.md",
         "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Ghi chép 090 quán quen.md"
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 59.md",
+        "notes/Ghi chép 100 bánh nướng.md"
       ]
     },
     {
@@ -4854,14 +4854,14 @@
       "top_paths": [
         "notes/Tính toán chi phí xây nhà.md",
         "notes/Kí hiệu toán học.md",
-        "notes/Ghi chú tỉnh toán lại.md",
         "notes/Bài tập về nhà.md",
+        "notes/Ghi chú tỉnh toán lại.md",
         "notes/Budget sheet.md",
         "notes/An toàn cá nhân.md",
         "notes/Cơn đau đầu mãn tính.md",
         "notes/Sức khoẻ tinh thần.md",
-        "notes/Phân tích số liệu doanh thu.md",
-        "notes/Ghi chép 016 đèn lồng.md"
+        "notes/Ghi chép 016 đèn lồng.md",
+        "notes/Ghi chép 025 ngõ nhỏ.md"
       ]
     },
     {
@@ -4885,15 +4885,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Mở cửa sổ mỗi sáng.md",
+        "notes/Nhật ký 43.md",
+        "notes/Nhật ký 42.md",
+        "notes/Nhật ký 44.md",
         "notes/Ghi chép 044 góc bếp.md",
         "notes/Ghi chép 103 sổ tay.md",
         "notes/Bôi mỡ cửa cuốn.md",
         "notes/Home repairs.md",
-        "notes/Ghi chép 034 chợ phiên.md",
         "notes/Mất ngủ về đêm.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Ghi chép 026 góc bếp.md",
-        "notes/Ghi chép 079 đèn lồng.md"
+        "notes/Ghi chép 034 chợ phiên.md"
       ]
     },
     {
@@ -4921,11 +4921,11 @@
         "notes/Ghi chép 018 giá sách.md",
         "notes/Ghi chép 061 giá sách.md",
         "notes/Giã cả nồi cua.md",
+        "notes/Giá nhà đất.md",
         "notes/Ghi chép 075 giá sách.md",
         "notes/Ghi chép 105 giá sách.md",
-        "notes/Giá nhà đất.md",
-        "notes/Ghi chép 092 giá sách.md",
-        "notes/Ghi chép 089 giá sách.md"
+        "notes/Ghi chép 089 giá sách.md",
+        "notes/Ghi chép 092 giá sách.md"
       ]
     },
     {
@@ -4952,11 +4952,11 @@
         "notes/Cãi tiến độ với khách.md",
         "notes/Nổi tiếng một thời.md",
         "notes/Landing page cho chiến dịch mới.md",
-        "notes/Buổi sáng.md",
+        "notes/Nhật ký 16.md",
         "notes/Máy văn phòng.md",
+        "notes/Buổi sáng.md",
         "notes/Ghi chép 098 góc bếp.md",
-        "notes/Ghi chép 017 tách trà.md",
-        "notes/Ngành công nghệ thông tin.md",
+        "notes/Nhật ký 14.md",
         "notes/Sổ cái cuối tháng.md"
       ]
     },
@@ -5016,12 +5016,12 @@
         "notes/Quà cam kết tặng khách.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 110 quán quen.md",
-        "notes/Ghi chép 090 quán quen.md",
         "notes/Chuyến đi Quảng Ngãi cuối tuần.md",
         "notes/Biên bản hội đồng quản trị.md",
         "notes/Ban quản lý dự án xây dựng cầu.md",
         "notes/Phương pháp học tập hiệu quả.md",
-        "notes/Xin nghỉ việc.md"
+        "notes/Xin nghỉ việc.md",
+        "notes/Quản lí rủi ro.md"
       ]
     },
     {
@@ -5142,14 +5142,14 @@
       "top_paths": [
         "notes/Khoản vay mua nhà.md",
         "notes/Giữ chân khách hàng.md",
-        "notes/Ngành công nghệ thông tin.md",
+        "notes/Nhật ký 42.md",
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Mẹo bán hàng online.md",
         "notes/Bạn hàng lâu năm.md",
-        "notes/Vàng và bạc.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
+        "notes/Vàng và bạc.md",
         "notes/Podcast về tài chính cá nhân.md",
-        "notes/Tiết giảm vận hành.md"
+        "notes/Ngành công nghệ thông tin.md"
       ]
     },
     {
@@ -5238,12 +5238,12 @@
       "top_paths": [
         "notes/Giá nhà đất.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Chiến lược tiếp thị nội dung.md",
         "notes/Võ Thị Ngọc Ánh.md",
+        "notes/Chiến lược tiếp thị nội dung.md",
+        "notes/Điểm trường vùng cao.md",
         "notes/Võ Thị Ngọc Anh.md",
         "notes/Lê Thị Thanh Hương.md",
         "notes/Lê Thị Thanh Hường.md",
-        "notes/Điểm trường vùng cao.md",
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Ghi chép 025 ngõ nhỏ.md"
       ]
@@ -5271,13 +5271,13 @@
         "notes/Phòng chứa bệnh phẩm.md",
         "notes/Chữa bệnh bằng thảo dược.md",
         "notes/Tuyến huyện.md",
-        "notes/Gói nhân đạo.md",
-        "notes/Đợt tuyển dụng.md",
-        "notes/Phạm Đức Thịnh.md",
-        "notes/Nấu cháo cho người ốm.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Cơn đau đầu mãn tính.md",
-        "notes/Ghi chép 090 quán quen.md"
+        "notes/Nhật ký 46.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 48.md",
+        "notes/Nhật ký 45.md",
+        "notes/Nhật ký 35.md",
+        "notes/Nhật ký 36.md",
+        "notes/Gói nhân đạo.md"
       ]
     },
     {
@@ -5334,13 +5334,13 @@
       "top_paths": [
         "notes/Ngoài trời.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Ghi chép 037 sổ tay.md",
+        "notes/Nhật ký 17.md",
         "notes/Chữa bệnh bằng thảo dược.md",
+        "notes/Nhật ký 11.md",
         "notes/Sao chép dữ liệu.md",
-        "notes/Phạm Đức Thành.md",
-        "notes/Landing page cho chiến dịch mới.md",
+        "notes/Nhật ký 09.md",
         "notes/Du lịch bụi giá rẻ.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
+        "notes/Nhật ký 10.md",
         "notes/Giảm cân lành mạnh.md"
       ]
     },
@@ -5398,14 +5398,14 @@
       "top_paths": [
         "notes/Cho vay tiêu dùng.md",
         "notes/Bếp công nghiệp.md",
-        "notes/Vàng và bạc.md",
-        "notes/Buổi sáng.md",
-        "notes/Mở cửa sổ mỗi sáng.md",
         "notes/Của để dành cho con.md",
+        "notes/Buổi sáng.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Ghi chú tỉnh toán lại.md",
-        "notes/Cô chủ nhiệm.md",
-        "notes/Khoản vay mua nhà.md"
+        "notes/Nhật ký 02.md",
+        "notes/Mở cửa sổ mỗi sáng.md",
+        "notes/Khoản vay mua nhà.md",
+        "notes/Nhật ký 26.md"
       ]
     },
     {
@@ -5433,11 +5433,11 @@
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Điểm trường vùng cao.md",
-        "notes/Liên lạc đối tác.md",
+        "notes/Nhật ký 45.md",
         "notes/Nổi tiếng một thời.md",
-        "notes/Mĩ thuật ứng dụng.md",
+        "notes/Liên lạc đối tác.md",
         "notes/Hoàng Mỹ Linh.md",
-        "notes/Giữ chân khách hàng.md"
+        "notes/Mĩ thuật ứng dụng.md"
       ]
     },
     {
@@ -5493,14 +5493,14 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Thực đơn chay.md",
-        "notes/Ghi chép 055 hiên nhà.md",
+        "notes/Nhật ký 42.md",
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Mẹo bán hàng online.md",
         "notes/Bạn hàng lâu năm.md",
-        "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Giữ chân khách hàng.md",
-        "notes/Tiết giảm vận hành.md",
+        "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Ghi chép 097 hiên nhà.md",
+        "notes/Tiết giảm vận hành.md",
         "notes/Ghi chép 026 góc bếp.md"
       ]
     },
@@ -5526,14 +5526,14 @@
       "top_paths": [
         "notes/Vàng và bạc.md",
         "notes/An toàn cá nhân.md",
-        "notes/Ghi chép 042 ngõ nhỏ.md",
         "notes/Họp sprint planning đầu tuần.md",
         "notes/Cơn đau đầu mãn tính.md",
         "notes/Sách vở đầu năm.md",
+        "notes/Nhật ký 45.md",
+        "notes/Nhật ký 21.md",
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Ghi chép 026 góc bếp.md",
-        "notes/Brainstorm ý tưởng khởi nghiệp.md",
-        "notes/Bảo mật tài khoản trực tuyến.md"
+        "notes/Ghi chép 065 sổ tay.md"
       ]
     },
     {
@@ -5563,7 +5563,7 @@
         "notes/Biên bản hội đồng quản trị.md",
         "notes/Chuyến đi Hà Tĩnh cuối tuần.md",
         "notes/Update phiên bản ứng dụng.md",
-        "notes/Ghi chép 084 chợ phiên.md",
+        "notes/Nhật ký 51.md",
         "notes/Cơn đau đầu mãn tính.md",
         "notes/Bản đồ tư duy.md"
       ]
@@ -5590,14 +5590,14 @@
       "top_paths": [
         "notes/Họp sprint planning đầu tuần.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Ban quản lý dự án xây dựng cầu.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 27.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 58.md",
+        "notes/Nhật ký 34.md",
         "notes/Weekly sync.md",
         "notes/Phỏng vấn xin việc.md",
-        "notes/Ghi chép 041 chiếc ô xanh.md",
-        "notes/Giám đốc điều hành.md",
-        "notes/Biên bản hội đồng quản trị.md",
-        "notes/Ghi chép 101 sổ tay.md",
-        "notes/Brainstorm ý tưởng khởi nghiệp.md"
+        "notes/Nhật ký 24.md"
       ]
     },
     {
@@ -5609,10 +5609,10 @@
         "notes/Kế hoạch marketing quý bốn.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.631,
-      "ndcg_k": 0.631,
-      "mrr": 0.5,
-      "hit_1": false,
+      "ndcg_5": 1,
+      "ndcg_k": 1,
+      "mrr": 1,
+      "hit_1": true,
       "hit_3": true,
       "hit_5": true,
       "recall_k": 1,
@@ -5620,16 +5620,16 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md",
         "notes/Kế hoạch marketing quý bốn.md",
+        "notes/Chiến lược tiếp thị nội dung.md",
         "notes/Q4 roadmap.md",
         "notes/Họp sprint planning đầu tuần.md",
         "notes/Meal plan.md",
-        "notes/Onboarding checklist.md",
         "notes/Kĩ năng giao tiếp.md",
-        "notes/Chuyến đi Phan Thiết cuối tuần.md",
-        "notes/Võ Thị Ngọc Anh.md",
-        "notes/Phạm Đức Thịnh.md"
+        "notes/Onboarding checklist.md",
+        "notes/Nhật ký 14.md",
+        "notes/Nhật ký 49.md",
+        "notes/Ghi chép 074 giá sách.md"
       ]
     },
     {
@@ -5687,13 +5687,13 @@
         "notes/Review code trước khi merge.md",
         "notes/Ban quản lý dự án xây dựng cầu.md",
         "notes/Việc cuối năm.md",
-        "notes/Brainstorm ý tưởng khởi nghiệp.md",
-        "notes/Ghi chép 055 hiên nhà.md",
+        "notes/Ghi chép 017 tách trà.md",
         "notes/Những lưu ý khi thuê nhà.md",
         "notes/Ghi chép 063 mưa chiều.md",
         "notes/Ghi chép 077 chợ phiên.md",
         "notes/Ghi chép 033 chợ phiên.md",
-        "notes/Sao chép dữ liệu.md"
+        "notes/Sao chép dữ liệu.md",
+        "notes/Ghi chép 071 hoa giấy.md"
       ]
     },
     {
@@ -5751,13 +5751,13 @@
         "notes/Workshop thiết kế sản phẩm.md",
         "notes/Cải tiến sản phẩm.md",
         "notes/Thuỷ sản xuất khẩu.md",
+        "notes/Nhật ký 22.md",
+        "notes/Nhật ký 24.md",
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 23.md",
         "notes/Phòng chứa bệnh phẩm.md",
-        "notes/Máy văn phòng.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Ghi chép 026 góc bếp.md",
-        "notes/Sàn thương mại điện tử.md",
-        "notes/Ghi chép 016 đèn lồng.md"
+        "notes/Nhật ký 41.md",
+        "notes/Nhật ký 51.md"
       ]
     },
     {
@@ -5782,14 +5782,14 @@
       "top_paths": [
         "notes/File backup dữ liệu hằng tuần.md",
         "notes/Sao chép dữ liệu.md",
+        "notes/Nhật ký 51.md",
         "notes/Những lưu ý khi thuê nhà.md",
         "notes/Phân tích số liệu doanh thu.md",
-        "notes/Chuyến đi Hội An cuối tuần.md",
-        "notes/Chuyến đi Quảng Ngãi cuối tuần.md",
-        "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Ngành công nghệ thông tin.md",
-        "notes/Chuyến đi Đà Lạt cuối tuần.md",
-        "notes/Chuyến đi Cần Thơ cuối tuần.md"
+        "notes/Ghi chép 091 sổ tay.md",
+        "notes/Ghi chép 014 sổ tay.md",
+        "notes/Ban quản lý dự án xây dựng cầu.md",
+        "notes/Ghi chép 063 mưa chiều.md"
       ]
     },
     {
@@ -5845,15 +5845,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Update phiên bản ứng dụng.md",
+        "notes/Nhật ký 16.md",
+        "notes/Nhật ký 09.md",
+        "notes/Nhật ký 19.md",
+        "notes/Nhật ký 40.md",
+        "notes/Nhật ký 43.md",
         "notes/Ghi chép 034 chợ phiên.md",
-        "notes/Ghi chép 057 chợ phiên.md",
-        "notes/Fitness log.md",
-        "notes/Ghi chép 033 chợ phiên.md",
-        "notes/Ghi chép 077 chợ phiên.md",
-        "notes/Ghi chép 084 chợ phiên.md",
-        "notes/Danh sách khách hàng tiềm năng.md",
-        "notes/Mĩ thuật ứng dụng.md",
-        "notes/Buổi sáng.md"
+        "notes/Nhật ký 02.md",
+        "notes/Nhật ký 50.md",
+        "notes/Nhật ký 26.md"
       ]
     },
     {
@@ -5910,14 +5910,14 @@
       "top_paths": [
         "notes/Meeting với đối tác nước ngoài.md",
         "notes/Liên lạc đối tác.md",
-        "notes/Phạm Đức Thịnh.md",
-        "notes/Ban quản lý dự án xây dựng cầu.md",
-        "notes/Học ngoại ngữ nhanh.md",
-        "notes/Họp sprint planning đầu tuần.md",
-        "notes/Weekly sync.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Đặng Minh Quân.md"
+        "notes/Nhật ký 41.md",
+        "notes/Nhật ký 17.md",
+        "notes/Nhật ký 13.md",
+        "notes/Nhật ký 24.md",
+        "notes/Nhật ký 37.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 27.md"
       ]
     },
     {
@@ -5976,12 +5976,12 @@
         "notes/Báo cáo tài chính quý ba.md",
         "notes/An toàn cá nhân.md",
         "notes/Tiết kiệm chi tiêu.md",
-        "notes/Học ngoại ngữ nhanh.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 23.md",
+        "notes/Bảo mật tài khoản trực tuyến.md",
         "notes/Quy chế nhân viên thử việc.md",
         "notes/Onboarding checklist.md",
-        "notes/Gói nhân đạo.md",
-        "notes/Bảo mật tài khoản trực tuyến.md",
-        "notes/Phạm Đức Thịnh.md"
+        "notes/Gói nhân đạo.md"
       ]
     },
     {
@@ -6006,14 +6006,14 @@
       "top_paths": [
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Phỏng vấn xin việc.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Đợt tuyển dụng.md",
         "notes/Phạm Đức Thành.md",
         "notes/Interview prep.md",
         "notes/Báo cáo feedback của người dùng.md",
+        "notes/Đánh giá nhà cung cấp mới.md",
+        "notes/Landing page cho chiến dịch mới.md",
         "notes/Nguyễn Hữu Phước.md",
-        "notes/Quy chế nhân viên thử việc.md",
-        "notes/Pháp lý nhà ở.md"
+        "notes/Ghi chép 025 ngõ nhỏ.md"
       ]
     },
     {
@@ -6108,9 +6108,9 @@
         "notes/Ghi chép 069 hiên nhà.md",
         "notes/Ghi chép 078 đèn lồng.md",
         "notes/Ghi chép 057 chợ phiên.md",
-        "notes/Buổi sáng.md",
-        "notes/Ghi chép 080 quán quen.md",
         "notes/Ghi chép 053 hoa giấy.md",
+        "notes/Ghi chép 080 quán quen.md",
+        "notes/Buổi sáng.md",
         "notes/Ghi chép 076 ngõ nhỏ.md"
       ]
     },
@@ -6168,13 +6168,13 @@
       "top_paths": [
         "notes/An toàn cá nhân.md",
         "notes/Giảm cân lành mạnh.md",
-        "notes/Ngoài trời.md",
         "notes/Chuyển hóa năng lượng.md",
         "notes/Cách trồng rau sạch tại nhà.md",
         "notes/Phạm Đức Thịnh.md",
         "notes/Khỏe mạnh mỗi ngày.md",
         "notes/Sức khoẻ tinh thần.md",
         "notes/Tính toán chi phí xây nhà.md",
+        "notes/Ban quản lý dự án xây dựng cầu.md",
         "notes/Nổi tiếng một thời.md"
       ]
     },
@@ -6209,7 +6209,7 @@
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Nuôi mèo con.md",
         "notes/Ghi chép 015 bài hát cũ.md",
-        "notes/Nổi tiếng một thời.md"
+        "notes/Báo cáo feedback của người dùng.md"
       ]
     },
     {
@@ -6238,9 +6238,9 @@
         "notes/Ghi chép 069 hiên nhà.md",
         "notes/Chỗ đỗ xe gần ga.md",
         "notes/Tối ưu quy trình làm việc.md",
+        "notes/Nắm rơm làm chổi.md",
         "notes/Ngành công nghệ thông tin.md",
         "notes/Kiềm chế cơn giận.md",
-        "notes/Nắm rơm làm chổi.md",
         "notes/Sức khoẻ tinh thần.md"
       ]
     },
@@ -6269,11 +6269,11 @@
         "notes/Brainstorm ý tưởng khởi nghiệp.md",
         "notes/Chọn nghề phù hợp.md",
         "notes/Văn hóa doanh nghiệp.md",
-        "notes/Điểm trường vùng cao.md",
-        "notes/Xin nghỉ việc.md",
         "notes/Landing page cho chiến dịch mới.md",
+        "notes/Xin nghỉ việc.md",
         "notes/Bếp công nghiệp.md",
-        "notes/Doanh nghiệp vừa và nhỏ.md"
+        "notes/Doanh nghiệp vừa và nhỏ.md",
+        "notes/Lịch hẹn gia đình.md"
       ]
     },
     {
@@ -6285,26 +6285,26 @@
         "notes/Xin nghỉ việc.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.631,
-      "ndcg_k": 0.631,
-      "mrr": 0.5,
+      "ndcg_5": 0,
+      "ndcg_k": 0.333,
+      "mrr": 0.143,
       "hit_1": false,
-      "hit_3": true,
-      "hit_5": true,
+      "hit_3": false,
+      "hit_5": false,
       "recall_k": 1,
       "evidence_coverage_k": 1,
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 101 sổ tay.md",
-        "notes/Xin nghỉ việc.md",
         "notes/Áp lực công việc.md",
+        "notes/Nhật ký 49.md",
         "notes/Cách trồng rau sạch tại nhà.md",
         "notes/Cãi tiến độ với khách.md",
         "notes/Meeting với đối tác nước ngoài.md",
-        "notes/Thói quen đọc sách.md",
-        "notes/Ghi chép 091 sổ tay.md",
+        "notes/Xin nghỉ việc.md",
         "notes/Liên lạc đối tác.md",
+        "notes/Ghi chép 091 sổ tay.md",
         "notes/Ghi chép 082 bài hát cũ.md"
       ]
     },
@@ -6330,14 +6330,14 @@
       "top_paths": [
         "notes/Nuôi mèo con.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Ghi chép 045 chiếc ô xanh.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Đóng bảo hiểm xã hội.md",
         "notes/Ghi chép 093 mưa chiều.md",
+        "notes/Học ngoại ngữ nhanh.md",
+        "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Study schedule.md",
-        "notes/Học ngoại ngữ nhanh.md"
+        "notes/Nhật ký 49.md"
       ]
     },
     {
@@ -6362,14 +6362,14 @@
       "top_paths": [
         "notes/Du lịch bụi giá rẻ.md",
         "notes/Ghi chép 026 góc bếp.md",
+        "notes/Ghi chép 045 chiếc ô xanh.md",
         "notes/Công thức mùa hè.md",
-        "notes/Lộ trình ôn thi tốt nghiệp.md",
+        "notes/Ghi chép 009 chiếc ô xanh.md",
         "notes/Ghi chép 074 giá sách.md",
         "notes/Travel packing.md",
+        "notes/Ghi chép 051 chiếc ô xanh.md",
         "notes/Ghi chép 099 bài hát cũ.md",
-        "notes/Ghi chép 095 quán quen.md",
-        "notes/Cơn đau đầu mãn tính.md",
-        "notes/Ghi chép 056 mưa chiều.md"
+        "notes/Ghi chép 005 chiếc ô xanh.md"
       ]
     },
     {
@@ -6381,27 +6381,29 @@
         "notes/Nấu cháo cho người ốm.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 1,
-      "ndcg_k": 1,
-      "mrr": 1,
-      "hit_1": true,
-      "hit_3": true,
-      "hit_5": true,
-      "recall_k": 1,
-      "evidence_coverage_k": 1,
-      "all_relevant_k": true,
-      "missed_paths": [],
+      "ndcg_5": 0,
+      "ndcg_k": 0,
+      "mrr": 0,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": false,
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Nấu cháo cho người ốm.md"
+      ],
       "top_paths": [
-        "notes/Nấu cháo cho người ốm.md",
         "notes/Ghi chép món ăn 01.md",
         "notes/Ghi chép món ăn 06.md",
         "notes/Ghi chép món ăn 05.md",
         "notes/Ghi chép món ăn 09.md",
         "notes/Ghi chép món ăn 07.md",
         "notes/Ghi chép món ăn 03.md",
-        "notes/Ghi chép món ăn 10.md",
         "notes/Ghi chép món ăn 04.md",
-        "notes/Ghi chép món ăn 12.md"
+        "notes/Ghi chép món ăn 10.md",
+        "notes/Ghi chép món ăn 12.md",
+        "notes/Ghi chép món ăn 13.md"
       ]
     },
     {
@@ -6414,15 +6416,17 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0.289,
-      "mrr": 0.1,
+      "ndcg_k": 0,
+      "mrr": 0,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
-      "recall_k": 1,
-      "evidence_coverage_k": 1,
-      "all_relevant_k": true,
-      "missed_paths": [],
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Kiềm chế cơn giận.md"
+      ],
       "top_paths": [
         "notes/Ghi chép 012 quán quen.md",
         "notes/Cơn đau đầu mãn tính.md",
@@ -6432,8 +6436,8 @@
         "notes/Sóng biển lúc bình minh.md",
         "notes/Sức khoẻ tinh thần.md",
         "notes/Chuyến đi Hà Tĩnh cuối tuần.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Kiềm chế cơn giận.md"
+        "notes/Ghi chú tỉnh toán lại.md",
+        "notes/Ghi chép 082 bài hát cũ.md"
       ]
     },
     {
@@ -6460,8 +6464,8 @@
         "notes/Nuôi mèo con.md",
         "notes/Meeting với đối tác nước ngoài.md",
         "notes/Cãi tiến độ với khách.md",
-        "notes/Ghi chép 014 sổ tay.md",
         "notes/Ngành công nghệ thông tin.md",
+        "notes/Ghi chép 014 sổ tay.md",
         "notes/Ghi chép 071 hoa giấy.md",
         "notes/Thói quen đọc sách.md",
         "notes/Giữ chân khách hàng.md",
@@ -6492,12 +6496,12 @@
         "notes/Phỏng vấn xin việc.md",
         "notes/Hỏi đáp thường gặp.md",
         "notes/Meeting với đối tác nước ngoài.md",
-        "notes/Cãi tiến độ với khách.md",
         "notes/Mĩ thuật ứng dụng.md",
         "notes/Mentor hướng dẫn người mới.md",
+        "notes/Nhật ký 14.md",
         "notes/Ghi chép địa điểm 03.md",
-        "notes/Văn hóa doanh nghiệp.md",
-        "notes/Ngành công nghệ thông tin.md"
+        "notes/Ngành công nghệ thông tin.md",
+        "notes/Cãi tiến độ với khách.md"
       ]
     },
     {
@@ -6593,7 +6597,7 @@
         "notes/Chuyến đi Phan Thiết cuối tuần.md",
         "notes/Võ Thị Ngọc Anh.md",
         "notes/Kỳ thi cuối năm.md",
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
+        "notes/Ghi chép 025 ngõ nhỏ.md"
       ]
     },
     {
@@ -6620,9 +6624,9 @@
         "notes/Phạm Đức Thành.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Thất thiệt.md",
         "notes/Trương Quốc Khánh.md",
         "notes/Ghi chép 080 quán quen.md",
+        "notes/Thất thiệt.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Ghi chép 099 bài hát cũ.md",
         "notes/Ghi chép 035 sổ tay.md"
@@ -6684,12 +6688,12 @@
         "notes/Đặng Minh Quang.md",
         "notes/Ghi chép địa điểm 14.md",
         "notes/Ghi chép 080 quán quen.md",
-        "notes/Ghi chép địa điểm 24.md",
+        "notes/Ghi chép 110 quán quen.md",
         "notes/Ghi chép 054 quán quen.md",
-        "notes/Ghi chép 095 quán quen.md",
-        "notes/Ghi chép 094 quán quen.md",
-        "notes/Sóng biển lúc bình minh.md",
-        "notes/Ghi chép địa điểm 07.md"
+        "notes/Ghi chép 068 quán quen.md",
+        "notes/Ghi chép 029 quán quen.md",
+        "notes/Ghi chép địa điểm 07.md",
+        "notes/Nhật ký 11.md"
       ]
     },
     {
@@ -6749,11 +6753,11 @@
         "notes/Đặng Minh Quân.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép địa điểm 20.md",
-        "notes/Lê Thị Thanh Hường.md",
+        "notes/Nhật ký 49.md",
         "notes/Ghi chép địa điểm 03.md",
-        "notes/Mĩ thuật ứng dụng.md",
-        "notes/Hoạ sĩ trẻ.md",
-        "notes/Ghi chép 080 quán quen.md"
+        "notes/Lê Thị Thanh Hường.md",
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 14.md"
       ]
     },
     {
@@ -6779,13 +6783,13 @@
         "notes/Trương Quốc Khánh.md",
         "notes/Trương Quốc Khang.md",
         "notes/Đặng Minh Quân.md",
+        "notes/Nhật ký 31.md",
         "notes/Giữ chân khách hàng.md",
         "notes/Ghi chép 080 quán quen.md",
         "notes/Ghi chép 090 quán quen.md",
+        "notes/Đặng Minh Quang.md",
         "notes/Ghi chép 094 quán quen.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 056 mưa chiều.md",
-        "notes/Lê Thị Thanh Hường.md"
+        "notes/Nhật ký 34.md"
       ]
     },
     {
@@ -6848,8 +6852,8 @@
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép địa điểm 13.md",
         "notes/Ghi chép 042 ngõ nhỏ.md",
-        "notes/Trương Quốc Khang.md",
-        "notes/Ghi chép 101 sổ tay.md"
+        "notes/Ghi chép 101 sổ tay.md",
+        "notes/Nguyễn Hữu Phúc.md"
       ]
     },
     {
@@ -6873,15 +6877,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Chuyến đi Cần Thơ cuối tuần.md",
-        "notes/Ghi chép 103 sổ tay.md",
         "notes/Ghi chép 023 quán quen.md",
+        "notes/Thất thiệt.md",
         "notes/Hóa đơn điện tử.md",
         "notes/An toàn cá nhân.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Thói quen ngủ sớm dậy sớm.md",
-        "notes/Thất thiệt.md",
-        "notes/Hoạ sĩ trẻ.md"
+        "notes/Hoạ sĩ trẻ.md",
+        "notes/Nhật ký 15.md"
       ]
     },
     {
@@ -6908,12 +6912,12 @@
         "notes/Thuỷ tinh cường lực.md",
         "notes/Sức khoẻ tinh thần.md",
         "notes/Danh sách khách hàng tiềm năng.md",
-        "notes/Võ Thị Ngọc Anh.md",
+        "notes/Nhật ký 10.md",
         "notes/Chuyến đi Hà Tĩnh cuối tuần.md",
-        "notes/Ngành công nghệ thông tin.md",
-        "notes/Phạm Đức Thành.md",
+        "notes/Võ Thị Ngọc Anh.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Thất thiệt.md"
+        "notes/Phạm Đức Thành.md",
+        "notes/Cơn đau đầu mãn tính.md"
       ]
     },
     {
@@ -6941,11 +6945,11 @@
         "notes/Ghi chép 010 bài hát cũ.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Báo cáo tài chính quý ba.md",
-        "notes/Ghi chép 071 hoa giấy.md",
+        "notes/Nhật ký 12.md",
         "notes/Báo cáo feedback của người dùng.md",
-        "notes/Ghi chép 097 hiên nhà.md",
+        "notes/Ghi chép 071 hoa giấy.md",
         "notes/Đóng bảo hiểm xã hội.md",
-        "notes/Update phiên bản ứng dụng.md"
+        "notes/Ghi chép 097 hiên nhà.md"
       ]
     },
     {
@@ -7004,12 +7008,12 @@
         "notes/Đóng bảo hiểm xã hội.md",
         "notes/Biên bản hội đồng quản trị.md",
         "notes/Võ Thị Ngọc Anh.md",
+        "notes/Nhật ký 34.md",
         "notes/Ghi chép 090 quán quen.md",
-        "notes/Ghi chép 068 quán quen.md",
+        "notes/Nhật ký 03.md",
         "notes/Chọn nghề phù hợp.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép món ăn 01.md",
-        "notes/Ghi chép 026 góc bếp.md"
+        "notes/Ghi chép 068 quán quen.md",
+        "notes/Ghi chép món ăn 01.md"
       ]
     },
     {
@@ -7103,15 +7107,15 @@
       ],
       "top_paths": [
         "notes/Ngành công nghệ thông tin.md",
-        "notes/Ghi chép địa điểm 15.md",
         "notes/Áp lực công việc.md",
         "notes/Công thức mùa hè.md",
         "notes/Bếp công nghiệp.md",
-        "notes/Ban quản lý dự án xây dựng cầu.md",
+        "notes/Nhật ký 18.md",
         "notes/Của để dành cho con.md",
+        "notes/Ban quản lý dự án xây dựng cầu.md",
         "notes/Đặng Minh Quân.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Trương Quốc Khánh.md"
+        "notes/Nhật ký 31.md"
       ]
     },
     {
@@ -7124,8 +7128,8 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0.315,
-      "mrr": 0.125,
+      "ndcg_k": 0.289,
+      "mrr": 0.1,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
@@ -7138,12 +7142,12 @@
         "notes/Gift ideas.md",
         "notes/Ghi chép 101 sổ tay.md",
         "notes/Ghi chép 006 tách trà.md",
+        "notes/Nhật ký 51.md",
         "notes/Ghi chép 023 quán quen.md",
+        "notes/Nhật ký 42.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Liên lạc đối tác.md",
-        "notes/Dự án nhỏ.md",
-        "notes/Ghi chép 054 quán quen.md",
-        "notes/Reading list.md"
+        "notes/Dự án nhỏ.md"
       ]
     },
     {
@@ -7171,13 +7175,13 @@
         "notes/Trương Quốc Khang.md",
         "notes/Lê Thị Thanh Hường.md",
         "notes/Phạm Đức Thịnh.md",
+        "notes/Nhật ký 45.md",
         "notes/Võ Thị Ngọc Anh.md",
-        "notes/Trương Quốc Khánh.md",
+        "notes/Nhật ký 35.md",
+        "notes/Nhật ký 25.md",
+        "notes/Nhật ký 18.md",
         "notes/Cô chủ nhiệm.md",
-        "notes/Chữa bệnh bằng thảo dược.md",
-        "notes/Ghi chép 082 bài hát cũ.md",
-        "notes/Mentor hướng dẫn người mới.md",
-        "notes/Nguyễn Hữu Phúc.md"
+        "notes/Nhật ký 34.md"
       ]
     },
     {
@@ -7205,11 +7209,11 @@
         "notes/Chuẩn bị nhập học.md",
         "notes/Ngành công nghệ thông tin.md",
         "notes/Home repairs.md",
+        "notes/Nhật ký 51.md",
         "notes/Bug triage.md",
         "notes/Ghi chép 108 chiếc ô xanh.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 015 bài hát cũ.md",
-        "notes/Reading list.md"
+        "notes/Ghi chép 015 bài hát cũ.md"
       ]
     },
     {
@@ -7268,14 +7272,14 @@
       "top_paths": [
         "notes/Giao nhận nội thành.md",
         "notes/Kĩ năng giao tiếp.md",
-        "notes/Ghi chép 042 ngõ nhỏ.md",
-        "notes/Ghi chép 014 sổ tay.md",
         "notes/Weekly sync.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Ghi chép 056 mưa chiều.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 49.md",
         "notes/Mùa hè năm nay.md",
-        "notes/Ghi chép 063 mưa chiều.md",
-        "notes/Cô chủ nhiệm.md"
+        "notes/Ghi chép 025 ngõ nhỏ.md",
+        "notes/Cô chủ nhiệm.md",
+        "notes/Nhật ký 52.md",
+        "notes/Xin nghỉ việc.md"
       ]
     },
     {
@@ -7288,8 +7292,8 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0.333,
-      "mrr": 0.143,
+      "ndcg_k": 0.301,
+      "mrr": 0.111,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
@@ -7299,15 +7303,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Gift ideas.md",
+        "notes/Nhật ký 08.md",
         "notes/Meal plan.md",
         "notes/Ghi chép 041 chiếc ô xanh.md",
+        "notes/Nhật ký 45.md",
         "notes/Hồi đáp thư mời.md",
         "notes/Ghi chép 063 mưa chiều.md",
         "notes/Ghi chép 056 mưa chiều.md",
         "notes/Liên lạc đối tác.md",
-        "notes/Ghi chép 105 giá sách.md",
-        "notes/Weekly sync.md",
-        "notes/Ghi chép 082 bài hát cũ.md"
+        "notes/Ghi chép 105 giá sách.md"
       ]
     },
     {
@@ -7339,9 +7343,9 @@
         "notes/Budget sheet.md",
         "notes/Home repairs.md",
         "notes/Ghi chép 101 sổ tay.md",
-        "notes/Onboarding checklist.md",
         "notes/Q4 roadmap.md",
-        "notes/Đóng bảo hiểm xã hội.md"
+        "notes/Đóng bảo hiểm xã hội.md",
+        "notes/Fitness log.md"
       ]
     },
     {
@@ -7402,12 +7406,12 @@
         "notes/Workflow duyệt chi phí.md",
         "notes/Tính toán chi phí xây nhà.md",
         "notes/Ghi chép 057 chợ phiên.md",
-        "notes/Sàn thương mại điện tử.md",
         "notes/Giấy đăng ký kinh doanh.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Kinh nghiệm quí báu.md",
         "notes/Budget sheet.md",
-        "notes/Ghi chép 105 giá sách.md"
+        "notes/Ghi chép 105 giá sách.md",
+        "notes/Đặng Minh Quân.md"
       ]
     },
     {
@@ -7469,11 +7473,11 @@
         "notes/Ngành công nghệ thông tin.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Liên lạc đối tác.md",
+        "notes/Nhật ký 51.md",
         "notes/Thất thiệt.md",
         "notes/Phỏng vấn xin việc.md",
         "notes/Đặng Minh Quân.md",
-        "notes/Mentor hướng dẫn người mới.md",
-        "notes/Bug triage.md"
+        "notes/Nhật ký 17.md"
       ]
     },
     {
@@ -7498,16 +7502,16 @@
         "notes/Máy văn phòng.md"
       ],
       "top_paths": [
-        "notes/Nghệ thuật thuyết trình.md",
         "notes/Thói quen đọc sách.md",
         "notes/Mentor hướng dẫn người mới.md",
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
-        "notes/Ngành công nghệ thông tin.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
+        "notes/Nghệ thuật thuyết trình.md",
+        "notes/Ngành công nghệ thông tin.md",
         "notes/Hành trình khám phá núi rừng.md",
-        "notes/Phỏng vấn xin việc.md",
-        "notes/Ghi chép 108 chiếc ô xanh.md"
+        "notes/Nhật ký 14.md",
+        "notes/Phỏng vấn xin việc.md"
       ]
     },
     {
@@ -7532,13 +7536,13 @@
       "top_paths": [
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Sức khoẻ tinh thần.md",
-        "notes/Trương Quốc Khang.md",
-        "notes/Thuỷ sản xuất khẩu.md",
         "notes/Chuyển hóa năng lượng.md",
         "notes/Kĩ năng giao tiếp.md",
-        "notes/An toàn cá nhân.md",
-        "notes/Ngành công nghệ thông tin.md",
-        "notes/Đặng Minh Quân.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 18.md",
+        "notes/Nhật ký 14.md",
+        "notes/Trương Quốc Khang.md",
+        "notes/Nhật ký 35.md",
         "notes/Trương Quốc Khánh.md"
       ]
     },
@@ -7569,9 +7573,9 @@
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Ghi chép 016 đèn lồng.md",
         "notes/Liên lạc đối tác.md",
-        "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Vàng và bạc.md",
-        "notes/Ghi chép 079 đèn lồng.md"
+        "notes/Ghi chép 079 đèn lồng.md",
+        "notes/Ghi chép 098 góc bếp.md"
       ]
     },
     {
@@ -7601,8 +7605,8 @@
         "notes/Nghệ thuật thuyết trình.md",
         "notes/Lộ trình ôn thi tốt nghiệp.md",
         "notes/Hành trình khám phá núi rừng.md",
-        "notes/Mẹo bán hàng online.md",
         "notes/Quy chế nhân viên thử việc.md",
+        "notes/Mẹo bán hàng online.md",
         "notes/Bí quyết chụp ảnh chân dung.md"
       ]
     },
@@ -7628,8 +7632,8 @@
       "top_paths": [
         "notes/Quy chế nhân viên thử việc.md",
         "notes/Phỏng vấn xin việc.md",
-        "notes/Tối ưu quy trình làm việc.md",
         "notes/Lý do chuyển việc.md",
+        "notes/Tối ưu quy trình làm việc.md",
         "notes/Áp lực công việc.md",
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Xin nghỉ việc.md",
@@ -7691,13 +7695,13 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Sàn thương mại điện tử.md",
-        "notes/Ghi chép 068 quán quen.md",
         "notes/Thuỷ sản xuất khẩu.md",
-        "notes/Ghi chép 023 quán quen.md",
+        "notes/Nhật ký 03.md",
         "notes/Ghi chép 010 bài hát cũ.md",
         "notes/Quả cam sành.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Ngành công nghệ thông tin.md",
+        "notes/Ghi chép 068 quán quen.md",
         "notes/Workshop thiết kế sản phẩm.md",
         "notes/Giữ chân khách hàng.md"
       ]
@@ -7725,12 +7729,12 @@
         "notes/Báo cáo tài chính quý ba.md",
         "notes/Kế hoạch marketing quý bốn.md",
         "notes/Q4 roadmap.md",
-        "notes/Ghi chép 083 quán quen.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Quy chế nhân viên thử việc.md",
-        "notes/Ghi chép 017 tách trà.md",
+        "notes/Nhật ký 15.md",
         "notes/Quy trình chăm sóc khách hàng sau bán.md",
-        "notes/Ghi chép 095 quán quen.md",
+        "notes/Ghi chép 083 quán quen.md",
+        "notes/Ghi chép 017 tách trà.md",
         "notes/Ghi chép 097 hiên nhà.md"
       ]
     },
@@ -7787,15 +7791,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
-        "notes/Lớp mười hai.md",
-        "notes/Họp sprint planning đầu tuần.md",
-        "notes/Weekly sync.md",
-        "notes/Công thức mùa hè.md",
-        "notes/Hợp đồng thuê văn phòng.md",
-        "notes/Ghi chép 080 quán quen.md",
-        "notes/Ghi chép 090 quán quen.md",
-        "notes/Ghi chép 016 đèn lồng.md",
-        "notes/Ghi chép 062 góc bếp.md"
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 27.md",
+        "notes/Nhật ký 24.md",
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 41.md",
+        "notes/Nhật ký 58.md",
+        "notes/Nhật ký 10.md",
+        "notes/Lớp mười hai.md"
       ]
     },
     {
@@ -7883,14 +7887,14 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Ban quản lý dự án xây dựng cầu.md",
+        "notes/Nhật ký 19.md",
+        "notes/Nhật ký 18.md",
         "notes/Đặng Minh Quân.md",
-        "notes/Biên bản hội đồng quản trị.md",
+        "notes/Nhật ký 20.md",
+        "notes/Nhật ký 17.md",
         "notes/Tính toán chi phí xây nhà.md",
-        "notes/Liên lạc đối tác.md",
-        "notes/Ghi chép 079 đèn lồng.md",
-        "notes/Du học sau đại học.md",
-        "notes/Weekly sync.md",
-        "notes/Giá nhà đất.md",
+        "notes/Nhật ký 15.md",
+        "notes/Nhật ký 14.md",
         "notes/Công thức mùa hè.md"
       ]
     },
@@ -7920,10 +7924,10 @@
         "notes/Văn hóa doanh nghiệp.md",
         "notes/Tối ưu quy trình làm việc.md",
         "notes/Liên lạc đối tác.md",
+        "notes/Nhật ký 18.md",
+        "notes/Nhật ký 42.md",
         "notes/Ghi chép 014 sổ tay.md",
-        "notes/Chuẩn bị nhập học.md",
-        "notes/Ghi chép 101 sổ tay.md",
-        "notes/Ghi chép 092 giá sách.md"
+        "notes/Nhật ký 51.md"
       ]
     },
     {
@@ -7955,7 +7959,7 @@
         "notes/Hoàng Mỹ Linh.md",
         "notes/Kỉ luật bản thân.md",
         "notes/Ghi chép 090 quán quen.md",
-        "notes/Ghi chép 080 quán quen.md"
+        "notes/Nhật ký 46.md"
       ]
     },
     {
@@ -7985,9 +7989,9 @@
         "notes/Đặng Minh Quân.md",
         "notes/Bếp công nghiệp.md",
         "notes/Podcast về tài chính cá nhân.md",
-        "notes/Ghi chép địa điểm 12.md",
+        "notes/Nhật ký 60.md",
         "notes/Ghi chép 041 chiếc ô xanh.md",
-        "notes/Sống biển đảo thời nay.md"
+        "notes/Nhật ký 58.md"
       ]
     },
     {
@@ -8013,8 +8017,8 @@
         "notes/Ghi chép 029 quán quen.md",
         "notes/Kế hoạch marketing quý bốn.md",
         "notes/Q4 roadmap.md",
-        "notes/Ghi chép 008 hoa giấy.md",
         "notes/Tối ưu quy trình làm việc.md",
+        "notes/Ghi chép 008 hoa giấy.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép 099 bài hát cũ.md",
@@ -8031,10 +8035,10 @@
         "notes/Weekly sync.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 1,
-      "ndcg_k": 1,
-      "mrr": 1,
-      "hit_1": true,
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
       "hit_3": true,
       "hit_5": true,
       "recall_k": 1,
@@ -8042,15 +8046,15 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 51.md",
         "notes/Weekly sync.md",
         "notes/Giao nhận nội thành.md",
         "notes/Kĩ năng giao tiếp.md",
-        "notes/Ban quản lý dự án xây dựng cầu.md",
         "notes/Ghi chép 016 đèn lồng.md",
         "notes/Ghi chép 098 góc bếp.md",
         "notes/Giám đốc điều hành.md",
         "notes/Ghi chép 084 chợ phiên.md",
-        "notes/Họp phòng kinh doanh sáng thứ hai.md",
         "notes/Ghi chép 082 bài hát cũ.md"
       ]
     },
@@ -8078,8 +8082,8 @@
         "notes/Học ngoại ngữ nhanh.md",
         "notes/An toàn cá nhân.md",
         "notes/Danh sách khách hàng tiềm năng.md",
-        "notes/Reading list.md",
         "notes/Gift ideas.md",
+        "notes/Reading list.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Quy chế nhân viên thử việc.md",
         "notes/Ghi chép 016 đèn lồng.md",
@@ -8096,8 +8100,8 @@
       ],
       "partial_paths": [],
       "ndcg_5": 0,
-      "ndcg_k": 0.333,
-      "mrr": 0.143,
+      "ndcg_k": 0.356,
+      "mrr": 0.167,
       "hit_1": false,
       "hit_3": false,
       "hit_5": false,
@@ -8106,16 +8110,16 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Kí hiệu toán học.md",
         "notes/Ghi chép 084 chợ phiên.md",
+        "notes/Kí hiệu toán học.md",
         "notes/Ghi chép 034 chợ phiên.md",
         "notes/Ghi chép 057 chợ phiên.md",
-        "notes/Ghi chép 033 chợ phiên.md",
         "notes/Chi phí hợp lý.md",
         "notes/Budget sheet.md",
         "notes/Tính toán chi phí xây nhà.md",
         "notes/An toàn cá nhân.md",
-        "notes/Update phiên bản ứng dụng.md"
+        "notes/Update phiên bản ứng dụng.md",
+        "notes/Workflow duyệt chi phí.md"
       ]
     },
     {
@@ -8127,9 +8131,9 @@
         "notes/Reading list.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.5,
-      "ndcg_k": 0.5,
-      "mrr": 0.333,
+      "ndcg_5": 0.631,
+      "ndcg_k": 0.631,
+      "mrr": 0.5,
       "hit_1": false,
       "hit_3": true,
       "hit_5": true,
@@ -8138,16 +8142,16 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Ghi chép 095 quán quen.md",
-        "notes/Giữ chân khách hàng.md",
+        "notes/Nhật ký 22.md",
         "notes/Reading list.md",
         "notes/Danh sách khách hàng tiềm năng.md",
         "notes/Onboarding checklist.md",
         "notes/Của để dành cho con.md",
         "notes/Phạm Đức Thịnh.md",
-        "notes/Giảm cân lành mạnh.md",
         "notes/Võ Thị Ngọc Anh.md",
-        "notes/Thói quen đọc sách.md"
+        "notes/Thói quen đọc sách.md",
+        "notes/Ghi chép 025 ngõ nhỏ.md",
+        "notes/Ghi chép 095 quán quen.md"
       ]
     },
     {
@@ -8171,15 +8175,15 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Travel packing.md",
-        "notes/Lý do chuyển việc.md",
         "notes/Lê Thị Thanh Hường.md",
+        "notes/Lý do chuyển việc.md",
         "notes/Ghi chép 026 góc bếp.md",
         "notes/Ghi chép 097 hiên nhà.md",
         "notes/Tâm lý học hành vi.md",
         "notes/Ghi chép 028 góc bếp.md",
         "notes/Chi phí hợp lý.md",
         "notes/Ghi chép 068 quán quen.md",
-        "notes/Landing page cho chiến dịch mới.md"
+        "notes/Ban quản lý dự án xây dựng cầu.md"
       ]
     },
     {
@@ -8202,16 +8206,16 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
+        "notes/Ghi chép 071 hoa giấy.md",
         "notes/Ghi chép 079 đèn lồng.md",
-        "notes/Ghi chép 007 đèn lồng.md",
         "notes/Release notes.md",
         "notes/Ghi chép 096 hiên nhà.md",
         "notes/Ghi chép 017 tách trà.md",
         "notes/Giám đốc điều hành.md",
         "notes/Ghi chép 097 hiên nhà.md",
         "notes/Tiết giảm vận hành.md",
-        "notes/Ghi chép 071 hoa giấy.md",
-        "notes/Travel packing.md"
+        "notes/Travel packing.md",
+        "notes/Ghi chép 062 góc bếp.md"
       ]
     },
     {
@@ -8223,9 +8227,9 @@
         "notes/Expense tracker.md"
       ],
       "partial_paths": [],
-      "ndcg_5": 0.5,
-      "ndcg_k": 0.5,
-      "mrr": 0.333,
+      "ndcg_5": 0.631,
+      "ndcg_k": 0.631,
+      "mrr": 0.5,
       "hit_1": false,
       "hit_3": true,
       "hit_5": true,
@@ -8235,7 +8239,6 @@
       "missed_paths": [],
       "top_paths": [
         "notes/Ghi chép 062 góc bếp.md",
-        "notes/Ghi chép 085 hoa giấy.md",
         "notes/Expense tracker.md",
         "notes/Tiết kiệm chi tiêu.md",
         "notes/Họp phòng kinh doanh sáng thứ hai.md",
@@ -8243,7 +8246,8 @@
         "notes/Ghi chép 017 tách trà.md",
         "notes/Lịch hẹn gia đình.md",
         "notes/Phạm Đức Thành.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md"
+        "notes/Ghi chép 025 ngõ nhỏ.md",
+        "notes/Cho vay tiêu dùng.md"
       ]
     },
     {
@@ -8271,8 +8275,8 @@
         "notes/Ghi chép 036 đèn lồng.md",
         "notes/Sắp xếp thời gian biểu.md",
         "notes/Interview prep.md",
-        "notes/Phỏng vấn xin việc.md",
         "notes/Vàng và bạc.md",
+        "notes/Phỏng vấn xin việc.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
         "notes/Máy văn phòng.md",
         "notes/Ghi chép 099 bài hát cũ.md"
@@ -8301,15 +8305,15 @@
       ],
       "top_paths": [
         "notes/Ghi chép 016 đèn lồng.md",
-        "notes/Liên lạc đối tác.md",
         "notes/Kỹ thuật nấu ăn.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Ghi chép 074 giá sách.md",
+        "notes/Nhật ký 22.md",
+        "notes/Liên lạc đối tác.md",
         "notes/Ghi chép 062 góc bếp.md",
         "notes/Hoá học hữu cơ.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Cách trồng rau sạch tại nhà.md"
+        "notes/Nhật ký 42.md"
       ]
     },
     {
@@ -8398,15 +8402,15 @@
         "notes/Gift ideas.md"
       ],
       "top_paths": [
-        "notes/Ghi chép 101 sổ tay.md",
         "notes/Ghi chép 006 tách trà.md",
         "notes/Ghi chép 068 quán quen.md",
         "notes/Ghi chép 090 quán quen.md",
-        "notes/Giá cả tăng dần.md",
-        "notes/Ghi chép 054 quán quen.md",
         "notes/Gói nhân đạo.md",
+        "notes/Ghi chép 054 quán quen.md",
+        "notes/Ghi chép 101 sổ tay.md",
+        "notes/Nhật ký 06.md",
         "notes/Ghi chép 017 tách trà.md",
-        "notes/Quy trình chăm sóc khách hàng sau bán.md",
+        "notes/Giá cả tăng dần.md",
         "notes/Ghi chép 025 ngõ nhỏ.md"
       ]
     },
@@ -8432,16 +8436,16 @@
         "notes/Home repairs.md"
       ],
       "top_paths": [
-        "notes/Giã cả nồi cua.md",
+        "notes/Ghi chép 097 hiên nhà.md",
         "notes/Ghi chép 082 bài hát cũ.md",
         "notes/Ghi chép 103 sổ tay.md",
+        "notes/Giã cả nồi cua.md",
         "notes/Gift ideas.md",
         "notes/Món xào.md",
         "notes/Ghi chép 090 quán quen.md",
         "notes/Salad mùa hè.md",
-        "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Của để dành cho con.md",
-        "notes/Ghi chép 016 đèn lồng.md"
+        "notes/Nhật ký 15.md",
+        "notes/Của để dành cho con.md"
       ]
     },
     {
@@ -8451,6 +8455,204 @@
       "notes": "Query is the alias \"Nhật ký tập luyện\" without diacritics; body is English.",
       "relevant_paths": [
         "notes/Fitness log.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0,
+      "ndcg_k": 0,
+      "mrr": 0,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": false,
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Fitness log.md"
+      ],
+      "top_paths": [
+        "notes/Nhật ký 12.md",
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 15.md",
+        "notes/Nhật ký 49.md",
+        "notes/Ghi chép 028 góc bếp.md",
+        "notes/Nhật ký 24.md",
+        "notes/Nhật ký 36.md",
+        "notes/Ghi chép 017 tách trà.md",
+        "notes/Nhật ký 48.md"
+      ]
+    },
+    {
+      "id": "vi-compound-16",
+      "query": "sân bay",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"sân bay\" once; three other notes have \"sân\" and \"bay\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 01.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.387,
+      "ndcg_k": 0.387,
+      "mrr": 0.2,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Chuyến bay đêm.md",
+        "notes/Nhật ký 04.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 02.md",
+        "notes/Nhật ký 01.md",
+        "notes/Ghi chép 010 bài hát cũ.md",
+        "notes/Ngành công nghệ thông tin.md",
+        "notes/Trương Quốc Khang.md",
+        "notes/Ghi chép 049 sổ tay.md",
+        "notes/Chuẩn bị bữa sáng.md"
+      ]
+    },
+    {
+      "id": "vi-compound-17",
+      "query": "bao tang",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"bảo tàng\" once; three other notes have \"bảo\" and \"tàng\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 05.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0,
+      "ndcg_k": 0,
+      "mrr": 0,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": false,
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Nhật ký 05.md"
+      ],
+      "top_paths": [
+        "notes/Nhật ký 07.md",
+        "notes/Ghi chép 015 bài hát cũ.md",
+        "notes/Báo cáo tài chính quý ba.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 08.md",
+        "notes/Ghi chép 026 góc bếp.md",
+        "notes/Nhật ký 06.md",
+        "notes/Nhật ký 15.md",
+        "notes/Ghi chép 017 tách trà.md",
+        "notes/Giá cả tăng dần.md"
+      ]
+    },
+    {
+      "id": "vi-compound-18",
+      "query": "nói chuyện bóng đá",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"bóng đá\" once; three other notes have \"bóng\" and \"đá\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 09.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.431,
+      "ndcg_k": 0.431,
+      "mrr": 0.25,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 11.md",
+        "notes/Nhật ký 10.md",
+        "notes/Nhật ký 17.md",
+        "notes/Nhật ký 09.md",
+        "notes/Nhật ký 12.md",
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 49.md",
+        "notes/Chuyện cũ.md",
+        "notes/Gói nhân đạo.md",
+        "notes/Nhật ký 04.md"
+      ]
+    },
+    {
+      "id": "vi-compound-19",
+      "query": "bàn chải",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"bàn chải\" once; three other notes have \"bàn\" and \"chải\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 13.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.431,
+      "ndcg_k": 0.431,
+      "mrr": 0.25,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 15.md",
+        "notes/Nhật ký 16.md",
+        "notes/Nhật ký 14.md",
+        "notes/Nhật ký 13.md",
+        "notes/Ban quản lý dự án xây dựng cầu.md",
+        "notes/Ghi chép 052 bánh nướng.md",
+        "notes/Bàn đồ gỗ nội thất.md",
+        "notes/Nhật ký 51.md",
+        "notes/Biên bản hội đồng quản trị.md",
+        "notes/Budget sheet.md"
+      ]
+    },
+    {
+      "id": "vi-compound-20",
+      "query": "cau thu",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"cầu thủ\" once; three other notes have \"cầu\" and \"thủ\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 17.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0,
+      "ndcg_k": 0,
+      "mrr": 0,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": false,
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Nhật ký 17.md"
+      ],
+      "top_paths": [
+        "notes/Nhật ký 18.md",
+        "notes/Nghệ thuật thuyết trình.md",
+        "notes/Hợp đồng thuê văn phòng.md",
+        "notes/Hòa giải mâu thuẫn.md",
+        "notes/Kỹ thuật nấu ăn.md",
+        "notes/Mĩ thuật ứng dụng.md",
+        "notes/Nấu cháo cho người ốm.md",
+        "notes/Phỏng vấn xin việc.md",
+        "notes/Những lưu ý khi thuê nhà.md",
+        "notes/Thuỷ tinh cường lực.md"
+      ]
+    },
+    {
+      "id": "vi-compound-21",
+      "query": "nói chuyện hải sản",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"hải sản\" once; three other notes have \"hải\" and \"sản\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 21.md"
       ],
       "partial_paths": [],
       "ndcg_5": 0.631,
@@ -8464,16 +8666,306 @@
       "all_relevant_k": true,
       "missed_paths": [],
       "top_paths": [
-        "notes/Giấy tờ cần ký.md",
-        "notes/Fitness log.md",
-        "notes/Ghi chép 028 góc bếp.md",
-        "notes/Giấy đăng ký kinh doanh.md",
+        "notes/Nhật ký 23.md",
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 22.md",
+        "notes/Nhật ký 03.md",
+        "notes/Nhật ký 24.md",
+        "notes/Thuỷ sản xuất khẩu.md",
+        "notes/Lớp mười hai.md",
+        "notes/Nhật ký 14.md",
+        "notes/Nhật ký 31.md",
+        "notes/Họp phòng kinh doanh sáng thứ hai.md"
+      ]
+    },
+    {
+      "id": "vi-compound-22",
+      "query": "thời tiết",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"thời tiết\" once; three other notes have \"thời\" and \"tiết\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 25.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 1,
+      "ndcg_k": 1,
+      "mrr": 1,
+      "hit_1": true,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 25.md",
+        "notes/Nhật ký 27.md",
+        "notes/Tiết kiệm chi tiêu.md",
+        "notes/Tiết giảm vận hành.md",
+        "notes/Nổi tiếng một thời.md",
+        "notes/Tiết thực hành.md",
+        "notes/Sống biển đảo thời nay.md",
+        "notes/Sắp xếp thời gian biểu.md",
+        "notes/Nhật ký 28.md",
+        "notes/Nhật ký 49.md"
+      ]
+    },
+    {
+      "id": "vi-compound-23",
+      "query": "quan ao",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"quần áo\" once; three other notes have \"quần\" and \"áo\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 29.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 32.md",
+        "notes/Nhật ký 31.md",
+        "notes/Nhật ký 29.md",
+        "notes/Ghi chép 090 quán quen.md",
+        "notes/Ghi chép 080 quán quen.md",
+        "notes/Ghi chép 094 quán quen.md",
+        "notes/Ghi chép 054 quán quen.md",
+        "notes/Ghi chép 029 quán quen.md",
+        "notes/Ghi chép 068 quán quen.md",
+        "notes/Ban quản lý dự án xây dựng cầu.md"
+      ]
+    },
+    {
+      "id": "vi-compound-24",
+      "query": "nói chuyện bệnh nhân",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"bệnh nhân\" once; three other notes have \"bệnh\" and \"nhân\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 33.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 34.md",
+        "notes/Nhật ký 35.md",
+        "notes/Nhật ký 33.md",
+        "notes/Tuyến huyện.md",
+        "notes/Nhật ký 36.md",
+        "notes/Phòng chứa bệnh phẩm.md",
+        "notes/Nhật ký 17.md",
+        "notes/Nhật ký 13.md",
+        "notes/An toàn cá nhân.md",
+        "notes/Chữa bệnh bằng thảo dược.md"
+      ]
+    },
+    {
+      "id": "vi-compound-25",
+      "query": "trái cây",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"trái cây\" once; three other notes have \"trái\" and \"cây\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 37.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 39.md",
+        "notes/Nhật ký 40.md",
+        "notes/Nhật ký 37.md",
+        "notes/Nhật ký 38.md",
+        "notes/Trồng cây trong nhà.md",
         "notes/Ghi chép 017 tách trà.md",
-        "notes/Ghi chép 074 giá sách.md",
+        "notes/Nhật ký 42.md",
+        "notes/Việc cuối năm.md",
+        "notes/Ghi chép 057 chợ phiên.md",
+        "notes/Nhật ký 12.md"
+      ]
+    },
+    {
+      "id": "vi-compound-26",
+      "query": "cua hang",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"cửa hàng\" once; three other notes have \"cửa\" and \"hàng\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 41.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0,
+      "ndcg_k": 0,
+      "mrr": 0,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": false,
+      "recall_k": 0,
+      "evidence_coverage_k": 0,
+      "all_relevant_k": false,
+      "missed_paths": [
+        "notes/Nhật ký 41.md"
+      ],
+      "top_paths": [
+        "notes/Giã cả nồi cua.md",
+        "notes/Ghi chép 046 hiên nhà.md",
+        "notes/Chuyến bay đêm.md",
+        "notes/Khoản vay mua nhà.md",
+        "notes/Danh sách khách hàng tiềm năng.md",
+        "notes/Mẹo bán hàng online.md",
+        "notes/Quà cho bố mẹ.md",
+        "notes/Bạn hàng lâu năm.md",
+        "notes/Ghi chép 055 hiên nhà.md",
+        "notes/Quy trình chăm sóc khách hàng sau bán.md"
+      ]
+    },
+    {
+      "id": "vi-compound-27",
+      "query": "nói chuyện thư viện",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"thư viện\" once; three other notes have \"thư\" and \"viện\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 45.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 46.md",
+        "notes/Nhật ký 47.md",
+        "notes/Nhật ký 45.md",
+        "notes/Tuyến huyện.md",
+        "notes/Nhật ký 48.md",
+        "notes/Thủy điện nhỏ.md",
+        "notes/Hồi đáp thư mời.md",
+        "notes/Hỏi đáp thường gặp.md",
+        "notes/Liên lạc đối tác.md",
+        "notes/Sàn thương mại điện tử.md"
+      ]
+    },
+    {
+      "id": "vi-compound-28",
+      "query": "giày dép",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"giày dép\" once; three other notes have \"giày\" and \"dép\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 49.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 51.md",
+        "notes/Nhật ký 52.md",
+        "notes/Nhật ký 49.md",
+        "notes/Nhật ký 50.md",
+        "notes/Ghi chép 071 hoa giấy.md",
+        "notes/Ghi chép 062 góc bếp.md",
         "notes/Ghi chép 025 ngõ nhỏ.md",
-        "notes/Kỹ thuật nấu ăn.md",
+        "notes/Ghi chép 057 chợ phiên.md",
+        "notes/Ghi chép 091 sổ tay.md",
+        "notes/Ghi chép 094 quán quen.md"
+      ]
+    },
+    {
+      "id": "vi-compound-29",
+      "query": "ca si",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"ca sĩ\" once; three other notes have \"ca\" and \"sĩ\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 53.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.431,
+      "ndcg_k": 0.431,
+      "mrr": 0.25,
+      "hit_1": false,
+      "hit_3": false,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 54.md",
+        "notes/Nhật ký 56.md",
+        "notes/Nhật ký 55.md",
+        "notes/Nhật ký 53.md",
+        "notes/Hoạ sĩ trẻ.md",
+        "notes/Lớp mười hai.md",
+        "notes/Nhật ký 03.md",
+        "notes/Tiết thực hành.md",
         "notes/Gift ideas.md",
-        "notes/Kỳ thi cuối năm.md"
+        "notes/Nhật ký 15.md"
+      ]
+    },
+    {
+      "id": "vi-compound-30",
+      "query": "nói chuyện mùa đông",
+      "category": "vi-compound",
+      "notes": "Harder: the note has \"mùa đông\" once; three other notes have \"mùa\" and \"đông\" more often, reversed or apart.",
+      "relevant_paths": [
+        "notes/Nhật ký 57.md"
+      ],
+      "partial_paths": [],
+      "ndcg_5": 0.5,
+      "ndcg_k": 0.5,
+      "mrr": 0.333,
+      "hit_1": false,
+      "hit_3": true,
+      "hit_5": true,
+      "recall_k": 1,
+      "evidence_coverage_k": 1,
+      "all_relevant_k": true,
+      "missed_paths": [],
+      "top_paths": [
+        "notes/Nhật ký 58.md",
+        "notes/Nhật ký 59.md",
+        "notes/Nhật ký 57.md",
+        "notes/Nhật ký 25.md",
+        "notes/Nhật ký 49.md",
+        "notes/Nhật ký 21.md",
+        "notes/Nhật ký 01.md",
+        "notes/Nhật ký 45.md",
+        "notes/Nhật ký 41.md",
+        "notes/Chuyện cũ.md"
       ]
     }
   ]
