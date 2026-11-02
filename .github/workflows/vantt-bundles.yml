@@ -243,7 +243,9 @@ jobs:
       - name: Install the release tree and build the Vietnamese pack
         run: |
           set -euo pipefail
-          (cd tree && npm ci --ignore-scripts --no-audit --no-fund && npm rebuild)
+          (cd tree && npm ci --ignore-scripts --no-audit --no-fund)
+          # onnxruntime-node's install script downloads binaries and fails on network hiccups
+          for attempt in 1 2 3; do (cd tree && npm rebuild) && break; [ "$attempt" = 3 ] && exit 1; sleep 15; done
           cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
           (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
           # npm 12 refuses git dependencies (EALLOWGIT), so the corpus generator (no dependencies of its own) is cloned.
@@ -309,7 +311,9 @@ jobs:
       - name: Install the release tree and build the Vietnamese pack
         run: |
           set -euo pipefail
-          (cd tree && npm ci --ignore-scripts --no-audit --no-fund && npm rebuild)
+          (cd tree && npm ci --ignore-scripts --no-audit --no-fund)
+          # onnxruntime-node's install script downloads binaries and fails on network hiccups
+          for attempt in 1 2 3; do (cd tree && npm rebuild) && break; [ "$attempt" = 3 ] && exit 1; sleep 15; done
           cp -R tree/vantt/packages/ohs-lang-vi "$RUNNER_TEMP/ohs-lang-vi"
           (cd "$RUNNER_TEMP/ohs-lang-vi" && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
           git clone --quiet --depth 1 --branch v0.10.0 https://github.com/vantt/obsidian-test-fixture "$RUNNER_TEMP/otf"
