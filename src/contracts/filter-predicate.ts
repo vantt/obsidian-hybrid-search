@@ -16,6 +16,29 @@ interface FilterOptions {
   tag?: string | string[];
   scope?: string | string[];
   frontmatter?: string | string[];
+  /** Exact vault-relative note paths. Unlike the other kinds an empty array is a real,
+   *  empty restriction (matches nothing), not an absent one. */
+  paths?: string[];
+}
+
+/** True when a `paths` restriction was supplied, including the empty one. */
+export function hasPathsFilter(paths: string[] | undefined): paths is string[] {
+  return paths !== undefined;
+}
+
+/** Distinct normalized note paths, in first-seen order. */
+export function normalizePathSet(paths: string[]): string[] {
+  return [...new Set(paths.map((p) => normalizeNotePath(p)))];
+}
+
+/**
+ * One JSON-array parameter instead of one placeholder per path, so a restriction of any
+ * size stays clear of SQLite's bound-variable limit. `json_each` is materialised once and
+ * probed through the UNIQUE index on `notes.path`.
+ */
+function pathsClause(paths: string[], params: Array<string | number>): string {
+  params.push(JSON.stringify(normalizePathSet(paths)));
+  return `n.path IN (SELECT value FROM json_each(?))`;
 }
 
 /**
@@ -115,7 +138,8 @@ export function buildFilterPredicate(options: FilterOptions): FilterPredicate {
   if (
     !hasFilterValue(options.tag) &&
     !hasFilterValue(options.scope) &&
-    !hasFilterValue(options.frontmatter)
+    !hasFilterValue(options.frontmatter) &&
+    !hasPathsFilter(options.paths)
   ) {
     return empty;
   }
@@ -153,6 +177,8 @@ export function buildFilterPredicate(options: FilterOptions): FilterPredicate {
     clauses.push(`(${scope.includes.map((s) => scopeClause(s, params)).join(' OR ')})`);
   }
   for (const s of scope.excludes) clauses.push(`NOT ${scopeClause(s, params)}`);
+
+  if (hasPathsFilter(options.paths)) clauses.push(pathsClause(options.paths, params));
 
   // Every supplied value was unparsable (e.g. frontmatter "-not-a-pair"), so nothing
   // constrains the query. Returning "()" here would be a SQL syntax error that the
