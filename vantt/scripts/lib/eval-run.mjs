@@ -55,16 +55,20 @@ const OHS_DEFAULT_IGNORE = '.obsidian/**,templates/**,*.canvas';
  * Environment of a private-vault eval (V15): like `evalEnv`, but the vault is indexed the way
  * the user's own search indexes it. The user's note selection (OBSIDIAN_IGNORE_PATTERNS, else
  * OHS's default, plus OBSIDIAN_INCLUDE_PATTERNS and OBSIDIAN_CONTENT_IGNORE_PATTERNS) is kept,
- * and `_ohs/**` is always ignored so the lexicon file never becomes a search result. Git ignore
- * rules stay off: the vault copy lives under the repository's ignored work directory, whose
- * ignore rules would hide every note.
+ * and `_ohs/**` is always ignored so the lexicon file never becomes a search result; so is a
+ * `lexiconPath` inside the vault set in `packOptions` (the gate's pack options) or, without one
+ * there, in the user's OHS_LANGUAGE_PACK_OPTIONS. Both runs of a comparison must pass the same
+ * `packOptions` so they index the same notes. Git ignore rules stay off: the vault copy lives
+ * under the repository's ignored work directory, whose ignore rules would hide every note.
  */
-export function privateEvalEnv(extra = {}, source = process.env) {
+export function privateEvalEnv(extra = {}, source = process.env, packOptions = null) {
   const ignore = (source.OBSIDIAN_IGNORE_PATTERNS ?? OHS_DEFAULT_IGNORE)
     .split(',')
     .map((p) => p.trim())
     .filter(Boolean);
   if (!ignore.includes('_ohs/**')) ignore.push('_ohs/**');
+  const lexicon = lexiconIgnorePattern(packOptions?.lexiconPath ?? userLexiconPath(source));
+  if (lexicon && !ignore.includes(lexicon)) ignore.push(lexicon);
   const env = evalEnv({
     OBSIDIAN_IGNORE_PATTERNS: ignore.join(','),
     OBSIDIAN_INCLUDE_PATTERNS: source.OBSIDIAN_INCLUDE_PATTERNS ?? '',
@@ -72,6 +76,55 @@ export function privateEvalEnv(extra = {}, source = process.env) {
   if (source.OBSIDIAN_CONTENT_IGNORE_PATTERNS !== undefined)
     env.OBSIDIAN_CONTENT_IGNORE_PATTERNS = source.OBSIDIAN_CONTENT_IGNORE_PATTERNS;
   return { ...env, ...extra };
+}
+
+/** Error whose message is fixed text (no input, path or child output): safe for a private report. */
+export class ReportableError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ReportableError';
+  }
+}
+
+function userLexiconPath(source) {
+  const raw = source.OHS_LANGUAGE_PACK_OPTIONS;
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw)?.lexiconPath;
+  } catch {
+    throw new ReportableError('OHS_LANGUAGE_PACK_OPTIONS is not valid JSON');
+  }
+}
+
+/**
+ * OHS ignore pattern for a pack's `lexiconPath` (relative to the vault), or null when there is
+ * nothing more to ignore: unset, the default under `_ohs/`, or outside the vault (absolute or
+ * `..`). OHS compares a pattern without `*`/`?` as a root-anchored literal path, so the file
+ * itself is ignored, not its folder (which may hold notes).
+ */
+export function lexiconIgnorePattern(lexiconPath) {
+  if (lexiconPath === undefined || lexiconPath === null) return null;
+  if (typeof lexiconPath !== 'string' || !lexiconPath.trim())
+    throw new ReportableError('lexiconPath must be a non-empty string');
+  if (path.isAbsolute(lexiconPath) || path.win32.isAbsolute(lexiconPath)) return null;
+  const rel = path.posix.normalize(lexiconPath.trim().replaceAll('\\', '/')).replace(/^\.\//, '');
+  if (rel === '..' || rel.startsWith('../')) return null;
+  if (rel === '_ohs' || rel.startsWith('_ohs/')) return null;
+  if (/[,*?]/.test(rel) || rel.startsWith('!'))
+    throw new ReportableError('lexiconPath cannot be written as an OHS ignore pattern');
+  return rel.replace(/\/+$/, '');
+}
+
+/**
+ * Terminal text for diagnostic detail that may name notes (a failed child's stderr tail, an
+ * unexpected error's message). `show` is true on an interactive terminal or with
+ * `--show-child-stderr`; otherwise only one line says how to see it, because agent and CI
+ * transcripts are kept. Returns null when there is no detail.
+ */
+export function terminalDetail(label, text, { show }) {
+  if (!text) return null;
+  if (show) return `--- ${label} (local terminal only, do not paste publicly) ---\n${text}\n---`;
+  return `${label} is hidden (it may name notes); rerun on a local terminal or with --show-child-stderr to see it.`;
 }
 
 /** Last `lines` non-empty lines of a child's output. */
@@ -87,7 +140,7 @@ export const outputTail = (text, lines = 40) =>
  * captured (never its stdout, where upstream's eval echoes every query): the caller prints it
  * on the user's terminal only, never into a report.
  */
-class ChildRunError extends Error {
+export class ChildRunError extends Error {
   constructor(message, res) {
     super(message);
     this.name = 'ChildRunError';

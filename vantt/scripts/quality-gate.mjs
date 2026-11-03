@@ -10,6 +10,7 @@
 //        [--k 10]
 //   node vantt/scripts/quality-gate.mjs --private <dir|golden-set.json> [--vault <dir>] [--with-lang <id>] [--json] [--out <file>]
 //        [--private-detail <file>]   local per-query JSON (queries, paths, ranks): the file must be outside the repository
+//        [--show-child-stderr]       print a failed child's stderr tail (or an error's text) when stderr is not a terminal
 //
 // Run from the repo root of the release branch (built, dependencies installed). Exit 0 =
 // pass (pending targets are reported, not failed), 1 = a check failed, 2 = could not run.
@@ -18,9 +19,11 @@
 // Private mode (V15) evaluates the user's own vault with their own golden set, which
 // live outside the repository. Only aggregate numbers are printed or written: never
 // a query, a path or a note title; the child's own output is swallowed, except that a failed
-// child's own stderr tail is printed on the terminal (never into the report) so the failure can
-// be diagnosed. The vault is indexed with the user's note selection (OBSIDIAN_IGNORE_PATTERNS...)
-// and `_ohs/**` (the lexicon) ignored. `--private-detail` is the one exception: it writes
+// child's own stderr tail is printed (never into the report) when stderr is an interactive
+// terminal or with --show-child-stderr, so the failure can be diagnosed. The report's error is
+// fixed text: other errors are reported by category (their text follows the stderr rule). The
+// vault is indexed with the user's note selection (OBSIDIAN_IGNORE_PATTERNS...) and the lexicon
+// (`_ohs/**`, or the pack's lexiconPath) ignored. `--private-detail` is the one exception: it writes
 // per-query content to a local file outside the repository (refused otherwise) and prints only
 // that the file was written.
 import { spawnSync } from 'node:child_process';
@@ -38,14 +41,17 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { baseVersion, pickBaseline, writeBaseline } from './lib/baselines.mjs';
 import {
+  ChildRunError,
   evalEnv,
   goldenFile,
   nfdGolden,
   platformKey,
   prepareDataset,
   privateEvalEnv,
+  ReportableError,
   runDetail,
   runEvaluate,
+  terminalDetail,
 } from './lib/eval-run.mjs';
 import {
   regressionChecks,
@@ -79,6 +85,7 @@ export function parseCli(argv) {
       vault: { type: 'string' },
       out: { type: 'string' },
       'private-detail': { type: 'string' },
+      'show-child-stderr': { type: 'boolean', default: false },
     },
     strict: true,
   });
@@ -118,10 +125,10 @@ function buildPack(dir, log) {
     !existsSync(path.join(dir, 'node_modules')) &&
     !sh(dir, existsSync(path.join(dir, 'package-lock.json')) ? 'npm ci' : 'npm install').ok
   )
-    throw new Error(`npm install failed in ${pkg.name}`);
-  if (!sh(dir, 'npm run build').ok) throw new Error(`build of ${pkg.name} failed`);
+    throw new ReportableError(`npm install failed in ${pkg.name}`);
+  if (!sh(dir, 'npm run build').ok) throw new ReportableError(`build of ${pkg.name} failed`);
   if (pkg.main && !existsSync(path.join(dir, pkg.main)))
-    throw new Error(`${pkg.name} has no ${pkg.main} after the build`);
+    throw new ReportableError(`${pkg.name} has no ${pkg.main} after the build`);
 }
 
 function packEnv(config, lang, dir, base = evalEnv) {
@@ -440,21 +447,25 @@ async function privateMode(opts, root, config) {
   const report = { gate: 'error', private: true, pack: lang };
   const scratch = path.join(root, 'vantt', '.work', 'quality-private');
   try {
-    if (!existsSync(golden)) throw new Error('private golden set not found');
+    if (!existsSync(golden)) throw new ReportableError('private golden set not found');
     if (!opts.vault && !process.env.OHS_PRIVATE_VAULT && !(isDir && existsSync(vault)))
-      throw new Error(
+      throw new ReportableError(
         'private vault not given: use --vault <dir>, OHS_PRIVATE_VAULT, or <dir>/vault',
       );
-    if (!existsSync(vault)) throw new Error('private vault not found');
-    if (!existsSync(dir)) throw new Error(`vantt/packages/ohs-lang-${lang} is not present`);
+    if (!existsSync(vault)) throw new ReportableError('private vault not found');
+    if (!existsSync(dir))
+      throw new ReportableError(`vantt/packages/ohs-lang-${lang} is not present`);
     buildPack(dir, log);
     mkdirSync(scratch, { recursive: true });
     const evalGolden = path.join(scratch, 'golden-set.json');
     writeFileSync(evalGolden, JSON.stringify(nfdGolden(JSON.parse(readFileSync(golden, 'utf8')))));
     log('Private eval: without pack, then with pack (output suppressed).');
     const common = { tree: root, vault, golden: evalGolden, scratch, k, capture: true };
-    const without = runEvaluate({ ...common, env: privateEvalEnv() });
-    const withPack = runEvaluate({ ...common, env: packEnv(config, lang, dir, privateEvalEnv) });
+    // Both runs ignore the same lexicon file, so they index the same notes.
+    const privEnv = (extra = {}) =>
+      privateEvalEnv(extra, process.env, config.pack_options?.[lang] ?? null);
+    const without = runEvaluate({ ...common, env: privEnv() });
+    const withPack = runEvaluate({ ...common, env: packEnv(config, lang, dir, privEnv) });
     report.without_pack = aggregate(without);
     report.with_pack = aggregate(withPack);
     report.checks = regressionChecks('private-regression', {
@@ -470,8 +481,8 @@ async function privateMode(opts, root, config) {
     report.failed = v.failed;
     if (opts['private-detail']) {
       log('Private detail: per-query search with explain (output suppressed).');
-      const detailWithout = runDetail({ ...common, env: privateEvalEnv() });
-      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir, privateEvalEnv) });
+      const detailWithout = runDetail({ ...common, env: privEnv() });
+      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir, privEnv) });
       const queries = JSON.parse(readFileSync(golden, 'utf8'));
       const file = path.resolve(opts['private-detail']);
       mkdirSync(path.dirname(file), { recursive: true });
@@ -484,12 +495,15 @@ async function privateMode(opts, root, config) {
     }
   } catch (e) {
     report.gate = 'error';
-    report.error = e.message;
-    // Terminal only: the child's own stderr may name notes, so it never goes into the report.
-    if (e.stderrTail)
-      log(
-        `--- end of the child's stderr (local terminal only, do not paste publicly) ---\n${e.stderrTail}\n---`,
-      );
+    report.error = privateErrorText(e);
+    // Terminal only: the child's own stderr or an unexpected error's text may name notes, so they
+    // never go into the report, and a non-interactive stderr only says how to see them.
+    const detail = e.stderrTail
+      ? terminalDetail("end of the child's stderr", e.stderrTail, { show: opts.showDetail })
+      : report.error !== e.message
+        ? terminalDetail('error detail', e.message, { show: opts.showDetail })
+        : null;
+    if (detail) log(detail);
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }
@@ -497,6 +511,18 @@ async function privateMode(opts, root, config) {
 }
 
 const nfc = (p) => p.normalize('NFC');
+
+/**
+ * Report text of a private-mode error: the message of a failed child run or of an error with fixed
+ * text; any other error (JSON.parse of a malformed golden set can quote its input) by category.
+ */
+export function privateErrorText(e) {
+  if (e instanceof ChildRunError || e instanceof ReportableError) return e.message;
+  if (e instanceof SyntaxError) return 'invalid JSON (private golden set or eval output)';
+  if (typeof e?.code === 'string' && /^E[A-Z]+$/.test(e.code))
+    return `file system error (${e.code})`;
+  return 'unexpected error in the private gate';
+}
 
 /** One side (without or with the pack) of a query's detail. */
 function detailSide(row, detail, relevant) {
@@ -547,7 +573,10 @@ function printHuman(report) {
   for (const c of report.checks ?? []) out(`  [${c.status}] ${c.id}: ${c.detail}`);
 }
 
-export async function main(argv, { cwd = process.cwd() } = {}) {
+export async function main(
+  argv,
+  { cwd = process.cwd(), stderrIsTTY = Boolean(process.stderr.isTTY) } = {},
+) {
   let opts;
   try {
     opts = parseCli(argv);
@@ -567,6 +596,7 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
       return 2;
     }
   }
+  opts.showDetail = opts['show-child-stderr'] || stderrIsTTY;
   const config = JSON.parse(readFileSync(path.join(here, 'quality-gates.json'), 'utf8'));
   const report = opts.private
     ? await privateMode(opts, root, config)

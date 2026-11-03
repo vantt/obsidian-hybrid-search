@@ -14,7 +14,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { baseVersion, compareVersions, pickBaseline, writeBaseline } from '../lib/baselines.mjs';
-import { nfdGolden, outputTail, platformKey, privateEvalEnv } from '../lib/eval-run.mjs';
+import {
+  ChildRunError,
+  lexiconIgnorePattern,
+  nfdGolden,
+  outputTail,
+  platformKey,
+  privateEvalEnv,
+  ReportableError,
+  terminalDetail,
+} from '../lib/eval-run.mjs';
 import {
   regressionChecks,
   upstreamChecks,
@@ -22,7 +31,7 @@ import {
   verdict,
   viChecks,
 } from '../lib/gates.mjs';
-import { detailPathError, main } from '../quality-gate.mjs';
+import { detailPathError, main, privateErrorText } from '../quality-gate.mjs';
 import { git, write } from './helpers.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -74,6 +83,61 @@ describe('privateEvalEnv', () => {
       OHS_LANGUAGE_PACK: '/p',
     });
     expect(fallback.LOCAL_EMBEDDING_MODEL).toBe('Xenova/multilingual-e5-small');
+  });
+
+  it("also ignores a pack's lexiconPath inside the vault, the same for both runs", () => {
+    const ignore = (...a) => privateEvalEnv({}, ...a).OBSIDIAN_IGNORE_PATTERNS;
+    const base = '.obsidian/**,templates/**,*.canvas,_ohs/**';
+    expect(ignore({}, { lexiconPath: 'meta/từ điển.md' })).toBe(`${base},meta/từ điển.md`);
+    // The user's own pack options count when the gate configures none.
+    const user = { OHS_LANGUAGE_PACK_OPTIONS: JSON.stringify({ lexiconPath: './Lex/vi.md' }) };
+    expect(ignore(user)).toBe(`${base},Lex/vi.md`);
+    expect(ignore(user, { lexiconPath: 'other.md' })).toBe(`${base},other.md`);
+    expect(ignore(user, null)).toBe(ignore(user, {}));
+    expect(() => ignore({ OHS_LANGUAGE_PACK_OPTIONS: '{SECRET' })).toThrow(ReportableError);
+  });
+
+  it('lexiconIgnorePattern ignores the file itself, never more', () => {
+    expect(lexiconIgnorePattern(undefined)).toBe(null);
+    expect(lexiconIgnorePattern('_ohs/lexicon.md')).toBe(null);
+    expect(lexiconIgnorePattern('/abs/lexicon.md')).toBe(null);
+    expect(lexiconIgnorePattern('C:\\v\\lexicon.md')).toBe(null);
+    expect(lexiconIgnorePattern('../outside.md')).toBe(null);
+    expect(lexiconIgnorePattern('notes\\lex.md')).toBe('notes/lex.md');
+    expect(lexiconIgnorePattern('a/./b/../lex.md')).toBe('a/lex.md');
+    for (const bad of ['a,b.md', 'lex*.md', '!lex.md', '', 3])
+      expect(() => lexiconIgnorePattern(bad), String(bad)).toThrow(ReportableError);
+  });
+
+  it('terminalDetail shows detail only when asked, else one line on how to see it', () => {
+    expect(terminalDetail('x', '', { show: true })).toBe(null);
+    expect(terminalDetail('x', 'SECRET', { show: true })).toMatch(/SECRET/);
+    const hidden = terminalDetail('x', 'SECRET', { show: false });
+    expect(hidden).not.toMatch(/SECRET/);
+    expect(hidden).toMatch(/--show-child-stderr/);
+    expect(hidden.split('\n')).toHaveLength(1);
+  });
+
+  it('privateErrorText keeps fixed messages and reports anything else by category', () => {
+    expect(privateErrorText(new ChildRunError('eval failed in private run (exit 1)', {}))).toBe(
+      'eval failed in private run (exit 1)',
+    );
+    expect(privateErrorText(new ReportableError('private vault not found'))).toBe(
+      'private vault not found',
+    );
+    let syntax;
+    try {
+      JSON.parse('{"q": SECRET-QUERY');
+    } catch (e) {
+      syntax = e;
+    }
+    expect(privateErrorText(syntax)).toBe('invalid JSON (private golden set or eval output)');
+    expect(privateErrorText(Object.assign(new Error('open /SECRET'), { code: 'ENOENT' }))).toBe(
+      'file system error (ENOENT)',
+    );
+    expect(privateErrorText(new TypeError('SECRET of undefined'))).toBe(
+      'unexpected error in the private gate',
+    );
   });
 
   it('outputTail keeps the last non-empty lines', () => {
@@ -449,7 +513,7 @@ describe('quality-gate CLI on a stub eval', () => {
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
-  async function run(argv) {
+  async function run(argv, { tty = false } = {}) {
     const out = [];
     const err = [];
     const o = process.stdout.write.bind(process.stdout);
@@ -458,7 +522,7 @@ describe('quality-gate CLI on a stub eval', () => {
     process.stderr.write = (c) => (err.push(String(c)), true);
     let code;
     try {
-      code = await main(argv, { cwd: root });
+      code = await main(argv, { cwd: root, stderrIsTTY: tty });
     } finally {
       process.stdout.write = o;
       process.stderr.write = e;
@@ -631,12 +695,52 @@ describe('quality-gate CLI on a stub eval', () => {
     expect(code).toBe(2);
     expect(report.error).toMatch(/vault/);
   });
-  it("--private shows a failed eval's own stderr on the terminal, never its stdout or in the report", async () => {
+  describe("a failed private eval's own stderr", () => {
+    const failing = (extra, opts) => {
+      write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
+      write(root, 'vantt/packages/ohs-lang-de/fail-eval.txt', '1');
+      const priv = path.join(dir, 'p.json');
+      writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', category: 'c' }]));
+      return run(
+        [
+          '--private',
+          priv,
+          '--vault',
+          path.join(root, 'fixtures/obsidian-help/dataset'),
+          '--with-lang',
+          'de',
+          '--json',
+          ...extra,
+        ],
+        opts,
+      );
+    };
+    it('is shown with --show-child-stderr, never its stdout or in the report', async () => {
+      const { code, err, report } = await failing(['--show-child-stderr']);
+      expect(code).toBe(2);
+      expect(report.error).toBe('eval failed in private run (exit 1)');
+      expect(err).toMatch(/eval-diagnostic from the child/);
+      expect(err).not.toMatch(/SECRET-QUERY/);
+      expect(JSON.stringify(report)).not.toMatch(/diagnostic|SECRET/);
+    });
+    it('is shown on an interactive terminal', async () => {
+      const { err } = await failing([], { tty: true });
+      expect(err).toMatch(/eval-diagnostic from the child/);
+    });
+    it('is hidden from a non-interactive stderr, which says how to see it', async () => {
+      const { code, err, report } = await failing([]);
+      expect(code).toBe(2);
+      expect(report.error).toBe('eval failed in private run (exit 1)');
+      expect(err).not.toMatch(/diagnostic|SECRET/);
+      expect(err).toMatch(/hidden.*--show-child-stderr/);
+    });
+  });
+
+  it('--private reports a malformed golden set by category, never quoting it', async () => {
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
-    write(root, 'vantt/packages/ohs-lang-de/fail-eval.txt', '1');
     const priv = path.join(dir, 'p.json');
-    writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', category: 'c' }]));
-    const { code, err, report } = await run([
+    writeFileSync(priv, '[{"id": "p1", "query": SECRET-QUERY');
+    const { code, out, err, report } = await run([
       '--private',
       priv,
       '--vault',
@@ -646,10 +750,9 @@ describe('quality-gate CLI on a stub eval', () => {
       '--json',
     ]);
     expect(code).toBe(2);
-    expect(report.error).toBe('eval failed in private run (exit 1)');
-    expect(err).toMatch(/eval-diagnostic from the child/);
-    expect(err).not.toMatch(/SECRET-QUERY/);
-    expect(JSON.stringify(report)).not.toMatch(/diagnostic|SECRET/);
+    expect(report.error).toBe('invalid JSON (private golden set or eval output)');
+    expect(out + err).not.toMatch(/SECRET/);
+    expect(err).toMatch(/error detail is hidden/);
   });
 
   describe('--private-detail', () => {
@@ -751,6 +854,7 @@ describe('quality-gate CLI on a stub eval', () => {
         '--k',
         '30',
         '--json',
+        '--show-child-stderr',
       ]);
       expect(code).toBe(2);
       expect(report.error).toBe('detail run failed (exit 1)');
