@@ -7,6 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Candidate, QueryAnalysis } from '../src/contract.js';
+import { CORE_WEIGHTS, RRF_K } from '../src/core-fusion.js';
 import { resolveOptions } from '../src/options.js';
 import { weakBm25Penalty } from '../src/rescore.js';
 
@@ -24,6 +25,11 @@ const candidate = (path: string, rank: Record<string, number>): Candidate => ({
 });
 
 describe('core hybrid fusion constants', () => {
+  it('are the values of the core fixture', () => {
+    expect(RRF_K).toBe(CORE.k);
+    expect(CORE_WEIGHTS).toEqual(CORE.weights);
+  });
+
   const options = resolveOptions();
   const analysis: QueryAnalysis = { viewQueries: {} };
   // The semantic answer misses every BM25 top result: agreement 0, the whole BM25 vote is lost.
@@ -41,7 +47,8 @@ describe('core hybrid fusion constants', () => {
     for (const [added, weight] of others) {
       extra = [...extra, ...added];
       total += weight;
-      const candidates = [answer, bm25At(1), bm25At(4), ...extra];
+      // a full BM25 top 5 (a shorter list keeps its votes)
+      const candidates = [answer, bm25At(1), bm25At(4), bm25At(2), bm25At(3), bm25At(5), ...extra];
       const penalty = weakBm25Penalty(candidates, analysis, options);
       const best = total / (CORE.k + 1);
       expect(penalty[0]).toBe(0);
