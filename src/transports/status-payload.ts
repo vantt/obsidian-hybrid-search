@@ -1,6 +1,7 @@
 import { getIndexingStatus } from '../indexing/indexer.js';
 import { activeModelName, useRemoteEmbeddings } from '../inference/embedder.js';
 import { config } from '../runtime/config.js';
+import { buildStatusField } from '../runtime/package-identity.js';
 import { getIndexFailures, getStats } from '../storage/db.js';
 
 export interface StatusPayloadOptions {
@@ -46,6 +47,7 @@ export function buildStatusPayload({
     embedding_dim: stats.embeddingDim,
     context_length: contextLength,
     version,
+    ...buildStatusField(),
     ignore_patterns: config.ignorePatterns,
     respect_gitignore: config.respectGitignore,
     include_patterns: config.includePatterns,
