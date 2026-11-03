@@ -110,6 +110,26 @@ jobs:
       - name: Pin npm 12.2.0
         run: npm install -g npm@12.2.0 && npm --version
 
+      # The fork scripts (bundle.mjs here, run-eval.mjs, quality-gate.mjs) run npm/npx through npm's
+      # JS entry on Windows, without a shell: check that it resolves to the pinned npm, in seconds.
+      - name: npm and npx without a shell (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          node --input-type=module -e "
+            import { spawnSync } from 'node:child_process';
+            import { pathToFileURL } from 'node:url';
+            const { npmCommand } = await import(pathToFileURL('tools/vantt/scripts/lib/proc.mjs').href);
+            for (const tool of ['npm', 'npx']) {
+              const c = npmCommand(tool, ['--version']);
+              const r = spawnSync(c.command, c.args, { encoding: 'utf8' });
+              console.log(tool, c.args[0], r.stdout.trim());
+              if (r.status !== 0 || r.stdout.trim() !== '12.2.0') process.exit(1);
+            }"
+          # run-eval.mjs loads proc.mjs by a relative path; --compare needs no OHS tree.
+          b=$(ls tools/vantt/eval/baselines/*/*.vi-search.json | head -n1)
+          [ -n "$b" ] || { echo "::error::no vi-search baseline to compare"; exit 1; }
+          node tools/vantt/eval/vi/run-eval.mjs --compare "$b" "$b" > /dev/null
+
       - name: Build bundle
         run: |
           node tools/vantt/scripts/bundle.mjs --platform "${{ matrix.platform }}" --tree tree \
