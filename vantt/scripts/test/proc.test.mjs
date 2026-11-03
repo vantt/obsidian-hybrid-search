@@ -109,6 +109,10 @@ describe('batchCommand', () => {
 
   it('doubles trailing backslashes so they do not escape the closing quote', () => {
     expect(batchCommand('x.cmd', ['C:\\dir\\'], {}).args[3]).toBe('""x.cmd" "C:\\dir\\\\""');
+    expect(batchCommand('x.cmd', ['a\\b\\\\'], {}).args[3]).toBe('""x.cmd" "a\\b\\\\\\\\""');
+    expect(batchCommand('x.cmd', ['\\'.repeat(3)], {}).args[3]).toBe(
+      `""x.cmd" "${'\\'.repeat(6)}""`,
+    );
     expect(batchCommand('x.cmd', [], {}).command).toBe('cmd.exe');
   });
 

@@ -72,9 +72,11 @@ describe('collectTrends', () => {
     expect(trends.tags).toEqual(['v0.17.1', 'v0.17.2']);
     expect(panel('vi_ndcg5').fork).toEqual({ 'v0.17.2': 0.8, 'v0.17.1': 0.78 });
     expect(panel('vi_ndcg5').upstream).toEqual({ 'v0.17.2': 0.6 });
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the review data
     expect(panel('vi-dd').fork['v0.17.2']).toBe(0.9);
     expect(panel('index_s').fork['v0.17.1']).toBe(21);
     expect(panel('per_query_ms').upstream['v0.17.2']).toBe(40);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the review data
     expect(panel('help_ndcg5').fork['v0.17.2']).toBe(0.7);
   });
   it('keeps the newest review for a tag measured twice and skips missing metrics', () => {
@@ -85,6 +87,7 @@ describe('collectTrends', () => {
     });
     const t = collectTrends([r2, r1]);
     expect(t.tags).toEqual(['v0.17.1', 'v0.17.2', 'v0.17.3']);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the review data
     expect(t.panels.find((p) => p.id === 'vi_ndcg5').fork['v0.17.2']).toBe(0.81); // the newer review (r2) re-measured v0.17.2 as its previous side
     expect(t.panels.find((p) => p.id === 'index_s').fork['v0.17.3']).toBeUndefined();
   });

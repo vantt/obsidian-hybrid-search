@@ -98,19 +98,21 @@ describe('privateEvalEnv', () => {
   });
 
   it('lexiconIgnorePattern ignores the file itself, never more', () => {
-    expect(lexiconIgnorePattern(undefined)).toBe(null);
-    expect(lexiconIgnorePattern('_ohs/lexicon.md')).toBe(null);
-    expect(lexiconIgnorePattern('/abs/lexicon.md')).toBe(null);
-    expect(lexiconIgnorePattern('C:\\v\\lexicon.md')).toBe(null);
-    expect(lexiconIgnorePattern('../outside.md')).toBe(null);
+    expect(lexiconIgnorePattern(undefined)).toBeNull();
+    expect(lexiconIgnorePattern('_ohs/lexicon.md')).toBeNull();
+    expect(lexiconIgnorePattern('/abs/lexicon.md')).toBeNull();
+    expect(lexiconIgnorePattern('C:\\v\\lexicon.md')).toBeNull();
+    expect(lexiconIgnorePattern('../outside.md')).toBeNull();
     expect(lexiconIgnorePattern('notes\\lex.md')).toBe('notes/lex.md');
     expect(lexiconIgnorePattern('a/./b/../lex.md')).toBe('a/lex.md');
+    expect(lexiconIgnorePattern('lexicon/')).toBe('lexicon');
+    expect(lexiconIgnorePattern('notes//lex.md//')).toBe('notes/lex.md');
     for (const bad of ['a,b.md', 'lex*.md', '!lex.md', '', 3])
       expect(() => lexiconIgnorePattern(bad), String(bad)).toThrow(ReportableError);
   });
 
   it('terminalDetail shows detail only when asked, else one line on how to see it', () => {
-    expect(terminalDetail('x', '', { show: true })).toBe(null);
+    expect(terminalDetail('x', '', { show: true })).toBeNull();
     expect(terminalDetail('x', 'SECRET', { show: true })).toMatch(/SECRET/);
     const hidden = terminalDetail('x', 'SECRET', { show: false });
     expect(hidden).not.toMatch(/SECRET/);
@@ -641,6 +643,7 @@ describe('quality-gate CLI on a stub eval', () => {
     expect(code).toBe(0);
     expect(report).toMatchObject({ private: true, gate: 'pass', pack: 'de' });
     expect(report.without_pack.categories.c).toMatchObject({ n: 2, ndcg_5: 0.8 });
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the eval result
     expect(report.with_pack.summary.ndcg_5).toBe(0.85);
     expect(out + err).not.toMatch(/SECRET/);
     expect(existsSync(path.join(root, 'vantt/.work/quality-private'))).toBe(false);
@@ -666,7 +669,9 @@ describe('quality-gate CLI on a stub eval', () => {
       '--json',
     ]);
     expect(code).toBe(0);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the eval result
     expect(report.without_pack.summary.ndcg_5).toBe(0.8);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the value is copied unchanged from the eval result
     expect(report.with_pack.summary.ndcg_5).toBe(0.85);
     expect(JSON.parse(readFileSync(priv, 'utf8'))[0].relevant_paths[0]).toBe(nfc);
   });

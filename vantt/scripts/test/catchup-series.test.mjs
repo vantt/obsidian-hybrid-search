@@ -59,6 +59,12 @@ touches = []
     expect(patches[1].touches).toEqual([]);
   });
 
+  it('strips a comment after a table header, from its first `#`', () => {
+    const toml = '[[patches]]  # first # second\nid = "a"\nname = "x"\npatch_file = "p"\n';
+    expect(parseSeries(toml).patches).toEqual([{ id: 'a', name: 'x', patch_file: 'p' }]);
+    expect(() => parseSeries('[[patches]] # c\r\n')).toThrow(/unsupported table/);
+  });
+
   it.each([
     ['[[patches]]\nid = "a"\nname = "x"\npatch_file = "p"\nfoo = 12\n', /line 5|:5:/],
     ['[[patches]]\nid = "a\nname = "x"\n', /:2: unterminated string/],

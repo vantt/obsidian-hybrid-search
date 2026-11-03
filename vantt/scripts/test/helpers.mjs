@@ -23,6 +23,7 @@ const ENV = {
 };
 
 export const git = (cwd, ...args) =>
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- the tests run the developer's own git
   execFileSync('git', args, {
     cwd,
     env: ENV,
@@ -168,7 +169,7 @@ export function setSeries(fx, entries, extraToml = '') {
   let toml = '# series\n';
   for (const e of entries) {
     if (e.content !== undefined) write(fx.fork, `vantt/patches/${e.file}`, e.content);
-    toml += `\n[[patches]]\nid = "${e.id}"\nname = "${e.name ?? `feat: ${e.id}`}"\npatch_file = "${e.file}"\n${e.extra ?? ''}`;
+    toml += `\n[[patches]]\nid = "${e.id}"\nname = "${e.name ?? 'feat: ' + e.id}"\npatch_file = "${e.file}"\n${e.extra ?? ''}`;
   }
   write(fx.fork, 'vantt/patches/series.toml', toml + extraToml);
   git(fx.fork, 'add', '-A');

@@ -279,6 +279,7 @@ describe('conflict rehearsal (T8)', () => {
     expect(head(fx.fork)).toBe('vantt/v0.2.0');
     const state = JSON.parse(read(fx.fork, 'vantt/.catchup-state.json'));
     expect(state).toMatchObject({ index: 1, conflicted_files: ['src/app.txt'], orig: 'master' });
+    // eslint-disable-next-line sonarjs/super-linear-regex -- matched once against a small conflicted fixture file
     expect(read(fx.fork, 'src/app.txt')).toMatch(/<<<<<<<.*\n/);
 
     // A new run refuses while the session is open.
