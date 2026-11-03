@@ -8,7 +8,7 @@
 //   --models a,b,c     subset of: e5-small, e5-base, bge-m3, halong, halong-fp32   (default: all)
 //   --threads N        ONNX intra-op threads for every step (default 4, models an ordinary laptop; 0 = all cores)
 //   --k N              result depth (default 10)
-//   --vault <dir> --golden <file>   use an existing corpus; default: generate vi-search@v0.11.0 into <work>/vault
+//   --vault <dir> --golden <file>   use an existing corpus; default: generate vi-search@v0.12.0 into <work>/vault
 //   --otf <otf.mjs>    fixture generator to use instead of npx
 //   --python <bin>     python with torch, transformers, onnx, onnxruntime; needed once to export `halong` and `halong-fp32` to ONNX
 //   --runs N           repeat each query process N times and report the median timing (default 1; quality is deterministic)
@@ -28,7 +28,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const WORKER = path.join(here, 'lib/semantic-worker.mjs');
 const EXPORTER = path.join(here, 'lib/semantic-export-onnx.py');
 const GOLDEN = path.resolve(here, '../eval/vi/golden-set.json');
-const FIXTURE_TAG = 'v0.11.0';
+const FIXTURE_TAG = 'v0.12.0';
 const RERANKER = 'onnx-community/gte-multilingual-reranker-base';
 
 const MODELS = {

@@ -169,7 +169,7 @@ function viVault(workDir, otf) {
     const env = childEnv();
     const fixture = otf
       ? { command: process.execPath, args: [path.resolve(otf), ...gen] }
-      : npmCommand('npx', ['--yes', 'github:vantt/obsidian-test-fixture#v0.11.0', ...gen], { env });
+      : npmCommand('npx', ['--yes', 'github:vantt/obsidian-test-fixture#v0.12.0', ...gen], { env });
     const res = spawnSync(fixture.command, fixture.args, {
       cwd: workDir,
       env,
