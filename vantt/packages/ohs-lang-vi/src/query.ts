@@ -48,6 +48,8 @@ export interface QueryToken {
   marked: boolean;
   /** A Vietnamese syllable (accented) or a possible unaccented one. */
   syllable: boolean;
+  /** Typed in capitals (an acronym): taken literally, never restored, decoded or corrected. */
+  acronym?: boolean;
 }
 
 export interface QueryState {
@@ -95,9 +97,30 @@ export function makeQueryToken(norm: string, options: PackOptions): QueryToken {
   };
 }
 
+/** A word typed in capitals, at least two letters: `KH`, `BA`, `ĐKKD`, `SE3`. */
+const CAPITALS_RE = /^(?=(?:\P{L}*\p{Lu}){2})[\p{Lu}\p{N}]+$/u;
+
+/**
+ * Tokens typed in capitals are acronyms ("BA", "DA", "AI"), not syllables to restore or
+ * decode, even when their letters spell one ("ba", "da", "ai"); unless the whole query of
+ * several words is typed in capitals (caps lock). Indexes of such tokens.
+ */
+function acronymIndexes(query: string, count: number): Set<number> {
+  const typed = tokenize(query.normalize('NFC'));
+  if (typed.length !== count) return new Set();
+  const capitals = typed.map((t) => CAPITALS_RE.test(t));
+  const lettered = typed.filter((t) => /\p{L}/u.test(t)).length;
+  if (lettered > 1 && capitals.filter(Boolean).length === lettered) return new Set();
+  return new Set(capitals.flatMap((c, i) => (c ? [i] : [])));
+}
+
 export function tokenizeQuery(query: string, options: PackOptions): QueryState {
   const normalized = normalize(query, { tonePlacement: options.tonePlacement });
   const tokens = tokenize(normalized).map((norm) => makeQueryToken(norm, options));
+  for (const i of acronymIndexes(query, tokens.length)) {
+    tokens[i]!.syllable = false;
+    tokens[i]!.acronym = true;
+  }
   return {
     query,
     normalized,
