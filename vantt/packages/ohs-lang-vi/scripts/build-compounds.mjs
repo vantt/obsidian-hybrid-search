@@ -37,7 +37,9 @@ import { createInterface } from 'node:readline';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { normalize, parseSyllable } from '../build/index.js';
+// The compiled pack is loaded in main(), so the pure helpers can be imported (and tested) without
+// building the pack first.
+let normalize, parseSyllable;
 
 const HF = 'https://huggingface.co/datasets';
 
@@ -483,6 +485,7 @@ function compare(scored, counts, refFile) {
 // ---- main ------------------------------------------------------------------------------------------------------
 
 async function main() {
+  ({ normalize, parseSyllable } = await import('../build/index.js'));
   const { values } = parseArgs({
     options: {
       work: { type: 'string' },
