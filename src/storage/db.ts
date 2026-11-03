@@ -4,6 +4,7 @@ import { mkdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import * as sqliteVec from 'sqlite-vec';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { extractChunkAnchors } from '../content/block-anchors.js';
 import { CONTENT_POLICY_IDENTITY, type SourcePart } from '../content/content-ignore.js';
 import { normalizeNotePath, normalizeTag } from '../content/text-normalization.js';
 import { config } from '../runtime/config.js';
@@ -236,7 +237,17 @@ function rebuildFrontmatterLookup(db: DB): void {
 }
 
 // Advance this revision for schema changes, independently of ownership table setup.
-const INDEX_SCHEMA_VERSION = '2';
+const INDEX_SCHEMA_VERSION = '3';
+
+/** Derive anchors for chunks indexed before the columns existed; no embedder, no rechunking. */
+function backfillChunkAnchors(db: DB): void {
+  const update = db.prepare('UPDATE chunks SET block_id = ?, has_highlight = ? WHERE id = ?');
+  const rows = db.prepare('SELECT id, text FROM chunks').all() as { id: number; text: string }[];
+  for (const row of rows) {
+    const { blockId, hasHighlight } = extractChunkAnchors(row.text);
+    if (blockId !== null || hasHighlight) update.run(blockId, hasHighlight ? 1 : 0, row.id);
+  }
+}
 
 function runMigrations(db: DB): void {
   // Base schema — no FTS tables here; they are managed by the versioned migration below
@@ -327,6 +338,11 @@ function runMigrations(db: DB): void {
   }
   if (!chunkCols.some((c) => c.name === 'source_spans')) {
     db.exec('ALTER TABLE chunks ADD COLUMN source_spans TEXT');
+  }
+  if (!chunkCols.some((c) => c.name === 'block_id')) {
+    db.exec('ALTER TABLE chunks ADD COLUMN block_id TEXT');
+    db.exec('ALTER TABLE chunks ADD COLUMN has_highlight INTEGER NOT NULL DEFAULT 0');
+    backfillChunkAnchors(db);
   }
 
   // Partial index for fast --errors lookups (only indexes failed rows)
@@ -870,6 +886,8 @@ export interface PreparedIndexNote {
     charStart?: number | null;
     charEnd?: number | null;
     sourceSpans?: readonly SourcePart[] | null;
+    blockId?: string | null;
+    hasHighlight?: boolean;
   }[];
   /** Language-pack view text; required exactly when the index has view tables. */
   lexical?: NoteLexical;
@@ -1013,12 +1031,13 @@ export function upsertNote(
 
 function insertChunks(db: DB, noteId: number, chunks: PreparedIndexNote['chunks']): void {
   const insertChunk = db.prepare(
-    'INSERT INTO chunks (note_id, chunk_index, text, heading_path, embedding_status, char_start, char_end, source_spans) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO chunks (note_id, chunk_index, text, heading_path, embedding_status, char_start, char_end, source_spans, block_id, has_highlight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   );
   const insertVec = db.prepare('INSERT INTO vec_chunks (chunk_id, embedding) VALUES (?, ?)');
 
   for (let i = 0; i < chunks.length; i++) {
-    const { text, headingPath, embedding, charStart, charEnd, sourceSpans } = chunks[i]!;
+    const { text, headingPath, embedding, charStart, charEnd, sourceSpans, blockId, hasHighlight } =
+      chunks[i]!;
     validateChunkSourceSpans(chunks[i]!);
     const status = embedding !== null ? 'ok' : 'failed';
     const result = insertChunk.run(
@@ -1030,6 +1049,8 @@ function insertChunks(db: DB, noteId: number, chunks: PreparedIndexNote['chunks'
       charStart ?? null,
       charEnd ?? null,
       sourceSpans ? JSON.stringify(sourceSpans) : null,
+      blockId ?? null,
+      hasHighlight ? 1 : 0,
     );
     if (embedding !== null) {
       // sqlite-vec vec0 requires INTEGER (BigInt), not REAL (JS number)
