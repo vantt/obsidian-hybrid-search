@@ -31,7 +31,7 @@ import {
   verdict,
   viChecks,
 } from '../lib/gates.mjs';
-import { detailPathError, main, privateErrorText } from '../quality-gate.mjs';
+import { detailPathError, main, parseLangOptions, privateErrorText } from '../quality-gate.mjs';
 import { git, write } from './helpers.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -144,6 +144,35 @@ describe('privateEvalEnv', () => {
 
   it('outputTail keeps the last non-empty lines', () => {
     expect(outputTail('a\r\n\nb\nc\n', 2)).toBe('b\nc');
+  });
+});
+
+describe('parseLangOptions', () => {
+  it('returns a JSON object as given', () => {
+    expect(parseLangOptions('{"foldIY":true,"lexiconPath":"lex/words.txt"}')).toEqual({
+      foldIY: true,
+      lexiconPath: 'lex/words.txt',
+    });
+    expect(parseLangOptions('{}')).toEqual({});
+  });
+
+  it('rejects invalid JSON and non-objects with fixed text that never quotes the input', () => {
+    const error = (raw) => {
+      try {
+        parseLangOptions(raw);
+      } catch (e) {
+        return e;
+      }
+      throw new Error('parseLangOptions accepted the input');
+    };
+    const bad = error('{"lexiconPath": SECRET');
+    expect(bad).toBeInstanceOf(ReportableError);
+    expect(bad.message).toBe('--lang-options is not valid JSON');
+    for (const raw of ['null', '[1]', '"SECRET"', '42', 'true']) {
+      const e = error(raw);
+      expect(e).toBeInstanceOf(ReportableError);
+      expect(e.message).toBe('--lang-options must be a JSON object');
+    }
   });
 });
 
@@ -455,6 +484,9 @@ if (pack && fs.existsSync(path.join(pack, 'fail-eval.txt'))) {
   console.error('Error: eval-diagnostic from the child');
   process.exit(1);
 }
+// With eval/log-env.txt, every run records the pack switches it got (one JSON line).
+if (fs.existsSync('eval/log-env.txt'))
+  fs.appendFileSync('eval/env.jsonl', JSON.stringify({ run: 'eval', pack: Boolean(pack), options: process.env.OHS_LANGUAGE_PACK_OPTIONS ?? null, ignore: process.env.OBSIDIAN_IGNORE_PATTERNS }) + '\\n');
 const worse = fs.existsSync('eval/behavior.txt');
 const golden = JSON.parse(fs.readFileSync(get('--golden-set'), 'utf8'));
 // Like upstream, paths compare as NFD strings: an NFC path in the golden set never matches.
@@ -475,6 +507,8 @@ import path from 'node:path';
 export async function search(query) {
   const pack = process.env.OHS_LANGUAGE_PACK;
   if (pack && fs.existsSync(path.join(pack, 'fail-detail.txt'))) throw new Error('detail-diagnostic from the child');
+  if (fs.existsSync('eval/log-env.txt'))
+    fs.appendFileSync('eval/env.jsonl', JSON.stringify({ run: 'detail', pack: Boolean(pack), options: process.env.OHS_LANGUAGE_PACK_OPTIONS ?? null, ignore: process.env.OBSIDIAN_IGNORE_PATTERNS }) + '\\n');
   return [{ path: 'SECRET-PATH.md', score: 0.5, scores: { bm25: 1 }, matchedBy: ['bm25'], explain: { ranks: { bm25: 1 }, debug: process.env.OHS_LANGUAGE_PACK ? { restore: 'SECRET-RESTORED ' + query } : undefined } }];
 }
 `;
@@ -515,7 +549,7 @@ describe('quality-gate CLI on a stub eval', () => {
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
-  async function run(argv, { tty = false } = {}) {
+  async function run(argv, { tty = false, config } = {}) {
     const out = [];
     const err = [];
     const o = process.stdout.write.bind(process.stdout);
@@ -524,7 +558,7 @@ describe('quality-gate CLI on a stub eval', () => {
     process.stderr.write = (c) => (err.push(String(c)), true);
     let code;
     try {
-      code = await main(argv, { cwd: root, stderrIsTTY: tty });
+      code = await main(argv, { cwd: root, stderrIsTTY: tty, config });
     } finally {
       process.stdout.write = o;
       process.stderr.write = e;
@@ -877,6 +911,112 @@ describe('quality-gate CLI on a stub eval', () => {
 
     it('detailPathError accepts a fresh directory outside any work tree', () => {
       expect(detailPathError(path.join(dir, 'a', 'b', 'detail.json'), root)).toBeNull();
+    });
+  });
+
+  describe('--lang-options', () => {
+    const LEX = 'lex/words.txt';
+    const setup = () => {
+      write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
+      write(root, 'eval/log-env.txt', '1');
+      const priv = path.join(dir, 'private');
+      mkdirSync(path.join(priv, 'vault'), { recursive: true });
+      writeFileSync(path.join(priv, 'vault', 'note.md'), '# note\n');
+      writeFileSync(
+        path.join(priv, 'golden-set.json'),
+        JSON.stringify([{ id: 'p1', query: 'q', category: 'c' }]),
+      );
+      return priv;
+    };
+    const runs = () =>
+      readFileSync(path.join(root, 'eval/env.jsonl'), 'utf8')
+        .trim()
+        .split('\n')
+        .map((l) => JSON.parse(l));
+    const configWith = (options) => ({ ...CONFIG, pack_options: { de: options } });
+
+    it('replaces the configured options for both runs and records them in the report', async () => {
+      const priv = setup();
+      const given = { foldIY: true, lexiconPath: LEX };
+      const { code, report } = await run(
+        ['--private', priv, '--with-lang', 'de', '--lang-options', JSON.stringify(given), '--json'],
+        { config: configWith({ foldIY: false, lexiconPath: 'old/lexicon.txt' }) },
+      );
+      expect(code).toBe(0);
+      expect(report.pack_options).toEqual(given);
+      const [without, withPack] = runs();
+      expect(without).toMatchObject({ run: 'eval', pack: false, options: null });
+      expect(withPack).toMatchObject({ run: 'eval', pack: true });
+      expect(JSON.parse(withPack.options)).toEqual(given);
+      // Both runs index the same notes: the given lexicon is ignored, the configured one is not.
+      expect(withPack.ignore).toBe(without.ignore);
+      expect(without.ignore.split(',')).toContain(LEX);
+      expect(without.ignore).not.toMatch(/old\/lexicon/);
+    });
+
+    it('reaches the detail runs too, and the detail file records the options', async () => {
+      const priv = setup();
+      const file = path.join(dir, 'out', 'detail.json');
+      const given = { lexiconPath: LEX };
+      const { code } = await run([
+        '--private',
+        priv,
+        '--with-lang',
+        'de',
+        '--lang-options',
+        JSON.stringify(given),
+        '--private-detail',
+        file,
+        '--json',
+      ]);
+      expect(code).toBe(0);
+      const detail = runs().filter((r) => r.run === 'detail');
+      expect(detail.map((r) => r.pack)).toEqual([false, true]);
+      expect(detail[0].options).toBeNull();
+      expect(JSON.parse(detail[1].options)).toEqual(given);
+      expect(detail[0].ignore).toBe(detail[1].ignore);
+      expect(JSON.parse(readFileSync(file, 'utf8')).pack_options).toEqual(given);
+    });
+
+    it('without the flag, the report records the configured options (or null)', async () => {
+      const priv = setup();
+      const configured = { foldIY: false };
+      const withConfig = await run(['--private', priv, '--with-lang', 'de', '--json'], {
+        config: configWith(configured),
+      });
+      expect(withConfig.report.pack_options).toEqual(configured);
+      expect(JSON.parse(runs()[1].options)).toEqual(configured);
+      const none = await run(['--private', priv, '--with-lang', 'de', '--json']);
+      expect(none.report.pack_options).toBeNull();
+    });
+
+    it('reports invalid JSON or a non-object by fixed text and runs nothing', async () => {
+      const priv = setup();
+      for (const [raw, message] of [
+        ['{"lexiconPath": SECRET', '--lang-options is not valid JSON'],
+        ['["SECRET"]', '--lang-options must be a JSON object'],
+      ]) {
+        const { code, out, err, report } = await run([
+          '--private',
+          priv,
+          '--with-lang',
+          'de',
+          '--lang-options',
+          raw,
+          '--json',
+        ]);
+        expect(code).toBe(2);
+        expect(report).toMatchObject({ gate: 'error', error: message, pack_options: null });
+        expect(out + err).not.toMatch(/SECRET/);
+      }
+      expect(existsSync(path.join(root, 'eval/env.jsonl'))).toBe(false);
+    });
+
+    it('is only valid with --private', async () => {
+      const { code, out, err } = await run([...std(), '--lang-options', '{}']);
+      expect(code).toBe(2);
+      expect(out).toBe('');
+      expect(err).toMatch(/--lang-options is only valid with --private/);
     });
   });
 });
