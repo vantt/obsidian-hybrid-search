@@ -136,7 +136,8 @@ export function readChunksForPaths(uniquePaths: string[]) {
 
   return db
     .prepare(
-      `SELECT n.path, c.heading_path, c.text, c.chunk_index, c.char_start, c.char_end
+      `SELECT n.path, c.heading_path, c.text, c.chunk_index, c.char_start, c.char_end,
+             c.block_id, c.has_highlight
          FROM notes n
          JOIN chunks c ON c.note_id = n.id
          WHERE n.path IN (${placeholders})
@@ -149,6 +150,8 @@ export function readChunksForPaths(uniquePaths: string[]) {
     chunk_index: number;
     char_start: number | null;
     char_end: number | null;
+    block_id: string | null;
+    has_highlight: number;
   }>;
 }
 
@@ -233,7 +236,7 @@ export function createVectorReader(
       WITH ranked AS (
         SELECT vc.chunk_id, vc.distance,
                c.note_id, c.chunk_index, c.text AS chunk_text, c.heading_path,
-               c.char_start, c.char_end,
+               c.char_start, c.char_end, c.block_id, c.has_highlight,
                n.path, n.title, n.tags, n.aliases,
                ROW_NUMBER() OVER (PARTITION BY c.note_id ORDER BY vc.distance, c.chunk_index) AS row_num
         FROM vec_chunks AS vc
@@ -243,7 +246,7 @@ export function createVectorReader(
           AND k = ?${restrictionSql}
       )
       SELECT chunk_id, distance, note_id, chunk_index, chunk_text, heading_path,
-             char_start, char_end, path, title, tags, aliases
+             char_start, char_end, block_id, has_highlight, path, title, tags, aliases
       FROM ranked
       WHERE row_num = 1
       ORDER BY distance, chunk_index
@@ -261,6 +264,8 @@ export function createVectorReader(
         heading_path: string | null;
         char_start: number | null;
         char_end: number | null;
+        block_id: string | null;
+        has_highlight: number;
         path: string;
         title: string;
         tags: string;
