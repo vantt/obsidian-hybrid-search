@@ -214,10 +214,9 @@ describe('seg view projection', () => {
             // Same count; part k of the view is the norm projection of source token k.
             expect(parts).toHaveLength(source.length);
             parts.forEach((part, k) => expect(part).toBe(p.project('norm', field, source[k]!)));
-            // Removing the joins gives the norm view back.
-            expect(projected.replace(/_/g, ' ')).toBe(
-              p.project('norm', field, t).replace(/_/g, ' '),
-            );
+            // Removing the joins gives the norm view back (a join replaces the spaces or tabs it spans).
+            const spaced = (v: string) => v.replace(/_/g, ' ').replace(/[^\S\r\n]+/g, ' ');
+            expect(spaced(projected)).toBe(spaced(p.project('norm', field, t)));
           }
         },
       ),
@@ -326,7 +325,6 @@ describe('seg view query', () => {
   });
 
   it('segments queries and notes the same way', () => {
-    const emptyVault = fakeContext([], resolveOptions(SEG));
     fc.assert(
       fc.property(
         fc.array(fc.constantFrom('khách', 'hàng', 'hoá', 'học', 'sinh', 'mua', 'thân', 'thiết'), {
@@ -336,7 +334,10 @@ describe('seg view query', () => {
         (words) => {
           const projected = seg(words.join(' '));
           const compounds = projected.split(' ').filter((t) => t.includes('_'));
-          const query = segPack.analyzeQuery(words.join(' '), emptyVault) as QueryAnalysis;
+          // a vault whose one note is the query text: every compound of the note is in the vault
+          const vault = fakeContext([words.join(' ')], resolveOptions(SEG));
+          // a fresh pack: vault statistics are cached per db version, and every fake vault starts at version 1
+          const query = createPack(SEG).analyzeQuery(words.join(' '), vault) as QueryAnalysis;
           const queried = query.viewQueries.seg?.split(' ') ?? [];
           for (const c of compounds) expect(queried).toContain(c);
         },

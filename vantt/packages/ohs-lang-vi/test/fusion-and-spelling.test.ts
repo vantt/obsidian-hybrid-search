@@ -83,17 +83,21 @@ describe('i/y spellings', () => {
     expect(evidenceIn(['Ghi chép', 'bán hàng tồn kho'], ['bán', 'hàng'], options).phrase).toBe(1);
   });
 
-  it('adds the other spelling the vault has to the fold and norm queries as an exact term', () => {
+  it('adds the other spelling the vault has: toned as an exact term, toneless as a phrase', () => {
     const docs = ['Rèn kĩ năng mềm', 'Kĩ thuật nấu ăn', 'Ghi chú khác'];
     const accented = analyze('kỹ năng mềm', docs, { accentedFold: 'always' });
+    // the fold view has no tones: "ki" alone would match every kì/kí/kỉ/kị note
     expect(accented.viewTerms?.fold).toEqual([
       { text: 'ky', prefix: true },
       { text: 'nang', prefix: true },
       { text: 'mem', prefix: true },
-      'ki',
+      'ki nang',
     ]);
     const plain = analyze('ky nang', docs);
-    expect(plain.viewTerms?.fold).toContain('ki');
+    expect(plain.viewTerms?.fold).toContain('ki nang');
+    expect(plain.viewTerms?.fold).not.toContain('ki');
+    const toned = analyze('kỹ năng', docs, { accentedNorm: true });
+    expect(toned.viewTerms?.norm).toContain('kĩ');
     // foldIY merges the spellings in the index already; a vault without the other spelling adds nothing
     expect(
       analyze('kỹ năng mềm', docs, { accentedFold: 'always', foldIY: true }).viewTerms?.fold,
@@ -101,6 +105,75 @@ describe('i/y spellings', () => {
     expect(
       analyze('kỹ năng mềm', ['Ghi chú khác'], { accentedFold: 'always' }).viewTerms,
     ).toBeUndefined();
+  });
+
+  it('never adds a toneless i/y spelling as a word of its own (mi/my, ty/ti)', () => {
+    const docs = [
+      'Uốn mi cong tự nhiên',
+      'My plan for the week: my errands and my calls',
+      ...filler(5, 'Công ty đang lên kế hoạch'),
+    ];
+    for (const query of ['uon mi cong', 'lông mi cong', 'sua ti vi']) {
+      const a = analyze(query, docs, { accentedFold: 'always' });
+      for (const view of ['norm', 'fold']) {
+        const terms = a.viewTerms?.[view] ?? [];
+        for (const t of terms) if (typeof t === 'string') expect(t.split(' ').length).toBe(2);
+        expect(terms).not.toContain('my');
+        expect(terms).not.toContain('ty');
+      }
+    }
+  });
+
+  it('view terms are the query words plus i/y variants of the target words (fast-check)', () => {
+    const syllable = fc.constantFrom(
+      'kĩ',
+      'kỹ',
+      'ky',
+      'ki',
+      'lý',
+      'li',
+      'mi',
+      'ty',
+      'năng',
+      'thuật',
+      'công',
+      'do',
+    );
+    const docs = [
+      'Rèn kĩ năng mềm',
+      'Kỹ thuật cơ bản',
+      'Lí do nghỉ',
+      'Công ty mới',
+      'my plan',
+      'lông mi',
+    ];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    fc.assert(
+      fc.property(fc.array(syllable, { minLength: 1, maxLength: 5 }), (words) => {
+        const a = pack.analyzeQuery(words.join(' '), ctx) as QueryAnalysis;
+        const data = a.data as ViAnalysisData;
+        for (const view of ['norm', 'fold'] as const) {
+          const terms = a.viewTerms?.[view];
+          if (!terms) continue;
+          const queryWords = a.viewQueries[view]!.split(' ');
+          const sequence = view === 'norm' ? data.target : data.targetFolded;
+          const variants = new Set(sequence.map((w) => iyVariant(w)).filter(Boolean));
+          for (const t of terms) {
+            if (typeof t !== 'string') {
+              expect(queryWords).toContain(t.text);
+              continue;
+            }
+            const parts = t.split(' ');
+            expect(parts.some((p) => variants.has(p))).toBe(true);
+            // a single-word variant carries a tone; toneless ones come with a neighbour
+            if (parts.length === 1) expect(t).toMatch(/[íìỉĩịýỳỷỹỵ]$/u);
+            else expect(parts).toHaveLength(2);
+          }
+        }
+      }),
+      { numRuns: 300 },
+    );
   });
 
   it('adds the other spelling of a compound to the seg query', () => {
@@ -149,14 +222,12 @@ describe('seg query filters', () => {
     );
   });
 
-  it('weights the seg branch by the share of the query its compounds cover', () => {
+  it('weights the seg branch by the share of the query its compounds cover (opt-in)', () => {
     const docs = ['Chọn giày chạy bộ cho người mới', 'Ghi chú khác'];
-    const a = analyze('chọn giày chạy bộ', docs);
+    const a = analyze('chọn giày chạy bộ', docs, { segWeightByCoverage: true });
     expect(a.viewQueries.seg).toBe('chạy_bộ');
     expect(a.viewWeights?.seg).toBeCloseTo(0.5);
-    expect(
-      analyze('chọn giày chạy bộ', docs, { segWeightByCoverage: false }).viewWeights?.seg,
-    ).toBeUndefined();
+    expect(analyze('chọn giày chạy bộ', docs).viewWeights?.seg).toBeUndefined();
   });
 });
 
@@ -199,7 +270,7 @@ describe('weak BM25 votes in hybrid fusion', () => {
     matchedViews: [],
     rank: { semantic: null, bm25: null, alias: null, title: null, ...rank },
   });
-  const analysis: QueryAnalysis = { viewQueries: {} };
+  const analysis: QueryAnalysis = { viewQueries: { norm: 'tìm' } };
 
   it('measures how many BM25 top results the semantic branch agrees with', () => {
     expect(
@@ -209,14 +280,35 @@ describe('weak BM25 votes in hybrid fusion', () => {
     expect(bm25Agreement([candidate('a', 1, { semantic: 1 })])).toBeNull(); // no BM25 branch
   });
 
+  /** BM25 ranks 2..5 for notes the semantic branch does not have. */
+  const moreBm25 = [2, 3, 4, 5].map((r) => candidate(`bm25-${r}.md`, 0.1, { bm25: r }));
+
   it('drops BM25 votes when BM25 and semantic disagree, and only those', () => {
     const answer = candidate('answer.md', 0.2, { semantic: 1 });
     const junk = candidate('junk.md', 0.35, { semantic: 16, bm25: 1, 'view:seg': 2 });
-    const penalty = weakBm25Penalty([answer, junk], analysis, options);
+    const penalty = weakBm25Penalty([answer, junk, ...moreBm25], analysis, options);
     expect(penalty[0]).toBe(0);
     // BM25 rank 1 counted 1.5/61 of a best possible (1.5 + 1.5 + 1) / 61
     expect(penalty[1]).toBeCloseTo(1.5 / 61 / (4 / 61));
     expect(junk.score - penalty[1]!).toBeLessThan(answer.score);
+  });
+
+  it('keeps the BM25 votes of a short BM25 list or of a query with an identifier', async () => {
+    const answer = candidate('answer.md', 0.2, { semantic: 1 });
+    const exact = candidate('exact.md', 0.35, { semantic: 16, bm25: 1, 'view:seg': 2 });
+    // one BM25 hit: an agreement of 0/1 says nothing
+    expect(weakBm25Penalty([answer, exact], analysis, options)).toEqual([0, 0]);
+    // an identifier the vectors do not know: its exact BM25 match keeps the vote
+    const docs = ['Lỗi ECONNRESET khi gọi máy chủ đối tác', ...filler(10, 'Máy chủ chạy chậm')];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    const list = [answer, exact, ...moreBm25];
+    const scores = async (query: string) =>
+      (await pack.rescore!(list, await pack.analyzeQuery(query, ctx), ctx)).map((c) => c.score);
+    const withId = await scores('lỗi ECONNRESET khi gọi máy chủ');
+    const plain = await scores('lỗi kết nối khi gọi máy chủ');
+    // same evidence for the exact note either way ("lỗi", "máy chủ" are in neither title); only the plain query loses BM25 votes
+    expect(withId[1]! - plain[1]!).toBeGreaterThan(0);
   });
 
   it('keeps every vote when BM25 agrees, when off, and for non-Vietnamese queries', async () => {
@@ -225,12 +317,18 @@ describe('weak BM25 votes in hybrid fusion', () => {
       candidate('b.md', 0.4, { bm25: 2 }),
     ];
     expect(weakBm25Penalty(agreeing, analysis, options)).toEqual([0, 0]);
+    const allAgree = [1, 2, 3, 4, 5].map((r) =>
+      candidate(`${r}.md`, 0.5, { semantic: r, bm25: r }),
+    );
+    expect(weakBm25Penalty(allAgree, analysis, options)).toEqual([0, 0, 0, 0, 0]);
     const disagreeing = [
       candidate('a.md', 0.2, { semantic: 1 }),
       candidate('b.md', 0.4, { bm25: 1 }),
+      ...moreBm25,
     ];
+    expect(weakBm25Penalty(disagreeing, analysis, options)[1]).toBeGreaterThan(0);
     expect(weakBm25Penalty(disagreeing, analysis, resolveOptions({ minBm25Agreement: 0 }))).toEqual(
-      [0, 0],
+      new Array(6).fill(0),
     );
     const pack = createPack();
     const english = pack.analyzeQuery(
@@ -290,5 +388,69 @@ describe('weak BM25 votes in hybrid fusion', () => {
       ),
       { numRuns: 200 },
     );
+  });
+});
+
+describe('query analysis bookkeeping', () => {
+  it('drops the seg branch when no compound of the query is in the vault', () => {
+    const a = analyze('chạy bộ buổi sáng', ['Ghi chú khác', 'Nấu cơm']);
+    expect(a.viewQueries.seg).toBeNull();
+    const b = analyze('chạy bộ buổi sáng', ['Chạy bộ quanh hồ', 'Ghi chú khác']);
+    expect(b.viewQueries.seg).toContain('chạy_bộ');
+    expect(b.debug?.segWeight).toBeGreaterThan(0);
+  });
+
+  it('credits the coverage of a compound the vault has only in the other i/y spelling', () => {
+    const a = analyze('kỹ năng mềm', ['Rèn kĩ năng mềm', 'Ghi chú khác']);
+    expect(a.viewQueries.seg?.split(' ')).toContain('kĩ_năng');
+    expect(a.debug?.segCoverage).toBeGreaterThan(0);
+  });
+
+  it('stops the unaccented-pair lookups once the answer is known', () => {
+    const query = 'chọn giày chạy bộ cho người mới bắt đầu tập';
+    const docs = ['chon giay chay bo cho nguoi moi bat dau tap'];
+    const lookups = (accentedFoldMinShare: number) => {
+      const raw = { segment: false, accentedFoldMinShare };
+      const ctx = fakeContext(docs, resolveOptions(raw));
+      const a = createPack(raw).analyzeQuery(query, ctx) as QueryAnalysis;
+      expect(a.viewQueries.fold).not.toBeNull();
+      return ctx.calls.phraseDocs;
+    };
+    // 8 pairs, all in the vault: share 1 needs all eight lookups, share 0.5 stops after four
+    expect(lookups(1) - lookups(0.5)).toBe(4);
+    expect(lookups(0)).toBeLessThan(lookups(0.5));
+  });
+
+  it('reads each vault statistic once per query and again only after a write', () => {
+    const docs = ['Danh sách khách hàng tiềm năng', 'Rèn kĩ năng mềm', ...filler(30)];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    const first = { ...ctx.calls };
+    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    expect(ctx.calls).toEqual(first);
+    ctx.bump();
+    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    expect(ctx.calls.termStats).toBeGreaterThan(first.termStats);
+  });
+
+  it('shows view terms, the seg weight and the fusion check in debug', async () => {
+    const docs = ['Rèn kĩ năng mềm', 'Ghi chú khác'];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    const a = (await pack.analyzeQuery('ki nang mem', ctx)) as QueryAnalysis;
+    expect(a.debug?.viewTerms).toEqual(a.viewTerms);
+    expect(a.debug?.segWeight).toBeTypeOf('number');
+    const c: Candidate = {
+      path: 'a.md',
+      score: 0.5,
+      title: 'Rèn kĩ năng mềm',
+      snippet: '',
+      matchedViews: [],
+      rank: { semantic: 1, bm25: 1 },
+    };
+    await pack.rescore!([c], a, ctx);
+    expect(a.debug?.bm25Agreement).toBe(1);
+    expect(a.debug?.bm25Penalty).toBe(0);
   });
 });

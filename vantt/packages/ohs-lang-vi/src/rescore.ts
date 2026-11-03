@@ -6,22 +6,12 @@
  * scaled by its probability. Candidates are never dropped or added.
  */
 import type { Candidate, QueryAnalysis, RescoredCandidate } from './contract.js';
+import { CORE_WEIGHTS, RRF_K } from './core-fusion.js';
 import { iyCanonical } from './fold.js';
 import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
 import type { ViAnalysisData } from './query.js';
 import { tokenize } from './views.js';
-
-/** RRF constant of the core (`rrfFusion(..., 60)`). */
-const RRF_K = 60;
-
-/** RRF weights of the core's own hybrid branches (`rrfFusion` in `searchByQuery`). */
-const CORE_WEIGHTS: Readonly<Record<string, number>> = {
-  semantic: 1.5,
-  bm25: 1.5,
-  alias: 2.0,
-  title: 0.25,
-};
 
 /** BM25 results whose agreement with the semantic branch is checked. */
 export const AGREEMENT_BM25_TOP = 5;
@@ -124,6 +114,10 @@ export function bm25Agreement(candidates: ReadonlyArray<Candidate>): number | nu
  * (they carry the accent, compound and lexicon evidence the vectors miss).
  * Returns the score to subtract from each candidate, on the core's scale
  * (RRF sum divided by the best possible sum).
+ *
+ * Only when BM25 returned a full top list (`AGREEMENT_BM25_TOP` results): the
+ * agreement of one or two BM25 hits says nothing (0 of 1), and such a short
+ * list is usually an exact match the vectors do not know.
  */
 export function weakBm25Penalty(
   candidates: ReadonlyArray<Candidate>,
@@ -132,7 +126,12 @@ export function weakBm25Penalty(
 ): number[] {
   const none = candidates.map(() => 0);
   const threshold = options.minBm25Agreement;
-  const agreement = threshold > 0 ? bm25Agreement(candidates) : null;
+  if (!(threshold > 0)) return none;
+  const bm25Top = candidates.filter(
+    (c) => isRank(c.rank.bm25) && c.rank.bm25 <= AGREEMENT_BM25_TOP,
+  ).length;
+  if (bm25Top < AGREEMENT_BM25_TOP) return none;
+  const agreement = bm25Agreement(candidates);
   if (agreement === null || agreement >= threshold) return none;
   // Branches with at least one candidate were the non-empty lists of the fusion.
   const branches = new Set<string>();
@@ -156,9 +155,17 @@ export function rescoreCandidates(
   if (!isAnalysisData(data) || data.target.length === 0)
     return candidates.map((c) => ({ path: c.path, score: c.score }));
   const w = options.rescoreWeights;
-  const penalty = data.vietnamese
-    ? weakBm25Penalty(candidates, analysis, options)
-    : candidates.map(() => 0);
+  // A query word that is no Vietnamese syllable (an identifier such as ECONNRESET, a model
+  // number) is an exact-match signal the vector branch does not have: BM25 keeps its votes.
+  const penalty =
+    data.vietnamese && !data.literalToken
+      ? weakBm25Penalty(candidates, analysis, options)
+      : candidates.map(() => 0);
+  // The core shows `analysis.debug` in `explain`; record the fusion check there.
+  if (analysis.debug) {
+    analysis.debug.bm25Agreement = bm25Agreement(candidates);
+    analysis.debug.bm25Penalty = Number(Math.max(0, ...penalty).toFixed(4));
+  }
   return candidates.map((c, index) => {
     const text = [c.title, c.snippet];
     // Expected evidence over the k-best restorations (one literal target for accented queries).

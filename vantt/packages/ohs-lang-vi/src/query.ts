@@ -76,6 +76,8 @@ export interface ViAnalysisData {
   accented: boolean;
   /** The query has Vietnamese evidence (`isVietnameseQuery`); otherwise the pack only rescores. */
   vietnamese: boolean;
+  /** A query token is not a Vietnamese syllable (an identifier, a number, an English word). */
+  literalToken: boolean;
 }
 
 /** Restorations handed to rescore (most probable first). */
@@ -148,16 +150,20 @@ export function findUnaccentedSpelling(
     state.unaccentedInVault = env.cache.termDocs(ctx, 'norm', plain(marked[0]!)) > 0;
     return;
   }
-  let pairs = 0;
-  let found = 0;
+  const pairs: string[] = [];
   for (let i = 1; i < state.tokens.length; i++) {
     const a = state.tokens[i - 1]!;
     const b = state.tokens[i]!;
-    if (!(a.marked || b.marked) || !a.syllable || !b.syllable) continue;
-    pairs++;
-    if (env.cache.phraseDocs(ctx, 'norm', `${plain(a)} ${plain(b)}`) > 0) found++;
+    if ((a.marked || b.marked) && a.syllable && b.syllable) pairs.push(`${plain(a)} ${plain(b)}`);
   }
-  state.unaccentedInVault = found > 0 && found / pairs >= env.options.accentedFoldMinShare;
+  // Pairs found needed (at least one); stop as soon as the answer is known.
+  const needed = Math.max(1, Math.ceil(env.options.accentedFoldMinShare * pairs.length - 1e-9));
+  let found = 0;
+  for (const [i, pair] of pairs.entries()) {
+    if (found >= needed || found + (pairs.length - i) < needed) break;
+    if (env.cache.phraseDocs(ctx, 'norm', pair) > 0) found++;
+  }
+  state.unaccentedInVault = pairs.length > 0 && found >= needed;
 }
 
 // 4. -------------------------------------------------------------------------
@@ -265,6 +271,7 @@ export function buildAnalysis(
     confidence,
     accented: state.accented,
     vietnamese,
+    literalToken: state.tokens.some((t) => !t.syllable),
   };
   analysis.data = data;
   // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25
@@ -305,16 +312,24 @@ export function analyzeQuery(
   ctx: QueryContext,
   env: QueryEnvironment,
 ): QueryAnalysis {
+  env.cache.sync(ctx);
   const state = tokenizeQuery(query, env.options);
   rewriteTokens(state, ctx, env, (norm) => makeQueryToken(norm, env.options));
   classifyAccents(state, env.options);
   restoreAccents(state, ctx, env);
   findUnaccentedSpelling(state, ctx, env);
   const analysis = buildAnalysis(state, env.options, env);
-  if (env.lexicon) applyLexicon(analysis, state, ctx, env.lexicon, env.options); // V18 hook
-  addSpellingVariants(analysis, ctx, env.options);
+  if (env.lexicon) applyLexicon(analysis, state, ctx, env.cache, env.lexicon, env.options); // V18 hook
+  addSpellingVariants(analysis, ctx, env.cache, env.options);
   if (env.compounds) {
-    const seg = segQuery(state, analysis.data as ViAnalysisData, ctx, env.compounds(), env.options);
+    const seg = segQuery(
+      state,
+      analysis.data as ViAnalysisData,
+      ctx,
+      env.cache,
+      env.compounds(),
+      env.options,
+    );
     analysis.viewQueries[SEG_VIEW] = seg?.query ?? null;
     // The branch searches the compounds only: its vote counts as much as the share of the query they cover.
     if (seg && env.options.segWeightByCoverage)
@@ -322,37 +337,61 @@ export function analyzeQuery(
         ...analysis.viewWeights,
         [SEG_VIEW]: env.options.viewWeights.seg * seg.coverage,
       };
-    if (seg && analysis.debug) analysis.debug.segCoverage = Number(seg.coverage.toFixed(3));
+    if (seg && analysis.debug) {
+      analysis.debug.segCoverage = Number(seg.coverage.toFixed(3));
+      analysis.debug.segWeight = Number(
+        (analysis.viewWeights?.[SEG_VIEW] ?? env.options.viewWeights.seg).toFixed(3),
+      );
+    }
   }
+  if (analysis.viewTerms && analysis.debug) analysis.debug.viewTerms = analysis.viewTerms;
   return analysis;
 }
+
+/** A final i or y carrying a tone mark (kĩ, lý): its other spelling is the same word. */
+const TONED_IY_RE = /[íìỉĩịýỳỷỹỵ]$/u;
 
 /**
  * The norm and fold views keep kĩ and kỹ apart (unless `foldIY`), so a query
  * written one way would only find notes written the same way. The other i/y
- * spelling of each query word joins the view query as an exact term when the
- * vault has it (the query's own words stay prefix terms, as in `viewQueries`).
+ * spelling of each target word joins the view query when the vault has it
+ * (the query's own words stay prefix terms, as in `viewQueries`). A toned
+ * syllable (kĩ/kỹ, lí/lý) joins as an exact term. A toneless one (mi, ty,
+ * and every syllable of the fold view) is often another word in the other
+ * spelling (lông mi / English "my", công ty / "ti"), so it joins only as a
+ * phrase with a neighbouring query word.
  */
 export function addSpellingVariants(
   analysis: QueryAnalysis,
   ctx: QueryContext,
+  cache: VocabularyCache,
   options: PackOptions,
 ): void {
+  const data = analysis.data as ViAnalysisData | undefined;
   for (const view of ['norm', 'fold'] as const) {
     if (view === 'fold' && options.foldIY) continue;
     const query = analysis.viewQueries[view];
     if (!query) continue;
     const words = tokenize(query);
+    const sequence = (view === 'norm' ? data?.target : data?.targetFolded) ?? words;
     const variants: string[] = [];
-    for (const word of words) {
+    const push = (term: string) => {
+      if (!words.includes(term) && !variants.includes(term)) variants.push(term);
+    };
+    for (const [i, word] of sequence.entries()) {
       const variant = iyVariant(word);
-      if (
-        variant &&
-        !words.includes(variant) &&
-        !variants.includes(variant) &&
-        ctx.termStats(view, variant).docs > 0
-      )
-        variants.push(variant);
+      if (!variant) continue;
+      if (TONED_IY_RE.test(word)) {
+        if (cache.termDocs(ctx, view, variant) > 0) push(variant);
+        continue;
+      }
+      const prev = sequence[i - 1];
+      const next = sequence[i + 1];
+      for (const phrase of [prev && `${prev} ${variant}`, next && `${variant} ${next}`])
+        if (phrase && cache.phraseDocs(ctx, view, phrase) > 0) {
+          push(phrase);
+          break;
+        }
     }
     if (variants.length === 0) continue;
     analysis.viewTerms = {

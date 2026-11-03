@@ -70,6 +70,7 @@ export class VocabularyCache {
   private version: number | null = null;
   private readonly docs = new Map<string, number>();
   private readonly phrases = new Map<string, number>();
+  private notes: number | null = null;
 
   /** Bind to the context's current db version, dropping stale entries. */
   sync(ctx: QueryContext): void {
@@ -78,7 +79,14 @@ export class VocabularyCache {
       this.version = version;
       this.docs.clear();
       this.phrases.clear();
+      this.notes = null;
     }
+  }
+
+  /** Number of notes (one count per db version). */
+  noteCount(ctx: QueryContext): number {
+    if (this.notes === null) this.notes = ctx.noteCount();
+    return this.notes;
   }
 
   termDocs(ctx: QueryContext, view: string, term: string): number {

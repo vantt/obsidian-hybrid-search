@@ -120,7 +120,8 @@ export interface PackOptions {
    * of the BM25 branch's top 5 is also in the semantic branch's top 10, the
    * BM25 votes are scaled by share / threshold (0 turns it off). Keeps notes
    * that match only common words of an idea-style query from burying the
-   * semantic answer.
+   * semantic answer. Not applied when BM25 has fewer than 5 results or the
+   * query has a word that is not a Vietnamese syllable (an identifier).
    */
   minBm25Agreement: number;
 }
@@ -146,10 +147,10 @@ export const DEFAULT_OPTIONS: PackOptions = {
   minSyllableShare: 0.5,
   accentedNorm: false,
   accentedFold: 'auto',
-  accentedFoldMinShare: 0.5,
+  accentedFoldMinShare: 0.25,
   segment: true,
   segMaxDocShare: 0.1,
-  segWeightByCoverage: true,
+  segWeightByCoverage: false,
   lexiconPath: DEFAULT_LEXICON_PATH,
   lexiconWeight: 0.6,
   abbrMaxDocShare: 0.05,
@@ -168,7 +169,7 @@ export const DEFAULT_OPTIONS: PackOptions = {
   },
   rescore: true,
   rescoreWeights: { phrase: 4, bigram: 1, coverage: 0.5, normRank: 0, unit: 1 / 61, semantic: 0 },
-  minBm25Agreement: 0.2,
+  minBm25Agreement: 1,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

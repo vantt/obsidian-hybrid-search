@@ -9,6 +9,7 @@ import type { LexiconStore } from './lexicon.js';
 import { expandQuery, type Form } from './lexicon.js';
 import { isCommon, type PackOptions } from './options.js';
 import type { QueryState, ViAnalysisData } from './query.js';
+import type { VocabularyCache } from './restore.js';
 import { foldToken, tokenize } from './views.js';
 
 function extend(current: string | null | undefined, extra: readonly string[]): string | null {
@@ -22,6 +23,7 @@ export function applyLexicon(
   analysis: QueryAnalysis,
   state: QueryState,
   ctx: QueryContext,
+  cache: VocabularyCache,
   store: LexiconStore,
   options: PackOptions,
 ): void {
@@ -49,9 +51,9 @@ export function applyLexicon(
     const folded = s.words.map(foldWord);
     const docs =
       folded.length === 1
-        ? ctx.termStats('fold', folded[0]!).docs
-        : ctx.phraseDocs('fold', folded.join(' '));
-    return isCommon(docs, ctx.noteCount(), options.abbrMaxDocShare);
+        ? cache.termDocs(ctx, 'fold', folded[0]!)
+        : cache.phraseDocs(ctx, 'fold', folded.join(' '));
+    return isCommon(docs, cache.noteCount(ctx), options.abbrMaxDocShare);
   };
   const words: string[] = [];
   for (const s of substitutions)

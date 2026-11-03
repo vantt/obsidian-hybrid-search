@@ -8,6 +8,7 @@ import type { QueryContext } from './contract.js';
 import { iyVariant } from './fold.js';
 import { isCommon, type PackOptions } from './options.js';
 import { isVietnameseQuery, type QueryState, type ViAnalysisData } from './query.js';
+import type { VocabularyCache } from './restore.js';
 import { SEG_JOINER, segmentWords, type CompoundDictionary } from './segment.js';
 
 export const SEG_VIEW = 'seg';
@@ -36,7 +37,7 @@ export const FUNCTION_WORDS: ReadonlySet<string> = new Set(
 export interface SegQuery {
   /** View query: the compounds joined with `_`, separated by spaces. */
   query: string;
-  /** Share of the target words the searched compounds cover (0 to 1). */
+  /** Share of the words the searched compounds cover, in the best-covered target (0 to 1). */
   coverage: number;
 }
 
@@ -54,6 +55,7 @@ export function segQuery(
   state: QueryState,
   data: ViAnalysisData,
   ctx: QueryContext,
+  cache: VocabularyCache,
   dictionary: CompoundDictionary,
   options: PackOptions,
 ): SegQuery | null {
@@ -65,17 +67,19 @@ export function segQuery(
   const wordLists = data.accented
     ? [data.target]
     : data.targets.filter((t, i) => i === 0 || t.p >= threshold).map((t) => t.words);
-  const docs = (key: string) => ctx.termStats(SEG_VIEW, key.replaceAll(' ', SEG_JOINER)).docs;
+  const notes = cache.noteCount(ctx);
+  const docs = (key: string) => cache.termDocs(ctx, SEG_VIEW, key.replaceAll(' ', SEG_JOINER));
   const useful = (key: string) =>
     !key.split(' ').every((w) => FUNCTION_WORDS.has(w)) &&
-    !isCommon(docs(key), ctx.noteCount(), options.segMaxDocShare);
+    !isCommon(docs(key), notes, options.segMaxDocShare);
   const compounds = new Set<string>();
-  const covered = new Set<number>();
+  // Spans of the searched compounds per word list, credited once the vault has them.
+  const spans = new Map<string, Array<[number, number, number]>>();
   for (const [listIndex, words] of wordLists.entries()) {
     const add = (key: string, start: number, length: number) => {
       if (!compounds.has(key) && !useful(key)) return;
       compounds.add(key);
-      if (listIndex === 0) for (let k = start; k < start + length; k++) covered.add(k);
+      spans.set(key, [...(spans.get(key) ?? []), [listIndex, start, length]]);
     };
     let start = 0;
     for (const length of segmentWords(words, dictionary)) {
@@ -91,17 +95,31 @@ export function segQuery(
       }
     }
   }
-  // The other i/y spelling of a compound (kĩ_năng for kỹ_năng), when the vault has it.
+  const covered = wordLists.map(() => new Set<number>());
+  const credit = (key: string) => {
+    for (const [list, start, length] of spans.get(key) ?? [])
+      for (let k = start; k < start + length; k++) covered[list]!.add(k);
+  };
   for (const compound of [...compounds]) {
+    if (docs(compound) > 0) credit(compound);
+    // The other i/y spelling of a compound (kĩ_năng for kỹ_năng), when the vault has it.
     const variant = compound
       .split(' ')
       .map((w) => iyVariant(w) ?? w)
       .join(' ');
-    if (variant !== compound && docs(variant) > 0) compounds.add(variant);
+    if (variant !== compound && docs(variant) > 0) {
+      compounds.add(variant);
+      credit(compound);
+    }
   }
-  if (compounds.size === 0) return null;
+  // Only compounds the vault has cover the query (best over the restorations and lexicon
+  // rewrites); with none the branch would search for nothing.
+  const coverage = Math.max(
+    ...wordLists.map((words, i) => covered[i]!.size / Math.max(1, words.length)),
+  );
+  if (compounds.size === 0 || coverage === 0) return null;
   return {
     query: [...compounds].map((c) => c.replaceAll(' ', SEG_JOINER)).join(' '),
-    coverage: covered.size / Math.max(1, wordLists[0]!.length),
+    coverage,
   };
 }
