@@ -99,8 +99,11 @@ export function makeQueryToken(norm: string, options: PackOptions): QueryToken {
   };
 }
 
-/** A word typed in capitals, at least two letters: `KH`, `BA`, `ĐKKD`, `SE3`. */
-const CAPITALS_RE = /^(?=(?:\P{L}*\p{Lu}){2})[\p{Lu}\p{N}]+$/u;
+/**
+ * A word typed in capitals, at least two letters: `KH`, `BA`, `ĐKKD`, `SE3`. Only A-Z and Đ:
+ * a capital vowel with a diacritic (`ĐẠI HỌC`, `HÀNG`) is a Vietnamese word typed in capitals.
+ */
+const CAPITALS_RE = /^(?=(?:[^A-ZĐ]*[A-ZĐ]){2})[A-ZĐ0-9]+$/u;
 
 /**
  * Tokens typed in capitals are acronyms ("BA", "DA", "AI"), not syllables to restore or

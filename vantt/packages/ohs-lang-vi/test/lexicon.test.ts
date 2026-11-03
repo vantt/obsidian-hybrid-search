@@ -174,6 +174,31 @@ describe('lexicon in the pack', () => {
     expect((run('BA NGAY').data as ViAnalysisData).literalToken).toBe(false);
   });
 
+  it('reads only A-Z and Đ capitals as acronyms, not Vietnamese words typed in capitals', () => {
+    write('');
+    const docs = ['Trường đại học bách khoa', 'Danh sách khách hàng tiềm năng', 'Ngày nghỉ lễ'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const data = (q: string) => run(q).data as ViAnalysisData;
+    expect(data('trường ĐẠI HỌC').vietnamese).toBe(true);
+    expect(data('trường ĐẠI HỌC').literalToken).toBe(false);
+    expect(data('Khách HÀNG tiềm năng').literalToken).toBe(false);
+    expect(run('Khách HÀNG tiềm năng').viewQueries.seg).not.toBeNull();
+    expect(data('NGÀY').literalToken).toBe(false);
+    expect(data('giấy ĐKKD').literalToken).toBe(true);
+  });
+
+  it('a word typed in capitals turns the seg branch off (literalToken)', () => {
+    write('');
+    const docs = ['Hợp đồng IT với đối tác', 'Hợp đồng thuê nhà', 'Ghi chú khác'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const caps = run('hop dong IT');
+    expect((caps.data as ViAnalysisData).literalToken).toBe(true);
+    expect(caps.viewQueries.seg ?? null).toBeNull();
+    expect((run('hop dong it').data as ViAnalysisData).literalToken).toBe(false);
+  });
+
   it('never searches an abbreviation expansion alone in a view the query skips', () => {
     // An accented query does not search the norm and fold views; an expansion-only branch there
     // would vote for every note dense in "khách hàng" and bury the note the query describes.
