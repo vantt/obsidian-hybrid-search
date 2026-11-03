@@ -58,7 +58,7 @@ export async function checkArchitecture(baseDir: string): Promise<string[]> {
   for (const module of graph.modules) {
     if (!module.source.startsWith('src/')) continue;
     if (
-      !/^src\/(?:(?:cli|server)\.ts$|(?:content|contracts|indexing|inference|runtime|search|storage|transports|vault)\/)/.test(
+      !/^src\/(?:(?:cli|server)\.ts$|(?:content|contracts|indexing|inference|language|runtime|search|storage|transports|vault)\/)/.test(
         module.source,
       )
     )

@@ -71,6 +71,7 @@ import {
 } from './content-filter.js';
 import { reportIndexProgress, type IndexRunContext as OwnerRunContext } from './index-owner.js';
 import { retryIndexWrite } from './index-write.js';
+import { lexicalForNote } from './language-views.js';
 
 export interface IndexRunContext extends OwnerRunContext {
   readonly contentFilter?: ContentFilter;
@@ -556,6 +557,8 @@ export async function indexFile(
         if (prepared.updateMtime) updateNoteMtime(run.lease, prepared.mtime, prepared.path);
         return 'skipped';
       }
+      const lexical = await lexicalForNote(run, prepared.note);
+      const note = lexical ? { ...prepared.note, lexical } : prepared.note;
       const published = await retryIndexWrite(run, () =>
         withIndexMutation(run.lease, () => {
           // Recheck only after SQLite admits this attempt. A busy wait may have
@@ -585,7 +588,7 @@ export async function indexFile(
           }
           commitIndexedNote(
             run.lease,
-            prepared.note,
+            note,
             {
               modelName: prepared.modelName,
               contentPolicySignature: prepared.contentPolicySignature,
