@@ -1,0 +1,33 @@
+{
+  "name": "ohs-lang-de",
+  "version": "0.1.0",
+  "private": true,
+  "description": "German language pack for obsidian-hybrid-search (umlaut and eszett folding, compound splitting)",
+  "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "node scripts/run-eval.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "fast-check": "4.10.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}
