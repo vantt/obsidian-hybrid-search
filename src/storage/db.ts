@@ -18,6 +18,7 @@ import {
   type IndexProgress,
   type StalledOwner,
 } from './index-ownership.js';
+import { dropLanguageTables, writeNoteLexical, type NoteLexical } from './language-tables.js';
 
 type DB = InstanceType<typeof Database>;
 
@@ -233,7 +234,7 @@ function rebuildFrontmatterLookup(db: DB): void {
 }
 
 // Advance this revision for schema changes, independently of ownership table setup.
-const INDEX_SCHEMA_VERSION = '1';
+const INDEX_SCHEMA_VERSION = '2';
 
 function runMigrations(db: DB): void {
   // Base schema — no FTS tables here; they are managed by the versioned migration below
@@ -850,6 +851,8 @@ export interface PreparedIndexNote {
     charEnd?: number | null;
     sourceSpans?: readonly SourcePart[] | null;
   }[];
+  /** Language-pack view text; required exactly when the index has view tables. */
+  lexical?: NoteLexical;
 }
 
 export function upsertNote(
@@ -942,6 +945,7 @@ export function upsertNote(
         replaceNoteTags(db, noteId, note.tags);
         replaceNoteFrontmatterFields(db, noteId, note.frontmatter);
         insertChunks(db, noteId, note.chunks);
+        writeNoteLexical(db, noteId, note.lexical);
         logEvent('updated', note.path);
         bumpDbVersion();
       } else {
@@ -969,6 +973,7 @@ export function upsertNote(
         replaceNoteTags(db, noteId, note.tags);
         replaceNoteFrontmatterFields(db, noteId, note.frontmatter);
         insertChunks(db, noteId, note.chunks);
+        writeNoteLexical(db, noteId, note.lexical);
         logEvent('added', note.path);
         bumpDbVersion();
       }
@@ -1105,7 +1110,7 @@ export function getDbVersion(): number {
   return row ? parseInt(row.value) : 0;
 }
 
-function bumpDbVersion(): void {
+export function bumpDbVersion(): void {
   const db = getDb();
   db.prepare(
     "INSERT OR REPLACE INTO settings(key, value) VALUES('db_version', CAST(COALESCE((SELECT CAST(value AS INTEGER) FROM settings WHERE key = 'db_version'), 0) + 1 AS TEXT))",
@@ -1808,6 +1813,8 @@ export function replaceActiveIndex(
   withIndexMutation(lease, () => {
     const db = getDb();
     const version = getDbVersion();
+    // Views are rebuilt from the published notes by the language-pack owner.
+    dropLanguageTables(db);
     db.exec(
       'DELETE FROM links; DELETE FROM markdown_links; DELETE FROM note_urls; DELETE FROM note_aliases; DELETE FROM note_tags; DELETE FROM note_frontmatter_fields;',
     );

@@ -23,6 +23,7 @@ export const SearchOptionsBoundarySchema = z.object({
   rerank: z.boolean().optional(),
   queries: z.array(z.string()).optional(),
   anchors: z.boolean().optional(),
+  explain: z.boolean().optional(),
 });
 
 export const SearchToolArgumentsSchema = z.object({
@@ -42,6 +43,7 @@ export const SearchToolArgumentsSchema = z.object({
   snippet_length: NonNegativeIntegerSchema.optional(),
   rerank: z.boolean().optional(),
   anchors: z.boolean().optional(),
+  explain: z.boolean().optional(),
 });
 
 export const ReadToolArgumentsSchema = z.object({

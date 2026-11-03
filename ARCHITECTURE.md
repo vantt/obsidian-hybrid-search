@@ -17,6 +17,7 @@ belong to an owner below; put new files beside the behavior they extend.
 | `content/`    | Markdown extraction, links, chunking, tokens, and text normalization      |
 | `inference/`  | Embedding providers, reranking, model sessions, and device selection      |
 | `storage/`    | SQLite lifecycle, schema, queries, transactions, and index generation     |
+| `language/`   | Optional language-pack contract, loading, and token mapping               |
 | `vault/`      | Vault discovery and file selection                                        |
 | `contracts/`  | Shared input schemas and filter semantics                                 |
 | `runtime/`    | Environment configuration, local process state, and native recovery       |
@@ -27,6 +28,12 @@ Transports call search and indexing; neither service imports the other. Both use
 storage operations and model adapters. Only storage acquires raw SQLite handles.
 Storage does not call search, indexing, or inference. Model adapters receive text
 and do not know about vaults or transport requests.
+
+Language packs are separately installed modules loaded at runtime from
+`OHS_LANGUAGE_PACK`; `language/` depends only on runtime configuration. Indexing
+computes pack views and passes the text to storage, which never calls a pack;
+search adds one RRF branch per view. Without a pack no view tables or branches
+exist.
 
 Content parsing does not access storage or run models. Note extraction and text
 normalization are pure. Shared contracts depend only on normalization; runtime
