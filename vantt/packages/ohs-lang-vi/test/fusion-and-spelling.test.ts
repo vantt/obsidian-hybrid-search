@@ -325,6 +325,10 @@ describe('weak BM25 votes in hybrid fusion', () => {
     expect((typo.data as ViAnalysisData).typoCorrected).toBe(true);
     const plain = await pack.analyzeQuery('giu chan khach hang', ctx);
     expect((plain.data as ViAnalysisData).typoCorrected).toBe(false);
+    // a correct word the vault lacks ("chun", a possible syllable) is no misspelling
+    const unknownWord = await pack.analyzeQuery('giu chun khach hang', ctx);
+    expect(JSON.stringify(unknownWord.debug?.rewrite)).toContain('"typo":[1]');
+    expect((unknownWord.data as ViAnalysisData).typoCorrected).toBe(false);
     expect((await pack.rescore!(list, typo, ctx))[1]!.score).toBeCloseTo(exact.score, 6);
     expect(typo.debug?.bm25Penalty).toBe(0);
     await pack.rescore!(list, plain, ctx);

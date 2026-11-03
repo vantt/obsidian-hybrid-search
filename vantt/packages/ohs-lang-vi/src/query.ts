@@ -80,7 +80,7 @@ export interface ViAnalysisData {
   vietnamese: boolean;
   /** A query token is not a Vietnamese syllable (an identifier, a number, an English word). */
   literalToken: boolean;
-  /** A query word was misspelled and replaced by a typo correction. */
+  /** A query word that cannot be a syllable was replaced by a typo correction. */
   typoCorrected?: boolean;
 }
 
@@ -254,6 +254,19 @@ function restoredText(state: QueryState, options: PackOptions): string {
   });
 }
 
+/**
+ * Indexes of typo-corrected words that cannot be a Vietnamese syllable ("chna", "khahc"):
+ * the query was misspelled there. A possible syllable the vault lacks ("ban" corrected to
+ * "an") may be a correct word.
+ */
+function misspelled(state: QueryState): number[] {
+  const typed = tokenize(state.normalized);
+  return (state.rewrite?.typo ?? []).filter((i) => {
+    const word = typed[i];
+    return word !== undefined && !isPossibleFoldedSyllable(word);
+  });
+}
+
 export function buildAnalysis(
   state: QueryState,
   options: PackOptions,
@@ -300,7 +313,7 @@ export function buildAnalysis(
     accented: state.accented,
     vietnamese,
     literalToken: state.tokens.some((t) => !t.syllable),
-    typoCorrected: (state.rewrite?.typo.length ?? 0) > 0,
+    typoCorrected: misspelled(state).length > 0,
   };
   analysis.data = data;
   // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25
