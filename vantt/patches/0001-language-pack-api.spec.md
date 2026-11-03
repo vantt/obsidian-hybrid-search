@@ -34,7 +34,7 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
 
 ## 3. Bất biến
 
-1. Không cấu hình gói: không có bảng nào khớp `notes%lex%`. Danh sách nhánh RRF và trọng số là `[vector, bm25, alias, fuzzy]` / `[1.5, 1.5, 2.0, 0.25]`. Kết quả JSON của 17 câu tìm (mọi chế độ, bộ lọc, anchors, multi-query) trùng từng byte với snapshot sinh trên upstream v0.17.2 (`test/vantt/fixtures/language-pack-baseline.snapshot.json`).
+1. Không cấu hình gói: không có bảng nào khớp `notes%lex%`. Danh sách nhánh RRF và trọng số là `[vector, bm25, alias, fuzzy]` / `[1.5, 1.5, 2.0, 0.25]`, hằng số RRF `k = 60` (cùng giá trị đặt trong `HYBRID_FUSION`). Kết quả JSON của 17 câu tìm (mọi chế độ, bộ lọc, anchors, multi-query) trùng từng byte với snapshot sinh trên upstream v0.17.2 (`test/vantt/fixtures/language-pack-baseline.snapshot.json`).
 2. Không cấu hình gói và không `explain`: kết quả không có trường `matchedTerms`, `explain`; `matchedBy` không có giá trị `view:*`; khoá cache tìm và `content_policy` giữ chữ của upstream.
 3. Gói không nạp được (ném lỗi lúc nạp, `apiVersion` khác 1, JSON tuỳ chọn hỏng, hàm `project` ném lỗi lúc thử khi nạp hay khi dựng view, tokenizer hỏng): cảnh báo một lần, `status.language_pack.error` ghi lý do, bảng view bị xoá, tìm chạy như không có gói.
 4. `analyzeQuery`, `rescore` hoặc `queryCacheKey` ném lỗi: chỉ câu đó chạy như không có gói, không lỗi ra ngoài.
@@ -61,12 +61,13 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
 | `src/indexing/indexer.ts` | `indexFile` | đính `lexical` trước `commitIndexedNote` |
 | `src/indexing/index-service.ts` | `openIndexDatabase`, `prepareContentOwner`, `reindex({force})`, `start` | nạp gói cho mọi giao tiếp; đồng bộ view |
 | `src/search/language-search.ts` (mới) | phân tích câu, `viewQueriesFor` (`viewTerms`, `viewWeights`), nhánh view, alias view, `rescore`, khoá cache | phía tìm của gói |
-| `src/search/searcher.ts` | `searchByQuery`, `search`, `cacheKey`, `rrfFusion`, `searchFuzzyTitle`, `searchBm25` (tách `enrichMarkedSnippets`), `searchLanguageViews`, `applyLanguageRescore`, `toSearchResult`, `SearchResult`, `SearchOptions` | nhánh RRF, `explain`, `matchedTerms` |
+| `src/search/searcher.ts` | `HYBRID_FUSION` (export chỉ đọc: `k` và trọng số `semantic`, `bm25`, `alias`, `title` của RRF hybrid một câu; `searchByQuery` đọc từ đây), `searchByQuery`, `search`, `cacheKey`, `rrfFusion`, `searchFuzzyTitle`, `searchBm25` (tách `enrichMarkedSnippets`), `searchLanguageViews`, `applyLanguageRescore`, `toSearchResult`, `SearchResult`, `SearchOptions` | nhánh RRF, `explain`, `matchedTerms` |
 | `src/runtime/config.ts` | `languagePack`, `languagePackOptions` | biến môi trường |
 | `src/contracts/boundary-validation.ts` | `explain` | MCP và stdio |
 | `src/transports/cli.ts`, `mcp-runtime.ts`, `stdio-server.ts`, `status-payload.ts` | `--explain`, `explain`, `language_pack` | đưa tuỳ chọn qua mọi giao tiếp |
 | `dependency-cruiser.config.cjs`, `test/architecture/check.ts`, `test/architecture-boundaries.test.ts`, `ARCHITECTURE.md`, `knip.json` | ranh giới | thư mục `language/` |
 | `test/vantt/**` (mới) | test, gói giả `lang-upper`, snapshot | xem mục 5 |
+| `vantt/packages/<gói>/test/fixtures/core-fusion.json` (ngoài bản vá, trên `master`) | bản sao `HYBRID_FUSION` mà gói dựa vào | `test/vantt/core-fusion.test.ts` đọc mọi file này |
 
 ## 5. Kiểm thử
 
@@ -93,15 +94,21 @@ Tái hiện trên upstream v0.17.2: vault có note "Die Große Straße am Ende d
     - `signature` và `queryCacheKey` nhận `{ vaultPath }` đúng vault.
     - `termsWithPrefix` chỉ trả term có tiền tố (cả chữ có dấu, tiền tố rỗng, tiền tố không có term).
 - `test/vantt/language-pack-tokens.test.ts`: bộ tách JS cho đúng số token như FTS5 thật (đối chiếu `fts5vocab instance`) với ba tokenizer; ghép `_`; token tiếp nối `U+2060`; cắt cửa sổ đoạn trích; kiểm hợp đồng ở bộ nạp.
+- `test/vantt/core-fusion.test.ts`: khoá hợp đồng điểm hybrid mà gói chấm lại dựa vào (`ohs-lang-vi` tính lại phiếu BM25 trong `rescore`).
+  - `HYBRID_FUSION` bằng `{k: 60, weights: {semantic: 1.5, bm25: 1.5, alias: 2.0, title: 0.25}}` và bằng từng `vantt/packages/*/test/fixtures/core-fusion.json` (phải có ít nhất một file). Phía gói, `vantt/packages/ohs-lang-vi/test/core-fusion.test.ts` kiểm mã của gói với cùng file đó, nên lõi lệch hay gói lệch đều có test đỏ.
+  - Tìm hybrid một câu với gói giả (`rescore: 'record'`): mọi `Candidate.rank` có đúng các khoá không tiền tố `semantic`, `bm25`, `alias`, `title`, `view:upper`; điểm mỗi ứng viên bằng `min(1, Σ w_b/(k + hạng_b) / (Σ w của nhánh có ứng viên / (k + 1)))`.
+  - Không có vector câu hỏi và câu view khớp note khác: ứng viên chỉ có phiếu BM25 có điểm đúng `w_bm25 / (k + hạng) / (Σ w của nhánh có ứng viên / (k + 1))`, công thức của gói.
+  - Đổi `k` hay một trọng số trong lời gọi `rrfFusion` hybrid (thử bằng tay) làm hai test hành vi đỏ.
 - Probe: `node vantt/probes/language-pack-api.mjs --ohs <bản đã build>`. Trả 1 trên upstream v0.17.2, 0 trên bản đã vá (đã chạy cả hai).
-- `test_command`: `npx vitest run test/vantt/language-pack-baseline.test.ts test/vantt/language-pack.test.ts test/vantt/language-pack-tokens.test.ts test/architecture-boundaries.test.ts`.
+- `test_command`: `npx vitest run test/vantt/language-pack-baseline.test.ts test/vantt/language-pack.test.ts test/vantt/language-pack-tokens.test.ts test/vantt/tie-aware.test.ts test/vantt/core-fusion.test.ts test/architecture-boundaries.test.ts`.
 - `capability_check`: probe ở trên (cần bản đã build).
 
 ## 6. Khi xung đột hoặc khi upstream đổi
 
 Cách tìm lại điểm chạm:
 
-- `searchByQuery`: tìm `rrfFusion(` có trọng số `[1.5, 1.5, 2.0, 0.25]`. Nhánh view nối vào cuối danh sách đó. `analyzeLanguageQuery` chạy trước các nhánh.
+- `searchByQuery`: tìm `rrfFusion(` của chế độ hybrid (upstream viết `60, [1.5, 1.5, 2.0, 0.25]`; bản vá đọc `HYBRID_FUSION.k` và `HYBRID_FUSION.weights`, khai báo ngay trước `rrfFusion`). Nhánh view nối vào cuối danh sách đó.
+- Upstream đổi `k`, trọng số, thứ tự hay tên nhánh RRF hybrid, hay cách chuẩn hoá điểm (`maxPossibleScore`): đặt `HYBRID_FUSION` theo giá trị mới của upstream (giữ bất biến 1: không gói thì kết quả như upstream), sửa giá trị mong đợi trong `test/vantt/core-fusion.test.ts`, rồi trên `master` sửa `vantt/packages/*/test/fixtures/core-fusion.json` và hằng số trong `src/rescore.ts` của từng gói cho khớp, chạy lại test gói. Không sửa ngược `HYBRID_FUSION` cho khớp gói. `analyzeLanguageQuery` chạy trước các nhánh.
 - `search`: tìm `options.queries && options.queries.length > 1` (multi-query) và `searchCache.set(key, final)` (gắn `explain`).
 - `cacheKey`: chuỗi khoá có `anchorsStr`; nối `languageStr` vào cuối.
 - `searchBm25`: khối "Enrich BM25 snippets with heading breadcrumb" đã tách thành `enrichMarkedSnippets`. Upstream sửa khối này thì sửa trong hàm tách ra.

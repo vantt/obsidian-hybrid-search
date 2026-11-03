@@ -30,7 +30,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  src/language/types.ts                         |  169 +
  src/runtime/config.ts                         |    7 +
  src/search/language-search.ts                 |  276 ++
- src/search/searcher.ts                        |  403 ++-
+ src/search/searcher.ts                        |  421 ++-
  src/storage/db.ts                             |   11 +-
  src/storage/language-queries.ts               |  168 +
  src/storage/language-tables.ts                |  204 ++
@@ -40,6 +40,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  src/transports/stdio-server.ts                |    1 +
  test/architecture-boundaries.test.ts          |   21 +
  test/architecture/check.ts                    |    2 +-
+ test/vantt/core-fusion.test.ts                |  153 +
  test/vantt/fixtures/lang-upper/index.ts       |  132 +
  test/vantt/fixtures/lang-upper/package.json   |    7 +
  .../language-pack-baseline.snapshot.json      | 2715 +++++++++++++++++
@@ -49,7 +50,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  test/vantt/language-pack-tokens.test.ts       |  168 +
  test/vantt/language-pack.test.ts              |  517 ++++
  test/vantt/tie-aware.test.ts                  |  119 +
- 32 files changed, 5765 insertions(+), 52 deletions(-)
+ 33 files changed, 5935 insertions(+), 53 deletions(-)
  create mode 100644 src/indexing/language-views.ts
  create mode 100644 src/language/loader.ts
  create mode 100644 src/language/noop.ts
@@ -58,6 +59,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  create mode 100644 src/search/language-search.ts
  create mode 100644 src/storage/language-queries.ts
  create mode 100644 src/storage/language-tables.ts
+ create mode 100644 test/vantt/core-fusion.test.ts
  create mode 100644 test/vantt/fixtures/lang-upper/index.ts
  create mode 100644 test/vantt/fixtures/lang-upper/package.json
  create mode 100644 test/vantt/fixtures/language-pack-baseline.snapshot.json
@@ -1309,7 +1311,7 @@ index 0000000..4d16737
 +    .map(({ r, score }) => ({ ...r, score }));
 +}
 diff --git a/src/search/searcher.ts b/src/search/searcher.ts
-index 2fbb7f0..5f6f462 100644
+index 2fbb7f0..c02d073 100644
 --- a/src/search/searcher.ts
 +++ b/src/search/searcher.ts
 @@ -17,6 +17,7 @@ import {
@@ -1553,7 +1555,24 @@ index 2fbb7f0..5f6f462 100644
  
    const readRows = createFuzzyTitleReader(buildTrigramOrQuery(query), limit, predicate);
  
-@@ -744,10 +852,16 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
+@@ -720,6 +828,16 @@ function searchVector(
+   });
+ }
+ 
++/**
++ * RRF constant and branch weights of the single-query hybrid fusion. A language
++ * pack that re-scores fused candidates rebuilds branch votes on this scale
++ * (pinned by `test/vantt/core-fusion.test.ts`).
++ */
++export const HYBRID_FUSION = Object.freeze({
++  k: 60,
++  weights: Object.freeze({ semantic: 1.5, bm25: 1.5, alias: 2.0, title: 0.25 }),
++});
++
+ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[] {
+   const scores = new Map<string, { rrfScore: number; result: RawResult }>();
+ 
+@@ -744,10 +862,16 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
          if (result.scores.fuzzy_title !== undefined) {
            existing.result.scores.fuzzy_title = result.scores.fuzzy_title;
          }
@@ -1571,7 +1590,7 @@ index 2fbb7f0..5f6f462 100644
          });
        }
      });
-@@ -767,6 +881,61 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
+@@ -767,6 +891,61 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
      }));
  }
  
@@ -1633,7 +1652,7 @@ index 2fbb7f0..5f6f462 100644
  // ─── Graph traversal ─────────────────────────────────────
  
  /** Get the first maxChars characters of a note's content as a fallback snippet. */
-@@ -1114,11 +1283,15 @@ function cacheKey(input: string, options: SearchOptions): string {
+@@ -1114,11 +1293,15 @@ function cacheKey(input: string, options: SearchOptions): string {
    const rerankStr = options.rerank ? config.rerankerModel : '';
    const queriesStr = options.queries && options.queries.length > 1 ? options.queries.join('|') : '';
    const anchorsStr = options.anchors ? 'a' : '';
@@ -1650,7 +1669,7 @@ index 2fbb7f0..5f6f462 100644
  }
  
  // eslint-disable-next-line sonarjs/cognitive-complexity -- primary search entry-point; complexity is inherent in the multi-mode, multi-filter pipeline
-@@ -1304,14 +1477,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1304,14 +1487,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
    // narrow filter used to return nothing at a small limit for exactly that reason.
    const predicate = buildFilterPredicate(options);
  
@@ -1674,7 +1693,7 @@ index 2fbb7f0..5f6f462 100644
          searchByQuery(
            q,
            mode,
-@@ -1320,6 +1501,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1320,6 +1511,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
            false,
            options.anchors ?? false,
            predicate,
@@ -1682,7 +1701,7 @@ index 2fbb7f0..5f6f462 100644
          ),
        ),
      );
-@@ -1328,6 +1510,25 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1328,6 +1520,25 @@ export async function search(input: string, options: SearchOptions = {}): Promis
      for (const r of results) {
        r.scores.hybrid = r.score;
      }
@@ -1708,7 +1727,7 @@ index 2fbb7f0..5f6f462 100644
      // Rerank after full merge — only in hybrid mode
      if (options.rerank) {
        if (mode !== 'hybrid') {
-@@ -1339,6 +1540,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1339,6 +1550,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
        }
      }
    } else {
@@ -1716,7 +1735,7 @@ index 2fbb7f0..5f6f462 100644
      results = await searchByQuery(
        input,
        mode,
-@@ -1347,6 +1549,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1347,6 +1559,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
        options.rerank ?? false,
        options.anchors ?? false,
        predicate,
@@ -1724,7 +1743,7 @@ index 2fbb7f0..5f6f462 100644
      );
    }
  
-@@ -1412,6 +1615,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+@@ -1412,6 +1625,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
      }
    }
  
@@ -1747,7 +1766,7 @@ index 2fbb7f0..5f6f462 100644
    searchCache.set(key, final);
    return final;
  }
-@@ -1505,16 +1724,61 @@ async function searchByQuery(
+@@ -1505,16 +1734,61 @@ async function searchByQuery(
    rerank = false,
    buildAnchors = false,
    predicate?: FilterPredicate,
@@ -1811,7 +1830,7 @@ index 2fbb7f0..5f6f462 100644
    }
  
    if (mode === 'title') {
-@@ -1523,20 +1787,40 @@ async function searchByQuery(
+@@ -1523,20 +1797,40 @@ async function searchByQuery(
      // BM25 but with high trigram overlap (e.g. exact title match) would be silently
      // dropped before scoring. Only done for title mode — hybrid uses rrfFusion which
      // depends on the original BM25 ordering from searchFuzzyTitle.
@@ -1856,7 +1875,7 @@ index 2fbb7f0..5f6f462 100644
    }
  
    // hybrid: RRF fusion of all three
-@@ -1552,7 +1836,7 @@ async function searchByQuery(
+@@ -1552,7 +1846,7 @@ async function searchByQuery(
    let vectorResults: RawResult[] = [];
    try {
      assertEmbeddingModelCompatible(modelName);
@@ -1865,7 +1884,7 @@ index 2fbb7f0..5f6f462 100644
      if (f32) vectorResults = searchVector(f32, modelName, candidateLimit, predicate);
    } catch (error) {
      if (!(error instanceof EmbeddingModelMismatchError)) throw error;
-@@ -1561,15 +1845,29 @@ async function searchByQuery(
+@@ -1561,15 +1855,29 @@ async function searchByQuery(
    const [bm25Results, fuzzyResults] = await Promise.all([
      Promise.resolve(
        measureSearchStageSync('bm25', () =>
@@ -1897,11 +1916,13 @@ index 2fbb7f0..5f6f462 100644
  
    // Exact alias matches (fuzzy_title=1.0) are canonical identity signals — treated like BM25.
    // Partial fuzzy matches (trigram overlap < 1.0) remain at low weight to avoid false positives.
-@@ -1577,9 +1875,15 @@ async function searchByQuery(
+@@ -1577,9 +1885,21 @@ async function searchByQuery(
    const partialFuzzyResults = fuzzyResults.filter((r) => r.scores.fuzzy_title !== 1.0);
    let results = measureSearchStageSync('rrfFusion', () =>
      rrfFusion(
 -      [vectorResults, bm25Results, exactAliasResults, partialFuzzyResults],
+-      60,
+-      [1.5, 1.5, 2.0, 0.25],
 +      [
 +        vectorResults,
 +        bm25Results,
@@ -1909,13 +1930,18 @@ index 2fbb7f0..5f6f462 100644
 +        partialFuzzyResults,
 +        ...views.map(({ results: list }) => list),
 +      ],
-       60,
--      [1.5, 1.5, 2.0, 0.25],
-+      [1.5, 1.5, 2.0, 0.25, ...views.map(({ weight }) => weight)],
++      HYBRID_FUSION.k,
++      [
++        HYBRID_FUSION.weights.semantic,
++        HYBRID_FUSION.weights.bm25,
++        HYBRID_FUSION.weights.alias,
++        HYBRID_FUSION.weights.title,
++        ...views.map(({ weight }) => weight),
++      ],
      ),
    );
  
-@@ -1587,6 +1891,15 @@ async function searchByQuery(
+@@ -1587,6 +1907,15 @@ async function searchByQuery(
    for (const r of results) {
      r.scores.hybrid = r.score;
    }
@@ -2537,6 +2563,165 @@ index c529cea..45c90c1 100644
          module.source,
        )
      )
+diff --git a/test/vantt/core-fusion.test.ts b/test/vantt/core-fusion.test.ts
+new file mode 100644
+index 0000000..8972723
+--- /dev/null
++++ b/test/vantt/core-fusion.test.ts
+@@ -0,0 +1,153 @@
++/**
++ * Language packs re-score fused hybrid candidates on the core's RRF scale: a
++ * pack rebuilds a branch's vote as `weight / (k + rank)` over the best possible
++ * sum. This pins that scale against the copy each pack keeps in
++ * `vantt/packages/<pack>/test/fixtures/core-fusion.json` (the pack's own tests
++ * check its code against the same file), the score the core gives a fused
++ * candidate, and the branch names in `Candidate.rank`.
++ */
++import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
++import type { Candidate } from '../../src/language/types.js';
++import { writeLanguagePackVault } from './fixtures/language-pack-vault.js';
++
++const vault = mkdtempSync(path.join(tmpdir(), 'ohs-core-fusion-'));
++process.env.OBSIDIAN_VAULT_PATH = vault;
++const PACK_DIR = path.resolve(import.meta.dirname, 'fixtures/lang-upper');
++const PACKAGES_DIR = path.resolve(import.meta.dirname, '../../vantt/packages');
++
++const queryEmbedding = vi.hoisted(() => ({ fail: false }));
++vi.mock('../../src/inference/embedder.js', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../../src/inference/embedder.js')>();
++  const { fixtureVector } = await import('./fixtures/language-pack-vault.js');
++  return {
++    ...actual,
++    activeModelName: () => 'fixture-model',
++    getEmbeddingDim: () => Promise.resolve(8),
++    getContextLength: () => Promise.resolve(512),
++    getDocumentTokenPolicy: () =>
++      Promise.resolve({ limit: 508, count: (text: string) => text.length / 4 }),
++    embedDetailed: vi.fn((texts: string[]) =>
++      Promise.resolve(texts.map((text) => ({ ok: true as const, embedding: fixtureVector(text) }))),
++    ),
++    embed: vi.fn((texts: string[], type?: 'query' | 'document') =>
++      Promise.resolve(
++        texts.map((t) => (queryEmbedding.fail && type === 'query' ? null : fixtureVector(t))),
++      ),
++    ),
++  };
++});
++
++const { openIndexDatabase, createIndexService } =
++  await import('../../src/indexing/index-service.js');
++const { HYBRID_FUSION, search } = await import('../../src/search/searcher.js');
++const { closeDb } = await import('../../src/storage/db.js');
++
++type Hooks = {
++  __langUpperSynonyms?: Record<string, string>;
++  __langUpperQueryKey?: string;
++  __langUpperCandidates?: Candidate[];
++};
++const hooks = globalThis as Hooks;
++
++/** Branch weights of the fused list, with the fake pack's only view as `lang-upper` declares it. */
++const WEIGHTS: Record<string, number> = { ...HYBRID_FUSION.weights, 'view:upper': 1.0 };
++const BRANCHES = ['semantic', 'bm25', 'alias', 'title', 'view:upper'];
++
++let call = 0;
++/** Candidates the pack's rescore receives for a single-query hybrid search. */
++async function rescoreInput(query: string): Promise<Candidate[]> {
++  hooks.__langUpperQueryKey = `core-fusion-${++call}`;
++  delete hooks.__langUpperCandidates;
++  await search(query, { mode: 'hybrid' });
++  return hooks.__langUpperCandidates!;
++}
++
++const isRank = (rank: number | null | undefined): rank is number =>
++  typeof rank === 'number' && rank > 0;
++
++/** Best possible RRF sum: every branch with a candidate (a non-empty list) votes rank 1. */
++function bestSum(candidates: readonly Candidate[]): number {
++  const active = BRANCHES.filter((b) => candidates.some((c) => isRank(c.rank[b])));
++  return active.reduce((sum, b) => sum + WEIGHTS[b]!, 0) / (HYBRID_FUSION.k + 1);
++}
++
++/** RRF score rebuilt from branch ranks, the way a pack does it. */
++function packScore(candidates: readonly Candidate[], candidate: Candidate): number {
++  let sum = 0;
++  for (const [branch, rank] of Object.entries(candidate.rank))
++    if (isRank(rank)) sum += WEIGHTS[branch]! / (HYBRID_FUSION.k + rank);
++  return Math.min(1, sum / bestSum(candidates));
++}
++
++beforeAll(async () => {
++  writeLanguagePackVault(vault);
++  closeDb();
++  process.env.OHS_LANGUAGE_PACK = PACK_DIR;
++  process.env.OHS_LANGUAGE_PACK_OPTIONS = JSON.stringify({ rescore: 'record' });
++  await openIndexDatabase();
++  const service = createIndexService();
++  try {
++    expect((await service.reindex()).errors).toEqual([]);
++  } finally {
++    await service.close();
++  }
++});
++
++afterEach(() => {
++  queryEmbedding.fail = false;
++  delete hooks.__langUpperSynonyms;
++  delete hooks.__langUpperQueryKey;
++  delete hooks.__langUpperCandidates;
++});
++
++afterAll(() => {
++  closeDb();
++  delete process.env.OHS_LANGUAGE_PACK;
++  delete process.env.OHS_LANGUAGE_PACK_OPTIONS;
++  rmSync(vault, { recursive: true, force: true });
++});
++
++describe('hybrid fusion contract for language packs', () => {
++  it('matches the constants every language pack copies', () => {
++    expect(HYBRID_FUSION).toEqual({
++      k: 60,
++      weights: { semantic: 1.5, bm25: 1.5, alias: 2.0, title: 0.25 },
++    });
++    const copies = readdirSync(PACKAGES_DIR)
++      .map((name) => path.join(PACKAGES_DIR, name, 'test/fixtures/core-fusion.json'))
++      .filter((file) => existsSync(file));
++    expect(copies.length).toBeGreaterThan(0);
++    for (const file of copies)
++      expect(JSON.parse(readFileSync(file, 'utf8')), file).toEqual(HYBRID_FUSION);
++  });
++
++  it('passes unprefixed branch ranks and RRF scores to rescore', async () => {
++    const candidates = await rescoreInput('bread');
++    expect(candidates.length).toBeGreaterThan(1);
++    for (const c of candidates) {
++      expect(Object.keys(c.rank)).toEqual(BRANCHES);
++      expect(c.score).toBeCloseTo(packScore(candidates, c), 12);
++    }
++  });
++
++  it('scores a candidate with only a BM25 vote as weight / (k + rank) over the best sum', async () => {
++    // No query vector and a view query matching other notes leave BM25-only hits.
++    queryEmbedding.fail = true;
++    hooks.__langUpperSynonyms = { bread: 'canyon' };
++    const candidates = await rescoreInput('bread');
++    for (const c of candidates) expect(c.rank.semantic).toBeNull();
++    const bm25Only = candidates.filter(
++      (c) => isRank(c.rank.bm25) && BRANCHES.every((b) => b === 'bm25' || !isRank(c.rank[b])),
++    );
++    expect(bm25Only.length).toBeGreaterThan(0);
++    expect(candidates.some((c) => isRank(c.rank['view:upper']))).toBe(true);
++    for (const c of bm25Only)
++      expect(c.score).toBeCloseTo(
++        HYBRID_FUSION.weights.bm25 / (HYBRID_FUSION.k + c.rank.bm25!) / bestSum(candidates),
++        12,
++      );
++  });
++});
 diff --git a/test/vantt/fixtures/lang-upper/index.ts b/test/vantt/fixtures/lang-upper/index.ts
 new file mode 100644
 index 0000000..d995a54

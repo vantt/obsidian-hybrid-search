@@ -170,7 +170,7 @@ index 83d1b10..9ca8982 100644
      return process.env.RERANKER_MODEL ?? DEFAULT_RERANKER_MODEL;
    },
 diff --git a/src/search/searcher.ts b/src/search/searcher.ts
-index 5f6f462..54a78ea 100644
+index c02d073..9e5f8ee 100644
 --- a/src/search/searcher.ts
 +++ b/src/search/searcher.ts
 @@ -107,6 +107,17 @@ interface MatchAnchor {

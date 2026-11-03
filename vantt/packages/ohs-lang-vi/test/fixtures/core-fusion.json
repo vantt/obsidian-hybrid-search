@@ -1,0 +1,4 @@
+{
+  "k": 60,
+  "weights": { "semantic": 1.5, "bm25": 1.5, "alias": 2.0, "title": 0.25 }
+}
