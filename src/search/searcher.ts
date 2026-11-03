@@ -17,6 +17,7 @@ import {
 } from '../contracts/filter-predicate.js';
 import { activeModelName, embed } from '../inference/embedder.js';
 import { reranker, type RerankCandidate } from '../inference/reranker.js';
+import type { LoadedLanguagePack, QueryAnalysis } from '../language/types.js';
 import { config } from '../runtime/config.js';
 import {
   assertEmbeddingModelCompatible,
@@ -53,6 +54,15 @@ import {
   readSnippetContents,
 } from '../storage/search-queries.js';
 import { createNoteSourceReader } from '../vault/note-source.js';
+import {
+  activeLanguagePack,
+  analyzeLanguageQuery,
+  findLanguageAliasMatches,
+  languageCacheKey,
+  rescoreCandidates,
+  searchLanguageView,
+  viewQueriesFor,
+} from './language-search.js';
 import { measureSearchStage, measureSearchStageSync } from './search-profile.js';
 
 interface NoteReadResult {
@@ -122,6 +132,17 @@ export interface SearchResult {
   };
   previewAnchors?: MatchAnchor[];
   primaryAnchorIndex?: number;
+  /** Original words matched through a language-pack view (present only for such matches). */
+  matchedTerms?: string[];
+  /** Present only when SearchOptions.explain is set. */
+  explain?: SearchExplain;
+}
+
+interface SearchExplain {
+  /** 1-based rank in each retrieval branch; null when the branch missed this note. Multi-query keys are prefixed with the query index. */
+  ranks: Record<string, number | null>;
+  /** The language pack's analysis diagnostics, when a pack is active. */
+  debug?: Record<string, unknown>;
 }
 
 export interface SearchOptions {
@@ -148,6 +169,8 @@ export interface SearchOptions {
   queries?: string[];
   /** When true, populates previewAnchors on each result with chunk location data. */
   anchors?: boolean;
+  /** When true, adds per-branch ranks and language-pack diagnostics to each result. */
+  explain?: boolean;
 }
 
 interface RawResult {
@@ -167,6 +190,18 @@ interface RawResult {
   };
   semanticAnchor?: MatchAnchor;
   bm25Anchor?: MatchAnchor;
+  /** Language-view branch scores by view name. */
+  views?: Record<string, number>;
+  matchedTerms?: string[];
+  ranks?: Record<string, number | null>;
+}
+
+/** Per-query language-pack and explain state; absent means plain upstream search. */
+interface QueryTrace {
+  loaded: LoadedLanguagePack | null;
+  /** Run the pack's rescore inside searchByQuery (false for multi-query sub-searches). */
+  rescore: boolean;
+  analysis?: QueryAnalysis;
 }
 
 export function matchesScopeFilter(notePath: string, scope: string | string[]): boolean {
@@ -212,9 +247,11 @@ function toSearchResult(r: RawResult): SearchResult {
   if (r.scores.semantic != null) matchedBy.push('semantic');
   if (r.scores.bm25 != null) matchedBy.push('bm25');
   if (r.scores.fuzzy_title != null) matchedBy.push('title');
-  const { chunkText: _chunkText, ...rest } = r;
+  for (const view of Object.keys(r.views ?? {})) matchedBy.push(`view:${view}`);
+  const { chunkText: _chunkText, views: _views, matchedTerms, ranks: _ranks, ...rest } = r;
   return {
     ...rest,
+    ...(matchedTerms && matchedTerms.length > 0 ? { matchedTerms } : {}),
     tags,
     aliases,
     matchedBy,
@@ -306,40 +343,104 @@ export function searchBm25(
         bm25: Math.max(0, Math.abs(row.rank) / (1 + Math.abs(row.rank))),
       },
     }));
-    // Enrich BM25 snippets with heading breadcrumb and/or build anchor data.
-    // Skip when neither is needed (snippetLength=0 and buildAnchors=false).
-    if (snippetLength > 0 || buildAnchors) {
-      const chunkDataMap = getChunkDataForBm25Results(results);
-      for (let i = 0; i < results.length; i++) {
-        const result = results[i]!;
-        const data = chunkDataMap.get(result.path);
-        if (data) {
-          if (snippetLength > 0 && data.headingPath) {
-            result.snippet = `${data.headingPath}\n${result.snippet}`;
-          }
-          if (buildAnchors) {
-            // Use the still-marked raw snippet (positioned near the match) for matchText,
-            // not the full chunk — the sentinel markers pin down which line is the real hit.
-            const rawSnippet = (rows[i]!.snippet ?? '').replace(/\.\.\./g, '');
-            result.bm25Anchor = {
-              kind: 'bm25',
-              headingPath: data.headingPath,
-              matchText: buildMatchTextFromMarkedSnippet(
-                rawSnippet,
-                SNIPPET_MARK_START,
-                SNIPPET_MARK_END,
-              ),
-              charStart: data.charStart,
-              charEnd: data.charEnd,
-            };
-          }
-        }
-      }
-    }
+    enrichMarkedSnippets(
+      results,
+      rows.map((row) => row.snippet ?? ''),
+      snippetLength,
+      buildAnchors,
+    );
     return results;
   } catch {
     return [];
   }
+}
+
+/** Enrich BM25-style snippets with heading breadcrumb and/or build anchor data. */
+function enrichMarkedSnippets(
+  results: RawResult[],
+  markedSnippets: string[],
+  snippetLength: number,
+  buildAnchors: boolean,
+): void {
+  // Skip when neither is needed (snippetLength=0 and buildAnchors=false).
+  if (snippetLength > 0 || buildAnchors) {
+    const chunkDataMap = getChunkDataForBm25Results(results);
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i]!;
+      const data = chunkDataMap.get(result.path);
+      if (data) {
+        if (snippetLength > 0 && data.headingPath) {
+          result.snippet = `${data.headingPath}\n${result.snippet}`;
+        }
+        if (buildAnchors) {
+          // Use the still-marked raw snippet (positioned near the match) for matchText,
+          // not the full chunk — the sentinel markers pin down which line is the real hit.
+          const rawSnippet = (markedSnippets[i] ?? '').replace(/\.\.\./g, '');
+          result.bm25Anchor = {
+            kind: 'bm25',
+            headingPath: data.headingPath,
+            matchText: buildMatchTextFromMarkedSnippet(
+              rawSnippet,
+              SNIPPET_MARK_START,
+              SNIPPET_MARK_END,
+            ),
+            charStart: data.charStart,
+            charEnd: data.charEnd,
+          };
+        }
+      }
+    }
+  }
+}
+
+/**
+ * One RRF branch per language view with a query. Snippets are original text: the
+ * view match is mapped back through the token invariant before enrichment.
+ */
+function searchLanguageViews(
+  loaded: LoadedLanguagePack | null,
+  analysis: QueryAnalysis | undefined,
+  limit: number,
+  snippetLength: number,
+  buildAnchors: boolean,
+  predicate: FilterPredicate | undefined,
+  titleOnly = false,
+): Array<{ view: string; weight: number; results: RawResult[] }> {
+  if (!loaded || !analysis) return [];
+  return viewQueriesFor(loaded, analysis, (query) => toFtsQuery(query, 'OR')).map(
+    ({ view, weight, ftsQuery }) => {
+      const hits = measureSearchStageSync('languageViews', () =>
+        searchLanguageView(
+          loaded,
+          view,
+          titleOnly ? `title : (${ftsQuery})` : ftsQuery,
+          limit,
+          snippetLength,
+          SNIPPET_MARK_START,
+          SNIPPET_MARK_END,
+          predicate,
+        ),
+      );
+      const results: RawResult[] = hits.map((hit) => ({
+        path: hit.path,
+        title: hit.title,
+        tags: hit.tags,
+        aliases: hit.aliases,
+        snippet: stripSnippetMarkers(hit.markedSnippet, SNIPPET_MARK_START, SNIPPET_MARK_END),
+        score: hit.score,
+        scores: {},
+        views: { [view]: hit.score },
+        matchedTerms: hit.matchedTerms,
+      }));
+      enrichMarkedSnippets(
+        results,
+        hits.map((hit) => hit.markedSnippet),
+        snippetLength,
+        buildAnchors,
+      );
+      return { view, weight, results };
+    },
+  );
 }
 
 function buildTrigramOrQuery(text: string): string {
@@ -407,6 +508,7 @@ export function searchFuzzyTitle(
   query: string,
   limit: number,
   predicate?: FilterPredicate,
+  viewAliasMatches: RawResult[] = [],
 ): RawResult[] {
   // Exact alias match first — handles short aliases (< 3 chars) and Cyrillic that
   // the trigram FTS can't tokenize, ensuring they always surface in title/hybrid mode.
@@ -414,6 +516,12 @@ export function searchFuzzyTitle(
   // post-filter is gone there is nothing downstream left to drop unfiltered ones.
   const aliasExact = searchByAliasExact(query, limit, predicate);
   const aliasExactPaths = new Set(aliasExact.map((r) => r.path));
+  // Language-view alias hits rank after upstream exact matches, without duplicates.
+  for (const match of viewAliasMatches) {
+    if (aliasExactPaths.has(match.path)) continue;
+    aliasExact.push(match);
+    aliasExactPaths.add(match.path);
+  }
 
   const readRows = createFuzzyTitleReader(buildTrigramOrQuery(query), limit, predicate);
 
@@ -720,6 +828,16 @@ function searchVector(
   });
 }
 
+/**
+ * RRF constant and branch weights of the single-query hybrid fusion. A language
+ * pack that re-scores fused candidates rebuilds branch votes on this scale
+ * (pinned by `test/vantt/core-fusion.test.ts`).
+ */
+export const HYBRID_FUSION = Object.freeze({
+  k: 60,
+  weights: Object.freeze({ semantic: 1.5, bm25: 1.5, alias: 2.0, title: 0.25 }),
+});
+
 function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[] {
   const scores = new Map<string, { rrfScore: number; result: RawResult }>();
 
@@ -744,10 +862,16 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
         if (result.scores.fuzzy_title !== undefined) {
           existing.result.scores.fuzzy_title = result.scores.fuzzy_title;
         }
+        if (result.views) mergeViewMatch(existing.result, result);
       } else {
         scores.set(result.path, {
           rrfScore,
-          result: { ...result, scores: { ...result.scores } },
+          result: {
+            ...result,
+            scores: { ...result.scores },
+            ...(result.views ? { views: { ...result.views } } : {}),
+            ...(result.matchedTerms ? { matchedTerms: [...result.matchedTerms] } : {}),
+          },
         });
       }
     });
@@ -765,6 +889,61 @@ function rrfFusion(lists: RawResult[][], k = 60, weights?: number[]): RawResult[
       ...result,
       score: Math.min(1, rrfScore / maxPossibleScore),
     }));
+}
+
+/** Fold a language-view hit into a fused result; semantic and BM25 snippets keep priority. */
+function mergeViewMatch(target: RawResult, hit: RawResult): void {
+  target.views = { ...target.views, ...hit.views };
+  const terms = target.matchedTerms ?? [];
+  for (const term of hit.matchedTerms ?? []) if (!terms.includes(term)) terms.push(term);
+  target.matchedTerms = terms;
+  if (target.scores.semantic === undefined && target.scores.bm25 === undefined && !target.snippet) {
+    target.snippet = hit.snippet;
+    if (hit.bm25Anchor && !target.bm25Anchor) target.bm25Anchor = hit.bm25Anchor;
+  }
+}
+
+/** Record 1-based branch ranks on fused results (explain and rescore input). */
+function recordBranchRanks(
+  trace: QueryTrace | undefined,
+  results: RawResult[],
+  branches: Array<[string, RawResult[]]>,
+): RawResult[] {
+  if (!trace) return results;
+  const positions = branches.map(([name, list]) => {
+    const ranks = new Map<string, number>();
+    list.forEach((r, index) => {
+      if (!ranks.has(r.path)) ranks.set(r.path, index + 1);
+    });
+    return [name, ranks] as const;
+  });
+  for (const result of results) {
+    result.ranks = Object.fromEntries(
+      positions.map(([name, ranks]) => [name, ranks.get(result.path) ?? null]),
+    );
+  }
+  return results;
+}
+
+async function applyLanguageRescore(
+  loaded: LoadedLanguagePack,
+  analysis: QueryAnalysis,
+  results: RawResult[],
+): Promise<RawResult[]> {
+  return rescoreCandidates(
+    loaded,
+    results,
+    results.map((r) => ({
+      path: r.path,
+      score: r.score,
+      title: r.title,
+      snippet: r.snippet,
+      matchedViews: Object.keys(r.views ?? {}),
+      matchedTerms: [...(r.matchedTerms ?? [])],
+      rank: { ...r.ranks },
+    })),
+    analysis,
+  );
 }
 
 // ─── Graph traversal ─────────────────────────────────────
@@ -1114,11 +1293,15 @@ function cacheKey(input: string, options: SearchOptions): string {
   const rerankStr = options.rerank ? config.rerankerModel : '';
   const queriesStr = options.queries && options.queries.length > 1 ? options.queries.join('|') : '';
   const anchorsStr = options.anchors ? 'a' : '';
+  // Empty unless explain or an active language pack applies, so the key is unchanged otherwise.
+  const pack = activeLanguagePack();
+  const languageStr =
+    (options.explain ? '\0explain' : '') + (pack ? `\0lang\0${languageCacheKey(pack)}` : '');
   // Two-component version:
   //   getDbVersion() — shared via SQLite settings; any process that modifies the DB
   //                    bumps it, invalidating caches in all other processes.
   //   localVersion   — in-process counter; bumpIndexVersion() for test-suite isolation.
-  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}`;
+  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}${languageStr}`;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity -- primary search entry-point; complexity is inherent in the multi-mode, multi-filter pipeline
@@ -1304,14 +1487,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
   // narrow filter used to return nothing at a small limit for exactly that reason.
   const predicate = buildFilterPredicate(options);
 
+  // A trace exists only when a language pack is active or explain was requested;
+  // without one, searchByQuery runs the upstream pipeline unchanged.
+  const pack = isPathLookup ? null : activeLanguagePack();
+  const newTrace = (rescore: boolean): QueryTrace | undefined =>
+    pack || options.explain ? { loaded: pack, rescore } : undefined;
+  const traces: Array<QueryTrace | undefined> = [];
+
   if (isPathLookup) {
     results = await searchSimilar(resolvedPath, retrievalLimit, predicate);
   } else if (options.queries && options.queries.length > 1) {
     // Multi-query fan-out: run each query in parallel, merge via RRF, then rerank once.
     // Each sub-search uses a larger candidate pool so RRF has enough signal to rank correctly.
     const candidateLimit = Math.max(retrievalLimit * 2, 20);
+    traces.push(...options.queries.map(() => newTrace(false)));
     const perQueryResults = await Promise.all(
-      options.queries.map((q) =>
+      options.queries.map((q, index) =>
         searchByQuery(
           q,
           mode,
@@ -1320,6 +1511,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
           false,
           options.anchors ?? false,
           predicate,
+          traces[index],
         ),
       ),
     );
@@ -1327,6 +1519,25 @@ export async function search(input: string, options: SearchOptions = {}): Promis
     // Populate scores.hybrid on merged results (mirrors single-query hybrid path)
     for (const r of results) {
       r.scores.hybrid = r.score;
+    }
+    if (traces[0]) {
+      const perQueryRanks = perQueryResults.map(
+        (list) => new Map(list.map((r) => [r.path, r.ranks ?? {}])),
+      );
+      for (const r of results) {
+        const ranks: Record<string, number | null> = {};
+        perQueryRanks.forEach((byPath, index) => {
+          for (const [name, rank] of Object.entries(byPath.get(r.path) ?? {}))
+            ranks[`${index}:${name}`] = rank;
+        });
+        r.ranks = ranks;
+      }
+    }
+    // A pack rescores the merged list once, with the first query's analysis.
+    const firstAnalysis = traces[0]?.analysis;
+    if (pack && firstAnalysis) {
+      results = await applyLanguageRescore(pack, firstAnalysis, results);
+      for (const r of results) r.scores.hybrid = r.score;
     }
     // Rerank after full merge — only in hybrid mode
     if (options.rerank) {
@@ -1339,6 +1550,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
       }
     }
   } else {
+    traces.push(newTrace(true));
     results = await searchByQuery(
       input,
       mode,
@@ -1347,6 +1559,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
       options.rerank ?? false,
       options.anchors ?? false,
       predicate,
+      traces[0],
     );
   }
 
@@ -1409,6 +1622,22 @@ export async function search(input: string, options: SearchOptions = {}): Promis
         final[i]!.previewAnchors = anchors;
         final[i]!.primaryAnchorIndex = 0; // semantic (index 0) is always primary when present
       }
+    }
+  }
+
+  if (options.explain) {
+    const debugs = traces.map((trace) => trace?.analysis?.debug);
+    const debug =
+      debugs.length > 1
+        ? debugs.some(Boolean)
+          ? { queries: debugs.map((d) => d ?? null) }
+          : undefined
+        : debugs[0];
+    for (let i = 0; i < final.length; i++) {
+      final[i]!.explain = {
+        ranks: filteredResults[i]?.ranks ?? {},
+        ...(debug ? { debug } : {}),
+      };
     }
   }
 
@@ -1505,16 +1734,61 @@ async function searchByQuery(
   rerank = false,
   buildAnchors = false,
   predicate?: FilterPredicate,
+  trace?: QueryTrace,
 ): Promise<RawResult[]> {
   if (rerank && mode !== 'hybrid') {
     process.stderr.write('Reranking is only supported in hybrid mode. Ignoring --rerank.\n');
     rerank = false;
   }
 
+  // Without an active language pack `analysis` is undefined and every branch below
+  // runs exactly the upstream query.
+  const loaded = trace?.loaded ?? null;
+  const analysis = loaded
+    ? await measureSearchStage('languageAnalyze', () => analyzeLanguageQuery(loaded, query))
+    : undefined;
+  if (trace) trace.analysis = analysis;
+  const finish = async (results: RawResult[]): Promise<RawResult[]> => {
+    if (!loaded || !analysis || !trace?.rescore) return results;
+    const rescored = await applyLanguageRescore(loaded, analysis, results);
+    if (mode === 'hybrid') for (const r of rescored) r.scores.hybrid = r.score;
+    return rescored;
+  };
+  const viewBranches = (
+    views: Array<{ view: string; results: RawResult[] }>,
+  ): Array<[string, RawResult[]]> => views.map(({ view, results }) => [`view:${view}`, results]);
+  const viewAliasMatches = (aliasLimit: number): RawResult[] =>
+    loaded && analysis
+      ? findLanguageAliasMatches(loaded, analysis, aliasLimit, predicate).map((row) => ({
+          path: row.path,
+          title: row.title ?? '',
+          tags: row.tags ?? '[]',
+          aliases: row.aliases,
+          snippet: '',
+          score: 1.0,
+          scores: { fuzzy_title: 1.0 },
+        }))
+      : [];
+
   if (mode === 'fulltext') {
-    return measureSearchStageSync('bm25', () =>
-      searchBm25(query, limit, snippetLength, buildAnchors, predicate),
+    const bm25Results = measureSearchStageSync('bm25', () =>
+      searchBm25(analysis?.baseQuery ?? query, limit, snippetLength, buildAnchors, predicate),
     );
+    const views = searchLanguageViews(
+      loaded,
+      analysis,
+      limit,
+      snippetLength,
+      buildAnchors,
+      predicate,
+    );
+    if (views.every(({ results }) => results.length === 0))
+      return finish(recordBranchRanks(trace, bm25Results, [['bm25', bm25Results]]));
+    const fused = rrfFusion([bm25Results, ...views.map(({ results }) => results)], 60, [
+      1.5,
+      ...views.map(({ weight }) => weight),
+    ]);
+    return finish(recordBranchRanks(trace, fused, [['bm25', bm25Results], ...viewBranches(views)]));
   }
 
   if (mode === 'title') {
@@ -1523,20 +1797,40 @@ async function searchByQuery(
     // BM25 but with high trigram overlap (e.g. exact title match) would be silently
     // dropped before scoring. Only done for title mode — hybrid uses rrfFusion which
     // depends on the original BM25 ordering from searchFuzzyTitle.
+    const pool = Math.max(limit * 5, 50);
     const candidates = measureSearchStageSync('fuzzyTitle', () =>
-      searchFuzzyTitle(query, Math.max(limit * 5, 50), predicate),
+      searchFuzzyTitle(query, pool, predicate, viewAliasMatches(pool)),
     );
-    return candidates.sort((a, b) => b.score - a.score).slice(0, limit);
+    const titleResults = candidates.sort((a, b) => b.score - a.score).slice(0, limit);
+    const views = searchLanguageViews(
+      loaded,
+      analysis,
+      limit,
+      snippetLength,
+      buildAnchors,
+      predicate,
+      true,
+    );
+    if (views.every(({ results }) => results.length === 0))
+      return finish(recordBranchRanks(trace, titleResults, [['title', titleResults]]));
+    const fused = rrfFusion([titleResults, ...views.map(({ results }) => results)], 60, [
+      1,
+      ...views.map(({ weight }) => weight),
+    ]).slice(0, limit);
+    return finish(
+      recordBranchRanks(trace, fused, [['title', titleResults], ...viewBranches(views)]),
+    );
   }
 
   if (mode === 'semantic') {
     const modelName = activeModelName();
     assertEmbeddingModelCompatible(modelName);
-    const f32 = await embedQuery(query);
+    const f32 = await embedQuery(analysis?.embedQuery ?? query);
     // If embedding permanently failed after retries, return empty rather than
     // polluting results with uniform zero-vector scores.
     if (!f32) return [];
-    return searchVector(f32, modelName, limit, predicate);
+    const semanticResults = searchVector(f32, modelName, limit, predicate);
+    return finish(recordBranchRanks(trace, semanticResults, [['semantic', semanticResults]]));
   }
 
   // hybrid: RRF fusion of all three
@@ -1552,7 +1846,7 @@ async function searchByQuery(
   let vectorResults: RawResult[] = [];
   try {
     assertEmbeddingModelCompatible(modelName);
-    const f32 = await embedQuery(query);
+    const f32 = await embedQuery(analysis?.embedQuery ?? query);
     if (f32) vectorResults = searchVector(f32, modelName, candidateLimit, predicate);
   } catch (error) {
     if (!(error instanceof EmbeddingModelMismatchError)) throw error;
@@ -1561,15 +1855,29 @@ async function searchByQuery(
   const [bm25Results, fuzzyResults] = await Promise.all([
     Promise.resolve(
       measureSearchStageSync('bm25', () =>
-        searchBm25(query, candidateLimit, snippetLength, buildAnchors, predicate),
+        searchBm25(
+          analysis?.baseQuery ?? query,
+          candidateLimit,
+          snippetLength,
+          buildAnchors,
+          predicate,
+        ),
       ),
     ),
     Promise.resolve(
       measureSearchStageSync('fuzzyTitle', () =>
-        searchFuzzyTitle(query, candidateLimit, predicate),
+        searchFuzzyTitle(query, candidateLimit, predicate, viewAliasMatches(candidateLimit)),
       ),
     ),
   ]);
+  const views = searchLanguageViews(
+    loaded,
+    analysis,
+    candidateLimit,
+    snippetLength,
+    buildAnchors,
+    predicate,
+  );
 
   // Exact alias matches (fuzzy_title=1.0) are canonical identity signals — treated like BM25.
   // Partial fuzzy matches (trigram overlap < 1.0) remain at low weight to avoid false positives.
@@ -1577,9 +1885,21 @@ async function searchByQuery(
   const partialFuzzyResults = fuzzyResults.filter((r) => r.scores.fuzzy_title !== 1.0);
   let results = measureSearchStageSync('rrfFusion', () =>
     rrfFusion(
-      [vectorResults, bm25Results, exactAliasResults, partialFuzzyResults],
-      60,
-      [1.5, 1.5, 2.0, 0.25],
+      [
+        vectorResults,
+        bm25Results,
+        exactAliasResults,
+        partialFuzzyResults,
+        ...views.map(({ results: list }) => list),
+      ],
+      HYBRID_FUSION.k,
+      [
+        HYBRID_FUSION.weights.semantic,
+        HYBRID_FUSION.weights.bm25,
+        HYBRID_FUSION.weights.alias,
+        HYBRID_FUSION.weights.title,
+        ...views.map(({ weight }) => weight),
+      ],
     ),
   );
 
@@ -1587,6 +1907,15 @@ async function searchByQuery(
   for (const r of results) {
     r.scores.hybrid = r.score;
   }
+  results = await finish(
+    recordBranchRanks(trace, results, [
+      ['semantic', vectorResults],
+      ['bm25', bm25Results],
+      ['alias', exactAliasResults],
+      ['title', partialFuzzyResults],
+      ...viewBranches(views),
+    ]),
+  );
 
   if (rerank) {
     results = await measureSearchStage('rerank', () => applyRerank(results, query, candidateLimit));
