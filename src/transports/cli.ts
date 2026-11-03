@@ -3,7 +3,6 @@ import { Command } from 'commander';
 import { exec } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import pc from 'picocolors';
 import { parseCliIntegerOption, parseCliNumberOption } from '../contracts/boundary-validation.js';
@@ -13,6 +12,7 @@ import { activeModelName, getContextLength, primeEmbeddingDim } from '../inferen
 import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings.js';
 import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
 import { config } from '../runtime/config.js';
+import { packageIdentity, updateCheckDisabled } from '../runtime/package-identity.js';
 import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
 import {
   applyDbConfigDefaults,
@@ -38,25 +38,7 @@ import { handleStdioLine } from './stdio-server.js';
 
 const execAsync = promisify(exec);
 
-/**
- * Read the package version from the nearest package.json above this module.
- * The depth differs between the compiled layout (dist/src/) and running the
- * sources directly (src/), so the file is located rather than assumed.
- */
-function readPackageVersion(): string {
-  let dir = path.dirname(fileURLToPath(import.meta.url));
-  while (true) {
-    const candidate = path.join(dir, 'package.json');
-    if (existsSync(candidate)) {
-      return (JSON.parse(readFileSync(candidate, 'utf-8')) as { version: string }).version;
-    }
-    const parent = path.dirname(dir);
-    if (parent === dir) throw new Error('Could not locate package.json for the CLI version');
-    dir = parent;
-  }
-}
-
-const version = readPackageVersion();
+const version = packageIdentity.version;
 
 function failCliValidation(err: unknown): never {
   console.error('Error:', err instanceof Error ? err.message : String(err));
@@ -339,7 +321,9 @@ async function fetchUpdateStatus(): Promise<
   | { state: 'up_to_date' }
   | { state: 'update_available'; latestVersion: string }
   | { state: 'offline' }
+  | { state: 'disabled' }
 > {
+  if (updateCheckDisabled()) return { state: 'disabled' };
   try {
     const signal = AbortSignal.timeout(3000);
     const res = await fetch('https://registry.npmjs.org/obsidian-hybrid-search/latest', { signal });
