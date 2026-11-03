@@ -1,0 +1,795 @@
+From 9815b08cdd50e0807d83c89955f0f69b9ce651f7 Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:20:37 +0700
+Subject: [PATCH] feat(stdio): add read, vectors, neighbors and reindex actions
+ and drain requests on close
+
+---
+ src/contracts/boundary-validation.ts |  36 +++
+ src/transports/cli.ts                |  25 +-
+ src/transports/stdio-server.ts       | 125 +++++++++-
+ test/serve-stdio.test.ts             |   4 +-
+ test/transport-parity.test.ts        | 111 ++++++++-
+ test/vantt/stdio-parity.test.ts      | 334 +++++++++++++++++++++++++++
+ 6 files changed, 624 insertions(+), 11 deletions(-)
+ create mode 100644 test/vantt/stdio-parity.test.ts
+
+diff --git a/src/contracts/boundary-validation.ts b/src/contracts/boundary-validation.ts
+index f83ab67..9cfc2f7 100644
+--- a/src/contracts/boundary-validation.ts
++++ b/src/contracts/boundary-validation.ts
+@@ -66,6 +66,42 @@ export const StdioStatusRequestSchema = z.object({
+   action: z.literal('status'),
+ });
+ 
++export const StdioReadRequestSchema = z.object({
++  id: z.string().optional(),
++  action: z.literal('read'),
++  paths: z.unknown(),
++  snippetLength: NonNegativeIntegerSchema.optional(),
++  related: z.boolean().optional(),
++});
++
++const PoolingSchema = z.enum(['mean', 'max']);
++
++export const StdioVectorsRequestSchema = z.object({
++  id: z.string().optional(),
++  action: z.literal('vectors'),
++  paths: z.array(z.string()).optional(),
++  pooling: PoolingSchema.optional(),
++  normalize: z.boolean().optional(),
++});
++
++export const StdioNeighborsRequestSchema = z.object({
++  id: z.string().optional(),
++  action: z.literal('neighbors'),
++  paths: z.array(z.string()).optional(),
++  k: FiniteNumberSchema.int().min(1).optional(),
++  minScore: FiniteNumberSchema.min(-1).max(1).optional(),
++  excludeLinked: z.boolean().optional(),
++  scope: z.unknown().optional(),
++  pooling: PoolingSchema.optional(),
++});
++
++export const StdioReindexRequestSchema = z.object({
++  id: z.string().optional(),
++  action: z.literal('reindex'),
++  path: z.string().optional(),
++  force: z.boolean().optional(),
++});
++
+ export const StdioRequestSchema = z.object({
+   id: z.string().optional(),
+   query: z.string(),
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index f7a7e7d..0d29dae 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -40,7 +40,7 @@ import { runHttpMcpServerCli } from './mcp-http-server.js';
+ import { runStdioMcpServer } from './mcp-stdio-server.js';
+ import { ensureMcpServer, formatMcpInfo, getMcpStatus, stopMcpServer } from './mcp-supervisor.js';
+ import { buildStatusPayload } from './status-payload.js';
+-import { handleStdioLine } from './stdio-server.js';
++import { drainInFlight, handleStdioLine, type StdioActionHandlers } from './stdio-server.js';
+ 
+ const execAsync = promisify(exec);
+ 
+@@ -908,21 +908,34 @@ const serveCommand = program
+       process.on('SIGTERM', cleanup);
+       process.on('SIGINT', cleanup);
+ 
+-      rl.on('close', cleanup);
+-      rl.on('end', cleanup);
++      const writeLine = (s: string) => process.stdout.write(s + '\n');
++      const actions: StdioActionHandlers = {
++        read: (paths, options) => readNotes(paths, options),
++        vectors: (params) => exportNoteVectors({ ...params, ohsVersion: version }),
++        neighbors: (params) => findNoteNeighbors({ ...params, ohsVersion: version }),
++        reindex: (params) => cliIndexer.reindex(params),
++      };
++      const inFlight = new Set<Promise<void>>();
+ 
+       for await (const line of rl) {
+         // Fire-and-forget: process each request concurrently so that a slow in-flight
+         // search (e.g. embedding API call) does not block reading and starting the next
+         // one.  Responses carry their own `id` field so the plugin dispatches them
+         // correctly regardless of arrival order.
+-        void handleStdioLine(
++        const request: Promise<void> = handleStdioLine(
+           line,
+           search,
+-          (s) => process.stdout.write(s + '\n'),
++          writeLine,
+           () => buildStatusPayload({ contextLength, version }),
+-        );
++          actions,
++        ).finally(() => inFlight.delete(request));
++        inFlight.add(request);
+       }
++
++      // stdin closed: accept nothing new, but let every running request answer first.
++      await drainInFlight(inFlight);
++      await new Promise<void>((resolve) => process.stdout.write('', () => resolve()));
++      cleanup();
+       return;
+     }
+ 
+diff --git a/src/transports/stdio-server.ts b/src/transports/stdio-server.ts
+index 19cd00c..9013295 100644
+--- a/src/transports/stdio-server.ts
++++ b/src/transports/stdio-server.ts
+@@ -1,22 +1,75 @@
+ import {
+   formatValidationError,
+   parseStringArrayParam,
++  StdioNeighborsRequestSchema,
++  StdioReadRequestSchema,
++  StdioReindexRequestSchema,
+   StdioRequestSchema,
+   StdioStatusRequestSchema,
++  StdioVectorsRequestSchema,
+   type SearchOptionsBoundary,
+ } from '../contracts/boundary-validation.js';
++import type { NeighborsOptions, NoteVectorsOptions, VectorExport } from '../search/note-vectors.js';
+ import type { SearchOptions, SearchResult } from '../search/searcher.js';
+ 
+ export type SearchFunction = (query: string, options?: SearchOptions) => Promise<SearchResult[]>;
+ export type StatusFunction = () => Promise<Record<string, unknown>> | Record<string, unknown>;
+ 
++/** `ohsVersion` is added by the transport; callers of the stdio actions never send it. */
++type StdioVectorsParams = Omit<NoteVectorsOptions, 'ohsVersion'>;
++type StdioNeighborsParams = Omit<NeighborsOptions, 'ohsVersion'>;
++
++/**
++ * Implementations of the non-search actions, supplied by the server that owns the
++ * index. An action whose handler is missing answers "not available on this server".
++ */
++export interface StdioActionHandlers {
++  read?: (paths: string[], options: { snippetLength?: number; related?: boolean }) => unknown[];
++  vectors?: (params: StdioVectorsParams) => VectorExport<unknown>;
++  neighbors?: (params: StdioNeighborsParams) => VectorExport<unknown>;
++  reindex?: (params: { path?: string; force?: boolean }) => Promise<unknown>;
++}
++
+ export interface StdioResponse {
+   id: string;
+   results?: SearchResult[];
+   status?: Record<string, unknown>;
++  /** `read`: one entry per requested path, in request order. */
++  notes?: unknown[];
++  /** `vectors` and `neighbors`: the same meta object and records the CLI prints. */
++  meta?: Record<string, unknown>;
++  records?: unknown[];
++  /** `reindex`: the index result. */
++  result?: unknown;
+   error?: string;
+ }
+ 
++/** Longest time a closing server waits for requests that are still running. */
++const STDIO_DRAIN_TIMEOUT_MS = 60_000;
++
++/**
++ * Resolve once every promise in `inFlight` has settled, or after `timeoutMs`.
++ * Returns true when everything settled. Requests that arrive meanwhile are waited for too.
++ */
++export async function drainInFlight(
++  inFlight: ReadonlySet<Promise<unknown>>,
++  timeoutMs: number = STDIO_DRAIN_TIMEOUT_MS,
++): Promise<boolean> {
++  let timer: NodeJS.Timeout | undefined;
++  const timedOut = new Promise<false>((resolve) => {
++    timer = setTimeout(() => resolve(false), timeoutMs);
++  });
++  const settled = (async (): Promise<true> => {
++    while (inFlight.size > 0) await Promise.allSettled([...inFlight]);
++    return true;
++  })();
++  try {
++    return await Promise.race([settled, timedOut]);
++  } finally {
++    clearTimeout(timer);
++  }
++}
++
+ /**
+  * Process a single newline-delimited JSON request for the stdio IPC server.
+  * Exported for unit testing — called by `ohs serve --stdio` in a loop.
+@@ -33,6 +86,7 @@ export async function handleStdioLine(
+   searchFn: SearchFunction,
+   writeLine: (s: string) => void,
+   statusFn?: StatusFunction,
++  actions: StdioActionHandlers = {},
+ ): Promise<void> {
+   const trimmed = line.trim();
+   if (!trimmed) return;
+@@ -49,7 +103,7 @@ export async function handleStdioLine(
+         writeLine(JSON.stringify({ id, error: 'Invalid stdio request: action must be a string' }));
+         return;
+       }
+-      if (raw.action !== 'search' && raw.action !== 'status') {
++      if (!KNOWN_ACTIONS.has(raw.action)) {
+         writeLine(JSON.stringify({ id, error: `unknown action: ${raw.action}` }));
+         return;
+       }
+@@ -68,6 +122,10 @@ export async function handleStdioLine(
+         writeLine(JSON.stringify({ id, status: await statusFn() }));
+         return;
+       }
++      if (raw.action !== 'search') {
++        writeLine(JSON.stringify({ id, ...(await runAction(raw.action, raw, actions)) }));
++        return;
++      }
+     }
+ 
+     const parsed = StdioRequestSchema.safeParse(raw);
+@@ -88,6 +146,71 @@ export async function handleStdioLine(
+   }
+ }
+ 
++const KNOWN_ACTIONS: ReadonlySet<string> = new Set([
++  'search',
++  'status',
++  'read',
++  'vectors',
++  'neighbors',
++  'reindex',
++]);
++
++/** Validate and run `read`, `vectors`, `neighbors` or `reindex`; returns the response fields. */
++async function runAction(
++  action: string,
++  raw: Record<string, unknown>,
++  actions: StdioActionHandlers,
++): Promise<Omit<StdioResponse, 'id'>> {
++  const invalid = (error: unknown): { error: string } => ({
++    error: formatValidationError(
++      'stdio request',
++      error as Parameters<typeof formatValidationError>[1],
++    ),
++  });
++  const unavailable = { error: `${action} is not available on this server` };
++
++  if (action === 'read') {
++    const parsed = StdioReadRequestSchema.safeParse(raw);
++    if (!parsed.success) return invalid(parsed.error);
++    if (!actions.read) return unavailable;
++    const rawPaths = parseStringArrayParam('paths', parsed.data.paths);
++    const paths = Array.isArray(rawPaths) ? rawPaths : rawPaths ? [rawPaths] : [];
++    if (paths.length === 0) return { error: 'Invalid stdio request: paths must not be empty' };
++    return {
++      notes: actions.read(paths, {
++        snippetLength: parsed.data.snippetLength,
++        related: parsed.data.related !== false,
++      }),
++    };
++  }
++  if (action === 'vectors') {
++    const parsed = StdioVectorsRequestSchema.safeParse(raw);
++    if (!parsed.success) return invalid(parsed.error);
++    if (!actions.vectors) return unavailable;
++    const { paths, pooling, normalize } = parsed.data;
++    return collectExport(actions.vectors({ paths, pooling, normalize }));
++  }
++  if (action === 'neighbors') {
++    const parsed = StdioNeighborsRequestSchema.safeParse(raw);
++    if (!parsed.success) return invalid(parsed.error);
++    if (!actions.neighbors) return unavailable;
++    const { paths, k, minScore, excludeLinked, pooling } = parsed.data;
++    const scope = parseStringArrayParam('scope', parsed.data.scope);
++    return collectExport(actions.neighbors({ paths, k, minScore, excludeLinked, scope, pooling }));
++  }
++  const parsed = StdioReindexRequestSchema.safeParse(raw);
++  if (!parsed.success) return invalid(parsed.error);
++  if (!actions.reindex) return unavailable;
++  return { result: await actions.reindex({ path: parsed.data.path, force: parsed.data.force }) };
++}
++
++function collectExport(exported: VectorExport<unknown>): Omit<StdioResponse, 'id'> {
++  return {
++    meta: exported.meta as unknown as Record<string, unknown>,
++    records: [...exported.records],
++  };
++}
++
+ function normalizeSearchOptions(rawOptions: SearchOptionsBoundary | undefined): SearchOptions {
+   if (rawOptions === undefined) {
+     return {};
+diff --git a/test/serve-stdio.test.ts b/test/serve-stdio.test.ts
+index 743ae38..92e0d8e 100644
+--- a/test/serve-stdio.test.ts
++++ b/test/serve-stdio.test.ts
+@@ -118,7 +118,7 @@ describe('handleStdioLine — explicit action dispatch', () => {
+     return { response: parseResponse(lines[0] ?? null), searchFn, statusFn };
+   }
+ 
+-  for (const action of ['reindex', '', 'SEARCH', ' status ', null, false, 0, 1, [], {}]) {
++  for (const action of ['bogus', '', 'SEARCH', ' status ', null, false, 0, 1, [], {}]) {
+     for (const fields of [{}, { query: 'alpha' }, { query: 42, options: { limit: 'x' } }]) {
+       it(`rejects action ${JSON.stringify(action)} with ${JSON.stringify(fields)}`, async () => {
+         const { response, searchFn, statusFn } = await dispatch({ id: 'bad', action, ...fields });
+@@ -136,7 +136,7 @@ describe('handleStdioLine — explicit action dispatch', () => {
+   }
+ 
+   for (const id of [undefined, 9, '']) {
+-    for (const action of ['reindex', false]) {
++    for (const action of ['bogus', false]) {
+       it(`preserves ID convention for ${JSON.stringify({ id, action })}`, async () => {
+         const { response, searchFn, statusFn } = await dispatch({ id, action, query: 42 });
+         assert.deepEqual(response, {
+diff --git a/test/transport-parity.test.ts b/test/transport-parity.test.ts
+index 1033b01..3859065 100644
+--- a/test/transport-parity.test.ts
++++ b/test/transport-parity.test.ts
+@@ -6,8 +6,9 @@ import { tmpdir } from 'node:os';
+ import path from 'node:path';
+ import { pathToFileURL } from 'node:url';
+ import { afterAll, expect, it } from 'vitest';
++import { exportNoteVectors, findNoteNeighbors } from '../src/search/note-vectors.js';
+ import type { SearchOptions, SearchResult } from '../src/search/searcher.js';
+-import { handleStdioLine } from '../src/transports/stdio-server.js';
++import { handleStdioLine, type StdioActionHandlers } from '../src/transports/stdio-server.js';
+ 
+ const root = path.resolve(import.meta.dirname, '..');
+ const vault = mkdtempSync(path.join(tmpdir(), 'ohs-transport-parity-'));
+@@ -21,7 +22,7 @@ const {
+   upsertMarkdownLinks,
+   upsertNoteUrls,
+ } = await import('./helpers/owned-storage.js');
+-const { search } = await import('../src/search/searcher.js');
++const { search, readNotes } = await import('../src/search/searcher.js');
+ const { populateMissingLinks, populateMissingMarkdownReferences } =
+   await import('./helpers/owned-indexer.js');
+ afterAll(() => {
+@@ -164,3 +165,109 @@ it('CLI JSON, MCP and line IPC preserve the same filtered Unicode result contrac
+     await client.close();
+   }
+ }, 30_000);
++
++it('read, vectors and neighbors give the same answer over line IPC, the CLI and MCP', async () => {
++  const actions: StdioActionHandlers = {
++    read: (paths, options) => readNotes(paths, options),
++    vectors: (params) => exportNoteVectors({ ...params, ohsVersion: 'parity' }),
++    neighbors: (params) => findNoteNeighbors({ ...params, ohsVersion: 'parity' }),
++  };
++  const ipc = async (request: Record<string, unknown>) => {
++    let line = '';
++    await handleStdioLine(
++      JSON.stringify({ id: 'x', ...request }),
++      search,
++      (output) => {
++        line = output;
++      },
++      undefined,
++      actions,
++    );
++    return JSON.parse(line) as Record<string, unknown>;
++  };
++
++  const env = {
++    ...Object.fromEntries(
++      Object.entries(process.env).filter(
++        (entry): entry is [string, string] => entry[1] !== undefined,
++      ),
++    ),
++    OBSIDIAN_VAULT_PATH: vault,
++    OPENAI_API_KEY: '',
++    OPENAI_BASE_URL: '',
++    OPENAI_EMBEDDING_MODEL: '',
++    LOCAL_EMBEDDING_MODEL: 'Xenova/multilingual-e5-small',
++    OHS_DISABLE_UPDATE_CHECK: '1',
++  };
++  const args = [
++    '--import',
++    pathToFileURL(path.join(root, 'dist/test/fixtures/vault-config-preload.js')).href,
++    path.join(root, 'dist/src/cli.js'),
++  ];
++  const cli = (...cliArgs: string[]) => {
++    const run = spawnSync(process.execPath, [...args, ...cliArgs], {
++      cwd: root,
++      env,
++      encoding: 'utf8',
++      timeout: 15_000,
++    });
++    expect(run.status, run.stderr).toBe(0);
++    return run.stdout;
++  };
++  const notePath = 'café/alpha.md'.normalize('NFD');
++  const asJson = (value: unknown) => JSON.parse(JSON.stringify(value)) as unknown;
++
++  // read
++  const readRequest = { action: 'read', paths: [notePath, 'missing.md'], snippetLength: 40 };
++  const read = await ipc(readRequest);
++  const expectedRead = asJson(readNotes([notePath, 'missing.md'], { snippetLength: 40 }));
++  expect(read).toEqual({ id: 'x', notes: expectedRead });
++  expect(
++    JSON.parse(cli('read', notePath, 'missing.md', '--snippet-length', '40', '--json')),
++  ).toEqual(expectedRead);
++
++  // vectors
++  const vectors = await ipc({ action: 'vectors', paths: [notePath] });
++  expect(vectors.error).toBeUndefined();
++  const cliVectors = cli('vectors', '--path', notePath)
++    .trim()
++    .split('\n')
++    .map((line) => JSON.parse(line) as Record<string, unknown>);
++  expect(cliVectors[0]).toEqual({
++    meta: { ...(vectors.meta as object), ohs_version: expect.any(String) as unknown },
++  });
++  expect(cliVectors.slice(1)).toEqual(vectors.records);
++  expect(vectors.records).toHaveLength(1);
++  const missing = await ipc({ action: 'vectors', paths: ['missing.md'] });
++  expect(missing.records).toEqual([{ path: 'missing.md', error: 'note not found in the index' }]);
++
++  // neighbors
++  const neighbors = await ipc({ action: 'neighbors', paths: [notePath], k: 2 });
++  expect(neighbors.error).toBeUndefined();
++  const cliNeighbors = cli('neighbors', '--path', notePath, '--k', '2')
++    .trim()
++    .split('\n')
++    .map((line) => JSON.parse(line) as Record<string, unknown>);
++  expect(cliNeighbors.slice(1)).toEqual(neighbors.records);
++
++  // MCP read
++  const client = new Client({ name: 'transport-parity', version: '1.0.0' });
++  const transport = new StdioClientTransport({
++    command: process.execPath,
++    args: [...args, 'mcp'],
++    cwd: root,
++    env,
++    stderr: 'pipe',
++  });
++  try {
++    await client.connect(transport);
++    const response = await client.callTool({
++      name: 'read',
++      arguments: { paths: [notePath, 'missing.md'], snippet_length: 40 },
++    });
++    const content = response.content as Array<{ type: string; text: string }>;
++    expect(JSON.parse(content[0]!.text)).toEqual({ results: expectedRead });
++  } finally {
++    await client.close();
++  }
++}, 60_000);
+diff --git a/test/vantt/stdio-parity.test.ts b/test/vantt/stdio-parity.test.ts
+new file mode 100644
+index 0000000..8c2f602
+--- /dev/null
++++ b/test/vantt/stdio-parity.test.ts
+@@ -0,0 +1,334 @@
++import { spawn } from 'node:child_process';
++import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { createServer, type Server } from 'node:http';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
++import {
++  drainInFlight,
++  handleStdioLine,
++  type StdioActionHandlers,
++} from '../../src/transports/stdio-server.js';
++
++const search = vi.fn(() => Promise.resolve([]));
++
++async function ask(
++  request: Record<string, unknown>,
++  actions?: StdioActionHandlers,
++): Promise<Record<string, unknown>> {
++  const lines: string[] = [];
++  await handleStdioLine(
++    JSON.stringify({ id: 'q', ...request }),
++    search,
++    (line) => lines.push(line),
++    undefined,
++    actions,
++  );
++  expect(lines).toHaveLength(1);
++  return JSON.parse(lines[0]!) as Record<string, unknown>;
++}
++
++describe('stdio actions: validation and dispatch', () => {
++  it('answers "not available" when the server supplies no handler', async () => {
++    for (const request of [
++      { action: 'read', paths: ['a.md'] },
++      { action: 'vectors' },
++      { action: 'neighbors' },
++      { action: 'reindex' },
++    ]) {
++      expect(await ask(request)).toEqual({
++        id: 'q',
++        error: `${request.action} is not available on this server`,
++      });
++    }
++  });
++
++  it('keeps unknown actions unknown and never touches a handler', async () => {
++    const read = vi.fn(() => []);
++    expect(await ask({ action: 'delete' }, { read })).toEqual({
++      id: 'q',
++      error: 'unknown action: delete',
++    });
++    expect(read).not.toHaveBeenCalled();
++  });
++
++  it('reports schema errors as {id, error} without calling the handler', async () => {
++    const handlers = {
++      read: vi.fn(() => []),
++      vectors: vi.fn(() => ({ meta: {} as never, records: [] })),
++      neighbors: vi.fn(() => ({ meta: {} as never, records: [] })),
++      reindex: vi.fn(() => Promise.resolve({})),
++    };
++    const bad = [
++      { action: 'read', paths: 7 },
++      { action: 'read', paths: [] },
++      { action: 'read', paths: ['a.md'], snippetLength: -1 },
++      { action: 'vectors', pooling: 'median' },
++      { action: 'vectors', paths: 'a.md' },
++      { action: 'neighbors', k: 0 },
++      { action: 'neighbors', minScore: 2 },
++      { action: 'neighbors', scope: 5 },
++      { action: 'reindex', force: 'yes' },
++      { action: 'reindex', path: 3 },
++    ];
++    for (const request of bad) {
++      const response = await ask(request, handlers);
++      expect(response.id).toBe('q');
++      expect(typeof response.error).toBe('string');
++      expect(Object.keys(response)).toHaveLength(2);
++    }
++    for (const handler of Object.values(handlers)) expect(handler).not.toHaveBeenCalled();
++  });
++
++  it('passes parsed parameters through and shapes the responses', async () => {
++    const handlers: StdioActionHandlers = {
++      read: vi.fn(() => [{ path: 'a.md', found: true }]),
++      vectors: vi.fn(() => ({
++        meta: { model: 'm' } as never,
++        records: new Set([{ path: 'a.md' }]),
++      })),
++      neighbors: vi.fn(() => ({ meta: { model: 'm' } as never, records: [] })),
++      reindex: vi.fn(() => Promise.resolve({ indexed: 1, skipped: 0, errors: [] })),
++    };
++    expect(await ask({ action: 'read', paths: 'a.md', related: false }, handlers)).toEqual({
++      id: 'q',
++      notes: [{ path: 'a.md', found: true }],
++    });
++    expect(handlers.read).toHaveBeenCalledWith(['a.md'], {
++      snippetLength: undefined,
++      related: false,
++    });
++    expect(await ask({ action: 'vectors', paths: ['a.md'], pooling: 'max' }, handlers)).toEqual({
++      id: 'q',
++      meta: { model: 'm' },
++      records: [{ path: 'a.md' }],
++    });
++    expect(handlers.vectors).toHaveBeenCalledWith({
++      paths: ['a.md'],
++      pooling: 'max',
++      normalize: undefined,
++    });
++    await ask(
++      { action: 'neighbors', k: 3, minScore: 0.5, excludeLinked: true, scope: ['x', '-y'] },
++      handlers,
++    );
++    expect(handlers.neighbors).toHaveBeenCalledWith({
++      paths: undefined,
++      k: 3,
++      minScore: 0.5,
++      excludeLinked: true,
++      scope: ['x', '-y'],
++      pooling: undefined,
++    });
++    expect(await ask({ action: 'reindex', path: 'a.md', force: true }, handlers)).toEqual({
++      id: 'q',
++      result: { indexed: 1, skipped: 0, errors: [] },
++    });
++    expect(handlers.reindex).toHaveBeenCalledWith({ path: 'a.md', force: true });
++  });
++
++  it('turns a handler exception into {id, error}', async () => {
++    const vectors = vi.fn(() => {
++      throw new Error('model mismatch');
++    });
++    expect(await ask({ action: 'vectors' }, { vectors })).toEqual({
++      id: 'q',
++      error: 'model mismatch',
++    });
++  });
++});
++
++describe('drainInFlight', () => {
++  it('returns at once when nothing is running', async () => {
++    expect(await drainInFlight(new Set(), 1000)).toBe(true);
++  });
++
++  it('waits for running work, including work added while waiting', async () => {
++    const inFlight = new Set<Promise<void>>();
++    let finished = 0;
++    const track = (ms: number) => {
++      const p: Promise<void> = new Promise<void>((resolve) => setTimeout(resolve, ms)).then(() => {
++        finished++;
++        inFlight.delete(p);
++      });
++      inFlight.add(p);
++    };
++    track(30);
++    setTimeout(() => track(30), 10);
++    expect(await drainInFlight(inFlight, 2000)).toBe(true);
++    expect(finished).toBe(2);
++  });
++
++  it('gives up after the timeout', async () => {
++    const never = new Promise<void>(() => undefined);
++    expect(await drainInFlight(new Set([never]), 20)).toBe(false);
++  });
++});
++
++// ─── Process level: the real `serve --stdio` ─────────────────────────────────
++
++const root = path.resolve(import.meta.dirname, '../..');
++const DIM = 8;
++const vault = mkdtempSync(path.join(tmpdir(), 'ohs-stdio-parity-'));
++let embedServer: Server;
++let embedPort = 0;
++
++function embedText(text: string): number[] {
++  const vector = new Array<number>(DIM).fill(0);
++  for (const word of text.toLowerCase().match(/[a-z]+/g) ?? []) {
++    let hash = 0;
++    for (const char of word) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
++    vector[hash % DIM] = (vector[hash % DIM] ?? 0) + 1;
++  }
++  const norm = Math.hypot(...vector) || 1;
++  return vector.map((v) => v / norm);
++}
++
++beforeAll(async () => {
++  writeFileSync(path.join(vault, 'apples.md'), 'Apples and pears grow in the orchard.\n');
++  writeFileSync(path.join(vault, 'pears.md'), 'Pears and apples ripen in autumn.\n');
++  writeFileSync(path.join(vault, 'rockets.md'), 'Rockets burn fuel to reach orbit.\n');
++  embedServer = createServer((req, res) => {
++    let body = '';
++    req.on('data', (chunk: Buffer) => (body += chunk.toString()));
++    req.on('end', () => {
++      const parsed = JSON.parse(body || '{}') as { input?: string | string[] };
++      const inputs = Array.isArray(parsed.input) ? parsed.input : [parsed.input ?? ''];
++      res.writeHead(200, { 'content-type': 'application/json' });
++      res.end(
++        JSON.stringify({
++          object: 'list',
++          data: inputs.map((text, index) => ({
++            object: 'embedding',
++            index,
++            embedding: embedText(text),
++          })),
++          model: 'text-embedding-3-small',
++        }),
++      );
++    });
++  });
++  await new Promise<void>((resolve) => embedServer.listen(0, '127.0.0.1', resolve));
++  embedPort = (embedServer.address() as { port: number }).port;
++});
++
++afterAll(() => {
++  embedServer.close();
++  rmSync(vault, { recursive: true, force: true });
++});
++
++interface Session {
++  responses: Array<Record<string, unknown>>;
++  exit: Promise<number | null>;
++  send(request: Record<string, unknown>): void;
++  closeStdin(): void;
++  waitFor(id: string): Promise<Record<string, unknown>>;
++}
++
++function startServer(): Session {
++  const child = spawn(process.execPath, [path.join(root, 'dist/src/cli.js'), 'serve', '--stdio'], {
++    cwd: vault,
++    env: {
++      ...process.env,
++      OBSIDIAN_VAULT_PATH: vault,
++      OPENAI_API_KEY: 'test',
++      OPENAI_BASE_URL: `http://127.0.0.1:${embedPort}/v1`,
++      OPENAI_EMBEDDING_MODEL: 'text-embedding-3-small',
++      OHS_DISABLE_UPDATE_CHECK: '1',
++      NO_COLOR: '1',
++    },
++    stdio: ['pipe', 'pipe', 'ignore'],
++  });
++  const responses: Array<Record<string, unknown>> = [];
++  const waiters = new Map<string, (value: Record<string, unknown>) => void>();
++  let buffered = '';
++  child.stdout.on('data', (chunk: Buffer) => {
++    buffered += chunk.toString();
++    let newline = buffered.indexOf('\n');
++    while (newline >= 0) {
++      const line = buffered.slice(0, newline);
++      buffered = buffered.slice(newline + 1);
++      newline = buffered.indexOf('\n');
++      if (!line.trim()) continue;
++      const message = JSON.parse(line) as Record<string, unknown>;
++      responses.push(message);
++      const id = typeof message.id === 'string' ? message.id : message.ready ? 'ready' : '';
++      waiters.get(id)?.(message);
++    }
++  });
++  const exit = new Promise<number | null>((resolve) => child.on('exit', (code) => resolve(code)));
++  return {
++    responses,
++    exit,
++    send: (request) => child.stdin.write(JSON.stringify(request) + '\n'),
++    closeStdin: () => child.stdin.end(),
++    waitFor: (id) =>
++      new Promise((resolve) => {
++        const existing = responses.find((r) => r.id === id || (id === 'ready' && r.ready));
++        if (existing) resolve(existing);
++        else waiters.set(id, resolve);
++      }),
++  };
++}
++
++describe('serve --stdio process', () => {
++  it('answers every in-flight request when stdin closes', async () => {
++    const session = startServer();
++    await session.waitFor('ready');
++    const total = 25;
++    for (let i = 0; i < total; i++) {
++      session.send({ id: `s${i}`, query: 'apples', options: { mode: 'fulltext' } });
++    }
++    session.closeStdin();
++    expect(await session.exit).toBe(0);
++    const ids = session.responses.map((r) => r.id).filter((id) => typeof id === 'string');
++    expect(new Set(ids)).toEqual(new Set(Array.from({ length: total }, (_, i) => `s${i}`)));
++    expect(ids).toHaveLength(total);
++    expect(session.responses.filter((r) => 'error' in r)).toEqual([]);
++  }, 60_000);
++
++  it('serves read, vectors, neighbors and reindex, then drains a slow reindex on close', async () => {
++    const session = startServer();
++    await session.waitFor('ready');
++
++    session.send({ id: 'index', action: 'reindex' });
++    const indexed = await session.waitFor('index');
++    expect(indexed.error).toBeUndefined();
++    expect(indexed.result).toMatchObject({ errors: [] });
++
++    session.send({ id: 'one', action: 'reindex', path: 'apples.md', force: true });
++    expect((await session.waitFor('one')).result).toMatchObject({ indexed: 1, errors: [] });
++
++    session.send({ id: 'read', action: 'read', paths: ['apples.md', 'nope.md'], related: false });
++    const read = (await session.waitFor('read')).notes as Array<Record<string, unknown>>;
++    expect(read[0]).toMatchObject({ path: 'apples.md', found: true });
++    expect(read[1]).toMatchObject({ path: 'nope.md', found: false });
++
++    session.send({ id: 'vec', action: 'vectors', paths: ['apples.md'] });
++    const vec = await session.waitFor('vec');
++    expect(vec.meta).toMatchObject({ dim: DIM, pooling: 'mean', note_count: 1 });
++    const [note] = vec.records as Array<{ path: string; dim: number; vector: number[] }>;
++    expect(note).toMatchObject({ path: 'apples.md', dim: DIM });
++    expect(note?.vector).toHaveLength(DIM);
++
++    session.send({ id: 'nn', action: 'neighbors', paths: ['apples.md'], k: 2 });
++    const nn = await session.waitFor('nn');
++    const [neighbors] = nn.records as Array<{ neighbors: Array<{ path: string }> }>;
++    expect(neighbors?.neighbors[0]?.path).toBe('pears.md');
++
++    session.send({ id: 'bad', action: 'neighbors', k: 0 });
++    expect(await session.waitFor('bad')).toMatchObject({
++      id: 'bad',
++      error: expect.any(String) as unknown,
++    });
++    session.send({ id: 'who', action: 'nope' });
++    expect(await session.waitFor('who')).toEqual({ id: 'who', error: 'unknown action: nope' });
++
++    // A full reindex followed at once by EOF: the answer must still arrive.
++    session.send({ id: 'last', action: 'reindex', force: true });
++    session.closeStdin();
++    expect(await session.exit).toBe(0);
++    const last = session.responses.find((r) => r.id === 'last');
++    expect(last?.result).toMatchObject({ errors: [] });
++  }, 120_000);
++});
+-- 
+2.53.0
+

@@ -1,0 +1,153 @@
+# Patch series applied by vantt/scripts/catchup.mjs on top of an upstream tag (PRD 6, 9.1).
+#
+# Patches are applied in file order. Planned order (PRD 9.4):
+#   P00 fork-identity, P01 language-pack-api, P02 db-path, P03 vector-export,
+#   P04 stdio-parity, P09 unicode-inline-tags, P05 block-anchors,
+#   P06 restrict-paths, P07 index-events
+#
+# Each patch is one [[patches]] table. Supported syntax: comments, strings
+# ("..." or '...'), arrays of strings (may span lines), booleans.
+#
+# [[patches]]
+# id = "db-path"                          # required, unique, kebab-case; commit gets "Patch-Id: <id>"
+# name = "feat(storage): allow the index database outside the vault"   # required, commit subject
+# patch_file = "0002-db-path.patch"      # required, `git format-patch` output, relative to vantt/patches/
+# metadata_file = "0002-db-path.spec.md" # spec (PRD 9.3): invariants, touch points, what to do on conflict
+# consumer = "pkm installer; Obsidian Sync users"
+# upstream_status = "unsubmitted"         # unsubmitted | issue_opened | pr_opened | merged | rejected
+#                                         # "merged" = catchup skips the patch
+# upstream_ref = ""                       # issue or PR link
+# touches = ["src/runtime/config.ts", "src/vault/vault-config.ts"]
+# test_command = "npx vitest run test/vantt/db-path.test.ts"         # tier T2
+# capability_check = "node dist/src/cli.js status --json | node vantt/scripts/expect.mjs db_path"
+# probe = "vantt/probes/db-path.mjs"      # PRD 9.2; run by the upstream review, not by catchup
+# phase = "now"                           # now | later
+#
+# After a conflict is fixed and the run goes green, catchup re-exports every
+# applied patch into this directory (PRD 6.4); commit the refreshed files on master.
+
+[[patches]]
+id = "fork-identity"
+name = "feat(cli): report fork build identity and allow disabling update checks"
+patch_file = "0000-fork-identity.patch"
+metadata_file = "0000-fork-identity.spec.md"
+consumer = "fork release builds; ohs installer"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/runtime/package-identity.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/status-payload.ts"]
+test_command = "npx vitest run test/vantt/fork-identity.test.ts"
+capability_check = "node vantt/probes/fork-identity.mjs --ohs ."
+probe = "vantt/probes/fork-identity.mjs"
+phase = "now"
+
+[[patches]]
+id = "language-pack-api"
+name = "feat(language): add a language-pack extension point"
+patch_file = "0001-language-pack-api.patch"
+metadata_file = "0001-language-pack-api.spec.md"
+consumer = "ohs-lang-vi; ohs-lang-de; future language packs"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/search/searcher.ts", "src/storage/db.ts", "src/indexing/index-service.ts", "src/indexing/indexer.ts", "src/runtime/config.ts", "src/contracts/boundary-validation.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/stdio-server.ts", "src/transports/status-payload.ts", "dependency-cruiser.config.cjs", "knip.json", "ARCHITECTURE.md", "test/architecture/check.ts", "test/architecture-boundaries.test.ts"]
+test_command = "npx vitest run test/vantt/language-pack-baseline.test.ts test/vantt/language-pack.test.ts test/vantt/language-pack-tokens.test.ts test/vantt/tie-aware.test.ts test/vantt/core-fusion.test.ts test/architecture-boundaries.test.ts"
+capability_check = "node vantt/probes/language-pack-api.mjs --ohs ."
+probe = "vantt/probes/language-pack-api.mjs"
+phase = "now"
+
+[[patches]]
+id = "db-path"
+name = "feat(storage): allow the index database outside the vault"
+patch_file = "0002-db-path.patch"
+metadata_file = "0002-db-path.spec.md"
+consumer = "pkm installer; Obsidian Sync users"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/runtime/config.ts", "src/vault/vault-config.ts", "src/storage/db.ts", "src/storage/vault-locator.ts", "src/transports/status-payload.ts", "src/transports/mcp-runtime.ts", "src/transports/cli.ts", "README.md"]
+test_command = "npx vitest run test/vantt/db-path.test.ts"
+capability_check = "node vantt/probes/db-path.mjs --ohs ."
+probe = "vantt/probes/db-path.mjs"
+phase = "now"
+
+[[patches]]
+id = "vector-export"
+name = "feat(search): export note vectors and nearest notes as JSON Lines"
+patch_file = "0003-vector-export.patch"
+metadata_file = "0003-vector-export.spec.md"
+consumer = "pkm project (note_knn, similar_pairs); stdio-parity; mobile server"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/transports/cli.ts", "src/storage/note-vectors.ts", "src/search/note-vectors.ts"]
+test_command = "npx vitest run test/vantt/vector-export.test.ts"
+capability_check = "node vantt/probes/vector-export.mjs --ohs ."
+probe = "vantt/probes/vector-export.mjs"
+phase = "now"
+
+[[patches]]
+id = "stdio-parity"
+name = "feat(stdio): add read, vectors, neighbors and reindex actions and drain requests on close"
+patch_file = "0004-stdio-parity.patch"
+metadata_file = "0004-stdio-parity.spec.md"
+consumer = "pkm plugin and phone server; any client holding a long-lived serve --stdio process"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/contracts/boundary-validation.ts", "src/transports/stdio-server.ts", "src/transports/cli.ts", "test/transport-parity.test.ts", "test/serve-stdio.test.ts"]
+test_command = "npx vitest run test/vantt/stdio-parity.test.ts test/transport-parity.test.ts test/serve-stdio.test.ts"
+capability_check = "node vantt/probes/stdio-parity.mjs --ohs ."
+probe = "vantt/probes/stdio-parity.mjs"
+phase = "now"
+
+[[patches]]
+id = "unicode-inline-tags"
+name = "fix(content): accept Unicode letters in inline tags"
+patch_file = "0009-unicode-inline-tags.patch"
+metadata_file = "0009-unicode-inline-tags.spec.md"
+consumer = "người dùng tiếng Việt và mọi ngôn ngữ ngoài Latin cơ bản"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/content/note-extractor.ts"]
+test_command = "npx vitest run test/vantt/unicode-inline-tags.test.ts test/indexer.test.ts test/indexer-edge-cases.test.ts"
+capability_check = "node vantt/probes/unicode-inline-tags.mjs --ohs ."
+probe = "vantt/probes/unicode-inline-tags.mjs"
+phase = "now"
+
+[[patches]]
+id = "block-anchors"
+name = "feat(index): store block ids and highlight flags per chunk, make chunk size configurable"
+patch_file = "0005-block-anchors.patch"
+metadata_file = "0005-block-anchors.spec.md"
+consumer = "project material pages (note#^block, highlighted passages); users wanting smaller chunks (upstream #91)"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/content/block-anchors.ts", "src/content/chunker.ts", "src/runtime/config.ts", "src/indexing/indexer.ts", "src/indexing/index-service.ts", "src/storage/db.ts", "src/storage/search-queries.ts", "src/search/searcher.ts"]
+test_command = "npx vitest run test/vantt/block-anchors.test.ts test/vantt/language-pack-baseline.test.ts"
+capability_check = "node vantt/probes/block-anchors.mjs --ohs ."
+probe = "vantt/probes/block-anchors.mjs"
+phase = "now"
+
+[[patches]]
+id = "restrict-paths"
+name = "feat(search): restrict search to a given set of note paths"
+patch_file = "0006-restrict-paths.patch"
+metadata_file = "0006-restrict-paths.spec.md"
+consumer = "pkm project: search within a region of notes"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/contracts/filter-predicate.ts", "src/search/searcher.ts", "src/contracts/boundary-validation.ts", "src/transports/cli.ts", "src/transports/mcp-runtime.ts", "src/transports/stdio-server.ts"]
+test_command = "npx vitest run test/vantt/restrict-paths.test.ts"
+capability_check = "node vantt/probes/restrict-paths.mjs --ohs ."
+probe = "vantt/probes/restrict-paths.mjs"
+phase = "now"
+
+[[patches]]
+id = "index-events"
+name = "feat(stdio): emit indexed and removed events after index writes"
+patch_file = "0007-index-events.patch"
+metadata_file = "0007-index-events.spec.md"
+consumer = "pkm (event-driven graph update); stdio IPC clients"
+upstream_status = "unsubmitted"
+upstream_ref = ""
+touches = ["src/indexing/indexer.ts", "src/runtime/config.ts", "src/transports/cli.ts"]
+test_command = "npx vitest run test/vantt/index-events.test.ts"
+capability_check = "node vantt/probes/index-events.mjs --ohs ."
+probe = "vantt/probes/index-events.mjs"
+phase = "now"

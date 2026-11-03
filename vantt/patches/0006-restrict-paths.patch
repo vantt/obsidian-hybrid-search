@@ -1,0 +1,550 @@
+From 632209f41385ff3020971f70ca3331a3dc05305b Mon Sep 17 00:00:00 2001
+From: Van Tran <trantoanvan@outlook.com>
+Date: Mon, 2 Nov 2026 12:09:32 +0700
+Subject: [PATCH] feat(search): restrict search to a given set of note paths
+
+Add a paths option (search option, MCP/stdio argument, CLI --paths-file) that
+becomes a clause of buildFilterPredicate and is pushed into every retrieval
+branch, so a restricted search equals a search over a vault holding only those
+notes.
+
+Patch-Id: restrict-paths
+---
+ src/contracts/boundary-validation.ts |   2 +
+ src/contracts/filter-predicate.ts    |  28 +++-
+ src/search/searcher.ts               |  33 +++-
+ src/transports/cli.ts                |  31 +++-
+ src/transports/mcp-runtime.ts        |   7 +
+ src/transports/stdio-server.ts       |   1 +
+ test/vantt/restrict-paths.test.ts    | 231 +++++++++++++++++++++++++++
+ 7 files changed, 328 insertions(+), 5 deletions(-)
+ create mode 100644 test/vantt/restrict-paths.test.ts
+
+diff --git a/src/contracts/boundary-validation.ts b/src/contracts/boundary-validation.ts
+index 9cfc2f7..21aa498 100644
+--- a/src/contracts/boundary-validation.ts
++++ b/src/contracts/boundary-validation.ts
+@@ -14,6 +14,7 @@ export const SearchOptionsBoundarySchema = z.object({
+   threshold: ThresholdSchema.optional(),
+   tag: z.unknown().optional(),
+   frontmatter: z.unknown().optional(),
++  paths: z.array(z.string()).optional(),
+   related: z.boolean().optional(),
+   depth: NonNegativeIntegerSchema.optional(),
+   direction: DirectionSchema.optional(),
+@@ -36,6 +37,7 @@ export const SearchToolArgumentsSchema = z.object({
+   threshold: ThresholdSchema.optional(),
+   tag: z.unknown().optional(),
+   frontmatter: z.unknown().optional(),
++  paths: z.array(z.string()).optional(),
+   related: z.boolean().optional(),
+   depth: NonNegativeIntegerSchema.optional(),
+   direction: DirectionSchema.optional(),
+diff --git a/src/contracts/filter-predicate.ts b/src/contracts/filter-predicate.ts
+index 3ee26ad..e2cd95f 100644
+--- a/src/contracts/filter-predicate.ts
++++ b/src/contracts/filter-predicate.ts
+@@ -16,6 +16,29 @@ interface FilterOptions {
+   tag?: string | string[];
+   scope?: string | string[];
+   frontmatter?: string | string[];
++  /** Exact vault-relative note paths. Unlike the other kinds an empty array is a real,
++   *  empty restriction (matches nothing), not an absent one. */
++  paths?: string[];
++}
++
++/** True when a `paths` restriction was supplied, including the empty one. */
++export function hasPathsFilter(paths: string[] | undefined): paths is string[] {
++  return paths !== undefined;
++}
++
++/** Distinct normalized note paths, in first-seen order. */
++export function normalizePathSet(paths: string[]): string[] {
++  return [...new Set(paths.map((p) => normalizeNotePath(p)))];
++}
++
++/**
++ * One JSON-array parameter instead of one placeholder per path, so a restriction of any
++ * size stays clear of SQLite's bound-variable limit. `json_each` is materialised once and
++ * probed through the UNIQUE index on `notes.path`.
++ */
++function pathsClause(paths: string[], params: Array<string | number>): string {
++  params.push(JSON.stringify(normalizePathSet(paths)));
++  return `n.path IN (SELECT value FROM json_each(?))`;
+ }
+ 
+ /**
+@@ -115,7 +138,8 @@ export function buildFilterPredicate(options: FilterOptions): FilterPredicate {
+   if (
+     !hasFilterValue(options.tag) &&
+     !hasFilterValue(options.scope) &&
+-    !hasFilterValue(options.frontmatter)
++    !hasFilterValue(options.frontmatter) &&
++    !hasPathsFilter(options.paths)
+   ) {
+     return empty;
+   }
+@@ -154,6 +178,8 @@ export function buildFilterPredicate(options: FilterOptions): FilterPredicate {
+   }
+   for (const s of scope.excludes) clauses.push(`NOT ${scopeClause(s, params)}`);
+ 
++  if (hasPathsFilter(options.paths)) clauses.push(pathsClause(options.paths, params));
++
+   // Every supplied value was unparsable (e.g. frontmatter "-not-a-pair"), so nothing
+   // constrains the query. Returning "()" here would be a SQL syntax error that the
+   // arms' catch blocks would swallow into an empty result.
+diff --git a/src/search/searcher.ts b/src/search/searcher.ts
+index 9e5f8ee..da85060 100644
+--- a/src/search/searcher.ts
++++ b/src/search/searcher.ts
+@@ -13,6 +13,8 @@ import { normalizeNotePath } from '../content/text-normalization.js';
+ import {
+   buildFilterPredicate,
+   hasFilterValue,
++  hasPathsFilter,
++  normalizePathSet,
+   type FilterPredicate,
+ } from '../contracts/filter-predicate.js';
+ import { activeModelName, embed } from '../inference/embedder.js';
+@@ -163,6 +165,8 @@ export interface SearchOptions {
+   threshold?: number;
+   tag?: string | string[];
+   frontmatter?: string | string[];
++  /** Restrict every retrieval arm to exactly these vault-relative note paths. */
++  paths?: string[];
+   related?: boolean;
+   depth?: number;
+   direction?: 'outgoing' | 'backlinks' | 'both';
+@@ -1302,6 +1306,13 @@ const searchCache = new LRUCache<SearchResult[]>(100);
+  *  filter-only branch's FETCH_ALL so both paths cap the vault the same way. */
+ const UNLIMITED_RESULTS = 10000;
+ 
++const compareCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
++
++function pathsKey(paths: string[] | undefined): string {
++  if (!hasPathsFilter(paths)) return '';
++  return `\0paths\0${normalizePathSet(paths).sort(compareCodeUnit).join('\n')}`;
++}
++
+ function cacheKey(input: string, options: SearchOptions): string {
+   const scopeStr = Array.isArray(options.scope) ? options.scope.join(',') : (options.scope ?? '');
+   const tagStr = Array.isArray(options.tag) ? options.tag.join(',') : (options.tag ?? '');
+@@ -1312,6 +1323,8 @@ function cacheKey(input: string, options: SearchOptions): string {
+   const rerankStr = options.rerank ? config.rerankerModel : '';
+   const queriesStr = options.queries && options.queries.length > 1 ? options.queries.join('|') : '';
+   const anchorsStr = options.anchors ? 'a' : '';
++  // Empty unless paths is set, so the key is unchanged otherwise.
++  const pathsStr = pathsKey(options.paths);
+   // Empty unless explain or an active language pack applies, so the key is unchanged otherwise.
+   const pack = activeLanguagePack();
+   const languageStr =
+@@ -1320,7 +1333,7 @@ function cacheKey(input: string, options: SearchOptions): string {
+   //   getDbVersion() — shared via SQLite settings; any process that modifies the DB
+   //                    bumps it, invalidating caches in all other processes.
+   //   localVersion   — in-process counter; bumpIndexVersion() for test-suite isolation.
+-  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}${languageStr}`;
++  return `v${getDbVersion()}_${getIndexVersion()}\0${activeModelName()}\0${getStoredModel()}\0${input}\0${options.mode ?? ''}\0${scopeStr}\0${options.limit ?? ''}\0${options.threshold ?? ''}\0${tagStr}\0${fmStr}\0${options.snippetLength ?? ''}\0${options.notePath ?? ''}\0${rerankStr}\0${queriesStr}\0${anchorsStr}${languageStr}${pathsStr}`;
+ }
+ 
+ // eslint-disable-next-line sonarjs/cognitive-complexity -- primary search entry-point; complexity is inherent in the multi-mode, multi-filter pipeline
+@@ -1361,7 +1374,7 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+     const fmStr = Array.isArray(options.frontmatter)
+       ? options.frontmatter.join(',')
+       : (options.frontmatter ?? '');
+-    const key = `related\0v${getDbVersion()}_${getIndexVersion()}\0${resolvedPath}\0${maxDepth}\0${direction}\0${linkType}\0${snippetLength}\0${scopeStr}\0${tagStr}\0${fmStr}`;
++    const key = `related\0v${getDbVersion()}_${getIndexVersion()}\0${resolvedPath}\0${maxDepth}\0${direction}\0${linkType}\0${snippetLength}\0${scopeStr}\0${tagStr}\0${fmStr}${pathsKey(options.paths)}`;
+     const cached = searchCache.get(key);
+     if (cached) return cached;
+     let related = searchRelated(resolvedPath, maxDepth, direction, snippetLength, linkType);
+@@ -1369,6 +1382,10 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+     if (hasFilterValue(options.scope)) {
+       related = related.filter((r) => matchesScopeFilter(r.path, options.scope!));
+     }
++    if (hasPathsFilter(options.paths)) {
++      const allowed = new Set(normalizePathSet(options.paths));
++      related = related.filter((r) => allowed.has(r.path));
++    }
+     if (hasFilterValue(options.tag)) {
+       const allowedPaths = filterNotePathsByTag(
+         related.map((result) => result.path),
+@@ -1407,8 +1424,13 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+   const hasFrontmatterFilter = hasFilterValue(options.frontmatter);
+   const hasTagFilter = hasFilterValue(options.tag);
+   const hasScopeFilter = hasFilterValue(options.scope);
++  const hasPaths = hasPathsFilter(options.paths);
+ 
+-  if (!input && !isPathLookup && (hasFrontmatterFilter || hasTagFilter || hasScopeFilter)) {
++  if (
++    !input &&
++    !isPathLookup &&
++    (hasFrontmatterFilter || hasTagFilter || hasScopeFilter || hasPaths)
++  ) {
+     const fmKey = cacheKey('', options);
+     const cachedFm = searchCache.get(fmKey);
+     if (cachedFm) return cachedFm;
+@@ -1447,6 +1469,11 @@ export async function search(input: string, options: SearchOptions = {}): Promis
+       fmResults = fmResults.filter((r) => matchesScopeFilter(r.path, options.scope!));
+     }
+ 
++    if (hasPaths) {
++      const allowed = new Set(normalizePathSet(options.paths!));
++      fmResults = fmResults.filter((r) => allowed.has(r.path));
++    }
++
+     // Apply tag filter
+     if (hasTagFilter) {
+       fmResults = applyTagFilter(fmResults, options.tag!);
+diff --git a/src/transports/cli.ts b/src/transports/cli.ts
+index 0d29dae..2923779 100644
+--- a/src/transports/cli.ts
++++ b/src/transports/cli.ts
+@@ -51,6 +51,24 @@ function failCliValidation(err: unknown): never {
+   process.exit(1);
+ }
+ 
++/** Reads a `--paths-file`: one vault-relative note path per line; `-` reads stdin. */
++function readPathsFile(file: string | undefined): string[] | undefined {
++  if (file === undefined) return undefined;
++  let text: string;
++  try {
++    text = readFileSync(file === '-' ? 0 : file, 'utf8');
++  } catch (err) {
++    throw new Error(
++      `Cannot read --paths-file ${file}: ${err instanceof Error ? err.message : String(err)}`,
++      { cause: err },
++    );
++  }
++  return text
++    .split(/\r?\n/)
++    .map((line) => line.trim())
++    .filter((line) => line !== '');
++}
++
+ function failAmbiguousPath(err: unknown): boolean {
+   if (!isAmbiguousNotePathError(err)) return false;
+   console.error(`Found ${err.candidates.length} matches:`);
+@@ -139,6 +157,7 @@ interface SearchOpts {
+   rerank?: boolean;
+   anchors?: boolean;
+   explain?: boolean;
++  pathsFile?: string;
+ }
+ 
+ interface ReindexOpts {
+@@ -463,13 +482,20 @@ program
+     '--anchors',
+     'Include previewAnchors (headingPath, matchText, charStart/charEnd) in JSON output',
+   )
++  .option(
++    '--paths-file <file>',
++    'Restrict the search to the note paths listed in <file> (one vault-relative path per line, "-" for stdin); an empty file matches nothing',
++  )
+   .option('--explain', 'Include per-branch ranks and language-pack query analysis in JSON output')
+   .action(async (queries: string[], opts: SearchOpts) => {
+     const effectiveInput = opts.path ?? queries[0];
+     const frontmatterFilters = [...opts.frontmatter, ...opts.prop];
+     const scopeFilters = [...opts.scope, ...opts.folder];
+     const hasFilters =
+-      frontmatterFilters.length > 0 || opts.tag.length > 0 || scopeFilters.length > 0;
++      frontmatterFilters.length > 0 ||
++      opts.tag.length > 0 ||
++      scopeFilters.length > 0 ||
++      opts.pathsFile !== undefined;
+     if (!effectiveInput && !hasFilters) {
+       program.help();
+       return;
+@@ -481,7 +507,9 @@ program
+     let threshold: number;
+     let depth: number;
+     let snippetLength: number | undefined;
++    let paths: string[] | undefined;
+     try {
++      paths = readPathsFile(opts.pathsFile);
+       parsedLimit =
+         opts.limit !== undefined
+           ? parseCliIntegerOption('--limit', opts.limit, { min: 0 })
+@@ -517,6 +545,7 @@ program
+         threshold,
+         tag: opts.tag.length > 0 ? opts.tag : undefined,
+         frontmatter: frontmatterFilters.length > 0 ? frontmatterFilters : undefined,
++        paths,
+         related: opts.related ?? false,
+         depth,
+         direction: opts.direction,
+diff --git a/src/transports/mcp-runtime.ts b/src/transports/mcp-runtime.ts
+index 2b99330..93cf38e 100644
+--- a/src/transports/mcp-runtime.ts
++++ b/src/transports/mcp-runtime.ts
+@@ -223,6 +223,7 @@ async function callSearchTool(a: Record<string, unknown>): Promise<McpToolResult
+       threshold: searchArgs.threshold,
+       tag,
+       frontmatter,
++      paths: searchArgs.paths,
+       related: searchArgs.related,
+       depth: searchArgs.depth,
+       direction: searchArgs.direction,
+@@ -410,6 +411,12 @@ export function createMcpServer(runtime: McpRuntime): Server {
+                 'Minimum score 0..1 after text/path ranking. Use ~0.2 to hide weak matches when precision matters. ' +
+                 'Ignored by related and filter-only searches; keep 0 for exploration or when recall matters because high thresholds can drop useful results.',
+             },
++            paths: {
++              type: 'array',
++              items: { type: 'string' },
++              description:
++                'Restrict the search to exactly these vault-relative note paths (e.g. ["projects/a.md"]). Applied inside every retrieval branch, so results equal a search over a vault holding only these notes. An empty array matches nothing. Not set: whole vault.',
++            },
+             tag: {
+               description:
+                 'Tag filter. Use when the user specifies tags/categories, not as a substitute for semantic topic search. String or array; prefix with "-" to exclude. ' +
+diff --git a/src/transports/stdio-server.ts b/src/transports/stdio-server.ts
+index 9013295..0285739 100644
+--- a/src/transports/stdio-server.ts
++++ b/src/transports/stdio-server.ts
+@@ -230,6 +230,7 @@ function normalizeSearchOptions(rawOptions: SearchOptionsBoundary | undefined):
+   if (rawOptions.queries !== undefined) options.queries = rawOptions.queries;
+   if (rawOptions.anchors !== undefined) options.anchors = rawOptions.anchors;
+   if (rawOptions.explain !== undefined) options.explain = rawOptions.explain;
++  if (rawOptions.paths !== undefined) options.paths = rawOptions.paths;
+ 
+   const scope = parseStringArrayParam('scope', rawOptions.scope);
+   if (scope !== undefined) options.scope = scope;
+diff --git a/test/vantt/restrict-paths.test.ts b/test/vantt/restrict-paths.test.ts
+new file mode 100644
+index 0000000..004be56
+--- /dev/null
++++ b/test/vantt/restrict-paths.test.ts
+@@ -0,0 +1,231 @@
++import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import path from 'node:path';
++import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
++
++const vault = mkdtempSync(path.join(tmpdir(), 'ohs-restrict-paths-'));
++process.env.OBSIDIAN_VAULT_PATH = vault;
++const PACK_DIR = path.resolve(import.meta.dirname, 'fixtures/lang-upper');
++
++vi.mock('../../src/inference/embedder.js', async (importOriginal) => {
++  const actual = await importOriginal<typeof import('../../src/inference/embedder.js')>();
++  const { fixtureVector } = await import('./fixtures/language-pack-vault.js');
++  return {
++    ...actual,
++    activeModelName: () => 'fixture-model',
++    getEmbeddingDim: () => Promise.resolve(8),
++    getContextLength: () => Promise.resolve(512),
++    getDocumentTokenPolicy: () =>
++      Promise.resolve({ limit: 508, count: (text: string) => text.length / 4 }),
++    embedDetailed: vi.fn((texts: string[]) =>
++      Promise.resolve(texts.map((text) => ({ ok: true as const, embedding: fixtureVector(text) }))),
++    ),
++    embed: vi.fn((texts: string[]) => Promise.resolve(texts.map((t) => fixtureVector(t)))),
++  };
++});
++
++const { openIndexDatabase, createIndexService } =
++  await import('../../src/indexing/index-service.js');
++const { search } = await import('../../src/search/searcher.js');
++const { closeDb } = await import('../../src/storage/db.js');
++const { buildFilterPredicate } = await import('../../src/contracts/filter-predicate.js');
++const { handleStdioLine } = await import('../../src/transports/stdio-server.js');
++const { SearchToolArgumentsSchema, SearchOptionsBoundarySchema } =
++  await import('../../src/contracts/boundary-validation.js');
++
++const REGION_SIZE = 30;
++const NOISE_SIZE = 120;
++const byCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
++const region = Array.from({ length: REGION_SIZE }, (_, i) => `region/r-${i}.md`);
++const noise = Array.from({ length: NOISE_SIZE }, (_, i) => `noise/n-${i}.md`);
++
++function write(file: string, text: string): void {
++  const full = path.join(vault, file);
++  mkdirSync(path.dirname(full), { recursive: true });
++  writeFileSync(full, text);
++}
++
++function writeNotes(): void {
++  // Noise notes repeat the query terms far more often than region notes, so without
++  // pushdown they fill every top-K and the region notes are unreachable.
++  noise.forEach((file, i) => {
++    write(
++      file,
++      `# Große Straße noise ${i}\n\n${'Die Große Straße, grosse strasse und die Straße. '.repeat(4)}noise${i}\n`,
++    );
++  });
++  region.forEach((file, i) => {
++    write(
++      file,
++      `# Straße region ${i}\n\nDie Große Straße, grosse strasse ${'filler '.repeat(i % 7)} region${i}${' extra'.repeat(i)}\n`,
++    );
++  });
++}
++
++async function reopen(pack: boolean): Promise<void> {
++  closeDb();
++  if (pack) {
++    process.env.OHS_LANGUAGE_PACK = PACK_DIR;
++    process.env.OHS_LANGUAGE_PACK_OPTIONS = '{}';
++  } else {
++    delete process.env.OHS_LANGUAGE_PACK;
++    delete process.env.OHS_LANGUAGE_PACK_OPTIONS;
++  }
++  await openIndexDatabase();
++  const service = createIndexService();
++  try {
++    const result = await service.reindex();
++    expect(result.errors).toEqual([]);
++  } finally {
++    await service.close();
++  }
++}
++
++const QUERIES = ['grosse strasse', 'Straße', 'region'];
++const MODES = ['fulltext', 'title', 'semantic', 'hybrid'] as const;
++
++async function pathsFor(
++  query: string,
++  mode: (typeof MODES)[number],
++  paths?: string[],
++): Promise<string[]> {
++  const results = await search(query, { mode, limit: REGION_SIZE, ...(paths ? { paths } : {}) });
++  return results.map((r) => r.path);
++}
++
++afterAll(() => {
++  closeDb();
++  delete process.env.OHS_LANGUAGE_PACK;
++  delete process.env.OHS_LANGUAGE_PACK_OPTIONS;
++  rmSync(vault, { recursive: true, force: true });
++});
++
++beforeAll(() => {
++  writeNotes();
++});
++
++describe.each([[false], [true]])('restricting to a set of 30 notes (language pack: %s)', (pack) => {
++  it('returns what a vault holding only those 30 notes returns, in every mode', async () => {
++    writeNotes();
++    await reopen(pack);
++
++    // Precondition: unrestricted, noise crowds the region out of the top-10, so the
++    // restricted run below can only succeed if the filter reached the retrieval queries.
++    const crowded = await search('grosse strasse', { mode: 'fulltext', limit: 10 });
++    expect(crowded.every((r) => !r.path.startsWith('region/'))).toBe(true);
++
++    const restricted = new Map<string, string[]>();
++    for (const query of QUERIES) {
++      for (const mode of MODES) {
++        restricted.set(`${mode}|${query}`, await pathsFor(query, mode, region));
++      }
++    }
++
++    for (const file of noise) rmSync(path.join(vault, file));
++    await reopen(pack);
++
++    for (const query of QUERIES) {
++      for (const mode of MODES) {
++        const alone = await pathsFor(query, mode);
++        const got = restricted.get(`${mode}|${query}`)!;
++        expect(alone.every((p) => p.startsWith('region/'))).toBe(true);
++        expect(got, `${mode} "${query}"`).toEqual(alone);
++      }
++    }
++    expect(restricted.get('fulltext|grosse strasse')!).toHaveLength(REGION_SIZE);
++    writeNotes();
++  });
++});
++
++describe('paths option semantics', () => {
++  beforeAll(async () => {
++    writeNotes();
++    await reopen(false);
++  });
++
++  it('restricts to exactly the listed notes and ignores unknown paths', async () => {
++    const results = await search('strasse', {
++      mode: 'fulltext',
++      paths: ['noise/n-3.md', 'region/r-1.md', 'missing/none.md'],
++    });
++    expect(results.map((r) => r.path).sort(byCodeUnit)).toEqual(['noise/n-3.md', 'region/r-1.md']);
++  });
++
++  it('an empty list matches nothing', async () => {
++    expect(await search('strasse', { paths: [] })).toEqual([]);
++    expect(await search('', { paths: [] })).toEqual([]);
++  });
++
++  it('combines with the other filters', async () => {
++    const results = await search('strasse', {
++      mode: 'fulltext',
++      paths: [...region, ...noise],
++      scope: 'region',
++      limit: 0,
++    });
++    expect(results).toHaveLength(REGION_SIZE);
++  });
++
++  it('lists exactly the given notes when no query is given', async () => {
++    const results = await search('', { paths: region.slice(0, 5), limit: 0 });
++    expect(results.map((r) => r.path).sort(byCodeUnit)).toEqual(
++      region.slice(0, 5).sort(byCodeUnit),
++    );
++  });
++
++  it('restricts a similar-notes lookup', async () => {
++    const results = await search('', {
++      notePath: 'region/r-0.md',
++      paths: region.slice(0, 6),
++      limit: 20,
++    });
++    expect(results.length).toBeGreaterThan(0);
++    expect(results.every((r) => region.slice(1, 6).includes(r.path))).toBe(true);
++  });
++
++  it('is not served from a cache entry of a different restriction', async () => {
++    const a = await search('strasse', { mode: 'fulltext', paths: ['region/r-1.md'] });
++    const b = await search('strasse', { mode: 'fulltext', paths: ['region/r-2.md'] });
++    expect(a.map((r) => r.path)).toEqual(['region/r-1.md']);
++    expect(b.map((r) => r.path)).toEqual(['region/r-2.md']);
++  });
++
++  it('leaves results unchanged when not set', async () => {
++    const plain = await pathsFor('strasse', 'hybrid');
++    const withUndefined = (
++      await search('strasse', { mode: 'hybrid', limit: REGION_SIZE, paths: undefined })
++    ).map((r) => r.path);
++    expect(withUndefined).toEqual(plain);
++  });
++
++  it('builds no clause when unset and one JSON parameter when set', () => {
++    expect(buildFilterPredicate({}).isEmpty).toBe(true);
++    const predicate = buildFilterPredicate({ paths: ['a.md', 'a.md', 'b/c.md'] });
++    expect(predicate.isEmpty).toBe(false);
++    expect(predicate.params).toHaveLength(1);
++    expect(JSON.parse(String(predicate.params[0]))).toEqual(['a.md', 'b/c.md']);
++  });
++
++  it('handles a restriction far larger than the bound-variable limit', () => {
++    const many = Array.from({ length: 50_000 }, (_, i) => `bulk/${i}.md`);
++    expect(buildFilterPredicate({ paths: many }).params).toHaveLength(1);
++  });
++
++  it('is accepted by the MCP and stdio boundaries', async () => {
++    expect(SearchToolArgumentsSchema.safeParse({ query: 'x', paths: ['a.md'] }).success).toBe(true);
++    expect(SearchToolArgumentsSchema.safeParse({ query: 'x', paths: 'a.md' }).success).toBe(false);
++    expect(SearchOptionsBoundarySchema.safeParse({ paths: ['a.md'] }).success).toBe(true);
++    const lines: string[] = [];
++    await handleStdioLine(
++      JSON.stringify({
++        id: '1',
++        query: 'strasse',
++        options: { mode: 'fulltext', paths: ['region/r-4.md'] },
++      }),
++      search,
++      (line) => lines.push(line),
++    );
++    const response = JSON.parse(lines[0]!) as { results: Array<{ path: string }> };
++    expect(response.results.map((r) => r.path)).toEqual(['region/r-4.md']);
++  });
++});
+-- 
+2.53.0
+

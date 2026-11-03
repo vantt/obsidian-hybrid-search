@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1010" height="816" viewBox="0 0 1010 816" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="11">
+<title>Xu hướng chỉ số qua các bản upstream</title>
+<rect width="1010" height="816" fill="#ffffff"/>
+<text x="14" y="22" font-size="14" font-weight="600" fill="#1f2328">Xu hướng chỉ số qua các bản upstream (v0.17.1, v0.17.2)</text>
+<g transform="translate(820,12)"><line x1="0" y1="4" x2="22" y2="4" stroke="#1f6feb" stroke-width="2"/><text x="28" y="8" fill="#1f2328">fork (có gói)</text><line x1="100" y1="4" x2="122" y2="4" stroke="#6e7781" stroke-width="2"/><text x="128" y="8" fill="#1f2328">upstream</text></g>
+<g transform="translate(10,40)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi: nDCG@5 (tổng)</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="69.9" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.646</title></circle>
+<text x="304.0" y="84.9" text-anchor="middle" fill="#6e7781">0.646</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,32.9 304.0,32.9"/>
+<circle cx="44.0" cy="32.9" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.944</title></circle>
+<text x="44.0" y="24.9" text-anchor="middle" fill="#1f6feb">0.944</text>
+<circle cx="304.0" cy="32.9" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.944</title></circle>
+<text x="304.0" y="24.9" text-anchor="middle" fill="#1f6feb">0.944</text>
+</g>
+<g transform="translate(340,40)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi: Hit@5 (tổng)</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="56.3" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.756</title></circle>
+<text x="304.0" y="71.3" text-anchor="middle" fill="#6e7781">0.756</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,29.2 304.0,29.2"/>
+<circle cx="44.0" cy="29.2" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.974</title></circle>
+<text x="44.0" y="21.2" text-anchor="middle" fill="#1f6feb">0.974</text>
+<circle cx="304.0" cy="29.2" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.974</title></circle>
+<text x="304.0" y="21.2" text-anchor="middle" fill="#1f6feb">0.974</text>
+</g>
+<g transform="translate(670,40)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">obsidian-help: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="58.9" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.735</title></circle>
+<text x="304.0" y="73.9" text-anchor="middle" fill="#6e7781">0.735</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,58.9 304.0,58.9"/>
+<circle cx="44.0" cy="58.9" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.735</title></circle>
+<text x="44.0" y="50.9" text-anchor="middle" fill="#1f6feb">0.735</text>
+<circle cx="304.0" cy="58.9" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.735</title></circle>
+<text x="304.0" y="50.9" text-anchor="middle" fill="#1f6feb">0.735</text>
+</g>
+<g transform="translate(10,230)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-unaccented: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="133.5" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.133</title></circle>
+<text x="304.0" y="148.5" text-anchor="middle" fill="#6e7781">0.133</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,26.0 304.0,26.0"/>
+<circle cx="44.0" cy="26.0" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 1.000</title></circle>
+<text x="44.0" y="18.0" text-anchor="middle" fill="#1f6feb">1.000</text>
+<circle cx="304.0" cy="26.0" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 1.000</title></circle>
+<text x="304.0" y="18.0" text-anchor="middle" fill="#1f6feb">1.000</text>
+</g>
+<g transform="translate(340,230)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-dd: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="120.4" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.239</title></circle>
+<text x="304.0" y="135.4" text-anchor="middle" fill="#6e7781">0.239</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,29.1 304.0,29.1"/>
+<circle cx="44.0" cy="29.1" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.975</title></circle>
+<text x="44.0" y="21.1" text-anchor="middle" fill="#1f6feb">0.975</text>
+<circle cx="304.0" cy="29.1" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.975</title></circle>
+<text x="304.0" y="21.1" text-anchor="middle" fill="#1f6feb">0.975</text>
+</g>
+<g transform="translate(670,230)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-semantic: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="94.7" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.446</title></circle>
+<text x="304.0" y="109.7" text-anchor="middle" fill="#6e7781">0.446</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,94.7 304.0,94.7"/>
+<circle cx="44.0" cy="94.7" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.446</title></circle>
+<text x="44.0" y="86.7" text-anchor="middle" fill="#1f6feb">0.446</text>
+<circle cx="304.0" cy="94.7" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.446</title></circle>
+<text x="304.0" y="86.7" text-anchor="middle" fill="#1f6feb">0.446</text>
+</g>
+<g transform="translate(10,420)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-synonym: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="141.7" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.067</title></circle>
+<text x="304.0" y="156.7" text-anchor="middle" fill="#6e7781">0.067</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,64.6 304.0,64.6"/>
+<circle cx="44.0" cy="64.6" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.689</title></circle>
+<text x="44.0" y="56.6" text-anchor="middle" fill="#1f6feb">0.689</text>
+<circle cx="304.0" cy="64.6" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.689</title></circle>
+<text x="304.0" y="56.6" text-anchor="middle" fill="#1f6feb">0.689</text>
+</g>
+<g transform="translate(340,420)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-compound: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="71.6" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.632</title></circle>
+<text x="304.0" y="86.6" text-anchor="middle" fill="#6e7781">0.632</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,27.5 304.0,27.5"/>
+<circle cx="44.0" cy="27.5" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.988</title></circle>
+<text x="44.0" y="19.5" text-anchor="middle" fill="#1f6feb">0.988</text>
+<circle cx="304.0" cy="27.5" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.988</title></circle>
+<text x="304.0" y="19.5" text-anchor="middle" fill="#1f6feb">0.988</text>
+</g>
+<g transform="translate(670,420)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">vi-snippet: nDCG@5</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.000</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">0.500</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">1.000</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="92.2" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 0.466</title></circle>
+<text x="304.0" y="107.2" text-anchor="middle" fill="#6e7781">0.466</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,32.1 304.0,32.1"/>
+<circle cx="44.0" cy="32.1" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 0.951</title></circle>
+<text x="44.0" y="24.1" text-anchor="middle" fill="#1f6feb">0.951</text>
+<circle cx="304.0" cy="32.1" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 0.951</title></circle>
+<text x="304.0" y="24.1" text-anchor="middle" fill="#1f6feb">0.951</text>
+</g>
+<g transform="translate(10,610)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">Thời gian index (giây, vi)</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.0</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">1.9</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">3.7</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="50.8" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 3.0</title></circle>
+<text x="304.0" y="65.8" text-anchor="middle" fill="#6e7781">3.0</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,42.2 304.0,43.3"/>
+<circle cx="44.0" cy="42.2" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 3.2</title></circle>
+<text x="44.0" y="34.2" text-anchor="middle" fill="#1f6feb">3.2</text>
+<circle cx="304.0" cy="43.3" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 3.2</title></circle>
+<text x="304.0" y="35.3" text-anchor="middle" fill="#1f6feb">3.2</text>
+</g>
+<g transform="translate(340,610)">
+<rect x="0" y="0" width="320" height="184" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>
+<text x="10" y="17" font-weight="600" fill="#1f2328">Thời gian mỗi câu (ms, vi)</text>
+<line x1="44" y1="150.0" x2="304" y2="150.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="153.5" text-anchor="end" fill="#59636e">0.0</text>
+<line x1="44" y1="88.0" x2="304" y2="88.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="91.5" text-anchor="end" fill="#59636e">5.7</text>
+<line x1="44" y1="26.0" x2="304" y2="26.0" stroke="#d8dee4" stroke-width="1"/>
+<text x="39" y="29.5" text-anchor="end" fill="#59636e">11.3</text>
+<text x="44.0" y="166" text-anchor="middle" fill="#59636e">v0.17.1</text>
+<text x="304.0" y="166" text-anchor="middle" fill="#59636e">v0.17.2</text>
+<circle cx="304.0" cy="96.2" r="3.5" fill="#6e7781"><title>upstream v0.17.2: 4.9</title></circle>
+<text x="304.0" y="111.2" text-anchor="middle" fill="#6e7781">4.9</text>
+<polyline fill="none" stroke="#1f6feb" stroke-width="2" points="44.0,42.2 304.0,56.1"/>
+<circle cx="44.0" cy="42.2" r="3.5" fill="#1f6feb"><title>fork v0.17.1: 9.8</title></circle>
+<text x="44.0" y="34.2" text-anchor="middle" fill="#1f6feb">9.8</text>
+<circle cx="304.0" cy="56.1" r="3.5" fill="#1f6feb"><title>fork v0.17.2: 8.6</title></circle>
+<text x="304.0" y="48.1" text-anchor="middle" fill="#1f6feb">8.6</text>
+</g>
+</svg>
