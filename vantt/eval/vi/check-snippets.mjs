@@ -8,7 +8,7 @@
 // Exit code 0 only when every query passes.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -34,7 +34,8 @@ if (value('--lang-options')) process.env.OHS_LANGUAGE_PACK_OPTIONS = value('--la
 else delete process.env.OHS_LANGUAGE_PACK_OPTIONS;
 
 const root = process.cwd();
-const load = (rel) => import(path.join(root, rel));
+// import() needs a file URL for an absolute path on Windows (`C:` reads as a URL scheme).
+const load = (rel) => import(pathToFileURL(path.join(root, rel)).href);
 const { openIndexDatabase, createIndexService } = await load('src/indexing/index-service.ts');
 const { search } = await load('src/search/searcher.ts');
 const { loadLanguagePack } = await load('src/language/loader.ts');

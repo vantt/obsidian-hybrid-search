@@ -16,6 +16,7 @@
 // Run from a work clone (its remotes, tags and fork branches are used; worktrees and builds go to
 // <clone>/vantt/.work/review-<tag>). Probes, series, eval sets and the pack come from the repo that
 // holds this script. Never pushes. Exit 0 = data written, 2 = usage, 7 = error.
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -23,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { evalEnv, goldenFile, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
 import { ensureNpm } from './lib/npm.mjs';
-import { git, sh } from './lib/proc.mjs';
+import { childEnv, git, npmCommand, sh } from './lib/proc.mjs';
 import {
   buildQualityRows,
   flagQuality,
@@ -164,10 +165,17 @@ function viVault(workDir, otf) {
       '--answers-out',
       path.join(workDir, 'vi-answers.json'),
     ];
-    const res = otf
-      ? sh(workDir, `node ${JSON.stringify(otf)} ${gen.join(' ')}`)
-      : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.11.0 ${gen.join(' ')}`);
-    if (!res.ok) throw new Error('could not generate the vi vault for snippets');
+    // No shell: the paths in `gen` reach the fixture as single arguments on every platform.
+    const env = childEnv();
+    const fixture = otf
+      ? { command: process.execPath, args: [path.resolve(otf), ...gen] }
+      : npmCommand('npx', ['--yes', 'github:vantt/obsidian-test-fixture#v0.11.0', ...gen], { env });
+    const res = spawnSync(fixture.command, fixture.args, {
+      cwd: workDir,
+      env,
+      stdio: ['ignore', 2, 2],
+    });
+    if (res.status !== 0) throw new Error('could not generate the vi vault for snippets');
   }
   const files = new Map();
   const walk = (dir) => {

@@ -22,6 +22,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { npmCommand } from './lib/proc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const WORKER = path.join(here, 'lib/semantic-worker.mjs');
@@ -177,12 +178,13 @@ function prepareCorpus() {
   if (!fs.existsSync(vault)) {
     const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', raw];
     const otf = value('--otf');
-    const r = otf
-      ? spawnSync(process.execPath, [path.resolve(otf), ...gen], { stdio: 'inherit' })
-      : spawnSync('npx', ['--yes', `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`, ...gen], {
-          cwd: work,
-          stdio: 'inherit',
-        });
+    const fixture = otf
+      ? { command: process.execPath, args: [path.resolve(otf), ...gen] }
+      : npmCommand('npx', ['--yes', `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`, ...gen]);
+    const r = spawnSync(fixture.command, fixture.args, {
+      ...(otf ? {} : { cwd: work }),
+      stdio: 'inherit',
+    });
     if (r.status !== 0) {
       console.error('fixture generation failed');
       process.exit(1);

@@ -31,6 +31,7 @@ import {
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { npmCommand } from './lib/proc.mjs';
 import { parseSeries } from './lib/series.mjs';
 
 export const PLATFORMS = {
@@ -101,10 +102,13 @@ export function hostPlatform() {
 }
 
 export function run(cmd, args, opts = {}) {
-  const res = spawnSync(cmd, args, {
+  // npm/npx are .cmd shims on Windows: run npm's JS entry instead of going through a shell.
+  const spec = /^(npm|npx)$/.test(cmd)
+    ? npmCommand(cmd, args, { env: opts.env ?? process.env })
+    : { command: cmd, args };
+  const res = spawnSync(spec.command, spec.args, {
     stdio: opts.capture ? ['ignore', 'pipe', 'inherit'] : ['ignore', 2, 2],
     encoding: 'utf8',
-    shell: isWin && /^(npm|npx)$/.test(cmd),
     ...opts,
   });
   if (res.error || res.status !== 0)

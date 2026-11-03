@@ -16,7 +16,7 @@ Corpus lớn không nằm trong repo này: nó do preset `vi-search` của [vant
 
 ## Chạy
 
-Cần `npm ci` ở thư mục gốc repo và mạng (lần đầu tải model `Xenova/multilingual-e5-small` về `~/.cache/huggingface/`, và `npx` tải fixture từ GitHub).
+Cần `npm ci` ở thư mục gốc repo và mạng (lần đầu tải model `Xenova/multilingual-e5-small` về `~/.cache/huggingface/`, và `npx` tải fixture từ GitHub). Trên Windows, `npx` là file `.cmd`; script chạy thẳng `npx-cli.js` của npm đầu tiên trên `PATH` bằng chính node đang chạy, không qua shell (`npmCommand` trong `vantt/scripts/lib/proc.mjs`).
 
 ```bash
 # Corpus sinh, in kết quả tổng hợp (kết quả JSON ở thư mục tạm, đường dẫn in ở dòng cuối)

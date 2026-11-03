@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { npmCommand } from '../../scripts/lib/proc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_TAG = 'v0.11.0';
@@ -104,10 +105,15 @@ try {
     const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', fresh];
     const otf = value('--otf');
     if (otf) run(process.execPath, [otf, ...gen]);
-    else
-      run('npx', ['--yes', `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`, ...gen], {
-        cwd: work,
-      }); // outside the repo: its devEngines pins an npm version
+    else {
+      // npx is a .cmd shim on Windows; npmCommand runs its JS entry without a shell.
+      const npx = npmCommand('npx', [
+        '--yes',
+        `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`,
+        ...gen,
+      ]);
+      run(npx.command, npx.args, { cwd: work }); // outside the repo: its devEngines pins an npm version
+    }
     // The committed golden set must be the one this corpus generates.
     const expected = toNfdPaths(fs.readFileSync(fresh, 'utf8'));
     if (flag('--update-golden')) fs.writeFileSync(GOLDEN, expected);

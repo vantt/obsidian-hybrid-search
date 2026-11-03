@@ -26,6 +26,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { dirSize, sha256File, walk } from './bundle.mjs';
+import { batchCommand } from './lib/proc.mjs';
 
 const isWin = process.platform === 'win32';
 const TAR = isWin
@@ -45,14 +46,15 @@ function launcher(root, name) {
   return path.join(root, 'bin', isWin ? `${name}.cmd` : name);
 }
 
-/** Spawn a launcher; .cmd files need a shell, so the path is quoted for it. */
+/** Spawn a launcher; .cmd files run through cmd.exe with every argument quoted. */
 function start(root, name, args, env) {
   const file = launcher(root, name);
-  return spawn(isWin ? `"${file}"` : file, args, {
+  const spec = isWin ? batchCommand(file, args, env) : { command: file, args };
+  return spawn(spec.command, spec.args, {
     env,
-    shell: isWin,
     stdio: ['pipe', 'pipe', 'pipe'],
     windowsHide: true,
+    windowsVerbatimArguments: isWin,
   });
 }
 

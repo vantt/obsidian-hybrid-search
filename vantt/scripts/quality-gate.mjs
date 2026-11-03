@@ -55,7 +55,7 @@ import {
   viChecks,
 } from './lib/gates.mjs';
 import { ensureNpm } from './lib/npm.mjs';
-import { git, sh } from './lib/proc.mjs';
+import { git, npmCommand, sh } from './lib/proc.mjs';
 import { sameRunUpstream } from './lib/same-run.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -217,17 +217,20 @@ function runSnippetCheck(root, lang, dir, config, scratch, otf) {
     '--answers-out',
     path.join(work, 'answers.json'),
   ];
-  const made = otf
-    ? spawnSync(process.execPath, [path.resolve(otf), ...gen], {
-        cwd: work,
-        env,
-        stdio: ['ignore', 2, 2],
-      })
-    : spawnSync(
+  const fixture = otf
+    ? { command: process.execPath, args: [path.resolve(otf), ...gen] }
+    : npmCommand(
         'npx',
         ['--yes', `github:vantt/obsidian-test-fixture#${fixtureTag(root)}`, ...gen],
-        { cwd: work, env, stdio: ['ignore', 2, 2] },
+        {
+          env,
+        },
       );
+  const made = spawnSync(fixture.command, fixture.args, {
+    cwd: work,
+    env,
+    stdio: ['ignore', 2, 2],
+  });
   if (made.status !== 0) throw new Error('could not generate the vi corpus for the snippet check');
   const options = config.pack_options?.[lang];
   const out = path.join(work, 'snippets.json');
