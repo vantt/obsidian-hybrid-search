@@ -36,6 +36,7 @@ export function buildStatusPayload({
     indexing_errors: getIndexFailures(),
     links: stats.links,
     last_indexed: stats.lastIndexed,
+    db_path: config.dbPath,
     db_size_mb:
       stats.dbSizeBytes !== null ? Math.round((stats.dbSizeBytes / 1024 / 1024) * 10) / 10 : null,
     // Null in local mode: config.apiBaseUrl always holds the OpenAI default, so
