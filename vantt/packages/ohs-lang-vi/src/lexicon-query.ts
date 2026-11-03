@@ -41,8 +41,12 @@ function addExpansions(
     if (viewQueries.norm) viewQueries.norm = extend(viewQueries.norm, abbreviationWords);
     if (viewQueries.fold)
       viewQueries.fold = extend(viewQueries.fold, abbreviationWords.map(foldWord));
-    analysis.baseQuery =
-      extend(analysis.baseQuery ?? state.normalized, abbreviationWords) ?? undefined;
+    // The upstream tokenizer drops diacritics, and FTS5 adds the score of a repeated term: an
+    // expansion word already in the query in any accent form ("khach hang KH") is left out.
+    const base = analysis.baseQuery ?? state.normalized;
+    const have = new Set(tokenize(base).map(foldWord));
+    const add = abbreviationWords.filter((w) => !have.has(foldWord(w)));
+    if (add.length > 0) analysis.baseQuery = `${base} ${add.join(' ')}`;
   }
   if (synonymWords.length > 0) {
     viewQueries.norm = extend(viewQueries.norm, synonymWords);
@@ -63,9 +67,9 @@ export function applyLexicon(
   const foldWord = (w: string) => foldToken(w, options);
   // Match the query as typed as well as after telex/typo rewriting (token for token), so a
   // typo-corrected word ("hoi" -> "moi") never hides a lexicon form the user typed.
-  const typed = tokenize(state.normalized).map((norm) => {
+  const typed = tokenize(state.normalized).map((norm, i) => {
     const folded = foldWord(norm);
-    return { norm, folded, marked: folded !== norm };
+    return { norm, folded, marked: folded !== norm, acronym: state.tokens[i]?.acronym };
   });
   const substitutions = expandQuery(lexicon, state.tokens, foldWord);
   if (typed.length === state.tokens.length) {
@@ -106,8 +110,5 @@ export function applyLexicon(
     data?.targets.push({ words: replaced, p: options.lexiconWeight });
     rewrites.push({ from: base.slice(s.start, s.end).join(' '), to: s.words.join(' ') });
   }
-  if (analysis.debug) {
-    analysis.debug.lexicon = rewrites;
-    if (analysis.baseQuery) analysis.debug.baseQuery = analysis.baseQuery;
-  }
+  if (analysis.debug) analysis.debug.lexicon = rewrites;
 }

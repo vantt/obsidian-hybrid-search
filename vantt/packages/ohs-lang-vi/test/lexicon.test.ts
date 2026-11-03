@@ -199,6 +199,29 @@ describe('lexicon in the pack', () => {
     expect((run('hop dong it').data as ViAnalysisData).literalToken).toBe(false);
   });
 
+  it('expands an abbreviation spelled like a syllable only when typed in capitals', () => {
+    write('## Viết tắt\nBA = business analyst\nKH = khách hàng\n');
+    const docs = ['Bà ngoại kể chuyện ba ngày', 'Tuyển business analyst', 'Khách hàng mới'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const lower = run('ba ngay');
+    expect(lower.baseQuery).toBeUndefined();
+    expect(lower.viewQueries.norm ?? '').not.toContain('business');
+    expect(run('BA NGAY').baseQuery).toBeUndefined(); // caps lock: no acronym
+    expect(run('BA ngay').baseQuery).toBe('ba ngay business analyst');
+    // a form that is no syllable keeps matching in any case
+    expect(run('kh moi').baseQuery).toBe('kh moi khách hàng');
+  });
+
+  it('does not repeat in BM25 an expansion word the query already has in another accent form', () => {
+    for (const [q, base] of [
+      ['khach hang KH', undefined],
+      ['KH khach', 'kh khach hàng'],
+      ['KH tiềm năng', 'kh tiềm năng khách hàng'],
+    ] as const)
+      expect(analyze(q).baseQuery, q).toBe(base);
+  });
+
   it('never searches an abbreviation expansion alone in a view the query skips', () => {
     // An accented query does not search the norm and fold views; an expansion-only branch there
     // would vote for every note dense in "khách hàng" and bury the note the query describes.

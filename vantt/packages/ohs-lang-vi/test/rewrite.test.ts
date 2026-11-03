@@ -125,6 +125,7 @@ describe('query rewriting', () => {
     const analysis = analyzeQuery('giuwx chaan khachs hangf', ctx, env({ telex: true }));
     expect(analysis.baseQuery).toBe('giữ chân khách hàng');
     expect(analysis.embedQuery).toBe('giữ chân khách hàng');
+    expect(analysis.debug?.baseQuery).toBe('giữ chân khách hàng');
     expect((analysis.data as { target: string[] }).target).toEqual([
       'giữ',
       'chân',

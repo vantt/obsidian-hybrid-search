@@ -374,6 +374,7 @@ export function analyzeQuery(
     }
   }
   if (analysis.viewTerms && analysis.debug) analysis.debug.viewTerms = analysis.viewTerms;
+  if (analysis.baseQuery && analysis.debug) analysis.debug.baseQuery = analysis.baseQuery;
   return analysis;
 }
 
