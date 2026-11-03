@@ -14,6 +14,12 @@ export function prependPath(dir) {
 /** Name of the PATH variable in an environment object (a copy of Windows' process.env keeps `Path`). */
 export const pathKey = (env) => Object.keys(env).find((k) => k.toUpperCase() === 'PATH') ?? 'PATH';
 
+/** `npm prefix -g` as the bundled npm reports it, or null. */
+const readGlobalPrefix = (npmCli, env) => {
+  const r = spawnSync(process.execPath, [npmCli, 'prefix', '-g'], { env, encoding: 'utf8' });
+  return r.status === 0 ? r.stdout.trim() || null : null;
+};
+
 export const childEnv = (extra = {}) => {
   const env = { ...process.env, HUSKY: '0' };
   if (extraPath) {
@@ -32,7 +38,7 @@ export const childEnv = (extra = {}) => {
 export function npmCommand(
   tool,
   args,
-  { env = process.env, platform = process.platform, exists = existsSync } = {},
+  { env = process.env, platform = process.platform, exists = existsSync, globalPrefix } = {},
 ) {
   if (tool !== 'npm' && tool !== 'npx') throw new Error(`npmCommand runs npm or npx, not ${tool}`);
   if (platform !== 'win32') return { command: tool, args };
@@ -49,6 +55,15 @@ export function npmCommand(
   ].find((f) => exists(f));
   if (!cli)
     throw new Error(`no npm/bin/${tool}-cli.js next to ${path.win32.join(dir, `${tool}.cmd`)}`);
+  // Node's own npm.cmd hands over to an npm installed with `npm install -g npm@x` in the global
+  // prefix when one exists there; do the same, so the pinned npm wins over the bundled one.
+  if (exists(path.win32.join(dir, 'node.exe'))) {
+    const npmCli = path.win32.join(path.win32.dirname(cli), 'npm-cli.js');
+    const prefix = (globalPrefix ?? readGlobalPrefix)(npmCli, env);
+    const pinned =
+      prefix && path.win32.join(prefix, 'node_modules', 'npm', 'bin', `${tool}-cli.js`);
+    if (pinned && exists(pinned)) return { command: process.execPath, args: [pinned, ...args] };
+  }
   return { command: process.execPath, args: [cli, ...args] };
 }
 

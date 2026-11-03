@@ -34,6 +34,32 @@ describe('npmCommand', () => {
     });
   });
 
+  it('prefers an npm installed with npm install -g in the global prefix, like npm.cmd', () => {
+    const node = 'C:\\hostedtoolcache\\windows\\node\\22.23.3\\x64';
+    const prefix = 'C:\\npm\\prefix';
+    const exists = files(
+      `${node}\\node.exe`,
+      `${node}\\npm.cmd`,
+      `${node}\\node_modules\\npm\\bin\\npm-cli.js`,
+      `${prefix}\\node_modules\\npm\\bin\\npm-cli.js`,
+    );
+    const seen = [];
+    const globalPrefix = (cli) => (seen.push(cli), prefix);
+    expect(
+      npmCommand('npm', ['ci'], { ...win({ Path: node }, exists), globalPrefix }).args,
+    ).toEqual([`${prefix}\\node_modules\\npm\\bin\\npm-cli.js`, 'ci']);
+    expect(seen).toEqual([`${node}\\node_modules\\npm\\bin\\npm-cli.js`]);
+    // no npm in the prefix, or no prefix: the bundled npm
+    const bundled = [`${node}\\node_modules\\npm\\bin\\npm-cli.js`, 'ci'];
+    expect(
+      npmCommand('npm', ['ci'], { ...win({ Path: node }, exists), globalPrefix: () => 'C:\\x' })
+        .args,
+    ).toEqual(bundled);
+    expect(
+      npmCommand('npm', ['ci'], { ...win({ Path: node }, exists), globalPrefix: () => null }).args,
+    ).toEqual(bundled);
+  });
+
   it('resolves a node_modules/.bin shim (the npm pinned by ensureNpm)', () => {
     const bin = 'D:\\w\\vantt\\.work\\tools\\npm-12.2.0\\node_modules\\.bin';
     const exists = files(
