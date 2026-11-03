@@ -54,7 +54,7 @@ export function npmCommand(
     path.win32.join(dir, '..', 'npm', 'bin', `${tool}-cli.js`),
   ].find((f) => exists(f));
   if (!cli)
-    throw new Error(`no npm/bin/${tool}-cli.js next to ${path.win32.join(dir, `${tool}.cmd`)}`);
+    throw new Error(`no npm/bin/${tool}-cli.js next to ${path.win32.join(dir, tool + '.cmd')}`);
   // Node's own npm.cmd hands over to an npm installed with `npm install -g npm@x` in the global
   // prefix when one exists there; do the same, so the pinned npm wins over the bundled one.
   if (exists(path.win32.join(dir, 'node.exe'))) {
@@ -76,8 +76,11 @@ export function batchCommand(file, args, env = process.env) {
   const quote = (a) => {
     const s = String(a);
     if (/["%!\r\n]/.test(s)) throw new Error(`cannot pass ${JSON.stringify(s)} through cmd.exe`);
-    // A backslash before the closing quote would escape it for the program's argument parser.
-    return `"${s.replace(/(\\+)$/, '$1$1')}"`;
+    // A backslash before the closing quote would escape it for the program's argument parser,
+    // so the trailing run of backslashes is doubled.
+    let end = s.length;
+    while (end > 0 && s[end - 1] === '\\') end--;
+    return `"${s}${s.slice(end)}"`;
   };
   const line = [file, ...args].map(quote).join(' ');
   return {
@@ -100,6 +103,7 @@ export class GitError extends Error {
 
 /** Run git; returns trimmed stdout. Throws GitError unless opts.allowFail, then returns {ok, stdout, stderr, status}. */
 export function git(cwd, args, opts = {}) {
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- maintainer tooling runs the developer's own git
   const res = spawnSync('git', args, {
     cwd,
     env: childEnv(opts.env),

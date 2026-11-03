@@ -108,6 +108,18 @@ export function upstreamPackCheck(cfg, { noPack, withPack }) {
   );
 }
 
+/** Problems of category `c` (value `v`, upstream `u`) against the upstream-relative limits of `t`. */
+function upstreamProblems(t, c, v, u) {
+  const problems = [];
+  if (t.min_gain_over_upstream !== undefined && v - u < t.min_gain_over_upstream - EPS)
+    problems.push(`${c} ${t.metric} gain ${r3(v - u)} < ${t.min_gain_over_upstream}`);
+  if (t.min_ratio_over_upstream !== undefined && v < u * t.min_ratio_over_upstream - EPS)
+    problems.push(`${c} ${t.metric} ${v} < ${t.min_ratio_over_upstream} x ${u}`);
+  if (t.max_drop_vs_upstream !== undefined && u - v > t.max_drop_vs_upstream + EPS)
+    problems.push(`${c} ${t.metric} ${u} -> ${v}`);
+  return problems;
+}
+
 function targetCheck(t, { result, upstream }) {
   const categories = t.categories ?? [t.category];
   const problems = [];
@@ -117,7 +129,7 @@ function targetCheck(t, { result, upstream }) {
     const v = metricOf(result, c, t.metric);
     const u = metricOf(upstream, c, t.metric);
     if (v !== undefined)
-      values.push(`${c} ${t.metric} ${r3(v)}${u === undefined ? '' : ` (upstream ${r3(u)})`}`);
+      values.push(`${c} ${t.metric} ${r3(v)}${u === undefined ? '' : ' (upstream ' + r3(u) + ')'}`);
     if (v === undefined) {
       missing = true;
       continue;
@@ -131,12 +143,7 @@ function targetCheck(t, { result, upstream }) {
       missing = true;
       continue;
     }
-    if (t.min_gain_over_upstream !== undefined && v - u < t.min_gain_over_upstream - EPS)
-      problems.push(`${c} ${t.metric} gain ${r3(v - u)} < ${t.min_gain_over_upstream}`);
-    if (t.min_ratio_over_upstream !== undefined && v < u * t.min_ratio_over_upstream - EPS)
-      problems.push(`${c} ${t.metric} ${v} < ${t.min_ratio_over_upstream} x ${u}`);
-    if (t.max_drop_vs_upstream !== undefined && u - v > t.max_drop_vs_upstream + EPS)
-      problems.push(`${c} ${t.metric} ${u} -> ${v}`);
+    problems.push(...upstreamProblems(t, c, v, u));
   }
   const dep = t.depends_on ? ` [${t.depends_on}]` : '';
   if (missing && !problems.length)
@@ -150,7 +157,7 @@ function targetCheck(t, { result, upstream }) {
     return check(
       t.id,
       'pending',
-      `${ok ? 'already met' : 'not met yet'}${ok ? '' : `: ${problems.join('; ')}`}${dep}`,
+      `${ok ? 'already met' : 'not met yet'}${ok ? '' : ': ' + problems.join('; ')}${dep}`,
       {
         would: ok ? 'pass' : 'fail',
       },

@@ -113,7 +113,7 @@ export function run(cmd, args, opts = {}) {
   });
   if (res.error || res.status !== 0)
     throw new Error(
-      `${cmd} ${args.join(' ')} failed (${res.error?.message ?? `exit ${res.status}`})`,
+      `${cmd} ${args.join(' ')} failed (${res.error?.message ?? 'exit ' + res.status})`,
     );
   return res.stdout ?? '';
 }
@@ -284,6 +284,25 @@ function patchList(tree) {
   );
 }
 
+/** Runtime manifest only: no scripts (upstream's `prepare` refuses to run outside a dev checkout) and no devEngines. */
+function runtimeManifest(pkg, version) {
+  const runtimePkg = {};
+  for (const k of [
+    'name',
+    'version',
+    'type',
+    'bin',
+    'license',
+    'dependencies',
+    'optionalDependencies',
+    'engines',
+    'allowScripts',
+  ])
+    if (pkg[k] !== undefined) runtimePkg[k] = pkg[k];
+  runtimePkg.version = version;
+  return runtimePkg;
+}
+
 export async function main(argv) {
   const { values } = parseArgs({
     args: argv,
@@ -342,22 +361,10 @@ export async function main(argv) {
   const app = path.join(root, 'app');
   mkdirSync(app, { recursive: true });
   cpSync(treeDist, path.join(app, 'dist'), { recursive: true });
-  // Runtime manifest only: no scripts (upstream's `prepare` refuses to run outside a dev checkout) and no devEngines.
-  const runtimePkg = {};
-  for (const k of [
-    'name',
-    'version',
-    'type',
-    'bin',
-    'license',
-    'dependencies',
-    'optionalDependencies',
-    'engines',
-    'allowScripts',
-  ])
-    if (pkg[k] !== undefined) runtimePkg[k] = pkg[k];
-  runtimePkg.version = version;
-  writeFileSync(path.join(app, 'package.json'), JSON.stringify(runtimePkg, null, 2) + '\n');
+  writeFileSync(
+    path.join(app, 'package.json'),
+    JSON.stringify(runtimeManifest(pkg, version), null, 2) + '\n',
+  );
   cpSync(path.join(tree, 'package-lock.json'), path.join(app, 'package-lock.json'));
 
   // 2. Production dependencies, built on this platform.

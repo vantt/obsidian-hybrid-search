@@ -124,7 +124,7 @@ function startServe(env) {
   };
 }
 
-let exitCode = 2;
+let exitCode;
 try {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.address();

@@ -45,7 +45,7 @@ const server = createServer((req, res) => {
   let body = '';
   req.on('data', (chunk) => (body += chunk));
   req.on('end', () => {
-    let inputs = [];
+    let inputs;
     try {
       const parsed = JSON.parse(body || '{}');
       inputs = Array.isArray(parsed.input) ? parsed.input : [parsed.input ?? ''];
@@ -62,7 +62,7 @@ const server = createServer((req, res) => {
   });
 });
 
-let exitCode = 2;
+let exitCode;
 try {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.address();

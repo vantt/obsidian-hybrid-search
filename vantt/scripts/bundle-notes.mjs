@@ -39,15 +39,17 @@ const lines = [
       .map(([k, v]) => `${k} ${v}`)
       .join(', ') || 'none'
   }`,
-  `- Patches (${first.patch_list.length}): ${first.patch_list.map((p) => `${p.id} (${p.upstream_status})`).join(', ') || 'none'}`,
+  `- Patches (${first.patch_list.length}): ${first.patch_list.map((p) => p.id + ' (' + p.upstream_status + ')').join(', ') || 'none'}`,
   '',
   '| Platform | Bundle | Packed (MB) | Unpacked (MB) | Before prune (MB) | Index time (s) | DB (MB) | Smoke |',
   '|---|---|---|---|---|---|---|---|',
 ];
 for (const b of bundles) {
   const s = smokes[b.platform];
+  const published = s?.ok && !(values.hold ?? []).includes(b.platform);
+  const bundle = published ? '`' + b.bundle + '`' : 'not published';
   lines.push(
-    `| ${b.platform} | ${s?.ok && !(values.hold ?? []).includes(b.platform) ? `\`${b.bundle}\`` : 'not published'} | ${mb(b.size_packed)} | ${mb(b.size_unpacked)} | ${mb(b.size_unpacked_before_prune)} | ${s?.index_ms != null ? (s.index_ms / 1000).toFixed(1) : '-'} | ${s?.db_size_mb ?? '-'} | ${s ? (s.ok ? 'pass' : 'FAIL') : '-'} |`,
+    `| ${b.platform} | ${bundle} | ${mb(b.size_packed)} | ${mb(b.size_unpacked)} | ${mb(b.size_unpacked_before_prune)} | ${s?.index_ms != null ? (s.index_ms / 1000).toFixed(1) : '-'} | ${s?.db_size_mb ?? '-'} | ${s ? (s.ok ? 'pass' : 'FAIL') : '-'} |`,
   );
 }
 const subs = bundles.filter((b) => b.substitutions && Object.keys(b.substitutions).length);

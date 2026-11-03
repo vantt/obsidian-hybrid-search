@@ -150,7 +150,7 @@ function runWorker(step, params, env, logName) {
       if (code !== 0 || !line)
         return reject(
           new Error(
-            `step ${step} failed (exit ${code}); see ${path.join(work, 'logs', `${logName}.log`)}`,
+            `step ${step} failed (exit ${code}); see ${path.join(work, 'logs', logName + '.log')}`,
           ),
         );
       resolve({ ...JSON.parse(line.slice(7)), wall_ms: Date.now() - t0 });

@@ -25,7 +25,8 @@ export function compareResults(a, b, tolerance = SCORE_TOLERANCE) {
       continue;
     }
     for (const f of SCORE_FIELDS) {
-      if (!(Math.abs((x[f] ?? 0) - (y[f] ?? 0)) <= tolerance)) {
+      const within = Math.abs((x[f] ?? 0) - (y[f] ?? 0)) <= tolerance;
+      if (!within) {
         mismatches.push({ id, kind: 'score', field: f, upstream: x[f], fork: y[f] });
         break;
       }

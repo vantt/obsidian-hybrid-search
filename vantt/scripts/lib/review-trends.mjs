@@ -178,7 +178,7 @@ export function renderTrendSvg(trends, { columns = 3, cellW = 330, cellH = 190 }
         .filter(Boolean);
       if (pts.length > 1)
         out.push(
-          `<polyline fill="none" stroke="${COLORS[kind]}" stroke-width="2" points="${pts.map((p) => `${x(p.idx).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')}"/>`,
+          `<polyline fill="none" stroke="${COLORS[kind]}" stroke-width="2" points="${pts.map((p) => x(p.idx).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ')}"/>`,
         );
       for (const p of pts) {
         const above = kind === 'fork';

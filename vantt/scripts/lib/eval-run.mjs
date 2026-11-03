@@ -112,7 +112,9 @@ export function lexiconIgnorePattern(lexiconPath) {
   if (rel === '_ohs' || rel.startsWith('_ohs/')) return null;
   if (/[,*?]/.test(rel) || rel.startsWith('!'))
     throw new ReportableError('lexiconPath cannot be written as an OHS ignore pattern');
-  return rel.replace(/\/+$/, '');
+  let end = rel.length;
+  while (end > 0 && rel[end - 1] === '/') end--;
+  return rel.slice(0, end);
 }
 
 /**

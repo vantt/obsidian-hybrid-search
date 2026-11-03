@@ -212,6 +212,7 @@ try {
   );
   // Record what was run so two result files can be compared.
   const result = JSON.parse(fs.readFileSync(out, 'utf8'));
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- records the commit with the developer's own git
   const git = spawnSync('git', ['rev-parse', '--short', 'HEAD'], {
     cwd: repoRoot,
     encoding: 'utf8',

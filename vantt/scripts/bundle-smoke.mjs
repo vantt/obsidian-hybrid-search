@@ -38,7 +38,7 @@ const nfc = (s) => s.normalize('NFC');
 const checks = [];
 function check(name, ok, detail = '') {
   checks.push({ name, ok: !!ok, detail: String(detail).slice(0, 400) });
-  log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? `: ${String(detail).slice(0, 200)}` : ''}`);
+  log(`${ok ? 'PASS' : 'FAIL'} ${name}${detail ? ': ' + String(detail).slice(0, 200) : ''}`);
   return !!ok;
 }
 
@@ -76,6 +76,7 @@ function runOnce(root, name, args, env, timeoutMs = 600_000) {
 }
 
 function killTree(p) {
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- taskkill is a Windows system tool
   if (isWin) spawnSync('taskkill', ['/PID', String(p.pid), '/T', '/F'], { stdio: 'ignore' });
   else p.kill('SIGKILL');
 }
@@ -304,7 +305,9 @@ async function main() {
   let status = {};
   try {
     status = JSON.parse(st1.out);
-  } catch {}
+  } catch {
+    // Unparsable output: the check below reports the missing fields.
+  }
   report.db_size_mb = status.db_size_mb;
   report.chunks = status.chunks;
   check(
@@ -316,7 +319,9 @@ async function main() {
   let hits = [];
   try {
     hits = JSON.parse(se.out);
-  } catch {}
+  } catch {
+    // Unparsable output: the check below reports no results.
+  }
   check(
     'ohs search --json returns results',
     se.code === 0 && Array.isArray(hits) && hits.length > 0,

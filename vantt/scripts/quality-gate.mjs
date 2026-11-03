@@ -189,7 +189,7 @@ function runViEval(root, lang, dir, config, scratch, k, otf) {
   );
   if (res.status !== 0)
     throw new Error(
-      `vi eval ${lang ? `with pack ${lang}` : 'without a pack'} failed (exit ${res.status})`,
+      `vi eval ${lang ? 'with pack ' + lang : 'without a pack'} failed (exit ${res.status})`,
     );
   return JSON.parse(readFileSync(out, 'utf8'));
 }
@@ -475,7 +475,7 @@ async function privateMode(opts, root, config) {
       metric: config.vi.metric,
       categoryMax: config.vi.category_regression_max,
       overallMax: config.vi.overall_regression_max,
-    }).map(({ categories, ...c }) => c); // category names are labels, but keep the checks minimal
+    }).map(({ categories: _categories, ...c }) => c); // category names are labels, but keep the checks minimal
     const v = verdict(report.checks);
     report.gate = v.status;
     report.failed = v.failed;
@@ -569,7 +569,7 @@ function buildDetail({ queries, without, withPack, detailWithout, detailWith, k,
 
 function printHuman(report) {
   const out = (m) => process.stderr.write(`${m}\n`);
-  out(`quality-gate: ${report.gate}${report.error ? ` (${report.error})` : ''}`);
+  out(`quality-gate: ${report.gate}${report.error ? ' (' + report.error + ')' : ''}`);
   for (const c of report.checks ?? []) out(`  [${c.status}] ${c.id}: ${c.detail}`);
 }
 

@@ -384,7 +384,7 @@ function applyFrom(ctx, state, from) {
         result.commit = commit(root, `${p.name}\n\nPatch-Id: ${p.id}`);
       }
     }
-    log(`  ${p.id}: ${result.status}${result.reason ? ` (${result.reason})` : ''}`);
+    log(`  ${p.id}: ${result.status}${result.reason ? ' (' + result.reason + ')' : ''}`);
     state.patch_results.push(result);
     state.index = i + 1;
     writeState(ctx, state);
@@ -422,7 +422,7 @@ function conflict(ctx, state, patches, i, stderr) {
     stderr.trim() ? `git apply: ${stderr.trim().split('\n').slice(-3).join(' | ')}` : '',
     `  branch:     ${state.target.branch}`,
     `  patch:      vantt/patches/${p.patch_file}`,
-    `  spec:       ${p.metadata_file ? `vantt/patches/${p.metadata_file}` : '(none)'}  (read "Bất biến" and "Điểm chạm")`,
+    `  spec:       ${p.metadata_file ? 'vantt/patches/' + p.metadata_file : '(none)'}  (read "Bất biến" and "Điểm chạm")`,
     '  files:',
     ...files.map((f) => `    - ${f}`),
     '',

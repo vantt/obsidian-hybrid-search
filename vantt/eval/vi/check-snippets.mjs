@@ -51,6 +51,7 @@ const nfc = (s) => s.normalize('NFC');
 // Whitespace is normalized in both texts before comparing; any leftover marker characters are stripped.
 const clean = (s) =>
   nfc(s)
+    // eslint-disable-next-line no-control-regex, sonarjs/no-control-regex -- U+0001/U+0002 are the OHS match markers
     .replace(/[\u0001\u0002]/g, '')
     .replace(/\s+/g, ' ')
     .trim();

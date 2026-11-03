@@ -226,6 +226,197 @@ function buildBlind({ workDir, a, b, otf, seed, max }) {
   return { pairs: pairs.length, seed, pairs_file: f.pairs, verdicts_file: f.verdicts, tally: null };
 }
 
+/** Summary of an eval result kept in the review data. */
+const lightResult = (r) => ({
+  summary: r.summary,
+  by_category: r.by_category,
+  note_count: r.meta?.note_count ?? null,
+  timing: r.review_timing ?? null,
+});
+
+/** Helpers of the quality evals: a result cache under the work dir and the trees available. */
+function evalContext(opts, trees, workDir) {
+  const resDir = path.join(workDir, 'results');
+  return {
+    cached: async (name, fn) => {
+      const f = path.join(resDir, `${name}.json`);
+      const hit = !opts.force && readJsonIfExists(f);
+      if (hit) return hit;
+      const r = await fn();
+      writeJson(f, r);
+      return r;
+    },
+    available: (names) => names.filter((n) => trees[n]),
+  };
+}
+
+/** obsidian-help eval on the new upstream and both fork builds. */
+async function obsidianHelpQuality(trees, workDir, { cached, available }) {
+  log('Eval obsidian-help');
+  const shared = path.join(forkDir, 'fixtures/obsidian-help/dataset');
+  const vault = existsSync(shared)
+    ? shared
+    : prepareDataset(trees.up_new.dir, 'obsidian-help', log);
+  const golden = goldenFile(trees.up_new.dir, 'obsidian-help');
+  const sides = {};
+  for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
+    log(` side ${n}`);
+    sides[n] = await cached(`obsidian-help-${n}`, () =>
+      runEvaluateTimed({
+        tree: trees[n].dir,
+        vault,
+        golden,
+        scratch: path.join(workDir, 'scratch'),
+        env: evalEnv(),
+      }),
+    );
+  }
+  const lightSides = Object.fromEntries(Object.entries(sides).map(([n, r]) => [n, lightResult(r)]));
+  const rows = buildQualityRows(lightSides);
+  return { sides: lightSides, rows, flags: flagQuality(rows) };
+}
+
+/** vi eval with and without the pack, then blind pairs of upstream against the new fork build. */
+async function viQuality(opts, trees, workDir, { cached }, warnings) {
+  log('Eval vi');
+  const packDir = path.resolve(
+    opts['lang-pack'] ?? path.join(forkDir, 'vantt/packages/ohs-lang-vi'),
+  );
+  const pack = packDir;
+  // A pack without its build output is silently ignored by OHS, which makes the fork look like upstream.
+  buildPack(packDir, log);
+  const vi = {};
+  const viRuns = [
+    ['up_new', null],
+    ['fork_prev', pack],
+    ['fork_new', pack],
+    ['fork_new_nopack', null],
+  ];
+  for (const [n, p] of viRuns) {
+    const tree = trees[n === 'fork_new_nopack' ? 'fork_new' : n];
+    if (!tree) continue;
+    log(` side ${n}`);
+    vi[n] = await cached(`vi-${n}`, () =>
+      runViEval({
+        forkDir,
+        tree: tree.dir,
+        out: path.join(workDir, 'scratch', `vi-${n}.json`),
+        pack: p,
+        otf: opts.otf,
+      }),
+    );
+  }
+  const lightVi = Object.fromEntries(Object.entries(vi).map(([n, r]) => [n, lightResult(r)]));
+  const rowsVi = buildQualityRows(lightVi);
+  if (
+    vi.fork_new &&
+    vi.fork_new_nopack &&
+    JSON.stringify(vi.fork_new.summary) === JSON.stringify(vi.fork_new_nopack.summary)
+  )
+    warnings.push(
+      'vi eval of fork_new is identical with and without the language pack: the pack may not have loaded',
+    );
+  const quality = {
+    pack: pack ? path.relative(forkDir, packDir) : null,
+    sides: lightVi,
+    rows: rowsVi,
+    flags: flagQuality(rowsVi),
+  };
+  let blind = null;
+  if (vi.up_new && vi.fork_new) {
+    log('Blind pairs');
+    blind = buildBlind({
+      workDir,
+      a: vi.up_new,
+      b: vi.fork_new,
+      otf: opts.otf,
+      seed: Number(opts.seed),
+      max: Number(opts['blind-max']),
+    });
+  }
+  return { quality, blind };
+}
+
+/** Private set eval (aggregate numbers only). */
+function privateQuality(opts, trees, workDir, { available }) {
+  log('Eval private set (aggregate numbers only)');
+  const dir = path.resolve(opts.private);
+  const sides = {};
+  for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
+    sides[n] = scrubPrivate(
+      runEvaluate({
+        tree: trees[n].dir,
+        vault: path.join(dir, 'vault'),
+        golden: path.join(dir, 'golden-set.json'),
+        scratch: path.join(workDir, 'scratch'),
+        capture: true,
+        log,
+      }),
+    );
+  }
+  const rows = buildQualityRows(sides);
+  return { sides, rows, flags: flagQuality(rows) };
+}
+
+/** Fork build of the `new` and `prev` sides (made by catchup with --build-missing). */
+function forkRefs(root, tagNew, prev, opts, warnings) {
+  const refs = {};
+  for (const [side, up, ft] of [
+    ['new', tagNew, null],
+    ['prev', prev.upstream_tag, prev.fork_tag],
+  ]) {
+    let ref = findForkRef(root, up, ft);
+    if (!ref && opts['build-missing']) {
+      const r = catchupBranch(root, up);
+      if (!r.ok) warnings.push(`catchup for ${up} exited ${r.exit}`);
+      ref = findForkRef(root, up, ft);
+    }
+    if (!ref) warnings.push(`no fork build for ${up} (${forkBranchOf(up)} missing)`);
+    refs[side] = ref;
+  }
+  return refs;
+}
+
+/** Probe of every patch in the series on every tree, with the suggested action. */
+function probePatches({ root, patches, trees, apply, prev, tagNew }) {
+  const patchData = [];
+  for (const p of patches) {
+    log(`Probe ${p.id}`);
+    const probe = {};
+    for (const name of Object.keys(trees)) {
+      if (!p.probe)
+        probe[name] = {
+          verdict: 'error',
+          exit: null,
+          output: 'no probe declared in series.toml',
+        };
+      else if (!trees[name])
+        probe[name] = { verdict: 'skipped', exit: null, output: `tree ${name} unavailable` };
+      else {
+        probe[name] = runProbe(path.join(forkDir, p.probe), trees[name].dir);
+        log(`  ${name}: ${probe[name].verdict}`);
+      }
+    }
+    patchData.push({
+      id: p.id,
+      name: p.name,
+      upstream_status: p.upstream_status,
+      touches: p.touches,
+      probe: p.probe ?? null,
+      apply: { new: apply.new[p.id], prev: apply.prev[p.id] },
+      upstream_changes: upstreamChanges(root, prev.upstream_tag, tagNew, p.touches),
+      probe_results: probe,
+      suggestion: suggestPatch({
+        upstream: probe.up_new.verdict,
+        apply: apply.new[p.id],
+        upstreamStatus: p.upstream_status,
+      }),
+      fork_probe_ok: trees.fork_new ? probe.fork_new.verdict === 'solved' : null,
+    });
+  }
+  return patchData;
+}
+
 export async function main(argv, { cwd = process.cwd() } = {}) {
   let opts;
   try {
@@ -237,7 +428,7 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   if (opts['trends-only']) {
     const r = writeTrends(path.resolve(opts.out ?? path.join(forkDir, 'vantt/reviews')));
     log(
-      `Trends over ${r.tags.join(', ') || 'no releases'}: ${r.svg}${r.report ? `, refreshed ${r.report}` : ''}`,
+      `Trends over ${r.tags.join(', ') || 'no releases'}: ${r.svg}${r.report ? ', refreshed ' + r.report : ''}`,
     );
     return 0;
   }
@@ -294,21 +485,7 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     );
 
     const warnings = [];
-    const refs = {};
-    for (const [side, up, ft] of [
-      ['new', tagNew, null],
-      ['prev', prev.upstream_tag, prev.fork_tag],
-    ]) {
-      let ref = findForkRef(root, up, ft);
-      if (!ref && opts['build-missing']) {
-        const r = catchupBranch(root, up);
-        if (!r.ok) warnings.push(`catchup for ${up} exited ${r.exit}`);
-        ref = findForkRef(root, up, ft);
-      }
-      if (!ref) warnings.push(`no fork build for ${up} (${forkBranchOf(up)} missing)`);
-      refs[side] = ref;
-    }
-
+    const refs = forkRefs(root, tagNew, prev, opts, warnings);
     // Patch applicability on both upstream tags, independent of catchup's branches.
     log('Patch applicability.');
     const apply = {
@@ -342,163 +519,18 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     const hooks = hookChanges(root, prev.upstream_tag, tagNew);
 
     // Probes on every tree, for every patch in the series.
-    const patchData = [];
-    for (const p of patches) {
-      log(`Probe ${p.id}`);
-      const probe = {};
-      for (const name of Object.keys(trees)) {
-        if (!p.probe)
-          probe[name] = {
-            verdict: 'error',
-            exit: null,
-            output: 'no probe declared in series.toml',
-          };
-        else if (!trees[name])
-          probe[name] = { verdict: 'skipped', exit: null, output: `tree ${name} unavailable` };
-        else {
-          probe[name] = runProbe(path.join(forkDir, p.probe), trees[name].dir);
-          log(`  ${name}: ${probe[name].verdict}`);
-        }
-      }
-      patchData.push({
-        id: p.id,
-        name: p.name,
-        upstream_status: p.upstream_status,
-        touches: p.touches,
-        probe: p.probe ?? null,
-        apply: { new: apply.new[p.id], prev: apply.prev[p.id] },
-        upstream_changes: upstreamChanges(root, prev.upstream_tag, tagNew, p.touches),
-        probe_results: probe,
-        suggestion: suggestPatch({
-          upstream: probe.up_new.verdict,
-          apply: apply.new[p.id],
-          upstreamStatus: p.upstream_status,
-        }),
-        fork_probe_ok: trees.fork_new ? probe.fork_new.verdict === 'solved' : null,
-      });
-    }
+    const patchData = probePatches({ root, patches, trees, apply, prev, tagNew });
 
     // Quality.
     const quality = { skipped: opts['skip-eval'] };
     let blind = null;
     if (!opts['skip-eval']) {
-      const resDir = path.join(workDir, 'results');
-      const cached = async (name, fn) => {
-        const f = path.join(resDir, `${name}.json`);
-        const hit = !opts.force && readJsonIfExists(f);
-        if (hit) return hit;
-        const r = await fn();
-        writeJson(f, r);
-        return r;
-      };
-      const light = (r) => ({
-        summary: r.summary,
-        by_category: r.by_category,
-        note_count: r.meta?.note_count ?? null,
-        timing: r.review_timing ?? null,
-      });
-      const available = (names) => names.filter((n) => trees[n]);
-
+      const ctx = evalContext(opts, trees, workDir);
       if (trees.up_new) {
-        log('Eval obsidian-help');
-        const shared = path.join(forkDir, 'fixtures/obsidian-help/dataset');
-        const vault = existsSync(shared)
-          ? shared
-          : prepareDataset(trees.up_new.dir, 'obsidian-help', log);
-        const golden = goldenFile(trees.up_new.dir, 'obsidian-help');
-        const sides = {};
-        for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
-          log(` side ${n}`);
-          sides[n] = await cached(`obsidian-help-${n}`, () =>
-            runEvaluateTimed({
-              tree: trees[n].dir,
-              vault,
-              golden,
-              scratch: path.join(workDir, 'scratch'),
-              env: evalEnv(),
-            }),
-          );
-        }
-        const lightSides = Object.fromEntries(Object.entries(sides).map(([n, r]) => [n, light(r)]));
-        const rows = buildQualityRows(lightSides);
-        quality['obsidian-help'] = { sides: lightSides, rows, flags: flagQuality(rows) };
-
-        log('Eval vi');
-        const packDir = path.resolve(
-          opts['lang-pack'] ?? path.join(forkDir, 'vantt/packages/ohs-lang-vi'),
-        );
-        const pack = packDir;
-        // A pack without its build output is silently ignored by OHS, which makes the fork look like upstream.
-        buildPack(packDir, log);
-        const vi = {};
-        const viRuns = [
-          ['up_new', null],
-          ['fork_prev', pack],
-          ['fork_new', pack],
-          ['fork_new_nopack', null],
-        ];
-        for (const [n, p] of viRuns) {
-          const tree = trees[n === 'fork_new_nopack' ? 'fork_new' : n];
-          if (!tree) continue;
-          log(` side ${n}`);
-          vi[n] = await cached(`vi-${n}`, () =>
-            runViEval({
-              forkDir,
-              tree: tree.dir,
-              out: path.join(workDir, 'scratch', `vi-${n}.json`),
-              pack: p,
-              otf: opts.otf,
-            }),
-          );
-        }
-        const lightVi = Object.fromEntries(Object.entries(vi).map(([n, r]) => [n, light(r)]));
-        const rowsVi = buildQualityRows(lightVi);
-        if (
-          vi.fork_new &&
-          vi.fork_new_nopack &&
-          JSON.stringify(vi.fork_new.summary) === JSON.stringify(vi.fork_new_nopack.summary)
-        )
-          warnings.push(
-            'vi eval of fork_new is identical with and without the language pack: the pack may not have loaded',
-          );
-        quality.vi = {
-          pack: pack ? path.relative(forkDir, packDir) : null,
-          sides: lightVi,
-          rows: rowsVi,
-          flags: flagQuality(rowsVi),
-        };
-        if (vi.up_new && vi.fork_new) {
-          log('Blind pairs');
-          blind = buildBlind({
-            workDir,
-            a: vi.up_new,
-            b: vi.fork_new,
-            otf: opts.otf,
-            seed: Number(opts.seed),
-            max: Number(opts['blind-max']),
-          });
-        }
+        quality['obsidian-help'] = await obsidianHelpQuality(trees, workDir, ctx);
+        ({ quality: quality.vi, blind } = await viQuality(opts, trees, workDir, ctx, warnings));
       }
-
-      if (opts.private) {
-        log('Eval private set (aggregate numbers only)');
-        const dir = path.resolve(opts.private);
-        const sides = {};
-        for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
-          sides[n] = scrubPrivate(
-            runEvaluate({
-              tree: trees[n].dir,
-              vault: path.join(dir, 'vault'),
-              golden: path.join(dir, 'golden-set.json'),
-              scratch: path.join(workDir, 'scratch'),
-              capture: true,
-              log,
-            }),
-          );
-        }
-        const rows = buildQualityRows(sides);
-        quality.private = { sides, rows, flags: flagQuality(rows) };
-      }
+      if (opts.private) quality.private = privateQuality(opts, trees, workDir, ctx);
     }
 
     const data = {
@@ -520,7 +552,7 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     log(`Wrote ${dataFile}`);
     const tr = writeTrends(outDir);
     log(
-      `Trends over ${tr.tags.join(', ')}: ${tr.svg}${tr.report ? `, refreshed ${tr.report}` : ' (no report yet; rerun with --trends-only after writing it)'}`,
+      `Trends over ${tr.tags.join(', ')}: ${tr.svg}${tr.report ? ', refreshed ' + tr.report : ' (no report yet; rerun with --trends-only after writing it)'}`,
     );
     return 0;
   } catch (e) {

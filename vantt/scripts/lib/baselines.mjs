@@ -58,7 +58,7 @@ export function pickBaseline(dir, { set, lang = null, version }) {
 
 /** Write a new baseline file; refuses to replace an existing one unless `force`. Returns the path. */
 export function writeBaseline(dir, { version, set, lang = null, result, force = false }) {
-  const file = path.join(dir, `${version}.${set}${lang ? `.${lang}` : ''}.json`);
+  const file = path.join(dir, `${version}.${set}${lang ? '.' + lang : ''}.json`);
   if (existsSync(file) && !force)
     throw new Error(
       `${file} exists; lowering a baseline needs a reviewed PR (--force overwrites it locally)`,

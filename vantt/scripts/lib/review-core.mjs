@@ -148,7 +148,8 @@ export function pickBlindQueries(perA, perB, { max = 20, seed = 1 } = {}) {
   }
   const pools = [...byCat.keys()].sort().map((cat) => shuffle(byCat.get(cat), random));
   const chosen = [];
-  for (let round = 0; chosen.length < max; round++) {
+  let round = 0;
+  while (chosen.length < max) {
     let any = false;
     for (const pool of pools) {
       if (round < pool.length && chosen.length < max) {
@@ -157,6 +158,7 @@ export function pickBlindQueries(perA, perB, { max = 20, seed = 1 } = {}) {
       }
     }
     if (!any) break;
+    round++;
   }
   return chosen;
 }

@@ -86,7 +86,7 @@ export function langPacks(cwd, treeish) {
     .map((d) => {
       const dir = `vantt/packages/${d}`;
       const pkg = git(cwd, ['show', `${treeish}:${dir}/package.json`], { allowFail: true });
-      let version = null;
+      let version;
       try {
         version = pkg.ok ? (JSON.parse(pkg.stdout).version ?? null) : null;
       } catch {
@@ -140,6 +140,29 @@ export function computeVersion(cwd, target, inputs, pkgVersion) {
  * package.json (and the root entries of package-lock.json). P00 `fork-identity`
  * reads these; the patch itself never hardcodes a version.
  */
+const SPACE_RE = /\s/;
+const LINE_TERMINATORS = '\n\r\u2028\u2029';
+
+/**
+ * Indent of the first line that starts with whitespace followed by `"`: the same as
+ * `/^(\s+)"/m.exec(raw)?.[1]` in linear time. Each whitespace run is read once; the match starts
+ * at its first line start (the run's start at offset 0, or just after a line terminator in it).
+ */
+export function firstKeyIndent(raw) {
+  let i = 0;
+  while (i < raw.length) {
+    if (!SPACE_RE.test(raw[i])) {
+      i++;
+      continue;
+    }
+    let start = -1;
+    for (; i < raw.length && SPACE_RE.test(raw[i]); i++)
+      if (start < 0 && (i === 0 || LINE_TERMINATORS.includes(raw[i - 1]))) start = i;
+    if (start >= 0 && raw[i] === '"') return raw.slice(start, i);
+  }
+  return undefined;
+}
+
 export function stampVersion(cwd, version) {
   const edit = (rel, fn) => {
     const file = path.join(cwd, rel);
@@ -147,7 +170,7 @@ export function stampVersion(cwd, version) {
     const raw = readFileSync(file, 'utf8');
     const json = JSON.parse(raw);
     fn(json);
-    const indent = /^(\s+)"/m.exec(raw)?.[1] ?? '  ';
+    const indent = firstKeyIndent(raw) ?? '  ';
     writeFileSync(file, JSON.stringify(json, null, indent) + '\n');
     return true;
   };
