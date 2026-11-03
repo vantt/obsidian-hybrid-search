@@ -313,6 +313,24 @@ describe('weak BM25 votes in hybrid fusion', () => {
     expect(withId[1]! - plain[1]!).toBeGreaterThan(0);
   });
 
+  it('keeps the BM25 votes of a misspelled query', async () => {
+    // The vector branch embedded the typo, so its disagreement with BM25 is no evidence.
+    const answer = candidate('answer.md', 0.2, { semantic: 1 });
+    const exact = candidate('exact.md', 0.35, { semantic: 16, bm25: 1, 'view:seg': 2 });
+    const docs = ['Kế hoạch giữ chân khách hàng', ...filler(10, 'Khách hàng mới')];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    const list = [answer, exact, ...moreBm25];
+    const typo = await pack.analyzeQuery('giu chna khahc hang', ctx);
+    expect((typo.data as ViAnalysisData).typoCorrected).toBe(true);
+    const plain = await pack.analyzeQuery('giu chan khach hang', ctx);
+    expect((plain.data as ViAnalysisData).typoCorrected).toBe(false);
+    expect((await pack.rescore!(list, typo, ctx))[1]!.score).toBeCloseTo(exact.score, 6);
+    expect(typo.debug?.bm25Penalty).toBe(0);
+    await pack.rescore!(list, plain, ctx);
+    expect(plain.debug?.bm25Penalty as number).toBeGreaterThan(0);
+  });
+
   it('keeps every vote when BM25 agrees, when off, and for non-Vietnamese queries', async () => {
     const agreeing = [
       candidate('a.md', 0.9, { semantic: 2, bm25: 1 }),

@@ -80,6 +80,8 @@ export interface ViAnalysisData {
   vietnamese: boolean;
   /** A query token is not a Vietnamese syllable (an identifier, a number, an English word). */
   literalToken: boolean;
+  /** A query word was misspelled and replaced by a typo correction. */
+  typoCorrected?: boolean;
 }
 
 /** Restorations handed to rescore (most probable first). */
@@ -295,6 +297,7 @@ export function buildAnalysis(
     accented: state.accented,
     vietnamese,
     literalToken: state.tokens.some((t) => !t.syllable),
+    typoCorrected: (state.rewrite?.typo.length ?? 0) > 0,
   };
   analysis.data = data;
   // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25

@@ -157,8 +157,10 @@ export function rescoreCandidates(
   const w = options.rescoreWeights;
   // A query word that is no Vietnamese syllable (an identifier such as ECONNRESET, a model
   // number) is an exact-match signal the vector branch does not have: BM25 keeps its votes.
+  // So does a misspelled query: the vector branch embedded the typo (or a guessed
+  // correction), so its disagreement with BM25 says nothing about BM25.
   const penalty =
-    data.vietnamese && !data.literalToken
+    data.vietnamese && !data.literalToken && data.typoCorrected !== true
       ? weakBm25Penalty(candidates, analysis, options)
       : candidates.map(() => 0);
   // The core shows `analysis.debug` in `explain`; record the fusion check there.
