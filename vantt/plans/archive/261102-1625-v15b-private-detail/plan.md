@@ -1,9 +1,9 @@
 ---
-title: "v15b-private-detail"
-description: "quality-gate --private-detail: file JSON cục bộ theo từng câu để điều tra hạng mục tụt trên vault riêng"
+title: 'v15b-private-detail'
+description: 'quality-gate --private-detail: file JSON cục bộ theo từng câu để điều tra hạng mục tụt trên vault riêng'
 status: completed
 priority: P1
-effort: "0,3d"
+effort: '0,3d'
 tags: [vi-pack, v15b, quality-gate]
 created: 2026-11-02
 ---

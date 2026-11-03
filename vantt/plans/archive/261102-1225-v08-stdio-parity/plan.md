@@ -1,9 +1,9 @@
 ---
-title: "v08-stdio-parity"
-description: "Bản vá P04 stdio-parity: action read, vectors, neighbors, reindex cho serve --stdio; chờ request đang chạy khi stdin đóng"
+title: 'v08-stdio-parity'
+description: 'Bản vá P04 stdio-parity: action read, vectors, neighbors, reindex cho serve --stdio; chờ request đang chạy khi stdin đóng'
 status: completed
 priority: P1
-effort: "1d"
+effort: '1d'
 tags: [patch, p04, v08, stdio-parity]
 created: 2026-11-02
 ---

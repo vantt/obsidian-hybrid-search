@@ -34,12 +34,12 @@ Tái hiện: `vantt/probes/index-events.mjs --ohs <dir>`: chạy `serve --stdio`
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/indexing/indexer.ts` | khối `onIndexEvent` / `noteIndexChange` / `noteIndexPublished` (thêm trước `assertIndexRun`); gọi trong `indexFile` (nhánh `missing` và sau `bumpIndexVersion` khi `indexed`), `cleanupStaleNotes`, `safeHandleUnlink` của `startWatcher`; import `getDbVersion` | điểm commit và xoá note |
-| `src/runtime/config.ts` | hàm `watchDebounceMs`, `config.debounce` | biến `OBSIDIAN_WATCH_DEBOUNCE_MS` (mặc định 5000, số nguyên không âm) |
-| `src/transports/cli.ts` | khối `if (opts.stdio)` của `serve`, ngay sau `writeLine`; import `onIndexEvent` | nối sự kiện vào `writeLine` khi bật |
-| `test/vantt/index-events.test.ts` (mới) | | tiến trình `serve --stdio` thật: sửa note, xoá note, không bật thì im |
+| File                                    | Hàm hoặc chỗ                                                                                                                                                                                                                                                     | Vì sao                                                                |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `src/indexing/indexer.ts`               | khối `onIndexEvent` / `noteIndexChange` / `noteIndexPublished` (thêm trước `assertIndexRun`); gọi trong `indexFile` (nhánh `missing` và sau `bumpIndexVersion` khi `indexed`), `cleanupStaleNotes`, `safeHandleUnlink` của `startWatcher`; import `getDbVersion` | điểm commit và xoá note                                               |
+| `src/runtime/config.ts`                 | hàm `watchDebounceMs`, `config.debounce`                                                                                                                                                                                                                         | biến `OBSIDIAN_WATCH_DEBOUNCE_MS` (mặc định 5000, số nguyên không âm) |
+| `src/transports/cli.ts`                 | khối `if (opts.stdio)` của `serve`, ngay sau `writeLine`; import `onIndexEvent`                                                                                                                                                                                  | nối sự kiện vào `writeLine` khi bật                                   |
+| `test/vantt/index-events.test.ts` (mới) |                                                                                                                                                                                                                                                                  | tiến trình `serve --stdio` thật: sửa note, xoá note, không bật thì im |
 
 ## 5. Kiểm thử
 

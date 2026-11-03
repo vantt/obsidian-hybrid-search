@@ -1,9 +1,9 @@
 ---
 phase: 3
-title: "Phase 3: Điểm cắm gói ngôn ngữ"
+title: 'Phase 3: Điểm cắm gói ngôn ngữ'
 status: done
 priority: P1
-effort: "6d"
+effort: '6d'
 dependencies: [1]
 ---
 
@@ -15,10 +15,10 @@ Bản vá P01 thêm điểm cắm chung cho mọi ngôn ngữ vào lõi; lõi kh
 
 ## Việc
 
-| ID | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|
-| V11 | P01 `language-pack-api`: thư mục `src/language/` (`types.ts`, `loader.ts`, `noop.ts`); hợp đồng `LanguagePackV1` gồm `views`, `project`, `analyzeQuery`, `rescore`, `aliasViews`, `queryCacheKey`, `QueryContext.vaultPath`; bảng `notes_lex_<v>`, `notes_alias_lex_<v>`, `fts5vocab`; nhánh RRF cho view; đoạn trích từ nhánh view đổi về chữ gốc theo bất biến token, `matchedTerms`; cờ `explain`; nạp ở CLI, MCP, stdio, daemon; cập nhật `dependency-cruiser.config.cjs`, `test/architecture-boundaries.test.ts`. Test bằng gói giả `lang-upper` | V01 | mạnh | 4 | 10.1, 10.2 |
-| V21 | Gói `vantt/packages/ohs-lang-de` (tiếng Đức): `ä` khớp `a` và `ae`, `ß` khớp `ss`, từ ghép dài; ít nhất một view và `analyzeQuery`; test riêng; golden set nhỏ. Mọi chỗ phải sửa lõi để gói chạy là lỗi của P01 và sửa trong P01 | V11 | vừa | 2 | 2.1 (G9), 15 (Q10) |
+| ID  | Việc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Cần | Mức  | Công | PRD                |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---- | ---- | ------------------ |
+| V11 | P01 `language-pack-api`: thư mục `src/language/` (`types.ts`, `loader.ts`, `noop.ts`); hợp đồng `LanguagePackV1` gồm `views`, `project`, `analyzeQuery`, `rescore`, `aliasViews`, `queryCacheKey`, `QueryContext.vaultPath`; bảng `notes_lex_<v>`, `notes_alias_lex_<v>`, `fts5vocab`; nhánh RRF cho view; đoạn trích từ nhánh view đổi về chữ gốc theo bất biến token, `matchedTerms`; cờ `explain`; nạp ở CLI, MCP, stdio, daemon; cập nhật `dependency-cruiser.config.cjs`, `test/architecture-boundaries.test.ts`. Test bằng gói giả `lang-upper` | V01 | mạnh | 4    | 10.1, 10.2         |
+| V21 | Gói `vantt/packages/ohs-lang-de` (tiếng Đức): `ä` khớp `a` và `ae`, `ß` khớp `ss`, từ ghép dài; ít nhất một view và `analyzeQuery`; test riêng; golden set nhỏ. Mọi chỗ phải sửa lõi để gói chạy là lỗi của P01 và sửa trong P01                                                                                                                                                                                                                                                                                                                      | V11 | vừa  | 2    | 2.1 (G9), 15 (Q10) |
 
 ## Quy tắc riêng
 

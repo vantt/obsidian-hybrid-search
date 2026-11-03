@@ -1,9 +1,9 @@
 ---
-title: "v13-vi-pack-m2-m3"
-description: "Gói ohs-lang-vi M2 + M3: view norm/fold, analyzeQuery, phục hồi dấu (Viterbi), rescore, LanguagePackV1; chốt tham số bằng eval"
+title: 'v13-vi-pack-m2-m3'
+description: 'Gói ohs-lang-vi M2 + M3: view norm/fold, analyzeQuery, phục hồi dấu (Viterbi), rescore, LanguagePackV1; chốt tham số bằng eval'
 status: completed
 priority: P1
-effort: "3,5d"
+effort: '3,5d'
 tags: [vi-pack, v13]
 created: 2026-11-02
 ---
@@ -46,20 +46,20 @@ TMPDIR=/home/vantt/projects/ohs-wt/tmp/v13 node vantt/eval/vi/run-eval.mjs --ohs
 node vantt/eval/vi/run-eval.mjs --compare vantt/eval/baselines/linux-x64/0.17.2.vi-search.json <a.json>
 ```
 
-| Hạng mục | nDCG@5 baseline → gói | MRR | Hit@5 |
-|---|---|---|---|
-| Tổng | 0,666 → 0,813 | 0,643 → 0,795 | 0,761 → 0,886 |
-| `vi-accented` | 1,000 → 1,000 | 1,000 → 1,000 | 1,00 → 1,00 |
-| `vi-partial-accent` | 0,872 → 0,933 | 0,830 → 0,911 | 1,00 → 1,00 |
-| `vi-unaccented` | 0,133 → 0,951 | 0,089 → 0,933 | 0,27 → 1,00 |
-| `vi-dd` | 0,263 → 0,888 | 0,240 → 0,850 | 0,40 → 1,00 |
-| `vi-tone-precision` | 0,951 → 1,000 | 0,933 → 1,000 | 1,00 → 1,00 |
-| `vi-compound` | 0,844 → 1,000 | 0,789 → 1,000 | 1,00 → 1,00 |
-| `vi-typo` | 0,488 → 0,661 | 0,426 → 0,578 | 0,73 → 0,93 |
-| `vi-snippet` | 0,463 → 0,743 | 0,437 → 0,719 | 0,60 → 0,87 |
-| `vi-alias` | 0,535 → 0,814 | 0,478 → 0,752 | 0,73 → 1,00 |
-| `vi-names` | 0,909 → 0,975 | 0,911 → 0,967 | 0,93 → 1,00 |
-| các hạng còn lại | không đổi | ≥ 0 | không đổi |
+| Hạng mục            | nDCG@5 baseline → gói | MRR           | Hit@5         |
+| ------------------- | --------------------- | ------------- | ------------- |
+| Tổng                | 0,666 → 0,813         | 0,643 → 0,795 | 0,761 → 0,886 |
+| `vi-accented`       | 1,000 → 1,000         | 1,000 → 1,000 | 1,00 → 1,00   |
+| `vi-partial-accent` | 0,872 → 0,933         | 0,830 → 0,911 | 1,00 → 1,00   |
+| `vi-unaccented`     | 0,133 → 0,951         | 0,089 → 0,933 | 0,27 → 1,00   |
+| `vi-dd`             | 0,263 → 0,888         | 0,240 → 0,850 | 0,40 → 1,00   |
+| `vi-tone-precision` | 0,951 → 1,000         | 0,933 → 1,000 | 1,00 → 1,00   |
+| `vi-compound`       | 0,844 → 1,000         | 0,789 → 1,000 | 1,00 → 1,00   |
+| `vi-typo`           | 0,488 → 0,661         | 0,426 → 0,578 | 0,73 → 0,93   |
+| `vi-snippet`        | 0,463 → 0,743         | 0,437 → 0,719 | 0,60 → 0,87   |
+| `vi-alias`          | 0,535 → 0,814         | 0,478 → 0,752 | 0,73 → 1,00   |
+| `vi-names`          | 0,909 → 0,975         | 0,911 → 0,967 | 0,93 → 1,00   |
+| các hạng còn lại    | không đổi             | ≥ 0           | không đổi     |
 
 Upstream obsidian-help có gói: nDCG@5 0,735 → 0,735. Smoke: tổng nDCG@5 +0,077, không hạng nào tụt. Chi tiết các lần quét tham số: README của gói.
 

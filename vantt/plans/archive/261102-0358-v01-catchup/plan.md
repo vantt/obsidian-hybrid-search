@@ -1,9 +1,9 @@
 ---
-title: "V01: catchup dựng nhánh phát hành từ tag upstream"
-description: "Việc V01 của lộ trình fork: vantt/scripts/catchup.mjs (Node ESM, không phụ thuộc), test vitest trên repo git tạm kể cả diễn tập xung đột T8, skill ohs-catchup, xuất lại bản vá sau khi sửa xung đột."
+title: 'V01: catchup dựng nhánh phát hành từ tag upstream'
+description: 'Việc V01 của lộ trình fork: vantt/scripts/catchup.mjs (Node ESM, không phụ thuộc), test vitest trên repo git tạm kể cả diễn tập xung đột T8, skill ohs-catchup, xuất lại bản vá sau khi sửa xung đột.'
 status: completed
 priority: P1
-effort: "2 ngày"
+effort: '2 ngày'
 tags: [infra]
 created: 2026-11-02
 ---

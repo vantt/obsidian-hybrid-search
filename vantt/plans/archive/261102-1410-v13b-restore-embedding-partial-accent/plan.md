@@ -1,9 +1,9 @@
 ---
-title: "v13b-restore-embedding-partial-accent"
-description: "Sửa restoreForEmbedding làm hỏng câu có dấu một phần (Hội An); chốt mặc định bằng eval"
+title: 'v13b-restore-embedding-partial-accent'
+description: 'Sửa restoreForEmbedding làm hỏng câu có dấu một phần (Hội An); chốt mặc định bằng eval'
 status: completed
 priority: P2
-effort: "0,3d"
+effort: '0,3d'
 tags: [vi-pack, v13b, v22]
 created: 2026-11-02
 ---

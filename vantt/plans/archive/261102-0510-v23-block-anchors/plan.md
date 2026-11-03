@@ -1,9 +1,9 @@
 ---
-title: "V23 P05 block-anchors"
-description: "Bản vá lõi P05: block_id và has_highlight cho mỗi đoạn, OBSIDIAN_CHUNK_TOKENS."
+title: 'V23 P05 block-anchors'
+description: 'Bản vá lõi P05: block_id và has_highlight cho mỗi đoạn, OBSIDIAN_CHUNK_TOKENS.'
 status: completed
 priority: P1
-effort: "2d"
+effort: '2d'
 tags: [feature, backend]
 created: 2026-11-02
 ---

@@ -37,17 +37,17 @@ Giới hạn đã biết: một đoạn chỉ có một `block_id` (id cuối). 
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/content/block-anchors.ts` (mới) | `extractChunkAnchors` | nhận id khối và chữ tô |
-| `src/content/chunker.ts` | `effectiveChunkTokens` (mới) | `min(giới hạn model, cấu hình)` |
-| `src/runtime/config.ts` | `chunkTokens` | đọc `OBSIDIAN_CHUNK_TOKENS` |
-| `src/indexing/indexer.ts` | `prepareIndexFile`: `chunkNote(content, effectiveChunkTokens(contextLength))` và `...extractChunkAnchors(chunk.text)` | áp cỡ đoạn, đính cờ vào đoạn |
-| `src/indexing/index-service.ts` | `desired` (chữ ký chính sách nội dung) | cỡ đoạn thành định danh index |
-| `src/storage/db.ts` | `INDEX_SCHEMA_VERSION`, `runMigrations` (+ `backfillChunkAnchors`), `PreparedIndexNote.chunks`, `insertChunks` | cột mới, migration, ghi cột |
-| `src/storage/search-queries.ts` | `readChunksForPaths`, truy vấn vector | đọc hai cột |
-| `src/search/searcher.ts` | `MatchAnchor`, `anchorFlags`, `Bm25ChunkData`, `matchChunkDataFromRows`, anchor `bm25` và `semantic` | đưa vào `previewAnchors` |
-| `test/vantt/block-anchors.test.ts` (mới) | | xem mục 5 |
+| File                                     | Hàm hoặc chỗ                                                                                                          | Vì sao                          |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `src/content/block-anchors.ts` (mới)     | `extractChunkAnchors`                                                                                                 | nhận id khối và chữ tô          |
+| `src/content/chunker.ts`                 | `effectiveChunkTokens` (mới)                                                                                          | `min(giới hạn model, cấu hình)` |
+| `src/runtime/config.ts`                  | `chunkTokens`                                                                                                         | đọc `OBSIDIAN_CHUNK_TOKENS`     |
+| `src/indexing/indexer.ts`                | `prepareIndexFile`: `chunkNote(content, effectiveChunkTokens(contextLength))` và `...extractChunkAnchors(chunk.text)` | áp cỡ đoạn, đính cờ vào đoạn    |
+| `src/indexing/index-service.ts`          | `desired` (chữ ký chính sách nội dung)                                                                                | cỡ đoạn thành định danh index   |
+| `src/storage/db.ts`                      | `INDEX_SCHEMA_VERSION`, `runMigrations` (+ `backfillChunkAnchors`), `PreparedIndexNote.chunks`, `insertChunks`        | cột mới, migration, ghi cột     |
+| `src/storage/search-queries.ts`          | `readChunksForPaths`, truy vấn vector                                                                                 | đọc hai cột                     |
+| `src/search/searcher.ts`                 | `MatchAnchor`, `anchorFlags`, `Bm25ChunkData`, `matchChunkDataFromRows`, anchor `bm25` và `semantic`                  | đưa vào `previewAnchors`        |
+| `test/vantt/block-anchors.test.ts` (mới) |                                                                                                                       | xem mục 5                       |
 
 ## 5. Kiểm thử
 

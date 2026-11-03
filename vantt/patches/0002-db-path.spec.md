@@ -33,16 +33,16 @@ Tái hiện trên upstream v0.17.2: đặt `OBSIDIAN_VAULT_PATH` tới một vau
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/runtime/config.ts` | `dbPathOverride` (mới), `dbPath` | đọc `OBSIDIAN_DB_PATH`, kiểm tuyệt đối |
-| `src/storage/vault-locator.ts` | `isSameVaultPath` (mới) | so vault bằng realpath |
-| `src/storage/db.ts` | `openDb`, `assertDatabaseBelongsToVault` (mới) | tạo thư mục cha, từ chối DB của vault khác |
-| `src/vault/vault-config.ts` | `discoverConfig`, `useExternalDatabase` (mới) | nhận `--db` hợp lệ, dò vault từ `OBSIDIAN_DB_PATH` |
-| `src/transports/status-payload.ts`, `src/transports/mcp-runtime.ts` | trường `db_path` | `status` CLI, stdio IPC, MCP |
-| `src/transports/cli.ts` | mô tả `--db` | chỉ chữ trợ giúp |
-| `README.md` | bảng cấu hình, mục chạy từ ngoài vault | tài liệu người dùng |
-| `test/vantt/db-path.test.ts` (mới) | test | xem mục 5 |
+| File                                                                | Hàm hoặc chỗ                                   | Vì sao                                             |
+| ------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| `src/runtime/config.ts`                                             | `dbPathOverride` (mới), `dbPath`               | đọc `OBSIDIAN_DB_PATH`, kiểm tuyệt đối             |
+| `src/storage/vault-locator.ts`                                      | `isSameVaultPath` (mới)                        | so vault bằng realpath                             |
+| `src/storage/db.ts`                                                 | `openDb`, `assertDatabaseBelongsToVault` (mới) | tạo thư mục cha, từ chối DB của vault khác         |
+| `src/vault/vault-config.ts`                                         | `discoverConfig`, `useExternalDatabase` (mới)  | nhận `--db` hợp lệ, dò vault từ `OBSIDIAN_DB_PATH` |
+| `src/transports/status-payload.ts`, `src/transports/mcp-runtime.ts` | trường `db_path`                               | `status` CLI, stdio IPC, MCP                       |
+| `src/transports/cli.ts`                                             | mô tả `--db`                                   | chỉ chữ trợ giúp                                   |
+| `README.md`                                                         | bảng cấu hình, mục chạy từ ngoài vault         | tài liệu người dùng                                |
+| `test/vantt/db-path.test.ts` (mới)                                  | test                                           | xem mục 5                                          |
 
 ## 5. Kiểm thử
 

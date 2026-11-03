@@ -1,5 +1,5 @@
 ---
-title: "Phase 1: Start"
+title: 'Phase 1: Start'
 status: completed
 ---
 

@@ -1,9 +1,9 @@
 ---
 phase: 6
-title: "Phase 6: Kiểm mỗi bản upstream mới"
+title: 'Phase 6: Kiểm mỗi bản upstream mới'
 status: done
 priority: P2
-effort: "2d"
+effort: '2d'
 dependencies: [2, 5]
 ---
 
@@ -15,10 +15,10 @@ Mỗi bản upstream mới có báo cáo: bản vá nào còn cần, upstream đ
 
 ## Việc
 
-| ID | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|
-| L24 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review (N22): gom `vantt/reviews/*.data.json`, vẽ xu hướng nDCG@5, Hit@5 tổng, hạng mục `vi-*` chính, eval upstream, thời gian index và mỗi câu; chèn vào báo cáo mới nhất. User xác nhận đưa vào goal 2026-11-02 | V14 | vừa | 0,5 | 2.2 (N22), 14.2 |
-| V14 | `vantt/scripts/review-upstream.mjs`: chạy probe mọi bản vá trên bản upstream mới, chạy eval upstream và eval `vi` ở cả hai bản, diff các điểm chạm của bản vá; hoàn thiện skill `.claude/skills/ohs-upstream-review/SKILL.md`; báo cáo theo mẫu PRD 12.5 ở `vantt/reviews/<tag>.md` | V06, V07, V08, V12 | vừa | 2 | 12 |
+| ID  | Việc                                                                                                                                                                                                                                                                                | Cần                | Mức | Công | PRD             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | --- | ---- | --------------- |
+| L24 | Biểu đồ chỉ số eval qua các bản phát hành trong báo cáo review (N22): gom `vantt/reviews/*.data.json`, vẽ xu hướng nDCG@5, Hit@5 tổng, hạng mục `vi-*` chính, eval upstream, thời gian index và mỗi câu; chèn vào báo cáo mới nhất. User xác nhận đưa vào goal 2026-11-02           | V14                | vừa | 0,5  | 2.2 (N22), 14.2 |
+| V14 | `vantt/scripts/review-upstream.mjs`: chạy probe mọi bản vá trên bản upstream mới, chạy eval upstream và eval `vi` ở cả hai bản, diff các điểm chạm của bản vá; hoàn thiện skill `.claude/skills/ohs-upstream-review/SKILL.md`; báo cáo theo mẫu PRD 12.5 ở `vantt/reviews/<tag>.md` | V06, V07, V08, V12 | vừa | 2    | 12              |
 
 ## Quy tắc riêng
 

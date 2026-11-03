@@ -1,9 +1,9 @@
 ---
-title: "v25-index-events"
-description: "Bản vá P07 index-events: serve --stdio phát sự kiện indexed và removed sau mỗi lô ghi"
+title: 'v25-index-events'
+description: 'Bản vá P07 index-events: serve --stdio phát sự kiện indexed và removed sau mỗi lô ghi'
 status: completed
 priority: P1
-effort: "0.5d"
+effort: '0.5d'
 tags: [patch, p07, v25, index-events]
 created: 2026-11-02
 ---

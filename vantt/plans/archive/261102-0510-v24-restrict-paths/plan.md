@@ -1,9 +1,9 @@
 ---
-title: "V24 P06 restrict-paths"
-description: "Bản vá lõi P06: tuỳ chọn paths[] / --paths-file giới hạn mọi nhánh tìm vào một tập note, đẩy xuống SQL qua buildFilterPredicate."
+title: 'V24 P06 restrict-paths'
+description: 'Bản vá lõi P06: tuỳ chọn paths[] / --paths-file giới hạn mọi nhánh tìm vào một tập note, đẩy xuống SQL qua buildFilterPredicate.'
 status: completed
 priority: P1
-effort: "0,5-1 ngày"
+effort: '0,5-1 ngày'
 tags: [feature, backend]
 created: 2026-11-02
 ---

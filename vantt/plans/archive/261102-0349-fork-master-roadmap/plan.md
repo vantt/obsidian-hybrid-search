@@ -1,9 +1,9 @@
 ---
-title: "Lộ trình tổng của fork vantt/obsidian-hybrid-search"
-description: "Plan tổng cho agent lead: mọi việc bắt buộc V00–V25 (trừ V16) của PRD, xếp theo 6 nhóm và theo đợt chạy song song, để điều phối agent con qua /ak-plan và /ak-cook."
+title: 'Lộ trình tổng của fork vantt/obsidian-hybrid-search'
+description: 'Plan tổng cho agent lead: mọi việc bắt buộc V00–V25 (trừ V16) của PRD, xếp theo 6 nhóm và theo đợt chạy song song, để điều phối agent con qua /ak-plan và /ak-cook.'
 status: completed
 priority: P1
-effort: "~44 ngày công agent"
+effort: '~44 ngày công agent'
 branch: master
 tags: [infra, feature, backend, experimental]
 blockedBy: []
@@ -19,43 +19,43 @@ Plan này là đầu vào cho một goal. Agent lead đọc nó để nắm toà
 
 ## Mục tiêu phải đạt (PRD mục 2.1)
 
-| ID | Mục tiêu | Phase |
-|---|---|---|
-| G1 | Có bản `vX.Y.Z-vantt.N` trong 24 giờ sau mỗi tag upstream, nếu không xung đột | 1 |
-| G2 | Không có gói ngôn ngữ thì kết quả tìm giống hệt upstream cùng tag | 3, 5 |
-| G3 | Có gói tiếng Việt thì tìm tiếng Việt tốt lên rõ, nhất là gõ không dấu | 4, 5 |
-| G4 | Khách cài từ gói dựng sẵn cho 4 nền, không chạy `npm` | 1 |
-| G5 | Mỗi bản upstream mới có báo cáo review | 6 |
-| G6 | Có lệnh chính thức lấy vector và K note gần nhất (phía fork) | 2 |
-| G7 | DB index đặt được ngoài vault | 2 |
-| G8 | Gói `vi`: Telex/VNI, gõ sai, đồng nghĩa, viết tắt, từ ghép, alias không dấu, đoạn trích chữ gốc | 4 |
-| G9 | Hợp đồng P01 chung thật: gói tiếng Đức chạy không sửa lõi | 3 |
-| G10 | Chọn cấu hình nhánh nghĩa: model nhúng, `restoreForEmbedding`, reranker | 5 |
-| G11 | Block anchor, tìm trong tập note, sự kiện index | 2 |
+| ID  | Mục tiêu                                                                                        | Phase |
+| --- | ----------------------------------------------------------------------------------------------- | ----- |
+| G1  | Có bản `vX.Y.Z-vantt.N` trong 24 giờ sau mỗi tag upstream, nếu không xung đột                   | 1     |
+| G2  | Không có gói ngôn ngữ thì kết quả tìm giống hệt upstream cùng tag                               | 3, 5  |
+| G3  | Có gói tiếng Việt thì tìm tiếng Việt tốt lên rõ, nhất là gõ không dấu                           | 4, 5  |
+| G4  | Khách cài từ gói dựng sẵn cho 4 nền, không chạy `npm`                                           | 1     |
+| G5  | Mỗi bản upstream mới có báo cáo review                                                          | 6     |
+| G6  | Có lệnh chính thức lấy vector và K note gần nhất (phía fork)                                    | 2     |
+| G7  | DB index đặt được ngoài vault                                                                   | 2     |
+| G8  | Gói `vi`: Telex/VNI, gõ sai, đồng nghĩa, viết tắt, từ ghép, alias không dấu, đoạn trích chữ gốc | 4     |
+| G9  | Hợp đồng P01 chung thật: gói tiếng Đức chạy không sửa lõi                                       | 3     |
+| G10 | Chọn cấu hình nhánh nghĩa: model nhúng, `restoreForEmbedding`, reranker                         | 5     |
+| G11 | Block anchor, tìm trong tập note, sự kiện index                                                 | 2     |
 
 ## Phases
 
-| # | Phase | Việc | Công | Status |
-|---|---|---|---|---|
-| 1 | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md) | V00, V01, V02, V03 | 5 | Done |
-| 2 | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md) | V04–V08, V23–V25 | 7,5 | Done |
-| 3 | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md) | V11, V21 | 6 | Done |
-| 4 | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md) | V09, V13, V17–V20 | 16 | Done |
-| 5 | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5 | Done (V10, V12, V15, V22 xong; V15 xong, user chốt dùng gói; V15b tách sang plan riêng) |
-| 6 | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md) | V14, L24 | 2,5 | Done |
+| #   | Phase                                                                 | Việc               | Công | Status                                                                                  |
+| --- | --------------------------------------------------------------------- | ------------------ | ---- | --------------------------------------------------------------------------------------- |
+| 1   | [Hạ tầng fork và theo upstream](./phase-01-fork-infrastructure.md)    | V00, V01, V02, V03 | 5    | Done                                                                                    |
+| 2   | [Bản vá lõi phục vụ dự án](./phase-02-core-patches.md)                | V04–V08, V23–V25   | 7,5  | Done                                                                                    |
+| 3   | [Điểm cắm gói ngôn ngữ](./phase-03-language-pack-api.md)              | V11, V21           | 6    | Done                                                                                    |
+| 4   | [Gói tiếng Việt `ohs-lang-vi`](./phase-04-vietnamese-pack.md)         | V09, V13, V17–V20  | 16   | Done                                                                                    |
+| 5   | [Đo lường và cổng chất lượng](./phase-05-evaluation-quality-gates.md) | V10, V12, V15, V22 | 6,5  | Done (V10, V12, V15, V22 xong; V15 xong, user chốt dùng gói; V15b tách sang plan riêng) |
+| 6   | [Kiểm mỗi bản upstream mới](./phase-06-upstream-review.md)            | V14, L24           | 2,5  | Done                                                                                    |
 
 Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự chạy theo việc, ở bảng dưới.
 
 ## Đợt chạy (lịch song song)
 
-| Đợt | Bắt đầu khi | Việc chạy song song |
-|---|---|---|
-| Đ0 | Ngay | V00 · V09 · V10 |
-| Đ1 | V00 xong | V01 |
-| Đ2 | V01 xong | V02 · V04 · V05 · V06 · V07 · V11 · V23 · V24; V03 ngay sau V02 |
-| Đ3 | Theo từng phụ thuộc | V08 (sau V07) · V12 (sau V10, V11) · V13 (sau V09, V10, V11) · V21 (sau V11) |
-| Đ4 | Theo từng phụ thuộc | V25 (sau V08) · V14 (sau V06–V08, V12) · V17, V18, V19, V20, V22 (sau V13) |
-| Đ5 | V13 xong và user gán nhãn | V15 |
+| Đợt | Bắt đầu khi               | Việc chạy song song                                                          |
+| --- | ------------------------- | ---------------------------------------------------------------------------- |
+| Đ0  | Ngay                      | V00 · V09 · V10                                                              |
+| Đ1  | V00 xong                  | V01                                                                          |
+| Đ2  | V01 xong                  | V02 · V04 · V05 · V06 · V07 · V11 · V23 · V24; V03 ngay sau V02              |
+| Đ3  | Theo từng phụ thuộc       | V08 (sau V07) · V12 (sau V10, V11) · V13 (sau V09, V10, V11) · V21 (sau V11) |
+| Đ4  | Theo từng phụ thuộc       | V25 (sau V08) · V14 (sau V06–V08, V12) · V17, V18, V19, V20, V22 (sau V13)   |
+| Đ5  | V13 xong và user gán nhãn | V15                                                                          |
 
 Đường găng: V00 → V01 → V11 → V13 → V20 (khoảng 14 ngày). Lead ưu tiên người và lượt chạy cho các việc trên đường này.
 
@@ -84,7 +84,6 @@ Phase là nhóm theo chủ đề, không phải thứ tự chạy. Thứ tự ch
 ## Xong khi (điều kiện cho goal)
 
 Bằng chứng (2026-11-02): catchup CI run 41419225358 (T1–T5, 9 bản vá, `0.17.2-vantt.4`); release `v0.17.2-vantt.4` 12 file, smoke xanh 4 nền; cổng chất lượng V12 (`vantt/scripts/quality-gates.json`, mọi mục tiêu G3/G8 bắt buộc); bất biến 58/58; `vantt/reviews/v0.17.2.md`, `semantic-eval-2026-11-02.md`, `v0.17.2-vantt.2.private.md`.
-
 
 - [x] Mọi việc V00–V15, V17–V25 có trạng thái DONE và điều kiện "Xong khi" của chúng được kiểm bằng lệnh hoặc báo cáo ghi trong phase file.
 - [x] `node vantt/scripts/catchup.mjs --with-lang vi --json` trên tag upstream mới nhất thoát 0, chạy đủ T1–T5, mọi bản vá P00–P09 được áp.

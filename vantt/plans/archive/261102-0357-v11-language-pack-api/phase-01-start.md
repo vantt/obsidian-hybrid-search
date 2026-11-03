@@ -1,6 +1,6 @@
 ---
 phase: 1
-title: "Thực hiện P01"
+title: 'Thực hiện P01'
 status: completed
 ---
 

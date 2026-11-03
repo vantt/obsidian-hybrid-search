@@ -1,9 +1,9 @@
 ---
-title: "v18-lexicon-abbr"
-description: "Gói ohs-lang-vi M5b: lexicon (đồng nghĩa, viết tắt, từ ghép), abbr.ts và lệnh learn-abbr"
+title: 'v18-lexicon-abbr'
+description: 'Gói ohs-lang-vi M5b: lexicon (đồng nghĩa, viết tắt, từ ghép), abbr.ts và lệnh learn-abbr'
 status: completed
 priority: P1
-effort: "2,5d"
+effort: '2,5d'
 tags: [vi-pack, v18]
 created: 2026-11-02
 ---

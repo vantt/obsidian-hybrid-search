@@ -1,9 +1,9 @@
 ---
-title: "v20-word-segmentation"
-description: "Gói ohs-lang-vi M5d: segment.ts, view seg, từ điển từ ghép theo Q9"
+title: 'v20-word-segmentation'
+description: 'Gói ohs-lang-vi M5d: segment.ts, view seg, từ điển từ ghép theo Q9'
 status: completed
 priority: P1
-effort: "4d"
+effort: '4d'
 tags: [vi-pack, v20]
 created: 2026-11-02
 ---
@@ -36,14 +36,14 @@ Q9: từ điển giấy phép MIT, BSD, Apache-2.0, CC0 hoặc CC-BY; đọc LIC
 
 nDCG@5: baseline upstream / V13 / V17+V18+V19 / V20.
 
-| Hạng mục | Baseline | V13 | V18 trộn | V20 |
-|---|---|---|---|---|
-| Tổng | 0,666 | 0,813 | 0,909 | **0,932** |
-| `vi-typo` | 0,488 | 0,661 | 0,722 | **0,975** |
-| `vi-snippet` | 0,463 | 0,743 | 0,743 | 0,777 |
-| `vi-synonym` | 0,067 | 0,067 | 0,645 | 0,729 (Hit@5 0,80 → 1,00) |
-| `vi-alias` | 0,535 | 0,814 | 0,975 | 1,000 |
-| `vi-compound` | 0,844 | 1,000 | 1,000 | 1,000 |
-| 12 hạng còn lại | | | | không đổi |
+| Hạng mục        | Baseline | V13   | V18 trộn | V20                       |
+| --------------- | -------- | ----- | -------- | ------------------------- |
+| Tổng            | 0,666    | 0,813 | 0,909    | **0,932**                 |
+| `vi-typo`       | 0,488    | 0,661 | 0,722    | **0,975**                 |
+| `vi-snippet`    | 0,463    | 0,743 | 0,743    | 0,777                     |
+| `vi-synonym`    | 0,067    | 0,067 | 0,645    | 0,729 (Hit@5 0,80 → 1,00) |
+| `vi-alias`      | 0,535    | 0,814 | 0,975    | 1,000                     |
+| `vi-compound`   | 0,844    | 1,000 | 1,000    | 1,000                     |
+| 12 hạng còn lại |          |       |          | không đổi                 |
 
 Bộ từ ghép khó ([`hard-compound-gen.mjs`](hard-compound-gen.mjs), 60 note, 15 cặp; note đích có cụm một lần, ba note mồi có hai âm tiết đảo hay rời nhau nhiều lần), nDCG@5 upstream / gói không seg / gói có seg: câu có dấu 0,664 / 0,779 / **1,000**; câu không dấu 0,312 / 0,523 / **0,864**; cụm trong câu dài 0,714 / 0,788 / **1,000**.

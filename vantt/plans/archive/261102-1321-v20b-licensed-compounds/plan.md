@@ -1,9 +1,9 @@
 ---
-title: "v20b-licensed-compounds"
-description: "Gói ohs-lang-vi: thay từ điển pyvi bằng danh sách học thống kê trên văn bản có giấy phép rõ; câu vi-compound khó trong fixture"
+title: 'v20b-licensed-compounds'
+description: 'Gói ohs-lang-vi: thay từ điển pyvi bằng danh sách học thống kê trên văn bản có giấy phép rõ; câu vi-compound khó trong fixture'
 status: completed
 priority: P1
-effort: "1d"
+effort: '1d'
 tags: [vi-pack, v20b]
 created: 2026-11-02
 ---
@@ -34,12 +34,12 @@ Thêm theo lead: gói cài thiếu `data/` phải nạp lỗi rõ ràng (không 
 
 Quá trình chỉnh (F1 so với pyvi hai âm tiết, chỉ để đo):
 
-| Bước | Số từ | P | R | F1 | Ghi chú |
-|---|---|---|---|---|---|
-| PMI ≥ 2, tỉ lệ thắng gộp ≥ 0,5 | 43.957 | 0,16 | 0,32 | 0,21 | đầy lỗi OCR (`quổc lộ`), chữ không dấu, tiếng Anh |
-| NPMI, thắng hai phía, lọc âm tiết sạch và ASCII | 20.969 | 0,31 | 0,28 | 0,29 | eval tốt hơn pyvi, nhưng `nhà hàng`, `sinh học` thiếu (luật thua trong văn pháp luật) |
-| Tỉ lệ thắng theo từng nguồn | 24.328 | 0,28 | 0,30 | 0,29 | `vi-names` tụt 0,025 vì tên người (`ngọc anh`) |
-| Bỏ tên riêng (viết hoa ≥ 80%) | **20.523** | 0,33 | 0,30 | **0,32** | bản gửi đi |
+| Bước                                            | Số từ      | P    | R    | F1       | Ghi chú                                                                               |
+| ----------------------------------------------- | ---------- | ---- | ---- | -------- | ------------------------------------------------------------------------------------- |
+| PMI ≥ 2, tỉ lệ thắng gộp ≥ 0,5                  | 43.957     | 0,16 | 0,32 | 0,21     | đầy lỗi OCR (`quổc lộ`), chữ không dấu, tiếng Anh                                     |
+| NPMI, thắng hai phía, lọc âm tiết sạch và ASCII | 20.969     | 0,31 | 0,28 | 0,29     | eval tốt hơn pyvi, nhưng `nhà hàng`, `sinh học` thiếu (luật thua trong văn pháp luật) |
+| Tỉ lệ thắng theo từng nguồn                     | 24.328     | 0,28 | 0,30 | 0,29     | `vi-names` tụt 0,025 vì tên người (`ngọc anh`)                                        |
+| Bỏ tên riêng (viết hoa ≥ 80%)                   | **20.523** | 0,33 | 0,30 | **0,32** | bản gửi đi                                                                            |
 
 Ngưỡng cuối nằm trong nhóm F1 cao nhất (chênh < 0,003); trong nhóm đó chọn bộ giữ đủ bảy từ mà test của gói kiểm từ V20 và trên 20.000 mục (test cũ). Từ ghép của 15 câu khó trong fixture được chọn trước khi dựng từ điển và không dùng để chỉnh.
 
@@ -47,28 +47,28 @@ Ngưỡng cuối nằm trong nhóm F1 cao nhất (chênh < 0,003); trong nhóm �
 
 nDCG@5. Baseline cũ: upstream trên `v0.10.0`.
 
-| Hạng mục | Baseline cũ (`v0.10.0`) | Baseline mới (`v0.11.0`) | Gói không seg | Gói, từ điển pyvi | Gói, từ điển mới |
-|---|---|---|---|---|---|
-| Tổng | 0,666 | 0,646 | 0,889 | 0,921 | **0,926** |
-| `vi-accented` | 1,000 | 1,000 | 1,000 | 1,000 | 1,000 |
-| `vi-partial-accent` | 0,872 | 0,863 | 1,000 | 1,000 | 1,000 |
-| `vi-telex` | 0,333 | 0,333 | 1,000 | 1,000 | 1,000 |
-| `vi-typo` | 0,488 | 0,543 | 0,755 | 0,967 | 0,967 |
-| `vi-snippet` | 0,463 | 0,466 | 0,752 | 0,777 | **0,843** |
-| `vi-unaccented` | 0,133 | 0,133 | 0,871 | 0,871 | 0,871 |
-| `vi-dd` | 0,263 | 0,239 | 0,913 | 0,913 | 0,913 |
-| `vi-iy` | 1,000 | 1,000 | 1,000 | 1,000 | 1,000 |
-| `vi-tone-placement` | 1,000 | 1,000 | 1,000 | 1,000 | 1,000 |
-| `vi-tone-precision` | 0,951 | 0,951 | 1,000 | 1,000 | 1,000 |
-| `vi-compound` | 0,844 | 0,632 | 0,822 | 0,971 | **0,983** |
-| ↳ câu 1–15 (cũ) | 0,844 | 0,844 | 1,000 | 1,000 | 1,000 |
-| ↳ câu 16–30 (khó) | — | 0,421 | 0,645 | 0,942 | **0,967** |
-| `vi-mixed-en` | 0,975 | 1,000 | 1,000 | 1,000 | 1,000 |
-| `vi-semantic` | 0,555 | 0,446 | 0,446 | 0,446 | 0,446 |
-| `vi-names` | 0,909 | 0,909 | 1,000 | 1,000 | 1,000 |
-| `vi-synonym` | 0,067 | 0,067 | 0,637 | 0,689 | 0,689 |
-| `vi-abbr` | 0,933 | 0,933 | 1,000 | 1,000 | 1,000 |
-| `vi-alias` | 0,535 | 0,477 | 0,975 | 0,975 | 0,975 |
+| Hạng mục            | Baseline cũ (`v0.10.0`) | Baseline mới (`v0.11.0`) | Gói không seg | Gói, từ điển pyvi | Gói, từ điển mới |
+| ------------------- | ----------------------- | ------------------------ | ------------- | ----------------- | ---------------- |
+| Tổng                | 0,666                   | 0,646                    | 0,889         | 0,921             | **0,926**        |
+| `vi-accented`       | 1,000                   | 1,000                    | 1,000         | 1,000             | 1,000            |
+| `vi-partial-accent` | 0,872                   | 0,863                    | 1,000         | 1,000             | 1,000            |
+| `vi-telex`          | 0,333                   | 0,333                    | 1,000         | 1,000             | 1,000            |
+| `vi-typo`           | 0,488                   | 0,543                    | 0,755         | 0,967             | 0,967            |
+| `vi-snippet`        | 0,463                   | 0,466                    | 0,752         | 0,777             | **0,843**        |
+| `vi-unaccented`     | 0,133                   | 0,133                    | 0,871         | 0,871             | 0,871            |
+| `vi-dd`             | 0,263                   | 0,239                    | 0,913         | 0,913             | 0,913            |
+| `vi-iy`             | 1,000                   | 1,000                    | 1,000         | 1,000             | 1,000            |
+| `vi-tone-placement` | 1,000                   | 1,000                    | 1,000         | 1,000             | 1,000            |
+| `vi-tone-precision` | 0,951                   | 0,951                    | 1,000         | 1,000             | 1,000            |
+| `vi-compound`       | 0,844                   | 0,632                    | 0,822         | 0,971             | **0,983**        |
+| ↳ câu 1–15 (cũ)     | 0,844                   | 0,844                    | 1,000         | 1,000             | 1,000            |
+| ↳ câu 16–30 (khó)   | —                       | 0,421                    | 0,645         | 0,942             | **0,967**        |
+| `vi-mixed-en`       | 0,975                   | 1,000                    | 1,000         | 1,000             | 1,000            |
+| `vi-semantic`       | 0,555                   | 0,446                    | 0,446         | 0,446             | 0,446            |
+| `vi-names`          | 0,909                   | 0,909                    | 1,000         | 1,000             | 1,000            |
+| `vi-synonym`        | 0,067                   | 0,067                    | 0,637         | 0,689             | 0,689            |
+| `vi-abbr`           | 0,933                   | 0,933                    | 1,000         | 1,000             | 1,000            |
+| `vi-alias`          | 0,535                   | 0,477                    | 0,975         | 0,975             | 0,975            |
 
 Hit@5 của gói với từ điển mới: `vi-unaccented` 0,93, `vi-dd` 1,00, `vi-telex` 1,00, `vi-typo` 1,00, `vi-synonym` 0,93, `vi-abbr` 1,00, `vi-alias` 1,00. Kết quả V20 trên `chk-series` và `v0.10.0` (`tmp/v20/v20-final.json`) không so trực tiếp được (khác lõi và corpus); trên cùng lõi và corpus, cột pyvi là "kết quả trước".
 

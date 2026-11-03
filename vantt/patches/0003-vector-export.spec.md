@@ -36,12 +36,12 @@ Tái hiện: vault tạm đã index, chạy `ohs vectors --path a.md`. Upstream 
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/storage/note-vectors.ts` (mới) | `iterateNoteChunkVectors`, `getStoredVectorSource`, `countNotesWithVectors`, `findExistingNotePaths`, `listNotePathsMatching` | đọc `vec_chunks`/`chunks`/`notes` theo từng note, ở đúng lớp được chạm SQLite; nhóm theo note bằng `ORDER BY n.path, c.chunk_index` |
-| `src/search/note-vectors.ts` (mới) | `exportNoteVectors`, `findNoteNeighbors`, `poolVectors` | gộp, cosine, lọc; dùng `getOutgoingLinksForPaths`, `getBacklinksForPaths` của `storage/db.ts` |
-| `src/transports/cli.ts` | lệnh `vectors`, `neighbors`, import | chỉ phân tích tuỳ chọn và in JSON Lines |
-| `test/vantt/vector-export.test.ts` (mới) | | test đơn vị và tích hợp |
+| File                                     | Hàm hoặc chỗ                                                                                                                  | Vì sao                                                                                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `src/storage/note-vectors.ts` (mới)      | `iterateNoteChunkVectors`, `getStoredVectorSource`, `countNotesWithVectors`, `findExistingNotePaths`, `listNotePathsMatching` | đọc `vec_chunks`/`chunks`/`notes` theo từng note, ở đúng lớp được chạm SQLite; nhóm theo note bằng `ORDER BY n.path, c.chunk_index` |
+| `src/search/note-vectors.ts` (mới)       | `exportNoteVectors`, `findNoteNeighbors`, `poolVectors`                                                                       | gộp, cosine, lọc; dùng `getOutgoingLinksForPaths`, `getBacklinksForPaths` của `storage/db.ts`                                       |
+| `src/transports/cli.ts`                  | lệnh `vectors`, `neighbors`, import                                                                                           | chỉ phân tích tuỳ chọn và in JSON Lines                                                                                             |
+| `test/vantt/vector-export.test.ts` (mới) |                                                                                                                               | test đơn vị và tích hợp                                                                                                             |
 
 Không sửa `storage/db.ts`, `searcher.ts`, không đổi schema. Điểm chạm duy nhất của file upstream có sẵn là `src/transports/cli.ts` (thêm một import, thêm khối lệnh trước `serve`).
 

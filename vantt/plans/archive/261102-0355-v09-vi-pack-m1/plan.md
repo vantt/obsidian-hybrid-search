@@ -1,9 +1,9 @@
 ---
-title: "v09-vi-pack-m1"
-description: "Gói ohs-lang-vi M1: normalize, fold, syllable, bảng dữ liệu, test bảng/thuộc tính/hiệu năng"
+title: 'v09-vi-pack-m1'
+description: 'Gói ohs-lang-vi M1: normalize, fold, syllable, bảng dữ liệu, test bảng/thuộc tính/hiệu năng'
 status: completed
 priority: P1
-effort: "2,5d"
+effort: '2,5d'
 tags: [vi-pack, v09]
 created: 2026-11-02
 ---

@@ -1,9 +1,9 @@
 ---
-title: "v11-language-pack-api"
-description: "Bản vá P01 language-pack-api: điểm cắm gói ngôn ngữ chung trong lõi OHS, thử bằng gói giả lang-upper"
+title: 'v11-language-pack-api'
+description: 'Bản vá P01 language-pack-api: điểm cắm gói ngôn ngữ chung trong lõi OHS, thử bằng gói giả lang-upper'
 status: completed
 priority: P1
-effort: "4d"
+effort: '4d'
 tags: [patch, p01, v11, language-pack]
 created: 2026-11-02
 ---
@@ -35,9 +35,9 @@ Gói `ohs-lang-vi`, `ohs-lang-de`; `series.toml` (lead giữ); script catchup.
 
 ## Phase
 
-| # | Phase | Trạng thái |
-|---|-------|-----------|
-| 1 | [Thực hiện](./phase-01-start.md) | Xong |
+| #   | Phase                            | Trạng thái |
+| --- | -------------------------------- | ---------- |
+| 1   | [Thực hiện](./phase-01-start.md) | Xong       |
 
 ## Điều kiện xong (từ phase-03)
 

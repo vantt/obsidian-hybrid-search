@@ -1,9 +1,9 @@
 ---
 phase: 5
-title: "Phase 5: Đo lường và cổng chất lượng"
+title: 'Phase 5: Đo lường và cổng chất lượng'
 status: done
 priority: P1
-effort: "6.5d"
+effort: '6.5d'
 dependencies: []
 ---
 
@@ -15,12 +15,12 @@ Bộ eval tiếng Việt, bài kiểm bất biến, cổng chất lượng nối
 
 ## Việc
 
-| ID | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|
-| V10 | Preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set 17 hạng mục × 15 câu theo định dạng eval của upstream, smoke-vault, baseline upstream không gói ở `vantt/eval/baselines/<platform>/` | — | vừa | 2,5 | 11.3, 11.5 |
-| V12 | `vantt/scripts/invariance.mjs` (không gói thì `top_paths` từng câu trùng 100% với upstream cùng tag, cùng máy, cùng lần chạy), `vantt/scripts/quality-gate.mjs`, nối cả hai vào catchup để chạy đủ T1–T5 | V10, V11 | vừa | 1 | 11.1, 11.4, 11.6 |
-| V15 | Eval trên vault thật của user: golden set riêng khoảng 60 câu do user gán nhãn, lưu ngoài repo, chạy ở máy user bằng `quality-gate.mjs --private <path>`; chỉ ghi số tổng hợp vào `vantt/reviews/` | V13, user | vừa | 0,5 + user | 11.5 |
-| V22 | Một đợt eval nhánh nghĩa: mỗi model nhúng (e5-small, e5-base, bge-m3, một model chuyên tiếng Việt chạy được bằng ONNX) × `restoreForEmbedding` bật/tắt × rerank có/không; mỗi model index một lần; đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu, thời gian index, thời gian mỗi câu, RAM, dung lượng | V13 | vừa | 2–2,5 | 2.1 (G10), 15 (Q3) |
+| ID  | Việc                                                                                                                                                                                                                                                                                                                | Cần       | Mức | Công       | PRD                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --- | ---------- | ------------------ |
+| V10 | Preset `vi-search` trong obsidian-test-fixture (kèm file lexicon mẫu), golden set 17 hạng mục × 15 câu theo định dạng eval của upstream, smoke-vault, baseline upstream không gói ở `vantt/eval/baselines/<platform>/`                                                                                              | —         | vừa | 2,5        | 11.3, 11.5         |
+| V12 | `vantt/scripts/invariance.mjs` (không gói thì `top_paths` từng câu trùng 100% với upstream cùng tag, cùng máy, cùng lần chạy), `vantt/scripts/quality-gate.mjs`, nối cả hai vào catchup để chạy đủ T1–T5                                                                                                            | V10, V11  | vừa | 1          | 11.1, 11.4, 11.6   |
+| V15 | Eval trên vault thật của user: golden set riêng khoảng 60 câu do user gán nhãn, lưu ngoài repo, chạy ở máy user bằng `quality-gate.mjs --private <path>`; chỉ ghi số tổng hợp vào `vantt/reviews/`                                                                                                                  | V13, user | vừa | 0,5 + user | 11.5               |
+| V22 | Một đợt eval nhánh nghĩa: mỗi model nhúng (e5-small, e5-base, bge-m3, một model chuyên tiếng Việt chạy được bằng ONNX) × `restoreForEmbedding` bật/tắt × rerank có/không; mỗi model index một lần; đo nDCG@5, Hit@5, mức tách cặp gần nghĩa thật với cặp nhiễu, thời gian index, thời gian mỗi câu, RAM, dung lượng | V13       | vừa | 2–2,5      | 2.1 (G10), 15 (Q3) |
 
 Song song: V10 ngay từ đầu. V12 khi V10 và V11 xong. V15 và V22 sau V13, chạy song song với V17–V20.
 

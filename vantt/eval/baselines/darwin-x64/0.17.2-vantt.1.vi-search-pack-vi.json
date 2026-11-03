@@ -231,9 +231,7 @@
       "query": "giữ chân khách hàng",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Giữ chân khách hàng.md"
-      ],
+      "relevant_paths": ["notes/Giữ chân khách hàng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -263,9 +261,7 @@
       "query": "giữ chan khach hang",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Giữ chân khách hàng.md"
-      ],
+      "relevant_paths": ["notes/Giữ chân khách hàng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -295,9 +291,7 @@
       "query": "giuwx chaan khachs hangf",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Giữ chân khách hàng.md"
-      ],
+      "relevant_paths": ["notes/Giữ chân khách hàng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -327,9 +321,7 @@
       "query": "giu chna khahc hang",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Giữ chân khách hàng.md"
-      ],
+      "relevant_paths": ["notes/Giữ chân khách hàng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -359,9 +351,7 @@
       "query": "chan khach",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"chân khách\".",
-      "relevant_paths": [
-        "notes/Giữ chân khách hàng.md"
-      ],
+      "relevant_paths": ["notes/Giữ chân khách hàng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -391,9 +381,7 @@
       "query": "sắp xếp thời gian biểu",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Sắp xếp thời gian biểu.md"
-      ],
+      "relevant_paths": ["notes/Sắp xếp thời gian biểu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -423,9 +411,7 @@
       "query": "sắp xep thoi gian bieu",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Sắp xếp thời gian biểu.md"
-      ],
+      "relevant_paths": ["notes/Sắp xếp thời gian biểu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -455,9 +441,7 @@
       "query": "sawps xeeps thowif gian bieeur",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Sắp xếp thời gian biểu.md"
-      ],
+      "relevant_paths": ["notes/Sắp xếp thời gian biểu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -487,9 +471,7 @@
       "query": "sap xep thio gina bieu",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Sắp xếp thời gian biểu.md"
-      ],
+      "relevant_paths": ["notes/Sắp xếp thời gian biểu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -519,9 +501,7 @@
       "query": "xep thoi",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"xếp thời\".",
-      "relevant_paths": [
-        "notes/Sắp xếp thời gian biểu.md"
-      ],
+      "relevant_paths": ["notes/Sắp xếp thời gian biểu.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -551,9 +531,7 @@
       "query": "phương pháp học tập hiệu quả",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Phương pháp học tập hiệu quả.md"
-      ],
+      "relevant_paths": ["notes/Phương pháp học tập hiệu quả.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -583,9 +561,7 @@
       "query": "phương phap hoc tap hieu qua",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Phương pháp học tập hiệu quả.md"
-      ],
+      "relevant_paths": ["notes/Phương pháp học tập hiệu quả.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -615,9 +591,7 @@
       "query": "phuwowng phaps hocj taapj hieeuj quar",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Phương pháp học tập hiệu quả.md"
-      ],
+      "relevant_paths": ["notes/Phương pháp học tập hiệu quả.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -647,9 +621,7 @@
       "query": "phuogn phpa hoc tap hieu qua",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Phương pháp học tập hiệu quả.md"
-      ],
+      "relevant_paths": ["notes/Phương pháp học tập hiệu quả.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -679,9 +651,7 @@
       "query": "phap hoc",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"pháp học\".",
-      "relevant_paths": [
-        "notes/Phương pháp học tập hiệu quả.md"
-      ],
+      "relevant_paths": ["notes/Phương pháp học tập hiệu quả.md"],
       "partial_paths": [],
       "ndcg_5": 0.387,
       "ndcg_k": 0.387,
@@ -711,9 +681,7 @@
       "query": "chuẩn bị bữa sáng",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị bữa sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -743,9 +711,7 @@
       "query": "chuẩn bi bua sang",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị bữa sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -775,9 +741,7 @@
       "query": "chuaanr bij buwax sangs",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị bữa sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -807,9 +771,7 @@
       "query": "chuna bi bua sagn",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị bữa sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -839,9 +801,7 @@
       "query": "chuan bi",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"chuẩn bị\".",
-      "relevant_paths": [
-        "notes/Chuẩn bị bữa sáng.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị bữa sáng.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -871,9 +831,7 @@
       "query": "hành trình khám phá núi rừng",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Hành trình khám phá núi rừng.md"
-      ],
+      "relevant_paths": ["notes/Hành trình khám phá núi rừng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -903,9 +861,7 @@
       "query": "hành trinh kham pha nui rung",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Hành trình khám phá núi rừng.md"
-      ],
+      "relevant_paths": ["notes/Hành trình khám phá núi rừng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -935,9 +891,7 @@
       "query": "hanhf trinhf khams phas nuis ruwngf",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Hành trình khám phá núi rừng.md"
-      ],
+      "relevant_paths": ["notes/Hành trình khám phá núi rừng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -967,9 +921,7 @@
       "query": "hahn trihn kham pha nui rung",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Hành trình khám phá núi rừng.md"
-      ],
+      "relevant_paths": ["notes/Hành trình khám phá núi rừng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -999,9 +951,7 @@
       "query": "trinh kham",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"trình khám\".",
-      "relevant_paths": [
-        "notes/Hành trình khám phá núi rừng.md"
-      ],
+      "relevant_paths": ["notes/Hành trình khám phá núi rừng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1031,9 +981,7 @@
       "query": "nghệ thuật thuyết trình",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Nghệ thuật thuyết trình.md"
-      ],
+      "relevant_paths": ["notes/Nghệ thuật thuyết trình.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1063,9 +1011,7 @@
       "query": "nghệ thuat thuyet trinh",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Nghệ thuật thuyết trình.md"
-      ],
+      "relevant_paths": ["notes/Nghệ thuật thuyết trình.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1095,9 +1041,7 @@
       "query": "ngheej thuaatj thuyeets trinhf",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Nghệ thuật thuyết trình.md"
-      ],
+      "relevant_paths": ["notes/Nghệ thuật thuyết trình.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1127,9 +1071,7 @@
       "query": "ngeh thuta thuyet trinh",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Nghệ thuật thuyết trình.md"
-      ],
+      "relevant_paths": ["notes/Nghệ thuật thuyết trình.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1159,9 +1101,7 @@
       "query": "thuat thuyet",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"thuật thuyết\".",
-      "relevant_paths": [
-        "notes/Nghệ thuật thuyết trình.md"
-      ],
+      "relevant_paths": ["notes/Nghệ thuật thuyết trình.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1191,9 +1131,7 @@
       "query": "tối ưu quy trình làm việc",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Tối ưu quy trình làm việc.md"
-      ],
+      "relevant_paths": ["notes/Tối ưu quy trình làm việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1223,9 +1161,7 @@
       "query": "tối uu quy trinh lam viec",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Tối ưu quy trình làm việc.md"
-      ],
+      "relevant_paths": ["notes/Tối ưu quy trình làm việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1255,9 +1191,7 @@
       "query": "toois uwu quy trinhf lamf vieecj",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Tối ưu quy trình làm việc.md"
-      ],
+      "relevant_paths": ["notes/Tối ưu quy trình làm việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1287,9 +1221,7 @@
       "query": "toi uu quy trihn lam vice",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Tối ưu quy trình làm việc.md"
-      ],
+      "relevant_paths": ["notes/Tối ưu quy trình làm việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1319,9 +1251,7 @@
       "query": "uu quy",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"ưu quy\".",
-      "relevant_paths": [
-        "notes/Tối ưu quy trình làm việc.md"
-      ],
+      "relevant_paths": ["notes/Tối ưu quy trình làm việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1351,9 +1281,7 @@
       "query": "thói quen ngủ sớm dậy sớm",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Thói quen ngủ sớm dậy sớm.md"
-      ],
+      "relevant_paths": ["notes/Thói quen ngủ sớm dậy sớm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1383,9 +1311,7 @@
       "query": "thói quen ngu som day som",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Thói quen ngủ sớm dậy sớm.md"
-      ],
+      "relevant_paths": ["notes/Thói quen ngủ sớm dậy sớm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1415,9 +1341,7 @@
       "query": "thois quen ngur sowms daayj sowms",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Thói quen ngủ sớm dậy sớm.md"
-      ],
+      "relevant_paths": ["notes/Thói quen ngủ sớm dậy sớm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1447,9 +1371,7 @@
       "query": "thio qune ngu som day som",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Thói quen ngủ sớm dậy sớm.md"
-      ],
+      "relevant_paths": ["notes/Thói quen ngủ sớm dậy sớm.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -1479,9 +1401,7 @@
       "query": "quen ngu",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"quen ngủ\".",
-      "relevant_paths": [
-        "notes/Thói quen ngủ sớm dậy sớm.md"
-      ],
+      "relevant_paths": ["notes/Thói quen ngủ sớm dậy sớm.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0.315,
@@ -1511,9 +1431,7 @@
       "query": "bí quyết chụp ảnh chân dung",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Bí quyết chụp ảnh chân dung.md"
-      ],
+      "relevant_paths": ["notes/Bí quyết chụp ảnh chân dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1543,9 +1461,7 @@
       "query": "bí quyet chup anh chan dung",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Bí quyết chụp ảnh chân dung.md"
-      ],
+      "relevant_paths": ["notes/Bí quyết chụp ảnh chân dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1575,9 +1491,7 @@
       "query": "bis quyeets chupj anhr chaan dung",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Bí quyết chụp ảnh chân dung.md"
-      ],
+      "relevant_paths": ["notes/Bí quyết chụp ảnh chân dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1607,9 +1521,7 @@
       "query": "bi quyte chpu anh chan dung",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Bí quyết chụp ảnh chân dung.md"
-      ],
+      "relevant_paths": ["notes/Bí quyết chụp ảnh chân dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1639,9 +1551,7 @@
       "query": "quyet chup",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"quyết chụp\".",
-      "relevant_paths": [
-        "notes/Bí quyết chụp ảnh chân dung.md"
-      ],
+      "relevant_paths": ["notes/Bí quyết chụp ảnh chân dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1671,9 +1581,7 @@
       "query": "chiến lược tiếp thị nội dung",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md"
-      ],
+      "relevant_paths": ["notes/Chiến lược tiếp thị nội dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1703,9 +1611,7 @@
       "query": "chiến luoc tiep thi noi dung",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md"
-      ],
+      "relevant_paths": ["notes/Chiến lược tiếp thị nội dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1735,9 +1641,7 @@
       "query": "chieens luwowcj tieeps thij nooij dung",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md"
-      ],
+      "relevant_paths": ["notes/Chiến lược tiếp thị nội dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1767,9 +1671,7 @@
       "query": "chine luco tiep thi noi dung",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md"
-      ],
+      "relevant_paths": ["notes/Chiến lược tiếp thị nội dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1799,9 +1701,7 @@
       "query": "luoc tiep",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"lược tiếp\".",
-      "relevant_paths": [
-        "notes/Chiến lược tiếp thị nội dung.md"
-      ],
+      "relevant_paths": ["notes/Chiến lược tiếp thị nội dung.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1831,9 +1731,7 @@
       "query": "bảo mật tài khoản trực tuyến",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Bảo mật tài khoản trực tuyến.md"
-      ],
+      "relevant_paths": ["notes/Bảo mật tài khoản trực tuyến.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1863,9 +1761,7 @@
       "query": "bảo mat tai khoan truc tuyen",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Bảo mật tài khoản trực tuyến.md"
-      ],
+      "relevant_paths": ["notes/Bảo mật tài khoản trực tuyến.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1895,9 +1791,7 @@
       "query": "baor maatj taif khoanr truwcj tuyeens",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Bảo mật tài khoản trực tuyến.md"
-      ],
+      "relevant_paths": ["notes/Bảo mật tài khoản trực tuyến.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1927,9 +1821,7 @@
       "query": "bao mat tai khona trcu tuyen",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Bảo mật tài khoản trực tuyến.md"
-      ],
+      "relevant_paths": ["notes/Bảo mật tài khoản trực tuyến.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1959,9 +1851,7 @@
       "query": "mat tai",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"mật tài\".",
-      "relevant_paths": [
-        "notes/Bảo mật tài khoản trực tuyến.md"
-      ],
+      "relevant_paths": ["notes/Bảo mật tài khoản trực tuyến.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1991,9 +1881,7 @@
       "query": "cách trồng rau sạch tại nhà",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Cách trồng rau sạch tại nhà.md"
-      ],
+      "relevant_paths": ["notes/Cách trồng rau sạch tại nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2023,9 +1911,7 @@
       "query": "cách trong rau sach tai nha",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Cách trồng rau sạch tại nhà.md"
-      ],
+      "relevant_paths": ["notes/Cách trồng rau sạch tại nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2055,9 +1941,7 @@
       "query": "cachs troongf rau sachj taij nhaf",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Cách trồng rau sạch tại nhà.md"
-      ],
+      "relevant_paths": ["notes/Cách trồng rau sạch tại nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2087,9 +1971,7 @@
       "query": "cahc trogn rau sach tai nha",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Cách trồng rau sạch tại nhà.md"
-      ],
+      "relevant_paths": ["notes/Cách trồng rau sạch tại nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2119,9 +2001,7 @@
       "query": "trong rau",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"trồng rau\".",
-      "relevant_paths": [
-        "notes/Cách trồng rau sạch tại nhà.md"
-      ],
+      "relevant_paths": ["notes/Cách trồng rau sạch tại nhà.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0.333,
@@ -2151,9 +2031,7 @@
       "query": "lộ trình ôn thi tốt nghiệp",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Lộ trình ôn thi tốt nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2183,9 +2061,7 @@
       "query": "lộ trinh on thi tot nghiep",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Lộ trình ôn thi tốt nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2215,9 +2091,7 @@
       "query": "looj trinhf oon thi toots nghieepj",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Lộ trình ôn thi tốt nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2247,9 +2121,7 @@
       "query": "lo trihn on thi tot nghipe",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Lộ trình ôn thi tốt nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2279,9 +2151,7 @@
       "query": "trinh on",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"trình ôn\".",
-      "relevant_paths": [
-        "notes/Lộ trình ôn thi tốt nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Lộ trình ôn thi tốt nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2311,9 +2181,7 @@
       "query": "những lưu ý khi thuê nhà",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Những lưu ý khi thuê nhà.md"
-      ],
+      "relevant_paths": ["notes/Những lưu ý khi thuê nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2343,9 +2211,7 @@
       "query": "những luu y khi thue nha",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Những lưu ý khi thuê nhà.md"
-      ],
+      "relevant_paths": ["notes/Những lưu ý khi thuê nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2375,9 +2241,7 @@
       "query": "nhuwngx luwu ys khi thuee nhaf",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Những lưu ý khi thuê nhà.md"
-      ],
+      "relevant_paths": ["notes/Những lưu ý khi thuê nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2407,9 +2271,7 @@
       "query": "nhugn luu y khi theu nha",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Những lưu ý khi thuê nhà.md"
-      ],
+      "relevant_paths": ["notes/Những lưu ý khi thuê nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2439,9 +2301,7 @@
       "query": "luu y",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"lưu ý\".",
-      "relevant_paths": [
-        "notes/Những lưu ý khi thuê nhà.md"
-      ],
+      "relevant_paths": ["notes/Những lưu ý khi thuê nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2471,9 +2331,7 @@
       "query": "phân tích số liệu doanh thu",
       "category": "vi-accented",
       "notes": "Query is the accented phrase of the note.",
-      "relevant_paths": [
-        "notes/Phân tích số liệu doanh thu.md"
-      ],
+      "relevant_paths": ["notes/Phân tích số liệu doanh thu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2503,9 +2361,7 @@
       "query": "phân tich so lieu doanh thu",
       "category": "vi-partial-accent",
       "notes": "First word keeps its marks, the other words lose them.",
-      "relevant_paths": [
-        "notes/Phân tích số liệu doanh thu.md"
-      ],
+      "relevant_paths": ["notes/Phân tích số liệu doanh thu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2535,9 +2391,7 @@
       "query": "phaan tichs soos lieeuj doanh thu",
       "category": "vi-telex",
       "notes": "Query is the phrase typed in Telex without composing it.",
-      "relevant_paths": [
-        "notes/Phân tích số liệu doanh thu.md"
-      ],
+      "relevant_paths": ["notes/Phân tích số liệu doanh thu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2567,9 +2421,7 @@
       "query": "phna tihc so lieu doanh thu",
       "category": "vi-typo",
       "notes": "Unaccented phrase with the last two letters of two words swapped.",
-      "relevant_paths": [
-        "notes/Phân tích số liệu doanh thu.md"
-      ],
+      "relevant_paths": ["notes/Phân tích số liệu doanh thu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2599,9 +2451,7 @@
       "query": "tich so",
       "category": "vi-snippet",
       "notes": "Snippet must be original text with marks and contain \"tích số\".",
-      "relevant_paths": [
-        "notes/Phân tích số liệu doanh thu.md"
-      ],
+      "relevant_paths": ["notes/Phân tích số liệu doanh thu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2631,9 +2481,7 @@
       "query": "nuoc mam",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 01.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 01.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2663,9 +2511,7 @@
       "query": "oc nuong",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 02.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 02.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2695,9 +2541,7 @@
       "query": "ech nau",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 03.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 03.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2727,9 +2571,7 @@
       "query": "muop hap",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 04.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 04.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2759,9 +2601,7 @@
       "query": "buoi hong",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 05.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 05.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2791,9 +2631,7 @@
       "query": "sua nep",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 06.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 06.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2823,9 +2661,7 @@
       "query": "bap nuong",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 07.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 07.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2855,9 +2691,7 @@
       "query": "mut com",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 08.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 08.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -2887,9 +2721,7 @@
       "query": "nep cam",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 09.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 09.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2919,9 +2751,7 @@
       "query": "lau ech",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 10.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 10.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2951,9 +2781,7 @@
       "query": "ruou nep",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 11.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 11.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -2983,9 +2811,7 @@
       "query": "pho suon",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 12.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 12.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3015,9 +2841,7 @@
       "query": "chuoi nuong",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 13.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 13.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3047,9 +2871,7 @@
       "query": "muc nuong",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 14.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 14.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -3079,9 +2901,7 @@
       "query": "cuon nam",
       "category": "vi-unaccented",
       "notes": "Query is a dish name without diacritics; 24 other notes have the same text with another dish name and the title does not name the dish.",
-      "relevant_paths": [
-        "notes/Ghi chép món ăn 15.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép món ăn 15.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3111,9 +2931,7 @@
       "query": "Dong Khoi",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 01.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 01.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3143,9 +2961,7 @@
       "query": "Dien Bien Phu",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 02.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 02.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3175,9 +2991,7 @@
       "query": "Dinh Tien Hoang",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 03.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 03.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3207,9 +3021,7 @@
       "query": "De Tham",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 04.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 04.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3239,9 +3051,7 @@
       "query": "Doi Can",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 05.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 05.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -3271,9 +3081,7 @@
       "query": "Dao Duy Tu",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 06.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 06.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3303,9 +3111,7 @@
       "query": "Dang Dung",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 07.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 07.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3335,9 +3141,7 @@
       "query": "Doan Thi Diem",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 08.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 08.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -3367,9 +3171,7 @@
       "query": "Doc Lap",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 09.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 09.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3399,9 +3201,7 @@
       "query": "Dai Co Viet",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 10.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 10.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3431,9 +3231,7 @@
       "query": "De La Thanh",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 11.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 11.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -3463,9 +3261,7 @@
       "query": "Dong Cac",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 12.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 12.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3495,9 +3291,7 @@
       "query": "Do Quang",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 13.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 13.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3527,9 +3321,7 @@
       "query": "Dang Tat",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 14.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 14.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -3559,9 +3351,7 @@
       "query": "Dinh Cong Trang",
       "category": "vi-dd",
       "notes": "Query is a street name with đ written as d; 24 other notes have the same text with another street and the title does not name the street.",
-      "relevant_paths": [
-        "notes/Ghi chép địa điểm 15.md"
-      ],
+      "relevant_paths": ["notes/Ghi chép địa điểm 15.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3591,9 +3381,7 @@
       "query": "kĩ thuật nấu ăn",
       "category": "vi-iy",
       "notes": "Note spells \"kỹ thuật nấu ăn\"; query spells \"kĩ thuật nấu ăn\".",
-      "relevant_paths": [
-        "notes/Kỹ thuật nấu ăn.md"
-      ],
+      "relevant_paths": ["notes/Kỹ thuật nấu ăn.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3623,9 +3411,7 @@
       "query": "mỹ thuật ứng dụng",
       "category": "vi-iy",
       "notes": "Note spells \"mĩ thuật ứng dụng\"; query spells \"mỹ thuật ứng dụng\".",
-      "relevant_paths": [
-        "notes/Mĩ thuật ứng dụng.md"
-      ],
+      "relevant_paths": ["notes/Mĩ thuật ứng dụng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3655,9 +3441,7 @@
       "query": "lí do chuyển việc",
       "category": "vi-iy",
       "notes": "Note spells \"lý do chuyển việc\"; query spells \"lí do chuyển việc\".",
-      "relevant_paths": [
-        "notes/Lý do chuyển việc.md"
-      ],
+      "relevant_paths": ["notes/Lý do chuyển việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3687,9 +3471,7 @@
       "query": "kinh nghiệm quý báu",
       "category": "vi-iy",
       "notes": "Note spells \"kinh nghiệm quí báu\"; query spells \"kinh nghiệm quý báu\".",
-      "relevant_paths": [
-        "notes/Kinh nghiệm quí báu.md"
-      ],
+      "relevant_paths": ["notes/Kinh nghiệm quí báu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3719,9 +3501,7 @@
       "query": "tỉ lệ chuyển đổi",
       "category": "vi-iy",
       "notes": "Note spells \"tỷ lệ chuyển đổi\"; query spells \"tỉ lệ chuyển đổi\".",
-      "relevant_paths": [
-        "notes/Tỷ lệ chuyển đổi.md"
-      ],
+      "relevant_paths": ["notes/Tỷ lệ chuyển đổi.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3751,9 +3531,7 @@
       "query": "kỷ luật bản thân",
       "category": "vi-iy",
       "notes": "Note spells \"kỉ luật bản thân\"; query spells \"kỷ luật bản thân\".",
-      "relevant_paths": [
-        "notes/Kỉ luật bản thân.md"
-      ],
+      "relevant_paths": ["notes/Kỉ luật bản thân.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3783,9 +3561,7 @@
       "query": "kì thi cuối năm",
       "category": "vi-iy",
       "notes": "Note spells \"kỳ thi cuối năm\"; query spells \"kì thi cuối năm\".",
-      "relevant_paths": [
-        "notes/Kỳ thi cuối năm.md"
-      ],
+      "relevant_paths": ["notes/Kỳ thi cuối năm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3815,9 +3591,7 @@
       "query": "kỹ năng giao tiếp",
       "category": "vi-iy",
       "notes": "Note spells \"kĩ năng giao tiếp\"; query spells \"kỹ năng giao tiếp\".",
-      "relevant_paths": [
-        "notes/Kĩ năng giao tiếp.md"
-      ],
+      "relevant_paths": ["notes/Kĩ năng giao tiếp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3847,9 +3621,7 @@
       "query": "địa lí Việt Nam",
       "category": "vi-iy",
       "notes": "Note spells \"địa lý Việt Nam\"; query spells \"địa lí Việt Nam\".",
-      "relevant_paths": [
-        "notes/Địa lý Việt Nam.md"
-      ],
+      "relevant_paths": ["notes/Địa lý Việt Nam.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3879,9 +3651,7 @@
       "query": "vật lý lớp mười",
       "category": "vi-iy",
       "notes": "Note spells \"vật lí lớp mười\"; query spells \"vật lý lớp mười\".",
-      "relevant_paths": [
-        "notes/Vật lí lớp mười.md"
-      ],
+      "relevant_paths": ["notes/Vật lí lớp mười.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3911,9 +3681,7 @@
       "query": "chi phí hợp lí",
       "category": "vi-iy",
       "notes": "Note spells \"chi phí hợp lý\"; query spells \"chi phí hợp lí\".",
-      "relevant_paths": [
-        "notes/Chi phí hợp lý.md"
-      ],
+      "relevant_paths": ["notes/Chi phí hợp lý.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3943,9 +3711,7 @@
       "query": "quản lý rủi ro",
       "category": "vi-iy",
       "notes": "Note spells \"quản lí rủi ro\"; query spells \"quản lý rủi ro\".",
-      "relevant_paths": [
-        "notes/Quản lí rủi ro.md"
-      ],
+      "relevant_paths": ["notes/Quản lí rủi ro.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -3975,9 +3741,7 @@
       "query": "tâm lí học hành vi",
       "category": "vi-iy",
       "notes": "Note spells \"tâm lý học hành vi\"; query spells \"tâm lí học hành vi\".",
-      "relevant_paths": [
-        "notes/Tâm lý học hành vi.md"
-      ],
+      "relevant_paths": ["notes/Tâm lý học hành vi.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4007,9 +3771,7 @@
       "query": "ký hiệu toán học",
       "category": "vi-iy",
       "notes": "Note spells \"kí hiệu toán học\"; query spells \"ký hiệu toán học\".",
-      "relevant_paths": [
-        "notes/Kí hiệu toán học.md"
-      ],
+      "relevant_paths": ["notes/Kí hiệu toán học.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4039,9 +3801,7 @@
       "query": "nguyên lí hoạt động",
       "category": "vi-iy",
       "notes": "Note spells \"nguyên lý hoạt động\"; query spells \"nguyên lí hoạt động\".",
-      "relevant_paths": [
-        "notes/Nguyên lý hoạt động.md"
-      ],
+      "relevant_paths": ["notes/Nguyên lý hoạt động.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4071,9 +3831,7 @@
       "query": "hoà giải mâu thuẫn",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hòa giải mâu thuẫn\"; query writes \"hoà giải mâu thuẫn\".",
-      "relevant_paths": [
-        "notes/Hòa giải mâu thuẫn.md"
-      ],
+      "relevant_paths": ["notes/Hòa giải mâu thuẫn.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4103,9 +3861,7 @@
       "query": "hòa bình thế giới",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hoà bình thế giới\"; query writes \"hòa bình thế giới\".",
-      "relevant_paths": [
-        "notes/Hoà bình thế giới.md"
-      ],
+      "relevant_paths": ["notes/Hoà bình thế giới.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4135,9 +3891,7 @@
       "query": "hoá đơn điện tử",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hóa đơn điện tử\"; query writes \"hoá đơn điện tử\".",
-      "relevant_paths": [
-        "notes/Hóa đơn điện tử.md"
-      ],
+      "relevant_paths": ["notes/Hóa đơn điện tử.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4167,9 +3921,7 @@
       "query": "hóa học hữu cơ",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hoá học hữu cơ\"; query writes \"hóa học hữu cơ\".",
-      "relevant_paths": [
-        "notes/Hoá học hữu cơ.md"
-      ],
+      "relevant_paths": ["notes/Hoá học hữu cơ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4199,9 +3951,7 @@
       "query": "thuỷ điện nhỏ",
       "category": "vi-tone-placement",
       "notes": "Note writes \"thủy điện nhỏ\"; query writes \"thuỷ điện nhỏ\".",
-      "relevant_paths": [
-        "notes/Thủy điện nhỏ.md"
-      ],
+      "relevant_paths": ["notes/Thủy điện nhỏ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4231,9 +3981,7 @@
       "query": "thủy sản xuất khẩu",
       "category": "vi-tone-placement",
       "notes": "Note writes \"thuỷ sản xuất khẩu\"; query writes \"thủy sản xuất khẩu\".",
-      "relevant_paths": [
-        "notes/Thuỷ sản xuất khẩu.md"
-      ],
+      "relevant_paths": ["notes/Thuỷ sản xuất khẩu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4263,9 +4011,7 @@
       "query": "khoẻ mạnh mỗi ngày",
       "category": "vi-tone-placement",
       "notes": "Note writes \"khỏe mạnh mỗi ngày\"; query writes \"khoẻ mạnh mỗi ngày\".",
-      "relevant_paths": [
-        "notes/Khỏe mạnh mỗi ngày.md"
-      ],
+      "relevant_paths": ["notes/Khỏe mạnh mỗi ngày.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4295,9 +4041,7 @@
       "query": "sức khỏe tinh thần",
       "category": "vi-tone-placement",
       "notes": "Note writes \"sức khoẻ tinh thần\"; query writes \"sức khỏe tinh thần\".",
-      "relevant_paths": [
-        "notes/Sức khoẻ tinh thần.md"
-      ],
+      "relevant_paths": ["notes/Sức khoẻ tinh thần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4327,9 +4071,7 @@
       "query": "toà nhà văn phòng",
       "category": "vi-tone-placement",
       "notes": "Note writes \"tòa nhà văn phòng\"; query writes \"toà nhà văn phòng\".",
-      "relevant_paths": [
-        "notes/Tòa nhà văn phòng.md"
-      ],
+      "relevant_paths": ["notes/Tòa nhà văn phòng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4359,9 +4101,7 @@
       "query": "họa sĩ trẻ",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hoạ sĩ trẻ\"; query writes \"họa sĩ trẻ\".",
-      "relevant_paths": [
-        "notes/Hoạ sĩ trẻ.md"
-      ],
+      "relevant_paths": ["notes/Hoạ sĩ trẻ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4391,9 +4131,7 @@
       "query": "xoá sổ nợ cũ",
       "category": "vi-tone-placement",
       "notes": "Note writes \"xóa sổ nợ cũ\"; query writes \"xoá sổ nợ cũ\".",
-      "relevant_paths": [
-        "notes/Xóa sổ nợ cũ.md"
-      ],
+      "relevant_paths": ["notes/Xóa sổ nợ cũ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4423,9 +4161,7 @@
       "query": "hỏa hoạn tại chung cư",
       "category": "vi-tone-placement",
       "notes": "Note writes \"hoả hoạn tại chung cư\"; query writes \"hỏa hoạn tại chung cư\".",
-      "relevant_paths": [
-        "notes/Hoả hoạn tại chung cư.md"
-      ],
+      "relevant_paths": ["notes/Hoả hoạn tại chung cư.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4455,9 +4191,7 @@
       "query": "văn hoá doanh nghiệp",
       "category": "vi-tone-placement",
       "notes": "Note writes \"văn hóa doanh nghiệp\"; query writes \"văn hoá doanh nghiệp\".",
-      "relevant_paths": [
-        "notes/Văn hóa doanh nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Văn hóa doanh nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4487,9 +4221,7 @@
       "query": "thủy tinh cường lực",
       "category": "vi-tone-placement",
       "notes": "Note writes \"thuỷ tinh cường lực\"; query writes \"thủy tinh cường lực\".",
-      "relevant_paths": [
-        "notes/Thuỷ tinh cường lực.md"
-      ],
+      "relevant_paths": ["notes/Thuỷ tinh cường lực.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4519,9 +4251,7 @@
       "query": "chuyển hoá năng lượng",
       "category": "vi-tone-placement",
       "notes": "Note writes \"chuyển hóa năng lượng\"; query writes \"chuyển hoá năng lượng\".",
-      "relevant_paths": [
-        "notes/Chuyển hóa năng lượng.md"
-      ],
+      "relevant_paths": ["notes/Chuyển hóa năng lượng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4551,9 +4281,7 @@
       "query": "bán hàng",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"bạn hàng\" above the note about \"bán hàng\".",
-      "relevant_paths": [
-        "notes/Mẹo bán hàng online.md"
-      ],
+      "relevant_paths": ["notes/Mẹo bán hàng online.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4583,9 +4311,7 @@
       "query": "bản đồ",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"bàn đồ\" above the note about \"bản đồ\".",
-      "relevant_paths": [
-        "notes/Bản đồ tư duy.md"
-      ],
+      "relevant_paths": ["notes/Bản đồ tư duy.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4615,9 +4341,7 @@
       "query": "chữa bệnh",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"chứa bệnh\" above the note about \"chữa bệnh\".",
-      "relevant_paths": [
-        "notes/Chữa bệnh bằng thảo dược.md"
-      ],
+      "relevant_paths": ["notes/Chữa bệnh bằng thảo dược.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4647,9 +4371,7 @@
       "query": "nghỉ ngơi",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"nghĩ ngợi\" above the note about \"nghỉ ngơi\".",
-      "relevant_paths": [
-        "notes/Nghỉ ngơi sau ca đêm.md"
-      ],
+      "relevant_paths": ["notes/Nghỉ ngơi sau ca đêm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4679,9 +4401,7 @@
       "query": "nấm rơm",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"nắm rơm\" above the note about \"nấm rơm\".",
-      "relevant_paths": [
-        "notes/Trồng nấm rơm.md"
-      ],
+      "relevant_paths": ["notes/Trồng nấm rơm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4711,9 +4431,7 @@
       "query": "đỗ xe",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"đổ xe\" above the note about \"đỗ xe\".",
-      "relevant_paths": [
-        "notes/Chỗ đỗ xe gần ga.md"
-      ],
+      "relevant_paths": ["notes/Chỗ đỗ xe gần ga.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4743,9 +4461,7 @@
       "query": "sóng biển",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"sống biển\" above the note about \"sóng biển\".",
-      "relevant_paths": [
-        "notes/Sóng biển lúc bình minh.md"
-      ],
+      "relevant_paths": ["notes/Sóng biển lúc bình minh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4775,9 +4491,7 @@
       "query": "tính toán",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"tỉnh toán\" above the note about \"tính toán\".",
-      "relevant_paths": [
-        "notes/Tính toán chi phí xây nhà.md"
-      ],
+      "relevant_paths": ["notes/Tính toán chi phí xây nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4807,9 +4521,7 @@
       "query": "mở cửa",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"mỡ cửa\" above the note about \"mở cửa\".",
-      "relevant_paths": [
-        "notes/Mở cửa sổ mỗi sáng.md"
-      ],
+      "relevant_paths": ["notes/Mở cửa sổ mỗi sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4839,9 +4551,7 @@
       "query": "giá cả",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"giã cả\" above the note about \"giá cả\".",
-      "relevant_paths": [
-        "notes/Giá cả tăng dần.md"
-      ],
+      "relevant_paths": ["notes/Giá cả tăng dần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4871,9 +4581,7 @@
       "query": "cải tiến",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"cãi tiến\" above the note about \"cải tiến\".",
-      "relevant_paths": [
-        "notes/Cải tiến sản phẩm.md"
-      ],
+      "relevant_paths": ["notes/Cải tiến sản phẩm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4903,9 +4611,7 @@
       "query": "hỏi đáp",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"hồi đáp\" above the note about \"hỏi đáp\".",
-      "relevant_paths": [
-        "notes/Hỏi đáp thường gặp.md"
-      ],
+      "relevant_paths": ["notes/Hỏi đáp thường gặp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4935,9 +4641,7 @@
       "query": "quả cam",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"quà cam\" above the note about \"quả cam\".",
-      "relevant_paths": [
-        "notes/Quả cam sành.md"
-      ],
+      "relevant_paths": ["notes/Quả cam sành.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4967,9 +4671,7 @@
       "query": "sách vở",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"sạch vở\" above the note about \"sách vở\".",
-      "relevant_paths": [
-        "notes/Sách vở đầu năm.md"
-      ],
+      "relevant_paths": ["notes/Sách vở đầu năm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -4999,9 +4701,7 @@
       "query": "mua bán",
       "category": "vi-tone-precision",
       "notes": "Must not rank the note about \"múa bán\" above the note about \"mua bán\".",
-      "relevant_paths": [
-        "notes/Mua bán xe cũ.md"
-      ],
+      "relevant_paths": ["notes/Mua bán xe cũ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5031,9 +4731,7 @@
       "query": "kế toán",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"toán học\" above the note about \"kế toán\".",
-      "relevant_paths": [
-        "notes/Sổ cái cuối tháng.md"
-      ],
+      "relevant_paths": ["notes/Sổ cái cuối tháng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5063,9 +4761,7 @@
       "query": "ngân hàng",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"hàng không\" above the note about \"ngân hàng\".",
-      "relevant_paths": [
-        "notes/Khoản vay mua nhà.md"
-      ],
+      "relevant_paths": ["notes/Khoản vay mua nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5095,9 +4791,7 @@
       "query": "học sinh",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"sinh học\" above the note about \"học sinh\".",
-      "relevant_paths": [
-        "notes/Lớp mười hai.md"
-      ],
+      "relevant_paths": ["notes/Lớp mười hai.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5127,9 +4821,7 @@
       "query": "giáo viên",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"viên chức\" above the note about \"giáo viên\".",
-      "relevant_paths": [
-        "notes/Cô chủ nhiệm.md"
-      ],
+      "relevant_paths": ["notes/Cô chủ nhiệm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5159,9 +4851,7 @@
       "query": "thị trường",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"trường học\" above the note about \"thị trường\".",
-      "relevant_paths": [
-        "notes/Giá nhà đất.md"
-      ],
+      "relevant_paths": ["notes/Giá nhà đất.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5191,9 +4881,7 @@
       "query": "bệnh viện",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"viện trợ\" above the note about \"bệnh viện\".",
-      "relevant_paths": [
-        "notes/Tuyến huyện.md"
-      ],
+      "relevant_paths": ["notes/Tuyến huyện.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5223,9 +4911,7 @@
       "query": "thành phố",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"phố cổ\" above the note about \"thành phố\".",
-      "relevant_paths": [
-        "notes/Ven biển.md"
-      ],
+      "relevant_paths": ["notes/Ven biển.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5255,9 +4941,7 @@
       "query": "thể thao",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"thao tác\" above the note about \"thể thao\".",
-      "relevant_paths": [
-        "notes/Ngoài trời.md"
-      ],
+      "relevant_paths": ["notes/Ngoài trời.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5287,9 +4971,7 @@
       "query": "xe máy",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"máy bay\" above the note about \"xe máy\".",
-      "relevant_paths": [
-        "notes/Chạy điện.md"
-      ],
+      "relevant_paths": ["notes/Chạy điện.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5319,9 +5001,7 @@
       "query": "lãi suất",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"suất ăn\" above the note about \"lãi suất\".",
-      "relevant_paths": [
-        "notes/Cho vay tiêu dùng.md"
-      ],
+      "relevant_paths": ["notes/Cho vay tiêu dùng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5351,9 +5031,7 @@
       "query": "dịch vụ",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"vụ án\" above the note about \"dịch vụ\".",
-      "relevant_paths": [
-        "notes/Giao nhận nội thành.md"
-      ],
+      "relevant_paths": ["notes/Giao nhận nội thành.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5383,9 +5061,7 @@
       "query": "cà chua",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"chua ngọt\" above the note about \"cà chua\".",
-      "relevant_paths": [
-        "notes/Salad mùa hè.md"
-      ],
+      "relevant_paths": ["notes/Salad mùa hè.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5415,9 +5091,7 @@
       "query": "nhà hàng",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"hàng xóm\" above the note about \"nhà hàng\".",
-      "relevant_paths": [
-        "notes/Thực đơn chay.md"
-      ],
+      "relevant_paths": ["notes/Thực đơn chay.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5447,9 +5121,7 @@
       "query": "đầu tư",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"tư vấn\" above the note about \"đầu tư\".",
-      "relevant_paths": [
-        "notes/Vàng và bạc.md"
-      ],
+      "relevant_paths": ["notes/Vàng và bạc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5479,9 +5151,7 @@
       "query": "bản tin",
       "category": "vi-compound",
       "notes": "Must not rank the note about \"tin đồn\" above the note about \"bản tin\".",
-      "relevant_paths": [
-        "notes/Buổi sáng.md"
-      ],
+      "relevant_paths": ["notes/Buổi sáng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5511,9 +5181,7 @@
       "query": "họp sprint planning",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Họp sprint planning đầu tuần.md"
-      ],
+      "relevant_paths": ["notes/Họp sprint planning đầu tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5543,9 +5211,7 @@
       "query": "plan tiếp thị quý bốn",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Kế hoạch marketing quý bốn.md"
-      ],
+      "relevant_paths": ["notes/Kế hoạch marketing quý bốn.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -5575,9 +5241,7 @@
       "query": "feedback người dùng",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Báo cáo feedback của người dùng.md"
-      ],
+      "relevant_paths": ["notes/Báo cáo feedback của người dùng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5607,9 +5271,7 @@
       "query": "kiểm tra code trước khi merge",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Review code trước khi merge.md"
-      ],
+      "relevant_paths": ["notes/Review code trước khi merge.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5639,9 +5301,7 @@
       "query": "hạn chót nộp hồ sơ visa",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Deadline nộp hồ sơ visa.md"
-      ],
+      "relevant_paths": ["notes/Deadline nộp hồ sơ visa.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5671,9 +5331,7 @@
       "query": "workshop sản phẩm",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Workshop thiết kế sản phẩm.md"
-      ],
+      "relevant_paths": ["notes/Workshop thiết kế sản phẩm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5703,9 +5361,7 @@
       "query": "sao lưu dữ liệu hằng tuần",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/File backup dữ liệu hằng tuần.md"
-      ],
+      "relevant_paths": ["notes/File backup dữ liệu hằng tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5735,9 +5391,7 @@
       "query": "brainstorm khởi nghiệp",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Brainstorm ý tưởng khởi nghiệp.md"
-      ],
+      "relevant_paths": ["notes/Brainstorm ý tưởng khởi nghiệp.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5767,9 +5421,7 @@
       "query": "cập nhật phiên bản app",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Update phiên bản ứng dụng.md"
-      ],
+      "relevant_paths": ["notes/Update phiên bản ứng dụng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5799,9 +5451,7 @@
       "query": "trang đích cho chiến dịch mới",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Landing page cho chiến dịch mới.md"
-      ],
+      "relevant_paths": ["notes/Landing page cho chiến dịch mới.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5831,9 +5481,7 @@
       "query": "cuộc họp với đối tác nước ngoài",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Meeting với đối tác nước ngoài.md"
-      ],
+      "relevant_paths": ["notes/Meeting với đối tác nước ngoài.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5863,9 +5511,7 @@
       "query": "checklist chuyển nhà",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Checklist chuyển nhà.md"
-      ],
+      "relevant_paths": ["notes/Checklist chuyển nhà.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5895,9 +5541,7 @@
       "query": "podcast tài chính cá nhân",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Podcast về tài chính cá nhân.md"
-      ],
+      "relevant_paths": ["notes/Podcast về tài chính cá nhân.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5927,9 +5571,7 @@
       "query": "người cố vấn hướng dẫn người mới",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Mentor hướng dẫn người mới.md"
-      ],
+      "relevant_paths": ["notes/Mentor hướng dẫn người mới.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5959,9 +5601,7 @@
       "query": "workflow duyệt chi phí",
       "category": "vi-mixed-en",
       "notes": "Query mixes English words or translates them to Vietnamese or the other way round.",
-      "relevant_paths": [
-        "notes/Workflow duyệt chi phí.md"
-      ],
+      "relevant_paths": ["notes/Workflow duyệt chi phí.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -5991,9 +5631,7 @@
       "query": "mẹo cất giữ của cải đều đặn",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Tiết kiệm chi tiêu.md"
-      ],
+      "relevant_paths": ["notes/Tiết kiệm chi tiêu.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0,
@@ -6004,9 +5642,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "notes/Tiết kiệm chi tiêu.md"
-      ],
+      "missed_paths": ["notes/Tiết kiệm chi tiêu.md"],
       "top_paths": [
         "notes/Giữ chân khách hàng.md",
         "notes/Giữ sạch vở ghi.md",
@@ -6025,9 +5661,7 @@
       "query": "khó chợp mắt vào lúc khuya khoắt",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Mất ngủ về đêm.md"
-      ],
+      "relevant_paths": ["notes/Mất ngủ về đêm.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -6057,9 +5691,7 @@
       "query": "cơn nhức óc dai dẳng không dứt",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Cơn đau đầu mãn tính.md"
-      ],
+      "relevant_paths": ["notes/Cơn đau đầu mãn tính.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6089,9 +5721,7 @@
       "query": "hạ trọng lượng cơ thể một cách an toàn",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Giảm cân lành mạnh.md"
-      ],
+      "relevant_paths": ["notes/Giảm cân lành mạnh.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -6121,9 +5751,7 @@
       "query": "mẹo thuộc vốn từ của một thứ tiếng khác",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Học ngoại ngữ nhanh.md"
-      ],
+      "relevant_paths": ["notes/Học ngoại ngữ nhanh.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0,
@@ -6134,9 +5762,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "notes/Học ngoại ngữ nhanh.md"
-      ],
+      "missed_paths": ["notes/Học ngoại ngữ nhanh.md"],
       "top_paths": [
         "notes/Của để dành cho con.md",
         "notes/Mẹo bán hàng online.md",
@@ -6155,9 +5781,7 @@
       "query": "căng thẳng ở chỗ làm",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Áp lực công việc.md"
-      ],
+      "relevant_paths": ["notes/Áp lực công việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6187,9 +5811,7 @@
       "query": "định hướng sự nghiệp cho người mới ra trường",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Chọn nghề phù hợp.md"
-      ],
+      "relevant_paths": ["notes/Chọn nghề phù hợp.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -6219,9 +5841,7 @@
       "query": "cách nói lời chia tay với sếp",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Xin nghỉ việc.md"
-      ],
+      "relevant_paths": ["notes/Xin nghỉ việc.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -6251,9 +5871,7 @@
       "query": "chăm bé miu mới đón về",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Nuôi mèo con.md"
-      ],
+      "relevant_paths": ["notes/Nuôi mèo con.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6283,9 +5901,7 @@
       "query": "đi chơi xa mà ít tốn kém",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Du lịch bụi giá rẻ.md"
-      ],
+      "relevant_paths": ["notes/Du lịch bụi giá rẻ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6315,9 +5931,7 @@
       "query": "món ăn dễ tiêu cho người đang hồi phục",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Nấu cháo cho người ốm.md"
-      ],
+      "relevant_paths": ["notes/Nấu cháo cho người ốm.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6347,9 +5961,7 @@
       "query": "bình tĩnh khi nổi nóng",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Kiềm chế cơn giận.md"
-      ],
+      "relevant_paths": ["notes/Kiềm chế cơn giận.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0.301,
@@ -6379,9 +5991,7 @@
       "query": "nuôi dưỡng niềm say mê với những trang giấy",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Thói quen đọc sách.md"
-      ],
+      "relevant_paths": ["notes/Thói quen đọc sách.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0.333,
@@ -6411,9 +6021,7 @@
       "query": "gây ấn tượng với nhà tuyển dụng ở buổi gặp đầu tiên",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Phỏng vấn xin việc.md"
-      ],
+      "relevant_paths": ["notes/Phỏng vấn xin việc.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -6443,9 +6051,7 @@
       "query": "làm xanh căn hộ bằng chậu cảnh",
       "category": "vi-semantic",
       "notes": "Query paraphrases the topic with different words.",
-      "relevant_paths": [
-        "notes/Trồng cây trong nhà.md"
-      ],
+      "relevant_paths": ["notes/Trồng cây trong nhà.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -6475,9 +6081,7 @@
       "query": "Nguyen Huu Phuoc",
       "category": "vi-names",
       "notes": "Person name without diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Nguyễn Hữu Phước.md"
-      ],
+      "relevant_paths": ["notes/Nguyễn Hữu Phước.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6507,9 +6111,7 @@
       "query": "Le Thi Thanh Huong",
       "category": "vi-names",
       "notes": "Person name without diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Lê Thị Thanh Hương.md"
-      ],
+      "relevant_paths": ["notes/Lê Thị Thanh Hương.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6539,9 +6141,7 @@
       "query": "Pham Duc Thinh",
       "category": "vi-names",
       "notes": "Person name without diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Phạm Đức Thịnh.md"
-      ],
+      "relevant_paths": ["notes/Phạm Đức Thịnh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6571,9 +6171,7 @@
       "query": "Vo Thi Ngoc Anh",
       "category": "vi-names",
       "notes": "Person name without diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Võ Thị Ngọc Ánh.md"
-      ],
+      "relevant_paths": ["notes/Võ Thị Ngọc Ánh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6603,9 +6201,7 @@
       "query": "Đặng Minh Quân",
       "category": "vi-names",
       "notes": "Person name with diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Đặng Minh Quân.md"
-      ],
+      "relevant_paths": ["notes/Đặng Minh Quân.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6635,9 +6231,7 @@
       "query": "Bùi Thanh Tùng",
       "category": "vi-names",
       "notes": "Person name with diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Bùi Thanh Tùng.md"
-      ],
+      "relevant_paths": ["notes/Bùi Thanh Tùng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6667,9 +6261,7 @@
       "query": "Hoàng Mỹ Linh",
       "category": "vi-names",
       "notes": "Person name with diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Hoàng Mỹ Linh.md"
-      ],
+      "relevant_paths": ["notes/Hoàng Mỹ Linh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6699,9 +6291,7 @@
       "query": "Trương Quốc Khánh",
       "category": "vi-names",
       "notes": "Person name with diacritics; a similar name is in the vault.",
-      "relevant_paths": [
-        "notes/Trương Quốc Khánh.md"
-      ],
+      "relevant_paths": ["notes/Trương Quốc Khánh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6731,9 +6321,7 @@
       "query": "Da Lat",
       "category": "vi-names",
       "notes": "Place name without diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Đà Lạt cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Đà Lạt cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6763,9 +6351,7 @@
       "query": "Quang Ngai",
       "category": "vi-names",
       "notes": "Place name without diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Quảng Ngãi cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Quảng Ngãi cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6795,9 +6381,7 @@
       "query": "Can Tho",
       "category": "vi-names",
       "notes": "Place name without diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Cần Thơ cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Cần Thơ cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6827,9 +6411,7 @@
       "query": "Ha Tinh",
       "category": "vi-names",
       "notes": "Place name without diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Hà Tĩnh cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Hà Tĩnh cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6859,9 +6441,7 @@
       "query": "Bà Rịa",
       "category": "vi-names",
       "notes": "Place name with diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Bà Rịa cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Bà Rịa cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6891,9 +6471,7 @@
       "query": "Phan Thiết",
       "category": "vi-names",
       "notes": "Place name with diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Phan Thiết cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Phan Thiết cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6923,9 +6501,7 @@
       "query": "Hội An",
       "category": "vi-names",
       "notes": "Place name with diacritics.",
-      "relevant_paths": [
-        "notes/Chuyến đi Hội An cuối tuần.md"
-      ],
+      "relevant_paths": ["notes/Chuyến đi Hội An cuối tuần.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -6955,9 +6531,7 @@
       "query": "xe hơi",
       "category": "vi-synonym",
       "notes": "Lexicon group \"ô tô = xe hơi = car\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Việc cuối năm.md"
-      ],
+      "relevant_paths": ["notes/Việc cuối năm.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -6987,9 +6561,7 @@
       "query": "phone",
       "category": "vi-synonym",
       "notes": "Lexicon group \"điện thoại = phone = smartphone\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Quà cho bố mẹ.md"
-      ],
+      "relevant_paths": ["notes/Quà cho bố mẹ.md"],
       "partial_paths": [],
       "ndcg_5": 0.5,
       "ndcg_k": 0.5,
@@ -7019,9 +6591,7 @@
       "query": "tiền công",
       "category": "vi-synonym",
       "notes": "Lexicon group \"lương = salary = tiền công\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Cuối tháng mười.md"
-      ],
+      "relevant_paths": ["notes/Cuối tháng mười.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -7051,9 +6621,7 @@
       "query": "coffee",
       "category": "vi-synonym",
       "notes": "Lexicon group \"cà phê = coffee = cafe\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Dự án nhỏ.md"
-      ],
+      "relevant_paths": ["notes/Dự án nhỏ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7083,9 +6651,7 @@
       "query": "thầy thuốc",
       "category": "vi-synonym",
       "notes": "Lexicon group \"bác sĩ = thầy thuốc = doctor\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Lịch hẹn gia đình.md"
-      ],
+      "relevant_paths": ["notes/Lịch hẹn gia đình.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -7115,9 +6681,7 @@
       "query": "laptop",
       "category": "vi-synonym",
       "notes": "Lexicon group \"máy tính xách tay = laptop = notebook\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Chuẩn bị nhập học.md"
-      ],
+      "relevant_paths": ["notes/Chuẩn bị nhập học.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7147,9 +6711,7 @@
       "query": "smoothie",
       "category": "vi-synonym",
       "notes": "Lexicon group \"sinh tố = smoothie\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Công thức mùa hè.md"
-      ],
+      "relevant_paths": ["notes/Công thức mùa hè.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7179,9 +6741,7 @@
       "query": "giao kèo",
       "category": "vi-synonym",
       "notes": "Lexicon group \"hợp đồng = contract = giao kèo\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Giấy tờ cần ký.md"
-      ],
+      "relevant_paths": ["notes/Giấy tờ cần ký.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -7211,9 +6771,7 @@
       "query": "email",
       "category": "vi-synonym",
       "notes": "Lexicon group \"thư điện tử = email = e-mail\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Liên lạc đối tác.md"
-      ],
+      "relevant_paths": ["notes/Liên lạc đối tác.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7243,9 +6801,7 @@
       "query": "savings",
       "category": "vi-synonym",
       "notes": "Lexicon group \"tiền tiết kiệm = savings = tiền gửi\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Của để dành cho con.md"
-      ],
+      "relevant_paths": ["notes/Của để dành cho con.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -7275,9 +6831,7 @@
       "query": "password",
       "category": "vi-synonym",
       "notes": "Lexicon group \"mật khẩu = password = mã bí mật\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/An toàn cá nhân.md"
-      ],
+      "relevant_paths": ["notes/An toàn cá nhân.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7307,9 +6861,7 @@
       "query": "kinh phí",
       "category": "vi-synonym",
       "notes": "Lexicon group \"chi phí = cost = kinh phí\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Tiết giảm vận hành.md"
-      ],
+      "relevant_paths": ["notes/Tiết giảm vận hành.md"],
       "partial_paths": [],
       "ndcg_5": 0.387,
       "ndcg_k": 0.387,
@@ -7339,9 +6891,7 @@
       "query": "scholarship",
       "category": "vi-synonym",
       "notes": "Lexicon group \"học bổng = scholarship\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Du học sau đại học.md"
-      ],
+      "relevant_paths": ["notes/Du học sau đại học.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7371,9 +6921,7 @@
       "query": "intern",
       "category": "vi-synonym",
       "notes": "Lexicon group \"thực tập sinh = intern = tập sự\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Mùa hè năm nay.md"
-      ],
+      "relevant_paths": ["notes/Mùa hè năm nay.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7403,9 +6951,7 @@
       "query": "chương trình",
       "category": "vi-synonym",
       "notes": "Lexicon group \"phần mềm = software = chương trình\"; the note uses the first form, the query another.",
-      "relevant_paths": [
-        "notes/Máy văn phòng.md"
-      ],
+      "relevant_paths": ["notes/Máy văn phòng.md"],
       "partial_paths": [],
       "ndcg_5": 0.431,
       "ndcg_k": 0.431,
@@ -7435,9 +6981,7 @@
       "query": "KH tiềm năng",
       "category": "vi-abbr",
       "notes": "Lexicon: KH = khách hàng; the note spells it out.",
-      "relevant_paths": [
-        "notes/Danh sách khách hàng tiềm năng.md"
-      ],
+      "relevant_paths": ["notes/Danh sách khách hàng tiềm năng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7467,9 +7011,7 @@
       "query": "HĐ thuê văn phòng",
       "category": "vi-abbr",
       "notes": "Lexicon: HĐ = hợp đồng; the note spells it out.",
-      "relevant_paths": [
-        "notes/Hợp đồng thuê văn phòng.md"
-      ],
+      "relevant_paths": ["notes/Hợp đồng thuê văn phòng.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7499,9 +7041,7 @@
       "query": "quy trình CSKH sau bán",
       "category": "vi-abbr",
       "notes": "Lexicon: CSKH = chăm sóc khách hàng; the note spells it out.",
-      "relevant_paths": [
-        "notes/Quy trình chăm sóc khách hàng sau bán.md"
-      ],
+      "relevant_paths": ["notes/Quy trình chăm sóc khách hàng sau bán.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7531,9 +7071,7 @@
       "query": "NV thử việc",
       "category": "vi-abbr",
       "notes": "Lexicon: NV = nhân viên; the note spells it out.",
-      "relevant_paths": [
-        "notes/Quy chế nhân viên thử việc.md"
-      ],
+      "relevant_paths": ["notes/Quy chế nhân viên thử việc.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7563,9 +7101,7 @@
       "query": "DN vừa và nhỏ",
       "category": "vi-abbr",
       "notes": "Lexicon: DN = doanh nghiệp; the note spells it out.",
-      "relevant_paths": [
-        "notes/Doanh nghiệp vừa và nhỏ.md"
-      ],
+      "relevant_paths": ["notes/Doanh nghiệp vừa và nhỏ.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7595,9 +7131,7 @@
       "query": "sàn TMĐT",
       "category": "vi-abbr",
       "notes": "Lexicon: TMĐT = thương mại điện tử; the note spells it out.",
-      "relevant_paths": [
-        "notes/Sàn thương mại điện tử.md"
-      ],
+      "relevant_paths": ["notes/Sàn thương mại điện tử.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7627,9 +7161,7 @@
       "query": "BCTC quý ba",
       "category": "vi-abbr",
       "notes": "Lexicon: BCTC = báo cáo tài chính; the note spells it out.",
-      "relevant_paths": [
-        "notes/Báo cáo tài chính quý ba.md"
-      ],
+      "relevant_paths": ["notes/Báo cáo tài chính quý ba.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7659,9 +7191,7 @@
       "query": "GĐ điều hành",
       "category": "vi-abbr",
       "notes": "Lexicon: GĐ = giám đốc; the note spells it out.",
-      "relevant_paths": [
-        "notes/Giám đốc điều hành.md"
-      ],
+      "relevant_paths": ["notes/Giám đốc điều hành.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7691,9 +7221,7 @@
       "query": "họp PKD sáng thứ hai",
       "category": "vi-abbr",
       "notes": "Lexicon: PKD = phòng kinh doanh; the note spells it out.",
-      "relevant_paths": [
-        "notes/Họp phòng kinh doanh sáng thứ hai.md"
-      ],
+      "relevant_paths": ["notes/Họp phòng kinh doanh sáng thứ hai.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7723,9 +7251,7 @@
       "query": "đánh giá NCC mới",
       "category": "vi-abbr",
       "notes": "Lexicon: NCC = nhà cung cấp; the note spells it out.",
-      "relevant_paths": [
-        "notes/Đánh giá nhà cung cấp mới.md"
-      ],
+      "relevant_paths": ["notes/Đánh giá nhà cung cấp mới.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7755,9 +7281,7 @@
       "query": "giấy ĐKKD",
       "category": "vi-abbr",
       "notes": "Lexicon: ĐKKD = đăng ký kinh doanh; the note spells it out.",
-      "relevant_paths": [
-        "notes/Giấy đăng ký kinh doanh.md"
-      ],
+      "relevant_paths": ["notes/Giấy đăng ký kinh doanh.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7787,9 +7311,7 @@
       "query": "ban QLDA xây dựng cầu",
       "category": "vi-abbr",
       "notes": "Lexicon: QLDA = quản lý dự án; the note spells it out.",
-      "relevant_paths": [
-        "notes/Ban quản lý dự án xây dựng cầu.md"
-      ],
+      "relevant_paths": ["notes/Ban quản lý dự án xây dựng cầu.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7819,9 +7341,7 @@
       "query": "ngành CNTT",
       "category": "vi-abbr",
       "notes": "Lexicon: CNTT = công nghệ thông tin; the note spells it out.",
-      "relevant_paths": [
-        "notes/Ngành công nghệ thông tin.md"
-      ],
+      "relevant_paths": ["notes/Ngành công nghệ thông tin.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7851,9 +7371,7 @@
       "query": "biên bản HĐQT",
       "category": "vi-abbr",
       "notes": "Lexicon: HĐQT = hội đồng quản trị; the note spells it out.",
-      "relevant_paths": [
-        "notes/Biên bản hội đồng quản trị.md"
-      ],
+      "relevant_paths": ["notes/Biên bản hội đồng quản trị.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7883,9 +7401,7 @@
       "query": "đóng BHXH",
       "category": "vi-abbr",
       "notes": "Lexicon: BHXH = bảo hiểm xã hội; the note spells it out.",
-      "relevant_paths": [
-        "notes/Đóng bảo hiểm xã hội.md"
-      ],
+      "relevant_paths": ["notes/Đóng bảo hiểm xã hội.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7915,9 +7431,7 @@
       "query": "Ke hoach quy bon",
       "category": "vi-alias",
       "notes": "Query is the alias \"Kế hoạch quý bốn\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Q4 roadmap.md"
-      ],
+      "relevant_paths": ["notes/Q4 roadmap.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7947,9 +7461,7 @@
       "query": "Hop giao ban tuan",
       "category": "vi-alias",
       "notes": "Query is the alias \"Họp giao ban tuần\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Weekly sync.md"
-      ],
+      "relevant_paths": ["notes/Weekly sync.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -7979,9 +7491,7 @@
       "query": "Danh sach tiep nhan nhan su",
       "category": "vi-alias",
       "notes": "Query is the alias \"Danh sách tiếp nhận nhân sự\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Onboarding checklist.md"
-      ],
+      "relevant_paths": ["notes/Onboarding checklist.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8011,9 +7521,7 @@
       "query": "Bang du toan chi phi",
       "category": "vi-alias",
       "notes": "Query is the alias \"Bảng dự toán chi phí\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Budget sheet.md"
-      ],
+      "relevant_paths": ["notes/Budget sheet.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8043,9 +7551,7 @@
       "query": "Danh muc sach can doc",
       "category": "vi-alias",
       "notes": "Query is the alias \"Danh mục sách cần đọc\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Reading list.md"
-      ],
+      "relevant_paths": ["notes/Reading list.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8075,9 +7581,7 @@
       "query": "Hanh ly chuyen di",
       "category": "vi-alias",
       "notes": "Query is the alias \"Hành lý chuyến đi\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Travel packing.md"
-      ],
+      "relevant_paths": ["notes/Travel packing.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8107,9 +7611,7 @@
       "query": "Ghi chu phat hanh",
       "category": "vi-alias",
       "notes": "Query is the alias \"Ghi chú phát hành\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Release notes.md"
-      ],
+      "relevant_paths": ["notes/Release notes.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8139,9 +7641,7 @@
       "query": "So theo doi chi tieu",
       "category": "vi-alias",
       "notes": "Query is the alias \"Sổ theo dõi chi tiêu\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Expense tracker.md"
-      ],
+      "relevant_paths": ["notes/Expense tracker.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8171,9 +7671,7 @@
       "query": "Chuan bi phong van",
       "category": "vi-alias",
       "notes": "Query is the alias \"Chuẩn bị phỏng vấn\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Interview prep.md"
-      ],
+      "relevant_paths": ["notes/Interview prep.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8203,9 +7701,7 @@
       "query": "Thuc don ca tuan",
       "category": "vi-alias",
       "notes": "Query is the alias \"Thực đơn cả tuần\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Meal plan.md"
-      ],
+      "relevant_paths": ["notes/Meal plan.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8235,9 +7731,7 @@
       "query": "Lich on tap",
       "category": "vi-alias",
       "notes": "Query is the alias \"Lịch ôn tập\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Study schedule.md"
-      ],
+      "relevant_paths": ["notes/Study schedule.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8267,9 +7761,7 @@
       "query": "Phan loai loi phan mem",
       "category": "vi-alias",
       "notes": "Query is the alias \"Phân loại lỗi phần mềm\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Bug triage.md"
-      ],
+      "relevant_paths": ["notes/Bug triage.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8299,9 +7791,7 @@
       "query": "Goi y qua tang",
       "category": "vi-alias",
       "notes": "Query is the alias \"Gợi ý quà tặng\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Gift ideas.md"
-      ],
+      "relevant_paths": ["notes/Gift ideas.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8331,9 +7821,7 @@
       "query": "Viec sua chua nha cua",
       "category": "vi-alias",
       "notes": "Query is the alias \"Việc sửa chữa nhà cửa\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Home repairs.md"
-      ],
+      "relevant_paths": ["notes/Home repairs.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -8363,9 +7851,7 @@
       "query": "Nhat ky tap luyen",
       "category": "vi-alias",
       "notes": "Query is the alias \"Nhật ký tập luyện\" without diacritics; body is English.",
-      "relevant_paths": [
-        "notes/Fitness log.md"
-      ],
+      "relevant_paths": ["notes/Fitness log.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,

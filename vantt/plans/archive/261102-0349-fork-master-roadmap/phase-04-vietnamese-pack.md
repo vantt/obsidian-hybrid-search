@@ -1,9 +1,9 @@
 ---
 phase: 4
-title: "Phase 4: Gói tiếng Việt ohs-lang-vi"
+title: 'Phase 4: Gói tiếng Việt ohs-lang-vi'
 status: done
 priority: P1
-effort: "16d"
+effort: '16d'
 dependencies: []
 ---
 
@@ -15,14 +15,14 @@ Package riêng `vantt/packages/ohs-lang-vi/`, thuần TypeScript, không phụ t
 
 ## Việc
 
-| ID | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|
-| V09 | M1: `normalize.ts`, `fold.ts`, `syllable.ts`; bảng dữ liệu (nguyên âm × thanh, đặt dấu, i/y, Telex và VNI); test bảng, test thuộc tính (fast-check), test hiệu năng | — | vừa | 2,5 | 10.3 |
-| V13 | M2 và M3: `views.ts` (`norm`, `fold`), `query.ts` (`analyzeQuery`), `restore.ts` (phục hồi dấu theo từ vựng vault, Viterbi), `rescore.ts`, `index.ts`; chốt trọng số và tham số bằng eval | V09, V10, V11 | mạnh | 3,5 | 10.3, 10.5 |
-| V17 | M5a: `telex.ts` (chuỗi Telex/VNI gõ dở), `typo.ts` (sửa gõ sai một chữ theo từ vựng vault) | V13 | vừa | 2,5 | 10.3 |
-| V18 | M5b: `lexicon.ts` (đồng nghĩa, Việt–Anh, viết tắt từ `_ohs/lexicon.md`), `abbr.ts` và lệnh `ohs-lang-vi learn-abbr --vault <dir>` | V13 | vừa | 2,5 | 10.3, 15 (Q8) |
-| V19 | M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích chữ gốc | V13 | vừa | 1 | 10.2, 10.3 |
-| V20 | M5d: `segment.ts`, view `seg`, từ điển từ ghép theo tiêu chí Q9 | V13 | mạnh | 4 | 10.4, 15 (Q9) |
+| ID  | Việc                                                                                                                                                                                      | Cần           | Mức  | Công | PRD           |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---- | ---- | ------------- |
+| V09 | M1: `normalize.ts`, `fold.ts`, `syllable.ts`; bảng dữ liệu (nguyên âm × thanh, đặt dấu, i/y, Telex và VNI); test bảng, test thuộc tính (fast-check), test hiệu năng                       | —             | vừa  | 2,5  | 10.3          |
+| V13 | M2 và M3: `views.ts` (`norm`, `fold`), `query.ts` (`analyzeQuery`), `restore.ts` (phục hồi dấu theo từ vựng vault, Viterbi), `rescore.ts`, `index.ts`; chốt trọng số và tham số bằng eval | V09, V10, V11 | mạnh | 3,5  | 10.3, 10.5    |
+| V17 | M5a: `telex.ts` (chuỗi Telex/VNI gõ dở), `typo.ts` (sửa gõ sai một chữ theo từ vựng vault)                                                                                                | V13           | vừa  | 2,5  | 10.3          |
+| V18 | M5b: `lexicon.ts` (đồng nghĩa, Việt–Anh, viết tắt từ `_ohs/lexicon.md`), `abbr.ts` và lệnh `ohs-lang-vi learn-abbr --vault <dir>`                                                         | V13           | vừa  | 2,5  | 10.3, 15 (Q8) |
+| V19 | M5c: `aliasViews` cho `fold`, `matchedTerms`, kiểm đoạn trích chữ gốc                                                                                                                     | V13           | vừa  | 1    | 10.2, 10.3    |
+| V20 | M5d: `segment.ts`, view `seg`, từ điển từ ghép theo tiêu chí Q9                                                                                                                           | V13           | mạnh | 4    | 10.4, 15 (Q9) |
 
 Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 song song sau V13, nhưng phần sửa `src/query.ts` làm lần lượt theo thứ tự V17, V18, V19, V20.
 
@@ -84,4 +84,3 @@ Song song: V09 ngay từ đầu, cùng lúc với phase 1. V17, V18, V19, V20 so
 
 - Từ điển từ ghép: `pyvi` `words.txt` (MIT), 22.574 từ hai âm tiết; 95% mục trùng danh sách GPL `Viet74K` nên có thể cùng gốc (ghi ở `data/README.md`).
 - `segment` mặc định bật: tổng nDCG@5 0,909 → 0,932, không hạng nào tụt; `vi-compound` bão hoà (1,000), đo thêm trên bộ khó trong `vantt/plans/archive/261102-1221-v20-word-segmentation/`. Đề xuất cho fixture: thêm câu `vi-compound` kiểu bộ khó (note mồi chứa hai âm tiết đảo, rời nhau, nhiều lần hơn note đích; câu không dấu; cụm trong câu dài).
-

@@ -1,9 +1,9 @@
 ---
 phase: 1
-title: "Phase 1: Hạ tầng fork và theo upstream"
+title: 'Phase 1: Hạ tầng fork và theo upstream'
 status: done
 priority: P1
-effort: "5d"
+effort: '5d'
 dependencies: []
 ---
 
@@ -15,12 +15,12 @@ Dựng cỗ máy giữ fork luôn theo upstream: cài đặt fork, script catchu
 
 ## Việc
 
-| ID | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|
-| V00 | Phần còn lại của cài đặt fork: `.gitignore` cho `vantt/` (`vantt/.catchup-state.json`, `vantt/reports/*.json` trừ bản phát hành, `vantt/.work/`), cách clone submodule trên CI, ghi trạng thái vào `vantt/README.md`. Bật Actions và tắt workflow upstream làm cùng V02 khi đã có workflow `vantt-*` | — | rẻ | 0,5 | 5 |
-| V01 | `vantt/scripts/catchup.mjs` (Node ESM, không phụ thuộc), test vitest trên repo git tạm (PRD 11.2, T8 diễn tập xung đột), skill `.claude/skills/ohs-catchup/SKILL.md`, xuất lại bản vá sau khi sửa xung đột | V00 | mạnh | 2 | 4.1, 6, 11.2 |
-| V02 | `.github/workflows/vantt-catchup.yml` (cron và chạy tay, chỉ trên `vantt/obsidian-hybrid-search`, mở issue khi hỏng, không trùng), `vantt-pr-check.yml` (chặn commit trên `master` chạm file upstream). Sau đó bật Actions, tắt `ci.yml`, `auto-tag.yml`, `release.yml`, `update-deps.yml` | V01 | vừa | 0,5 | 5, 7.1, 7.2, 7.4 |
-| V03 | `vantt/scripts/bundle.mjs` và `vantt-bundles.yml`: gói cho Windows x64, macOS ARM, macOS Intel, Linux x64, sha256, smoke test trên runner sạch (gồm cả `ohs serve --stdio`), ghi kích thước | V02 | vừa | 2 | 7.3, 8 |
+| ID  | Việc                                                                                                                                                                                                                                                                                                 | Cần | Mức  | Công | PRD              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---- | ---- | ---------------- |
+| V00 | Phần còn lại của cài đặt fork: `.gitignore` cho `vantt/` (`vantt/.catchup-state.json`, `vantt/reports/*.json` trừ bản phát hành, `vantt/.work/`), cách clone submodule trên CI, ghi trạng thái vào `vantt/README.md`. Bật Actions và tắt workflow upstream làm cùng V02 khi đã có workflow `vantt-*` | —   | rẻ   | 0,5  | 5                |
+| V01 | `vantt/scripts/catchup.mjs` (Node ESM, không phụ thuộc), test vitest trên repo git tạm (PRD 11.2, T8 diễn tập xung đột), skill `.claude/skills/ohs-catchup/SKILL.md`, xuất lại bản vá sau khi sửa xung đột                                                                                           | V00 | mạnh | 2    | 4.1, 6, 11.2     |
+| V02 | `.github/workflows/vantt-catchup.yml` (cron và chạy tay, chỉ trên `vantt/obsidian-hybrid-search`, mở issue khi hỏng, không trùng), `vantt-pr-check.yml` (chặn commit trên `master` chạm file upstream). Sau đó bật Actions, tắt `ci.yml`, `auto-tag.yml`, `release.yml`, `update-deps.yml`           | V01 | vừa  | 0,5  | 5, 7.1, 7.2, 7.4 |
+| V03 | `vantt/scripts/bundle.mjs` và `vantt-bundles.yml`: gói cho Windows x64, macOS ARM, macOS Intel, Linux x64, sha256, smoke test trên runner sạch (gồm cả `ohs serve --stdio`), ghi kích thước                                                                                                          | V02 | vừa  | 2    | 7.3, 8           |
 
 ## Quy tắc riêng
 

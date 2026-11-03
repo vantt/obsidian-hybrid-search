@@ -38,14 +38,14 @@ Tái hiện: `vantt/probes/stdio-parity.mjs --ohs <dir>` làm đúng hai việc 
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/contracts/boundary-validation.ts` | bốn schema `Stdio*RequestSchema` mới, đặt ngay trước `StdioRequestSchema` | hợp đồng IPC |
-| `src/transports/stdio-server.ts` | `handleStdioLine` (tham số thứ 5 `actions`, danh sách `KNOWN_ACTIONS`), `runAction`, `drainInFlight`, kiểu `StdioActionHandlers` | phân loại action, kiểm schema, chờ request |
-| `src/transports/cli.ts` | khối `if (opts.stdio)` của `serve`: bỏ `rl.on('close'/'end', cleanup)`, theo dõi `inFlight`, `await drainInFlight` sau vòng đọc, nối handler | vòng đời tiến trình |
-| `test/vantt/stdio-parity.test.ts` (mới) | | test đơn vị và tiến trình thật |
-| `test/transport-parity.test.ts` | thêm một test | `read`, `vectors`, `neighbors` cùng kết quả qua IPC, CLI, MCP |
-| `test/serve-stdio.test.ts` | hai danh sách action lạ đổi `reindex` thành `bogus` | `reindex` nay là action hợp lệ |
+| File                                    | Hàm hoặc chỗ                                                                                                                                 | Vì sao                                                        |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `src/contracts/boundary-validation.ts`  | bốn schema `Stdio*RequestSchema` mới, đặt ngay trước `StdioRequestSchema`                                                                    | hợp đồng IPC                                                  |
+| `src/transports/stdio-server.ts`        | `handleStdioLine` (tham số thứ 5 `actions`, danh sách `KNOWN_ACTIONS`), `runAction`, `drainInFlight`, kiểu `StdioActionHandlers`             | phân loại action, kiểm schema, chờ request                    |
+| `src/transports/cli.ts`                 | khối `if (opts.stdio)` của `serve`: bỏ `rl.on('close'/'end', cleanup)`, theo dõi `inFlight`, `await drainInFlight` sau vòng đọc, nối handler | vòng đời tiến trình                                           |
+| `test/vantt/stdio-parity.test.ts` (mới) |                                                                                                                                              | test đơn vị và tiến trình thật                                |
+| `test/transport-parity.test.ts`         | thêm một test                                                                                                                                | `read`, `vectors`, `neighbors` cùng kết quả qua IPC, CLI, MCP |
+| `test/serve-stdio.test.ts`              | hai danh sách action lạ đổi `reindex` thành `bogus`                                                                                          | `reindex` nay là action hợp lệ                                |
 
 ## 5. Kiểm thử
 

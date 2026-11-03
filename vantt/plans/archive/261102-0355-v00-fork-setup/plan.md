@@ -1,9 +1,9 @@
 ---
-title: "V00: cài đặt phần còn lại của fork"
-description: "Việc V00 của lộ trình fork: .gitignore cho vantt/, cách CI xử lý submodule, trạng thái trong vantt/README.md."
+title: 'V00: cài đặt phần còn lại của fork'
+description: 'Việc V00 của lộ trình fork: .gitignore cho vantt/, cách CI xử lý submodule, trạng thái trong vantt/README.md.'
 status: completed
 priority: P1
-effort: "0,5 ngày"
+effort: '0,5 ngày'
 tags: [infra]
 created: 2026-11-02
 ---

@@ -28,15 +28,15 @@ Không có cách tìm trong một tập note cho trước. Lọc kết quả sau
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/contracts/filter-predicate.ts` | `FilterOptions.paths`, `hasPathsFilter`, `normalizePathSet`, `pathsClause`, `buildFilterPredicate` | loại điều kiện mới |
-| `src/search/searcher.ts` | `SearchOptions.paths`, `pathsKey`, `cacheKey`, khoá và lọc của `related`, chế độ liệt kê | cache và hai đường lọc bằng JS |
-| `src/contracts/boundary-validation.ts` | `SearchOptionsBoundarySchema`, `SearchToolArgumentsSchema` | nhận `paths` |
-| `src/transports/cli.ts` | `readPathsFile`, tuỳ chọn `--paths-file`, `hasFilters` | CLI |
-| `src/transports/mcp-runtime.ts` | `callSearchTool`, `inputSchema` | MCP |
-| `src/transports/stdio-server.ts` | phân tích `options` | stdio |
-| `test/vantt/restrict-paths.test.ts` (mới) | test | xem mục 5 |
+| File                                      | Hàm hoặc chỗ                                                                                       | Vì sao                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `src/contracts/filter-predicate.ts`       | `FilterOptions.paths`, `hasPathsFilter`, `normalizePathSet`, `pathsClause`, `buildFilterPredicate` | loại điều kiện mới             |
+| `src/search/searcher.ts`                  | `SearchOptions.paths`, `pathsKey`, `cacheKey`, khoá và lọc của `related`, chế độ liệt kê           | cache và hai đường lọc bằng JS |
+| `src/contracts/boundary-validation.ts`    | `SearchOptionsBoundarySchema`, `SearchToolArgumentsSchema`                                         | nhận `paths`                   |
+| `src/transports/cli.ts`                   | `readPathsFile`, tuỳ chọn `--paths-file`, `hasFilters`                                             | CLI                            |
+| `src/transports/mcp-runtime.ts`           | `callSearchTool`, `inputSchema`                                                                    | MCP                            |
+| `src/transports/stdio-server.ts`          | phân tích `options`                                                                                | stdio                          |
+| `test/vantt/restrict-paths.test.ts` (mới) | test                                                                                               | xem mục 5                      |
 
 Các nhánh nhận predicate không phải sửa: chúng đã nhận `FilterPredicate` từ `search()`.
 

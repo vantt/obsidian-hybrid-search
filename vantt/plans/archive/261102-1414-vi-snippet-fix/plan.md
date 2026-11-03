@@ -1,9 +1,9 @@
 ---
-title: "vi-snippet-fix"
-description: "Gói ohs-lang-vi: câu vi-snippet-08 (\"quen ngu\") rơi khỏi top 10 trên fixture v0.11.0; chứng minh nguyên nhân, kiểm lại trên nhánh V20b đã gộp master"
+title: 'vi-snippet-fix'
+description: 'Gói ohs-lang-vi: câu vi-snippet-08 ("quen ngu") rơi khỏi top 10 trên fixture v0.11.0; chứng minh nguyên nhân, kiểm lại trên nhánh V20b đã gộp master'
 status: completed
 priority: P1
-effort: "0,3d"
+effort: '0,3d'
 tags: [vi-pack, v20b, g8-snippet]
 created: 2026-11-02
 ---
@@ -33,10 +33,10 @@ V20b (`261102-1321-v20b-licensed-compounds/plan.md`) báo G8-snippet 14/15 trên
 
 Đo hạng note đích của 15 câu `vi-snippet` trên cùng index:
 
-| Cấu hình | Hạng `vi-snippet-08` | Câu không nằm hạng 1 |
-|---|---|---|
-| `restoreForEmbedding: false` (như V20b) | 11 | 02 (2), 03 (5), 04 (2), 08 (11) |
-| mặc định đã gộp (`restoreForEmbedding: true`) | **1** | 04 (2), 10 (2) |
+| Cấu hình                                      | Hạng `vi-snippet-08` | Câu không nằm hạng 1            |
+| --------------------------------------------- | -------------------- | ------------------------------- |
+| `restoreForEmbedding: false` (như V20b)       | 11                   | 02 (2), 03 (5), 04 (2), 08 (11) |
+| mặc định đã gộp (`restoreForEmbedding: true`) | **1**                | 04 (2), 10 (2)                  |
 
 Khi tắt, cả 15 câu không có note đích trong nhánh vector, trừ 01, 06, 07; nhánh vector thiếu là nguyên nhân chung, câu 08 chỉ là câu có nhiều note mồi nhất (11 note "quán quen").
 
@@ -54,26 +54,26 @@ Không cần đổi mã gói: cơ chế chung là V13b (`restoreForEmbedding` b�
 
 nDCG@5. "V20b" = cột "từ điển mới" của V20b (`tmp/v20b/pack-final.json`, trước khi gộp V13b); "Đã gộp" = cây này (`tmp/snip/merged.json`).
 
-| Hạng mục | Baseline | V20b | Đã gộp | Δ |
-|---|---|---|---|---|
-| Tổng | 0,646 | 0,926 | **0,944** | +0,018 |
-| `vi-accented` | 1,000 | 1,000 | 1,000 | 0 |
-| `vi-partial-accent` | 0,863 | 1,000 | 1,000 | 0 |
-| `vi-telex` | 0,333 | 1,000 | 1,000 | 0 |
-| `vi-typo` | 0,543 | 0,967 | 1,000 | +0,033 |
-| `vi-snippet` | 0,466 | 0,843 | **0,951** | +0,108 |
-| `vi-unaccented` | 0,133 | 0,871 | 1,000 | +0,129 |
-| `vi-dd` | 0,239 | 0,913 | 0,975 | +0,062 |
-| `vi-iy` | 1,000 | 1,000 | 1,000 | 0 |
-| `vi-tone-placement` | 1,000 | 1,000 | 1,000 | 0 |
-| `vi-tone-precision` | 0,951 | 1,000 | 1,000 | 0 |
-| `vi-compound` | 0,632 | 0,983 | 0,988 | +0,005 |
-| `vi-mixed-en` | 1,000 | 1,000 | 1,000 | 0 |
-| `vi-semantic` | 0,446 | 0,446 | 0,446 | 0 |
-| `vi-names` | 0,909 | 1,000 | 1,000 | 0 |
-| `vi-synonym` | 0,067 | 0,689 | 0,689 | 0 |
-| `vi-abbr` | 0,933 | 1,000 | 1,000 | 0 |
-| `vi-alias` | 0,477 | 0,975 | 0,959 | −0,016 |
+| Hạng mục            | Baseline | V20b  | Đã gộp    | Δ      |
+| ------------------- | -------- | ----- | --------- | ------ |
+| Tổng                | 0,646    | 0,926 | **0,944** | +0,018 |
+| `vi-accented`       | 1,000    | 1,000 | 1,000     | 0      |
+| `vi-partial-accent` | 0,863    | 1,000 | 1,000     | 0      |
+| `vi-telex`          | 0,333    | 1,000 | 1,000     | 0      |
+| `vi-typo`           | 0,543    | 0,967 | 1,000     | +0,033 |
+| `vi-snippet`        | 0,466    | 0,843 | **0,951** | +0,108 |
+| `vi-unaccented`     | 0,133    | 0,871 | 1,000     | +0,129 |
+| `vi-dd`             | 0,239    | 0,913 | 0,975     | +0,062 |
+| `vi-iy`             | 1,000    | 1,000 | 1,000     | 0      |
+| `vi-tone-placement` | 1,000    | 1,000 | 1,000     | 0      |
+| `vi-tone-precision` | 0,951    | 1,000 | 1,000     | 0      |
+| `vi-compound`       | 0,632    | 0,983 | 0,988     | +0,005 |
+| `vi-mixed-en`       | 1,000    | 1,000 | 1,000     | 0      |
+| `vi-semantic`       | 0,446    | 0,446 | 0,446     | 0      |
+| `vi-names`          | 0,909    | 1,000 | 1,000     | 0      |
+| `vi-synonym`        | 0,067    | 0,689 | 0,689     | 0      |
+| `vi-abbr`           | 0,933    | 1,000 | 1,000     | 0      |
+| `vi-alias`          | 0,477    | 0,975 | 0,959     | −0,016 |
 
 Hit@5 đã gộp: `vi-unaccented` 1,00, `vi-dd` 1,00, `vi-telex` 1,00, `vi-typo` 1,00, `vi-synonym` 0,93, `vi-abbr` 1,00, `vi-alias` 1,00; `vi-tone-precision` MRR 1,000; `vi-compound` 0,988 ≥ 0,632 + 0,1. Mọi mục tiêu G3/G8 giữ.
 

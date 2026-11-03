@@ -1,9 +1,9 @@
 ---
-title: "V10: bộ eval tiếng Việt và baseline upstream"
-description: "Việc V10 của lộ trình fork: preset vi-search trong obsidian-test-fixture, golden set 17 hạng mục × 15 câu, smoke-vault, baseline upstream không gói."
+title: 'V10: bộ eval tiếng Việt và baseline upstream'
+description: 'Việc V10 của lộ trình fork: preset vi-search trong obsidian-test-fixture, golden set 17 hạng mục × 15 câu, smoke-vault, baseline upstream không gói.'
 status: completed
 priority: P1
-effort: "2,5 ngày"
+effort: '2,5 ngày'
 tags: [eval]
 created: 2026-11-02
 ---
@@ -14,7 +14,7 @@ created: 2026-11-02
 
 - PRD 11.3: `vantt/eval/vi/smoke-vault/` 10 note viết tay đủ trường hợp; corpus lớn sinh từ preset `vi-search` của `vantt/obsidian-test-fixture`.
 - PRD 11.5: định dạng golden set của upstream (`{id, query, relevant_paths, partial_paths, category, notes}`) chạy bằng eval sẵn có; 17 hạng mục, mỗi hạng tối thiểu 15 câu; corpus sinh xác định, có đáp án sinh cùng corpus; baseline là upstream không gói.
-- PRD 15 (Q8): lexicon là Markdown `_ohs/lexicon.md` với ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`, mỗi dòng một nhóm nối bằng ` = `; mục `## Chờ duyệt` không được dùng.
+- PRD 15 (Q8): lexicon là Markdown `_ohs/lexicon.md` với ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`, mỗi dòng một nhóm nối bằng `=`; mục `## Chờ duyệt` không được dùng.
 - Phase 5 của lộ trình: "golden set đủ 17 hạng mục × 15 câu; `npm run eval` chạy được trên corpus sinh; baseline ghi trong `vantt/eval/baselines/`". Chỉ văn bản sinh trong repo công khai. User cho phép đẩy repo fixture (2026-11-02): làm trên nhánh riêng, merge vào `main`, đẩy.
 
 ## Điều kiện xong

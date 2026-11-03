@@ -1,9 +1,9 @@
 ---
-title: "v14-upstream-review"
-description: "V14: review-upstream.mjs, hoàn thiện skill ohs-upstream-review, báo cáo mẫu v0.17.2"
+title: 'v14-upstream-review'
+description: 'V14: review-upstream.mjs, hoàn thiện skill ohs-upstream-review, báo cáo mẫu v0.17.2'
 status: completed
 priority: P2
-effort: "2d"
+effort: '2d'
 tags: [review, v14, upstream]
 created: 2026-11-02
 ---

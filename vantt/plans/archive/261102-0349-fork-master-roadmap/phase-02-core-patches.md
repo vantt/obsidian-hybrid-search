@@ -1,9 +1,9 @@
 ---
 phase: 2
-title: "Phase 2: Bản vá lõi phục vụ dự án"
+title: 'Phase 2: Bản vá lõi phục vụ dự án'
 status: done
 priority: P1
-effort: "7.5d"
+effort: '7.5d'
 dependencies: [1]
 ---
 
@@ -15,16 +15,16 @@ Tám bản vá nhỏ, mỗi bản một việc, cho thứ dự án cần mà ups
 
 ## Việc
 
-| ID | Bản vá | Việc | Cần | Mức | Công | PRD |
-|---|---|---|---|---|---|---|
-| V04 | P00 `fork-identity` | `ohs --version` in `<tag>-vantt.<N>`; catchup đặt số lúc build | V01 | rẻ | 0,3 | 4.3, 9.4 |
-| V05 | P09 `unicode-inline-tags` | Regex tag nội dòng (`src/content/note-extractor.ts`) nhận mọi chữ Unicode, gồm chữ Việt U+1EA0–1EF9 | V01 | rẻ | 0,3 | 3.3, 9.4 |
-| V06 | P02 `db-path` | DB index đặt được ngoài vault; daemon, MCP, CLI, stdio cùng dùng | V01 | vừa | 1 | 3.2, 9.4 |
-| V07 | P03 `vector-export` | Lệnh xuất vector theo note và K note gần nhất, JSON Lines, có tương đương qua stdio | V01 | vừa | 1 | 9.4 |
-| V08 | P04 `stdio-parity` | Thêm action `read`, `vectors`, `neighbors`, `reindex`; chờ request đang chạy trả lời rồi mới thoát khi stdin đóng. `search` của upstream đã đủ tuỳ chọn, không đổi | V07 | vừa | 1 | 9.4 (P04) |
-| V23 | P05 `block-anchors` | `block_id`, `has_highlight` cho mỗi đoạn; `OBSIDIAN_CHUNK_TOKENS`. Theo dõi upstream issue #91, upstream làm phần kích thước đoạn thì bỏ phần đó | V01 | vừa | 2 | 9.4 (P05) |
-| V24 | P06 `restrict-paths` | `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh, không lọc sau top-K | V01 | vừa | 0,5–1 | 9.0, 9.4 (P06) |
-| V25 | P07 `index-events` | stdio phát `indexed` và `removed` sau mỗi lô ghi | V08 | vừa | 1 | 9.4 (P07) |
+| ID  | Bản vá                    | Việc                                                                                                                                                               | Cần | Mức | Công  | PRD            |
+| --- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --- | ----- | -------------- |
+| V04 | P00 `fork-identity`       | `ohs --version` in `<tag>-vantt.<N>`; catchup đặt số lúc build                                                                                                     | V01 | rẻ  | 0,3   | 4.3, 9.4       |
+| V05 | P09 `unicode-inline-tags` | Regex tag nội dòng (`src/content/note-extractor.ts`) nhận mọi chữ Unicode, gồm chữ Việt U+1EA0–1EF9                                                                | V01 | rẻ  | 0,3   | 3.3, 9.4       |
+| V06 | P02 `db-path`             | DB index đặt được ngoài vault; daemon, MCP, CLI, stdio cùng dùng                                                                                                   | V01 | vừa | 1     | 3.2, 9.4       |
+| V07 | P03 `vector-export`       | Lệnh xuất vector theo note và K note gần nhất, JSON Lines, có tương đương qua stdio                                                                                | V01 | vừa | 1     | 9.4            |
+| V08 | P04 `stdio-parity`        | Thêm action `read`, `vectors`, `neighbors`, `reindex`; chờ request đang chạy trả lời rồi mới thoát khi stdin đóng. `search` của upstream đã đủ tuỳ chọn, không đổi | V07 | vừa | 1     | 9.4 (P04)      |
+| V23 | P05 `block-anchors`       | `block_id`, `has_highlight` cho mỗi đoạn; `OBSIDIAN_CHUNK_TOKENS`. Theo dõi upstream issue #91, upstream làm phần kích thước đoạn thì bỏ phần đó                   | V01 | vừa | 2     | 9.4 (P05)      |
+| V24 | P06 `restrict-paths`      | `paths[]` / `--paths-file` thêm vào `buildFilterPredicate`, đẩy xuống SQL ở mọi nhánh, không lọc sau top-K                                                         | V01 | vừa | 0,5–1 | 9.0, 9.4 (P06) |
+| V25 | P07 `index-events`        | stdio phát `indexed` và `removed` sau mỗi lô ghi                                                                                                                   | V08 | vừa | 1     | 9.4 (P07)      |
 
 Song song: V04, V05, V06, V07, V23, V24 chạy cùng lúc sau V01. V08 sau V07. V25 sau V08.
 

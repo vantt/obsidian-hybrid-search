@@ -1,5 +1,5 @@
 ---
-title: "V04: bản vá P00 fork-identity"
+title: 'V04: bản vá P00 fork-identity'
 status: completed
 created: 2026-11-02
 ---

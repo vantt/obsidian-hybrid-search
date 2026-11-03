@@ -80,12 +80,8 @@
       "query": "how to create internal links between notes",
       "category": "keyword",
       "notes": "core Obsidian feature; 'Internal links' is the canonical term",
-      "relevant_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
-      "partial_paths": [
-        "Getting started/Link notes.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Internal links.md"],
+      "partial_paths": ["Getting started/Link notes.md"],
       "ndcg_5": 0.907,
       "ndcg_k": 0.907,
       "mrr": 1,
@@ -114,12 +110,8 @@
       "query": "frontmatter properties in notes",
       "category": "keyword",
       "notes": "YAML frontmatter / note metadata; called 'Properties' in Obsidian",
-      "relevant_paths": [
-        "Editing and formatting/Properties.md"
-      ],
-      "partial_paths": [
-        "Editing and formatting/Advanced formatting syntax.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Properties.md"],
+      "partial_paths": ["Editing and formatting/Advanced formatting syntax.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -148,12 +140,8 @@
       "query": "how to use tags to organize notes",
       "category": "keyword",
       "notes": "tagging system; Tags view is a UI companion",
-      "relevant_paths": [
-        "Editing and formatting/Tags.md"
-      ],
-      "partial_paths": [
-        "Plugins/Tags view.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Tags.md"],
+      "partial_paths": ["Plugins/Tags view.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,
@@ -182,12 +170,8 @@
       "query": "keyboard shortcuts and hotkeys",
       "category": "keyword",
       "notes": "Hotkeys is the settings panel; editing shortcuts covers editor-level bindings",
-      "relevant_paths": [
-        "User interface/Hotkeys.md"
-      ],
-      "partial_paths": [
-        "Editing and formatting/Editing shortcuts.md"
-      ],
+      "relevant_paths": ["User interface/Hotkeys.md"],
+      "partial_paths": ["Editing and formatting/Editing shortcuts.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,
@@ -216,9 +200,7 @@
       "query": "canvas infinite whiteboard plugin",
       "category": "keyword",
       "notes": "Canvas is a core plugin for freeform note layouts",
-      "relevant_paths": [
-        "Plugins/Canvas.md"
-      ],
+      "relevant_paths": ["Plugins/Canvas.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -248,12 +230,8 @@
       "query": "note templates reuse structure",
       "category": "keyword",
       "notes": "Templates plugin; Daily notes uses templates as well",
-      "relevant_paths": [
-        "Plugins/Templates.md"
-      ],
-      "partial_paths": [
-        "Plugins/Daily notes.md"
-      ],
+      "relevant_paths": ["Plugins/Templates.md"],
+      "partial_paths": ["Plugins/Daily notes.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,
@@ -282,12 +260,8 @@
       "query": "search inside vault",
       "category": "keyword",
       "notes": "Search plugin for full-text search; Quick switcher is file-search",
-      "relevant_paths": [
-        "Plugins/Search.md"
-      ],
-      "partial_paths": [
-        "Plugins/Quick switcher.md"
-      ],
+      "relevant_paths": ["Plugins/Search.md"],
+      "partial_paths": ["Plugins/Quick switcher.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -316,9 +290,7 @@
       "query": "callout boxes and admonitions",
       "category": "keyword",
       "notes": "Obsidian's callout syntax (> [!info])",
-      "relevant_paths": [
-        "Editing and formatting/Callouts.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Callouts.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -348,12 +320,8 @@
       "query": "backlinks to a note",
       "category": "keyword",
       "notes": "Backlinks plugin shows incoming links to current note",
-      "relevant_paths": [
-        "Plugins/Backlinks.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
+      "relevant_paths": ["Plugins/Backlinks.md"],
+      "partial_paths": ["Linking notes and files/Internal links.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.87,
       "mrr": 1,
@@ -382,12 +350,8 @@
       "query": "daily notes journaling plugin",
       "category": "keyword",
       "notes": "Daily notes creates dated notes automatically",
-      "relevant_paths": [
-        "Plugins/Daily notes.md"
-      ],
-      "partial_paths": [
-        "Plugins/Templates.md"
-      ],
+      "relevant_paths": ["Plugins/Daily notes.md"],
+      "partial_paths": ["Plugins/Templates.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -416,12 +380,8 @@
       "query": "connect notes and see how they relate",
       "category": "conceptual",
       "notes": "conceptual phrasing for the graph; may also surface internal links",
-      "relevant_paths": [
-        "Plugins/Graph view.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
+      "relevant_paths": ["Plugins/Graph view.md"],
+      "partial_paths": ["Linking notes and files/Internal links.md"],
       "ndcg_5": 0.294,
       "ndcg_k": 0.294,
       "mrr": 0.2,
@@ -450,12 +410,8 @@
       "query": "insert pre-defined snippets of text into notes",
       "category": "keyword",
       "notes": "uses vocabulary from the file itself ('pre-defined snippets')",
-      "relevant_paths": [
-        "Plugins/Templates.md"
-      ],
-      "partial_paths": [
-        "Plugins/Daily notes.md"
-      ],
+      "relevant_paths": ["Plugins/Templates.md"],
+      "partial_paths": ["Plugins/Daily notes.md"],
       "ndcg_5": 0.534,
       "ndcg_k": 0.534,
       "mrr": 0.2,
@@ -484,12 +440,8 @@
       "query": "visualize knowledge graph of notes",
       "category": "conceptual",
       "notes": "knowledge graph is a synonym; backlinks is related",
-      "relevant_paths": [
-        "Plugins/Graph view.md"
-      ],
-      "partial_paths": [
-        "Plugins/Backlinks.md"
-      ],
+      "relevant_paths": ["Plugins/Graph view.md"],
+      "partial_paths": ["Plugins/Backlinks.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -518,12 +470,8 @@
       "query": "add keywords or topics to notes for filtering",
       "category": "conceptual",
       "notes": "Tags.md opens with 'Tags are keywords or topics'",
-      "relevant_paths": [
-        "Editing and formatting/Tags.md"
-      ],
-      "partial_paths": [
-        "Plugins/Tags view.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Tags.md"],
+      "partial_paths": ["Plugins/Tags view.md"],
       "ndcg_5": 0.48,
       "ndcg_k": 0.48,
       "mrr": 0.5,
@@ -552,9 +500,7 @@
       "query": "switch between reading and editing mode",
       "category": "conceptual",
       "notes": "Live preview vs reading view vs source mode",
-      "relevant_paths": [
-        "Editing and formatting/Views and editing mode.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Views and editing mode.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -584,12 +530,8 @@
       "query": "как работает граф связей между заметками",
       "category": "multilingual",
       "notes": "Russian: 'how does the connection graph between notes work'",
-      "relevant_paths": [
-        "Plugins/Graph view.md"
-      ],
-      "partial_paths": [
-        "Plugins/Backlinks.md"
-      ],
+      "relevant_paths": ["Plugins/Graph view.md"],
+      "partial_paths": ["Plugins/Backlinks.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -618,12 +560,8 @@
       "query": "теги для организации заметок в хранилище",
       "category": "multilingual",
       "notes": "Russian: 'tags for organizing notes in the vault'",
-      "relevant_paths": [
-        "Editing and formatting/Tags.md"
-      ],
-      "partial_paths": [
-        "Plugins/Tags view.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Tags.md"],
+      "partial_paths": ["Plugins/Tags view.md"],
       "ndcg_5": 0,
       "ndcg_k": 0.271,
       "mrr": 0.167,
@@ -652,9 +590,7 @@
       "query": "математические формулы в заметках",
       "category": "multilingual",
       "notes": "Russian: 'mathematical formulas in notes' → MathJax section in Advanced formatting",
-      "relevant_paths": [
-        "Editing and formatting/Advanced formatting syntax.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Advanced formatting syntax.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -684,9 +620,7 @@
       "query": "callout syntax warning info tip block",
       "category": "syntax",
       "notes": "tests Obsidian-specific callout type names",
-      "relevant_paths": [
-        "Editing and formatting/Callouts.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Callouts.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -716,12 +650,8 @@
       "query": "block reference embed section of another note",
       "category": "syntax",
       "notes": "block references (^id syntax) live in Internal links; embed files covers ![[]] embeds",
-      "relevant_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Embed files.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Internal links.md"],
+      "partial_paths": ["Linking notes and files/Embed files.md"],
       "ndcg_5": 0.86,
       "ndcg_k": 0.86,
       "mrr": 0.5,
@@ -750,12 +680,8 @@
       "query": "Bases table view database for notes",
       "category": "keyword",
       "notes": "Bases is a new core plugin for database-like views; 'table view' and 'Bases' are exact terms",
-      "relevant_paths": [
-        "Bases/Introduction to Bases.md"
-      ],
-      "partial_paths": [
-        "Bases/Create a base.md"
-      ],
+      "relevant_paths": ["Bases/Introduction to Bases.md"],
+      "partial_paths": ["Bases/Create a base.md"],
       "ndcg_5": 0.86,
       "ndcg_k": 0.86,
       "mrr": 0.5,
@@ -784,12 +710,8 @@
       "query": "alias alternative name for a note",
       "category": "keyword",
       "notes": "Aliases.md uses 'alias' and 'alternative name' terminology directly",
-      "relevant_paths": [
-        "Linking notes and files/Aliases.md"
-      ],
-      "partial_paths": [
-        "Plugins/Outgoing links.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Aliases.md"],
+      "partial_paths": ["Plugins/Outgoing links.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.88,
       "mrr": 1,
@@ -818,12 +740,8 @@
       "query": "embed file or note with wikilink",
       "category": "keyword",
       "notes": "'embed' and 'wikilink' are the canonical terms in Embed files.md",
-      "relevant_paths": [
-        "Linking notes and files/Embed files.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Embed files.md"],
+      "partial_paths": ["Linking notes and files/Internal links.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.887,
       "mrr": 1,
@@ -852,12 +770,8 @@
       "query": "install community plugins",
       "category": "keyword",
       "notes": "'Community plugins' and 'Install' are the exact terms used",
-      "relevant_paths": [
-        "Extending Obsidian/Community plugins.md"
-      ],
-      "partial_paths": [
-        "Plugins/Core plugins.md"
-      ],
+      "relevant_paths": ["Extending Obsidian/Community plugins.md"],
+      "partial_paths": ["Plugins/Core plugins.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.896,
       "mrr": 1,
@@ -886,12 +800,8 @@
       "query": "change theme and color scheme appearance",
       "category": "keyword",
       "notes": "Appearance.md covers color scheme and lists community themes; Themes.md is about installing them",
-      "relevant_paths": [
-        "User interface/Appearance.md"
-      ],
-      "partial_paths": [
-        "Extending Obsidian/Themes.md"
-      ],
+      "relevant_paths": ["User interface/Appearance.md"],
+      "partial_paths": ["Extending Obsidian/Themes.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,
@@ -920,12 +830,8 @@
       "query": "CSS snippets to customize Obsidian styles",
       "category": "keyword",
       "notes": "'CSS snippets' is the exact term; Appearance.md has a snippets section",
-      "relevant_paths": [
-        "Extending Obsidian/CSS snippets.md"
-      ],
-      "partial_paths": [
-        "User interface/Appearance.md"
-      ],
+      "relevant_paths": ["Extending Obsidian/CSS snippets.md"],
+      "partial_paths": ["User interface/Appearance.md"],
       "ndcg_5": 0.95,
       "ndcg_k": 0.95,
       "mrr": 1,
@@ -954,12 +860,8 @@
       "query": "sync notes across devices remote vault",
       "category": "keyword",
       "notes": "'remote vault' and 'Obsidian Sync' are the canonical terms",
-      "relevant_paths": [
-        "Obsidian Sync/Introduction to Obsidian Sync.md"
-      ],
-      "partial_paths": [
-        "Obsidian Sync/Set up Obsidian Sync.md"
-      ],
+      "relevant_paths": ["Obsidian Sync/Introduction to Obsidian Sync.md"],
+      "partial_paths": ["Obsidian Sync/Set up Obsidian Sync.md"],
       "ndcg_5": 0.164,
       "ndcg_k": 0.417,
       "mrr": 0.143,
@@ -988,12 +890,8 @@
       "query": "publish notes as website or digital garden",
       "category": "keyword",
       "notes": "'publish', 'digital garden' appear verbatim in the intro file",
-      "relevant_paths": [
-        "Obsidian Publish/Introduction to Obsidian Publish.md"
-      ],
-      "partial_paths": [
-        "Obsidian Publish/Set up Obsidian Publish.md"
-      ],
+      "relevant_paths": ["Obsidian Publish/Introduction to Obsidian Publish.md"],
+      "partial_paths": ["Obsidian Publish/Set up Obsidian Publish.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.87,
       "mrr": 1,
@@ -1022,12 +920,8 @@
       "query": "Web Clipper save webpage to vault browser extension",
       "category": "keyword",
       "notes": "'Web Clipper', 'browser extension' are exact terms from the intro",
-      "relevant_paths": [
-        "Obsidian Web Clipper/Introduction to Obsidian Web Clipper.md"
-      ],
-      "partial_paths": [
-        "Obsidian Web Clipper/Clip web pages.md"
-      ],
+      "relevant_paths": ["Obsidian Web Clipper/Introduction to Obsidian Web Clipper.md"],
+      "partial_paths": ["Obsidian Web Clipper/Clip web pages.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,
@@ -1056,12 +950,8 @@
       "query": "import notes from Evernote or Notion",
       "category": "keyword",
       "notes": "'Evernote', 'Notion', and 'import' appear verbatim in the file",
-      "relevant_paths": [
-        "Getting started/Import notes.md"
-      ],
-      "partial_paths": [
-        "Import notes/Importer.md"
-      ],
+      "relevant_paths": ["Getting started/Import notes.md"],
+      "partial_paths": ["Import notes/Importer.md"],
       "ndcg_5": 0.38,
       "ndcg_k": 0.38,
       "mrr": 0.333,
@@ -1090,9 +980,7 @@
       "query": "file recovery snapshots restore previous version",
       "category": "keyword",
       "notes": "'File recovery', 'snapshots', 'restore' are the exact terms used",
-      "relevant_paths": [
-        "Plugins/File recovery.md"
-      ],
+      "relevant_paths": ["Plugins/File recovery.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1122,9 +1010,7 @@
       "query": "save and load workspace layout",
       "category": "keyword",
       "notes": "'workspace', 'save workspace', 'load workspace' are exact terms",
-      "relevant_paths": [
-        "Plugins/Workspaces.md"
-      ],
+      "relevant_paths": ["Plugins/Workspaces.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1154,12 +1040,8 @@
       "query": "command palette run commands with Ctrl+P",
       "category": "keyword",
       "notes": "'Command palette' and 'Ctrl+P' appear verbatim in the file",
-      "relevant_paths": [
-        "Plugins/Command palette.md"
-      ],
-      "partial_paths": [
-        "User interface/Hotkeys.md"
-      ],
+      "relevant_paths": ["Plugins/Command palette.md"],
+      "partial_paths": ["User interface/Hotkeys.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.896,
       "mrr": 1,
@@ -1188,9 +1070,7 @@
       "query": "bookmarks quick access to notes and searches",
       "category": "keyword",
       "notes": "'bookmarks', 'shortcut', 'bookmark groups' are exact terms",
-      "relevant_paths": [
-        "Plugins/Bookmarks.md"
-      ],
+      "relevant_paths": ["Plugins/Bookmarks.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1220,9 +1100,7 @@
       "query": "outline panel to navigate headings in note",
       "category": "keyword",
       "notes": "'Outline', 'headings', 'navigate' appear verbatim",
-      "relevant_paths": [
-        "Plugins/Outline.md"
-      ],
+      "relevant_paths": ["Plugins/Outline.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1252,9 +1130,7 @@
       "query": "page preview hover over internal link",
       "category": "keyword",
       "notes": "'page preview', 'hover', 'internal link' are exact terms",
-      "relevant_paths": [
-        "Plugins/Page preview.md"
-      ],
+      "relevant_paths": ["Plugins/Page preview.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1284,9 +1160,7 @@
       "query": "record audio and embed in note microphone",
       "category": "keyword",
       "notes": "'Audio recorder', 'record audio', 'microphone', 'embed' appear verbatim",
-      "relevant_paths": [
-        "Plugins/Audio recorder.md"
-      ],
+      "relevant_paths": ["Plugins/Audio recorder.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1316,9 +1190,7 @@
       "query": "merge notes or extract selection into new note",
       "category": "keyword",
       "notes": "'merge notes', 'extract note' are the exact feature names",
-      "relevant_paths": [
-        "Plugins/Note composer.md"
-      ],
+      "relevant_paths": ["Plugins/Note composer.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1348,12 +1220,8 @@
       "query": "manage multiple vaults vault switcher",
       "category": "keyword",
       "notes": "'vault', 'Vault switcher', 'manage' appear verbatim",
-      "relevant_paths": [
-        "Files and folders/Manage vaults.md"
-      ],
-      "partial_paths": [
-        "Getting started/Create a vault.md"
-      ],
+      "relevant_paths": ["Files and folders/Manage vaults.md"],
+      "partial_paths": ["Getting started/Create a vault.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -1382,12 +1250,8 @@
       "query": "attach images and files to notes default location",
       "category": "keyword",
       "notes": "'attachments', 'default location', 'Add an attachment' are exact terms",
-      "relevant_paths": [
-        "Editing and formatting/Attachments.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Embed files.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Attachments.md"],
+      "partial_paths": ["Linking notes and files/Embed files.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.875,
       "mrr": 1,
@@ -1416,9 +1280,7 @@
       "query": "fold and collapse headings to hide content",
       "category": "keyword",
       "notes": "'folding', 'fold headings', 'collapse' are exact terms in Folding.md",
-      "relevant_paths": [
-        "Editing and formatting/Folding.md"
-      ],
+      "relevant_paths": ["Editing and formatting/Folding.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1448,12 +1310,8 @@
       "query": "Zettelkasten unique note creator timestamp",
       "category": "keyword",
       "notes": "'Zettelkasten', 'Unique note creator', 'timestamp' appear verbatim",
-      "relevant_paths": [
-        "Plugins/Unique note creator.md"
-      ],
-      "partial_paths": [
-        "Plugins/Daily notes.md"
-      ],
+      "relevant_paths": ["Plugins/Unique note creator.md"],
+      "partial_paths": ["Plugins/Daily notes.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -1482,9 +1340,7 @@
       "query": "create slideshow presentation from markdown notes",
       "category": "keyword",
       "notes": "'Slides', 'presentation' appear verbatim; separated by '---' horizontal rules",
-      "relevant_paths": [
-        "Plugins/Slides.md"
-      ],
+      "relevant_paths": ["Plugins/Slides.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1514,9 +1370,7 @@
       "query": "word count and character count in status bar",
       "category": "keyword",
       "notes": "'Word count', 'characters', 'status bar' are exact terms",
-      "relevant_paths": [
-        "Plugins/Word count.md"
-      ],
+      "relevant_paths": ["Plugins/Word count.md"],
       "partial_paths": [],
       "ndcg_5": 0.631,
       "ndcg_k": 0.631,
@@ -1546,9 +1400,7 @@
       "query": "open external links inside Obsidian web viewer",
       "category": "keyword",
       "notes": "'Web viewer', 'external links', 'reader view' are exact terms",
-      "relevant_paths": [
-        "Plugins/Web viewer.md"
-      ],
+      "relevant_paths": ["Plugins/Web viewer.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1578,9 +1430,7 @@
       "query": "I accidentally deleted a note, how to get it back",
       "category": "conceptual",
       "notes": "conceptual phrasing — 'deleted', 'get it back' have no overlap with 'snapshots' or 'restore'",
-      "relevant_paths": [
-        "Plugins/File recovery.md"
-      ],
+      "relevant_paths": ["Plugins/File recovery.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0,
@@ -1591,9 +1441,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "Plugins/File recovery.md"
-      ],
+      "missed_paths": ["Plugins/File recovery.md"],
       "top_paths": [
         "Files and folders/Manage notes.md",
         "Obsidian Sync/Version history.md",
@@ -1612,9 +1460,7 @@
       "query": "refer to a note by a different name in a link",
       "category": "conceptual",
       "notes": "conceptual — 'different name in a link' paraphrases alias without using the word",
-      "relevant_paths": [
-        "Linking notes and files/Aliases.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Aliases.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1644,12 +1490,8 @@
       "query": "add third-party extensions to extend functionality",
       "category": "conceptual",
       "notes": "conceptual — 'third-party extensions' paraphrases 'community plugins'",
-      "relevant_paths": [
-        "Extending Obsidian/Community plugins.md"
-      ],
-      "partial_paths": [
-        "Plugins/Core plugins.md"
-      ],
+      "relevant_paths": ["Extending Obsidian/Community plugins.md"],
+      "partial_paths": ["Plugins/Core plugins.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -1678,9 +1520,7 @@
       "query": "keep different window arrangements for different tasks",
       "category": "conceptual",
       "notes": "conceptual — 'window arrangements for different tasks' paraphrases 'save workspace layout'",
-      "relevant_paths": [
-        "Plugins/Workspaces.md"
-      ],
+      "relevant_paths": ["Plugins/Workspaces.md"],
       "partial_paths": [],
       "ndcg_5": 0,
       "ndcg_k": 0,
@@ -1691,9 +1531,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "Plugins/Workspaces.md"
-      ],
+      "missed_paths": ["Plugins/Workspaces.md"],
       "top_paths": [
         "User interface/Pop-out windows.md",
         "User interface/Tabs.md",
@@ -1712,12 +1550,8 @@
       "query": "save an article from the web into my notes",
       "category": "conceptual",
       "notes": "conceptual — 'article from the web' paraphrases 'clip web pages'; no 'clipper' in query",
-      "relevant_paths": [
-        "Obsidian Web Clipper/Introduction to Obsidian Web Clipper.md"
-      ],
-      "partial_paths": [
-        "Obsidian Web Clipper/Clip web pages.md"
-      ],
+      "relevant_paths": ["Obsidian Web Clipper/Introduction to Obsidian Web Clipper.md"],
+      "partial_paths": ["Obsidian Web Clipper/Clip web pages.md"],
       "ndcg_5": 0.19,
       "ndcg_k": 0.443,
       "mrr": 0.143,
@@ -1746,12 +1580,8 @@
       "query": "move my notes from another app to Obsidian",
       "category": "conceptual",
       "notes": "conceptual — 'move from another app' paraphrases 'import notes'",
-      "relevant_paths": [
-        "Getting started/Import notes.md"
-      ],
-      "partial_paths": [
-        "Import notes/Importer.md"
-      ],
+      "relevant_paths": ["Getting started/Import notes.md"],
+      "partial_paths": ["Import notes/Importer.md"],
       "ndcg_5": 0,
       "ndcg_k": 0,
       "mrr": 0,
@@ -1761,9 +1591,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "Getting started/Import notes.md"
-      ],
+      "missed_paths": ["Getting started/Import notes.md"],
       "top_paths": [
         "Obsidian Sync/Switch to Obsidian Sync.md",
         "Getting started/Sync your notes across devices.md",
@@ -1782,12 +1610,8 @@
       "query": "синхронизация заметок между устройствами",
       "category": "multilingual",
       "notes": "Russian: 'sync notes between devices'",
-      "relevant_paths": [
-        "Obsidian Sync/Introduction to Obsidian Sync.md"
-      ],
-      "partial_paths": [
-        "Obsidian Sync/Set up Obsidian Sync.md"
-      ],
+      "relevant_paths": ["Obsidian Sync/Introduction to Obsidian Sync.md"],
+      "partial_paths": ["Obsidian Sync/Set up Obsidian Sync.md"],
       "ndcg_5": 0.327,
       "ndcg_k": 0.442,
       "mrr": 0.25,
@@ -1816,12 +1640,8 @@
       "query": "как встроить изображение в заметку",
       "category": "multilingual",
       "notes": "Russian: 'how to embed an image in a note'",
-      "relevant_paths": [
-        "Linking notes and files/Embed files.md"
-      ],
-      "partial_paths": [
-        "Editing and formatting/Attachments.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Embed files.md"],
+      "partial_paths": ["Editing and formatting/Attachments.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -1850,12 +1670,8 @@
       "query": "публикация заметок в интернете",
       "category": "multilingual",
       "notes": "Russian: 'publishing notes on the internet'",
-      "relevant_paths": [
-        "Obsidian Publish/Introduction to Obsidian Publish.md"
-      ],
-      "partial_paths": [
-        "Obsidian Publish/Set up Obsidian Publish.md"
-      ],
+      "relevant_paths": ["Obsidian Publish/Introduction to Obsidian Publish.md"],
+      "partial_paths": ["Obsidian Publish/Set up Obsidian Publish.md"],
       "ndcg_5": 0,
       "ndcg_k": 0,
       "mrr": 0,
@@ -1865,9 +1681,7 @@
       "recall_k": 0,
       "evidence_coverage_k": 0,
       "all_relevant_k": false,
-      "missed_paths": [
-        "Obsidian Publish/Introduction to Obsidian Publish.md"
-      ],
+      "missed_paths": ["Obsidian Publish/Introduction to Obsidian Publish.md"],
       "top_paths": [
         "Obsidian/Credits.md",
         "Editing and formatting/Callouts.md",
@@ -1886,12 +1700,8 @@
       "query": "![[filename]] syntax to embed notes and images",
       "category": "syntax",
       "notes": "tests recognition of the ![[]] embed syntax with exclamation mark prefix",
-      "relevant_paths": [
-        "Linking notes and files/Embed files.md"
-      ],
-      "partial_paths": [
-        "Linking notes and files/Internal links.md"
-      ],
+      "relevant_paths": ["Linking notes and files/Embed files.md"],
+      "partial_paths": ["Linking notes and files/Internal links.md"],
       "ndcg_5": 0.48,
       "ndcg_k": 0.48,
       "mrr": 0.5,
@@ -1920,9 +1730,7 @@
       "query": "obsidian:// URI open note from external app",
       "category": "syntax",
       "notes": "'obsidian://' is the exact URI scheme; 'open' is a supported action",
-      "relevant_paths": [
-        "Extending Obsidian/Obsidian URI.md"
-      ],
+      "relevant_paths": ["Extending Obsidian/Obsidian URI.md"],
       "partial_paths": [],
       "ndcg_5": 1,
       "ndcg_k": 1,
@@ -1952,12 +1760,8 @@
       "query": "/slash command trigger in editor",
       "category": "syntax",
       "notes": "'Slash commands', 'forward slash' are exact terms; Command palette is related",
-      "relevant_paths": [
-        "Plugins/Slash commands.md"
-      ],
-      "partial_paths": [
-        "Plugins/Command palette.md"
-      ],
+      "relevant_paths": ["Plugins/Slash commands.md"],
+      "partial_paths": ["Plugins/Command palette.md"],
       "ndcg_5": 0.76,
       "ndcg_k": 0.76,
       "mrr": 1,
@@ -1986,12 +1790,8 @@
       "query": "Bases filter formula syntax YAML configuration",
       "category": "syntax",
       "notes": "'filters', 'formulas', 'YAML' appear verbatim in Bases syntax.md",
-      "relevant_paths": [
-        "Bases/Bases syntax.md"
-      ],
-      "partial_paths": [
-        "Bases/Introduction to Bases.md"
-      ],
+      "relevant_paths": ["Bases/Bases syntax.md"],
+      "partial_paths": ["Bases/Introduction to Bases.md"],
       "ndcg_5": 1,
       "ndcg_k": 1,
       "mrr": 1,

@@ -28,13 +28,13 @@ Tái hiện trên upstream v0.17.2: `ohs status` gọi registry và báo `update
 
 ## 4. Điểm chạm
 
-| File | Hàm hoặc chỗ | Vì sao |
-|---|---|---|
-| `src/runtime/package-identity.ts` (mới) | `readPackageIdentity`, `packageIdentity`, `updateCheckDisabled`, `buildStatusField` | Đọc package.json một lần, kiểm biến môi trường, sinh trường `build` |
-| `src/transports/cli.ts` | `const version`, `fetchUpdateStatus` | Dùng `packageIdentity.version` thay hàm đọc riêng (bỏ `readPackageVersion`); trạng thái `disabled` không in trường cập nhật |
-| `src/transports/mcp-runtime.ts` | `checkForUpdates` | Thoát sớm khi tắt kiểm cập nhật |
-| `src/transports/status-payload.ts` | `buildStatusPayload` | Thêm `...buildStatusField()` sau `version` |
-| `test/vantt/fork-identity.test.ts` (mới) | | Xem mục 5 |
+| File                                     | Hàm hoặc chỗ                                                                        | Vì sao                                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/runtime/package-identity.ts` (mới)  | `readPackageIdentity`, `packageIdentity`, `updateCheckDisabled`, `buildStatusField` | Đọc package.json một lần, kiểm biến môi trường, sinh trường `build`                                                         |
+| `src/transports/cli.ts`                  | `const version`, `fetchUpdateStatus`                                                | Dùng `packageIdentity.version` thay hàm đọc riêng (bỏ `readPackageVersion`); trạng thái `disabled` không in trường cập nhật |
+| `src/transports/mcp-runtime.ts`          | `checkForUpdates`                                                                   | Thoát sớm khi tắt kiểm cập nhật                                                                                             |
+| `src/transports/status-payload.ts`       | `buildStatusPayload`                                                                | Thêm `...buildStatusField()` sau `version`                                                                                  |
+| `test/vantt/fork-identity.test.ts` (mới) |                                                                                     | Xem mục 5                                                                                                                   |
 
 Lưu ý: `mcp-runtime.ts` giữ nguyên cách đọc `packageVersion` của upstream.
 

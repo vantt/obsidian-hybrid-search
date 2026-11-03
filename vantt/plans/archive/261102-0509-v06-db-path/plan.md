@@ -1,9 +1,9 @@
 ---
-title: "v06-db-path"
-description: "Bản vá P02 db-path: DB index đặt được ngoài vault, mọi transport và daemon dùng chung"
+title: 'v06-db-path'
+description: 'Bản vá P02 db-path: DB index đặt được ngoài vault, mọi transport và daemon dùng chung'
 status: completed
 priority: P1
-effort: "1d"
+effort: '1d'
 tags: [patch, p02, v06, db-path]
 created: 2026-11-02
 ---

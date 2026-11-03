@@ -1,9 +1,9 @@
 ---
-title: "v11b-p01-contract-fixes"
-description: "Bổ sung hợp đồng P01 language-pack-api (vẫn apiVersion 1): viewTerms khớp đúng, viewWeights theo câu, matchedTerms cho rescore, ngữ cảnh cho signature/queryCacheKey, cận trên termsWithPrefix"
+title: 'v11b-p01-contract-fixes'
+description: 'Bổ sung hợp đồng P01 language-pack-api (vẫn apiVersion 1): viewTerms khớp đúng, viewWeights theo câu, matchedTerms cho rescore, ngữ cảnh cho signature/queryCacheKey, cận trên termsWithPrefix'
 status: completed
 priority: P1
-effort: "0.5d"
+effort: '0.5d'
 tags: [patch, p01, v11b, language-pack-api]
 created: 2026-11-02
 ---

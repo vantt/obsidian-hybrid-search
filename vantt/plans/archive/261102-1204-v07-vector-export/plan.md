@@ -1,9 +1,9 @@
 ---
-title: "v07-vector-export"
-description: "Bản vá P03 vector-export: lệnh CLI xuất vector theo note và K note gần nhất, JSON Lines; hàm lõi dùng lại cho stdio (V08)"
+title: 'v07-vector-export'
+description: 'Bản vá P03 vector-export: lệnh CLI xuất vector theo note và K note gần nhất, JSON Lines; hàm lõi dùng lại cho stdio (V08)'
 status: completed
 priority: P1
-effort: "1d"
+effort: '1d'
 tags: [patch, p03, v07, vector-export]
 created: 2026-11-02
 ---
