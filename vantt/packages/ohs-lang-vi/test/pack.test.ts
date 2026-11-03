@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import type { Candidate, QueryAnalysis } from '../src/contract.js';
-import { TONES, type Tone } from '../src/data.js';
+import { TONES } from '../src/data.js';
 import createPackDefault, { createPack, PACK_VERSION } from '../src/index.js';
 import { resolveOptions } from '../src/options.js';
 import type { ViAnalysisData } from '../src/query.js';
@@ -50,7 +50,7 @@ describe('createPack', () => {
   it('applies view weights and disables rescore on request', () => {
     const pack = createPack({ viewWeights: { norm: 2, fold: 0.5 }, rescore: false });
     expect(pack.views.map((v) => v.weight)).toEqual([2, 0.5, 1]);
-    expect(pack.rescore).toBeUndefined();
+    expect(typeof pack.rescore).toBe('undefined');
   });
 
   it('rejects invalid options with a clear error', () => {
@@ -113,7 +113,7 @@ describe('project', () => {
       fc.boolean(),
     )
     .map(([i, tone, upper]) => {
-      const w = composeSyllable({ ...syllables[i]!, tone: tone as Tone }, 'classic');
+      const w = composeSyllable({ ...syllables[i]!, tone }, 'classic');
       return upper ? w.toUpperCase() : w;
     });
   const sep = fc.constantFrom(' ', ', ', '.\n', ' - ', '_', ' c++ ', ' #x ', ' ', '🎉', '2026');
@@ -140,7 +140,7 @@ describe('project', () => {
           for (const p of packs) {
             for (const view of ['norm', 'fold']) {
               const projected = tokenize(p.project(view, field, t));
-              expect(projected.length).toBe(source.length);
+              expect(projected).toHaveLength(source.length);
               // Same count with an independent emulation of the view tokenizer (tokenchars '+#').
               expect(viewTokens(p.project(view, field, t))).toHaveLength(viewTokens(t).length);
               projected.forEach((tok, k) => {
@@ -371,9 +371,11 @@ describe('rescore', () => {
       candidate('other.md', 0.03, 'Không liên quan'),
     ];
     const out = await pack.rescore!(candidates, analysis, fakeContext(VAULT));
-    expect(out.map((c) => c.path).sort()).toEqual(candidates.map((c) => c.path).sort());
+    const byPath = (a: string, b: string) => a.localeCompare(b);
+    expect(out.map((c) => c.path).sort(byPath)).toEqual(candidates.map((c) => c.path).sort(byPath));
     const score = Object.fromEntries(out.map((c) => [c.path, c.score]));
     expect(score['ban-hang.md']).toBeGreaterThan(score['ban-hang-decoy.md']!);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the score passes through unchanged
     expect(score['other.md']).toBe(0.03);
   });
 
@@ -385,6 +387,7 @@ describe('rescore', () => {
       fakeContext(VAULT),
     );
     expect(out[0]!.score).toBeGreaterThan(0.01);
+    // eslint-disable-next-line sonarjs/no-floating-point-equality -- the score passes through unchanged
     expect(out[1]!.score).toBe(0.02);
   });
 

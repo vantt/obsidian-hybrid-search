@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { BASE_VOWELS, TONES, toneVowel, type Tone } from '../src/data.js';
+import { BASE_VOWELS, TONES, toneVowel } from '../src/data.js';
 import { fold } from '../src/fold.js';
 import { normalize } from '../src/normalize.js';
 import { composeSyllable, parseSyllable } from '../src/syllable.js';
@@ -64,11 +64,11 @@ const syllableWord = fc
     fc.integer({ min: 0, max: syllableList.length - 1 }),
     fc.constantFrom(...TONES),
     fc.boolean(),
-    fc.constantFrom('modern', 'classic') as fc.Arbitrary<'modern' | 'classic'>,
+    fc.constantFrom<'modern' | 'classic'>('modern', 'classic'),
   )
   .map(([i, tone, upper, style]) => {
     const w = composeSyllable(
-      { ...(syllableList[i] as ReturnType<typeof parseSyllable> & object), tone: tone as Tone },
+      { ...(syllableList[i] as ReturnType<typeof parseSyllable> & object), tone },
       style,
     );
     return upper ? w.toUpperCase() : w;
@@ -85,7 +85,7 @@ const anyUnicode = fc.oneof(
   fc.string({ unit: 'grapheme', maxLength: 30 }),
   vietnameseLike,
 );
-const styles = fc.constantFrom('modern', 'classic') as fc.Arbitrary<'modern' | 'classic'>;
+const styles = fc.constantFrom<'modern' | 'classic'>('modern', 'classic');
 
 const run = { numRuns: NUM_RUNS };
 
@@ -151,8 +151,8 @@ describe('normalize properties', () => {
     fc.assert(
       fc.property(textCharsNbsp, (x) => {
         const out = normalize(x);
-        expect(out).not.toMatch(/[   ]/);
-        expect([...out].length).toBe([...x].length);
+        expect(out).not.toMatch(/[\u00a0\u2007\u202f]/);
+        expect([...out]).toHaveLength([...x].length);
       }),
       run,
     );
@@ -227,6 +227,7 @@ describe('fold properties', () => {
   it('produces ASCII for Vietnamese text', () => {
     fc.assert(
       fc.property(syllableText, (x) => {
+        // eslint-disable-next-line no-control-regex -- ASCII range check; \x00 is its intended lower bound
         expect(fold(x)).toMatch(/^[\x00-\x7f]*$/);
       }),
       run,
@@ -291,7 +292,7 @@ describe('syllable properties', () => {
   it('compose then parse gives the same syllable, for both styles', () => {
     fc.assert(
       fc.property(anySyllable, fc.constantFrom(...TONES), styles, (s, tone, style) => {
-        const syllable = { ...s, tone: tone as Tone };
+        const syllable = { ...s, tone };
         const word = composeSyllable(syllable, style);
         expect(parseSyllable(word)).toEqual(syllable);
         expect(parseSyllable(word.normalize('NFD'))).toEqual(syllable);
@@ -304,7 +305,7 @@ describe('syllable properties', () => {
   it('normalize leaves composed syllables unchanged for the same style', () => {
     fc.assert(
       fc.property(anySyllable, fc.constantFrom(...TONES), styles, (s, tone, style) => {
-        const word = composeSyllable({ ...s, tone: tone as Tone }, style);
+        const word = composeSyllable({ ...s, tone }, style);
         expect(normalize(word, { tonePlacement: style })).toBe(word);
       }),
       run,

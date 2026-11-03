@@ -9,6 +9,8 @@ import { editNeighbours } from '../src/typo.js';
 import { projectView } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
 
+const FINAL_CONSONANT_KEYS = 'bcdghklmnpqrstvx';
+
 function typeKeys(
   word: string,
   letterKeys: Record<string, string>,
@@ -20,7 +22,10 @@ function typeKeys(
   const keys = [...bare].map((ch) => letterKeys[ch] ?? ch).join('');
   const tone = syllable.tone === 0 ? '' : toneKeys[syllable.tone]!;
   // VNI allows the tone key before the final consonant; Telex needs it at the end.
-  return toneFirst ? keys.replace(/([^\d]*?)([bcdghklmnpqrstvx]*)$/, `$1${tone}$2`) : keys + tone;
+  if (!toneFirst) return keys + tone;
+  let cut = keys.length;
+  while (cut > 0 && FINAL_CONSONANT_KEYS.includes(keys[cut - 1]!)) cut--;
+  return keys.slice(0, cut) + tone + keys.slice(cut);
 }
 
 describe('decodeTelex / decodeVni', () => {

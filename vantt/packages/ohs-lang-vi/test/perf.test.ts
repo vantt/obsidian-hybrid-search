@@ -83,13 +83,15 @@ describe('performance: 1 MB projection (M1 pieces of project())', () => {
     const toned = allSyllables().map((s) => composeSyllable({ ...s, tone: 2 }));
     const words: string[] = [];
     let size = 0;
-    for (let round = 0; size < ONE_MB; round++) {
+    let round = 0;
+    while (size < ONE_MB) {
       for (const w of toned) {
         const word = round === 0 ? w : w + String.fromCodePoint(0x4e00 + (round % 5000)) + round;
         words.push(word);
         size += Buffer.byteLength(word) + 1;
         if (size >= ONE_MB) break;
       }
+      round++;
     }
     const text = words.join(' ');
     // Best of 3: the per-word memo holds far fewer words than the text has, and
@@ -212,7 +214,7 @@ describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () =
       norm.set(w, 1 + Math.floor(rand() * 500));
     }
   }
-  for (let i = 0; norm.size < 50_000; i++) norm.set(`term${i}x`, 1 + Math.floor(rand() * 20));
+  for (let i = 0; norm.size < 50_000;) norm.set(`term${i++}x`, 1 + Math.floor(rand() * 20));
   for (const [w, n] of norm) {
     const f = fold(w);
     foldCounts.set(f, (foldCounts.get(f) ?? 0) + n);
@@ -248,7 +250,7 @@ describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () =
 
   it('after an index change (caches reset) under 20 ms, warm well below', () => {
     const pack = createPack();
-    pack.analyzeQuery(query, ctx);
+    once(() => pack.analyzeQuery(query, ctx)); // fill the caches the index change resets
     ctx.bump();
     const afterWrite = once(() => pack.analyzeQuery(query, ctx));
     const warm = bestOf(5, () => pack.analyzeQuery(query, ctx));

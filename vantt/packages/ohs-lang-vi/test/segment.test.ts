@@ -5,8 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { byCodeUnit } from '../src/chars.js';
 import type { QueryAnalysis } from '../src/contract.js';
-import { TONES, type Tone } from '../src/data.js';
+import { TONES } from '../src/data.js';
 import { createPack, packSignature } from '../src/index.js';
 import { resolveOptions } from '../src/options.js';
 import {
@@ -43,7 +44,7 @@ describe('bundled dictionary', () => {
   it('has two-syllable compounds only, normalized, unique and sorted', () => {
     expect(entries.length).toBeGreaterThan(20_000);
     expect(new Set(entries).size).toBe(entries.length);
-    expect([...entries].sort()).toEqual(entries);
+    expect([...entries].sort(byCodeUnit)).toEqual(entries);
     for (const e of entries) {
       expect(e.split(' ')).toHaveLength(2);
       expect(e).toBe(e.normalize('NFC').toLowerCase());
@@ -80,6 +81,7 @@ describe('bundled dictionary', () => {
   });
 
   it('ships with the package: npm pack includes the dictionary, its notes and attribution', () => {
+    // eslint-disable-next-line sonarjs/no-os-command-from-path -- the test runs the developer's own npm
     const res = spawnSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
       cwd: fileURLToPath(new URL('..', import.meta.url)),
       encoding: 'utf8',
@@ -167,7 +169,7 @@ describe('seg view projection', () => {
       fc.boolean(),
     )
     .map(([i, tone, upper]) => {
-      const w = composeSyllable({ ...syllables[i]!, tone: tone as Tone }, 'classic');
+      const w = composeSyllable({ ...syllables[i]!, tone }, 'classic');
       return upper ? w.toUpperCase() : w;
     });
   const compound = fc.constantFrom(...bundledCompounds().slice(0, 2000));
