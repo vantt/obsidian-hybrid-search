@@ -2,6 +2,19 @@ import path from 'node:path';
 
 export const DEFAULT_RERANKER_MODEL = 'onnx-community/gte-multilingual-reranker-base';
 
+const DEFAULT_WATCH_DEBOUNCE_MS = 5_000;
+
+/** Per-file watcher debounce; OBSIDIAN_WATCH_DEBOUNCE_MS overrides it (non-negative integer). */
+function watchDebounceMs(): number {
+  const raw = process.env.OBSIDIAN_WATCH_DEBOUNCE_MS?.trim();
+  if (!raw) return DEFAULT_WATCH_DEBOUNCE_MS;
+  if (!/^\d+$/.test(raw))
+    throw new Error(
+      `OBSIDIAN_WATCH_DEBOUNCE_MS must be a non-negative integer (received "${raw}")`,
+    );
+  return Number(raw);
+}
+
 export const config = {
   get obsidianPrefix(): string {
     return process.env.OBSIDIAN_PREFIX ?? '';
@@ -79,5 +92,5 @@ export const config = {
   chunkMinLength: 50,
   chunkHeadingLevel: 0,
   batchSize: 10,
-  debounce: 5_000,
+  debounce: watchDebounceMs(),
 };
