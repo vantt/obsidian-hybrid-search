@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import { npmCommand } from '../../scripts/lib/proc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -117,7 +118,10 @@ try {
     // The committed golden set must be the one this corpus generates.
     const expected = toNfdPaths(fs.readFileSync(fresh, 'utf8'));
     if (flag('--update-golden')) fs.writeFileSync(GOLDEN, expected);
-    else if (expected !== fs.readFileSync(GOLDEN, 'utf8')) {
+    // Compare content, not bytes, so reformatting the committed file cannot fail the check.
+    else if (
+      !isDeepStrictEqual(JSON.parse(expected), JSON.parse(fs.readFileSync(GOLDEN, 'utf8')))
+    ) {
       console.error(
         'golden-set.json differs from the golden set generated with this fixture version; rerun with --update-golden',
       );
