@@ -1,6 +1,6 @@
 {
   "name": "obsidian-hybrid-search",
-  "version": "0.17.2",
+  "version": "0.17.2-vantt.7",
   "mcpName": "io.github.flowing-abyss/obsidian-hybrid-search",
   "type": "module",
   "bin": {
@@ -149,5 +149,6 @@
       "version": "12.2.0",
       "onFail": "error"
     }
-  }
+  },
+  "vanttFork": true
 }
