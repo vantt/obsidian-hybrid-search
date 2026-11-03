@@ -56,9 +56,10 @@ const OHS_DEFAULT_IGNORE = '.obsidian/**,templates/**,*.canvas';
  * the user's own search indexes it. The user's note selection (OBSIDIAN_IGNORE_PATTERNS, else
  * OHS's default, plus OBSIDIAN_INCLUDE_PATTERNS and OBSIDIAN_CONTENT_IGNORE_PATTERNS) is kept,
  * and `_ohs/**` is always ignored so the lexicon file never becomes a search result; so is a
- * `lexiconPath` inside the vault set in `packOptions` (the gate's pack options) or, without one
- * there, in the user's OHS_LANGUAGE_PACK_OPTIONS. Both runs of a comparison must pass the same
- * `packOptions` so they index the same notes. Git ignore rules stay off: the vault copy lives
+ * `lexiconPath` inside the vault set in `packOptions` (the gate's effective pack options:
+ * `--lang-options`, else quality-gates.json) or, without one there, in the user's
+ * OHS_LANGUAGE_PACK_OPTIONS. Both runs of a comparison must pass the same `packOptions` so they
+ * index the same notes. Git ignore rules stay off: the vault copy lives
  * under the repository's ignored work directory, whose ignore rules would hide every note.
  */
 export function privateEvalEnv(extra = {}, source = process.env, packOptions = null) {

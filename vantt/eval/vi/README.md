@@ -175,8 +175,10 @@ Baseline phụ thuộc nền (ONNX lượng tử cho số khác nhau theo CPU), 
 
 ```bash
 node vantt/scripts/quality-gate.mjs --private <golden-set.json> --vault <vault> --with-lang vi \
-  --out <báo cáo.json> --private-detail <file chi tiết.json>
+  --out <báo cáo.json> --private-detail <file chi tiết.json> [--lang-options '<json>']
 ```
+
+`--lang-options '<json>'` (chỉ dùng cùng `--private`) thay `pack_options` của gói trong `quality-gates.json` cho lần chạy này, để thử bộ tuỳ chọn khác mà không sửa file cấu hình. Giá trị phải là một object JSON; JSON hỏng hay không phải object thì báo cáo ghi lỗi cố định (`--lang-options is not valid JSON`, `--lang-options must be a JSON object`), thoát 2, chưa chạy gì. Cả lượt không gói lẫn lượt có gói (và hai lượt chi tiết) dùng cùng bộ tuỳ chọn đó: lượt có gói nhận nó qua `OHS_LANGUAGE_PACK_OPTIONS`, cả hai lượt bỏ qua cùng file `lexiconPath`. Báo cáo (và file chi tiết) ghi bộ tuỳ chọn thực dùng ở `pack_options` (`null` khi không có), nên phân biệt được các lần chạy về sau; vì thế đừng đặt tên note hay nội dung thật vào tuỳ chọn. Chế độ thường (gate phát hành) từ chối cờ này: nó luôn dùng `pack_options` đã duyệt.
 
 Chế độ `--private` chỉ in số tổng hợp (không câu hỏi, đường dẫn hay tiêu đề note). `--private-detail <file>` (chỉ dùng cùng `--private`) ghi thêm một file JSON cục bộ **có nội dung thật**, mỗi câu một mục:
 
@@ -185,7 +187,7 @@ Chế độ `--private` chỉ in số tổng hợp (không câu hỏi, đường
 
 Quy tắc an toàn: file phải nằm **ngoài repo** (ngoài cây làm việc git, nên cũng ngoài `vantt/`); đường dẫn trong repo hay trong cây git khác bị từ chối ngay, thoát 2, chưa chạy gì. File ghi với quyền `0600`. Stdout/stderr chỉ in đường dẫn file đã ghi. Đừng dán nội dung file vào issue, PR, log hay báo cáo; báo cáo chỉ nêu số tổng hợp. Chạy lại với `--k 30` nếu cần thấy note đúng nằm ở hạng sâu hơn (số ở top-k, nên đổi `k` làm đổi nDCG).
 
-Vault được đánh chỉ mục như khi bạn tìm: giữ `OBSIDIAN_IGNORE_PATTERNS` (không đặt thì dùng mặc định của OHS `.obsidian/**,templates/**,*.canvas`), `OBSIDIAN_INCLUDE_PATTERNS`, `OBSIDIAN_CONTENT_IGNORE_PATTERNS` trong môi trường của bạn, và luôn thêm `_ohs/**` để lexicon không thành kết quả tìm. Nếu `lexiconPath` của gói (trong `pack_options` của `quality-gates.json`, không có thì trong `OHS_LANGUAGE_PACK_OPTIONS` của bạn) trỏ tới file khác trong vault, chính file đó (không phải cả thư mục) cũng bị bỏ qua, ở cả lượt không gói lẫn lượt có gói. Luật `.gitignore` không dùng (bản sao vault nằm dưới thư mục làm việc bị git bỏ qua của repo). Model nhúng vẫn cố định `Xenova/multilingual-e5-small`.
+Vault được đánh chỉ mục như khi bạn tìm: giữ `OBSIDIAN_IGNORE_PATTERNS` (không đặt thì dùng mặc định của OHS `.obsidian/**,templates/**,*.canvas`), `OBSIDIAN_INCLUDE_PATTERNS`, `OBSIDIAN_CONTENT_IGNORE_PATTERNS` trong môi trường của bạn, và luôn thêm `_ohs/**` để lexicon không thành kết quả tìm. Nếu `lexiconPath` của gói (trong `--lang-options`, không có thì trong `pack_options` của `quality-gates.json`, không có thì trong `OHS_LANGUAGE_PACK_OPTIONS` của bạn) trỏ tới file khác trong vault, chính file đó (không phải cả thư mục) cũng bị bỏ qua, ở cả lượt không gói lẫn lượt có gói. Luật `.gitignore` không dùng (bản sao vault nằm dưới thư mục làm việc bị git bỏ qua của repo). Model nhúng vẫn cố định `Xenova/multilingual-e5-small`.
 
 Khi một lượt con (eval hoặc lượt chi tiết) hỏng, báo cáo chỉ ghi `eval failed in private run (exit N)` hay `detail run failed (exit N)`. Khoảng 40 dòng cuối **stderr của chính tiến trình con** (không bao giờ stdout, nơi eval của upstream in từng câu hỏi) chỉ được in khi stderr là terminal tương tác hoặc khi thêm `--show-child-stderr`; còn lại (agent, CI, chuyển hướng ra file) chỉ in một dòng hướng dẫn cách xem. Stderr đó có thể nêu tên note: chỉ đọc trên máy bạn, đừng dán nguyên văn vào issue hay báo cáo. Lỗi khác (không phải lượt con) ghi vào báo cáo theo loại cố định, không chép nguyên thông báo: `invalid JSON (private golden set or eval output)`, `file system error (<mã>)`, `unexpected error in the private gate`; thông báo gốc theo cùng quy tắc in như stderr ở trên.
 

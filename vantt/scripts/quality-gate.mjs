@@ -10,6 +10,7 @@
 //        [--k 10]
 //   node vantt/scripts/quality-gate.mjs --private <dir|golden-set.json> [--vault <dir>] [--with-lang <id>] [--json] [--out <file>]
 //        [--private-detail <file>]   local per-query JSON (queries, paths, ranks): the file must be outside the repository
+//        [--lang-options <json>]     pack options (a JSON object) for this run instead of pack_options in quality-gates.json
 //        [--show-child-stderr]       print a failed child's stderr tail (or an error's text) when stderr is not a terminal
 //
 // Run from the repo root of the release branch (built, dependencies installed). Exit 0 =
@@ -25,7 +26,9 @@
 // vault is indexed with the user's note selection (OBSIDIAN_IGNORE_PATTERNS...) and the lexicon
 // (`_ohs/**`, or the pack's lexiconPath) ignored. `--private-detail` is the one exception: it writes
 // per-query content to a local file outside the repository (refused otherwise) and prints only
-// that the file was written.
+// that the file was written. `--lang-options` (private mode only: the release gate uses the reviewed
+// pack_options) replaces the configured options for both runs, and the report records the
+// effective options as `pack_options`.
 import { spawnSync } from 'node:child_process';
 import {
   existsSync,
@@ -85,6 +88,7 @@ export function parseCli(argv) {
       vault: { type: 'string' },
       out: { type: 'string' },
       'private-detail': { type: 'string' },
+      'lang-options': { type: 'string' },
       'show-child-stderr': { type: 'boolean', default: false },
     },
     strict: true,
@@ -131,9 +135,24 @@ function buildPack(dir, log) {
     throw new ReportableError(`${pkg.name} has no ${pkg.main} after the build`);
 }
 
-function packEnv(config, lang, dir, base = evalEnv) {
+/**
+ * Pack options given with `--lang-options`: a JSON object. Fixed-text errors, because the value
+ * can hold a vault path (lexiconPath).
+ */
+export function parseLangOptions(raw) {
+  let value;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new ReportableError('--lang-options is not valid JSON');
+  }
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new ReportableError('--lang-options must be a JSON object');
+  return value;
+}
+
+function packEnv(options, dir, base = evalEnv) {
   const extra = { OHS_LANGUAGE_PACK: dir };
-  const options = config.pack_options?.[lang];
   if (options) extra.OHS_LANGUAGE_PACK_OPTIONS = JSON.stringify(options);
   return base(extra);
 }
@@ -336,7 +355,11 @@ async function standard(opts, root, config) {
       }
       buildPack(dir, log);
       log(`Upstream eval (${corpus}) with pack ${lang}`);
-      const withPack = runEvaluate({ ...common, tree: root, env: packEnv(config, lang, dir) });
+      const withPack = runEvaluate({
+        ...common,
+        tree: root,
+        env: packEnv(config.pack_options?.[lang], dir),
+      });
       checks.push(upstreamPackCheck(config.upstream, { noPack, withPack }));
       entry.upstream_summary = { without: noPack.summary, with: withPack.summary };
       if (lang !== 'vi') {
@@ -444,9 +467,17 @@ async function privateMode(opts, root, config) {
   );
   const lang = opts['with-lang']?.[0] ?? 'vi';
   const dir = packDir(root, lang);
-  const report = { gate: 'error', private: true, pack: lang };
+  const report = { gate: 'error', private: true, pack: lang, pack_options: null };
   const scratch = path.join(root, 'vantt', '.work', 'quality-private');
   try {
+    // Effective options of the pack: the same for both runs, recorded so reports can be told apart.
+    const options =
+      opts['lang-options'] === undefined
+        ? (config.pack_options?.[lang] ?? null)
+        : parseLangOptions(opts['lang-options']);
+    // The report is shared: keep a lexicon path (a vault location) out of it.
+    report.pack_options =
+      options && 'lexiconPath' in options ? { ...options, lexiconPath: '[set]' } : options;
     if (!existsSync(golden)) throw new ReportableError('private golden set not found');
     if (!opts.vault && !process.env.OHS_PRIVATE_VAULT && !(isDir && existsSync(vault)))
       throw new ReportableError(
@@ -462,10 +493,9 @@ async function privateMode(opts, root, config) {
     log('Private eval: without pack, then with pack (output suppressed).');
     const common = { tree: root, vault, golden: evalGolden, scratch, k, capture: true };
     // Both runs ignore the same lexicon file, so they index the same notes.
-    const privEnv = (extra = {}) =>
-      privateEvalEnv(extra, process.env, config.pack_options?.[lang] ?? null);
+    const privEnv = (extra = {}) => privateEvalEnv(extra, process.env, options);
     const without = runEvaluate({ ...common, env: privEnv() });
-    const withPack = runEvaluate({ ...common, env: packEnv(config, lang, dir, privEnv) });
+    const withPack = runEvaluate({ ...common, env: packEnv(options, dir, privEnv) });
     report.without_pack = aggregate(without);
     report.with_pack = aggregate(withPack);
     report.checks = regressionChecks('private-regression', {
@@ -482,13 +512,13 @@ async function privateMode(opts, root, config) {
     if (opts['private-detail']) {
       log('Private detail: per-query search with explain (output suppressed).');
       const detailWithout = runDetail({ ...common, env: privEnv() });
-      const detailWith = runDetail({ ...common, env: packEnv(config, lang, dir, privEnv) });
+      const detailWith = runDetail({ ...common, env: packEnv(options, dir, privEnv) });
       const queries = JSON.parse(readFileSync(golden, 'utf8'));
       const file = path.resolve(opts['private-detail']);
       mkdirSync(path.dirname(file), { recursive: true });
       writeFileSync(
         file,
-        `${JSON.stringify(buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang }), null, 2)}\n`,
+        `${JSON.stringify(buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang, options }), null, 2)}\n`,
         { mode: 0o600 },
       );
       log(`Per-query detail written to ${file}`);
@@ -541,7 +571,7 @@ function detailSide(row, detail, relevant) {
 }
 
 /** Per-query detail of the two runs, joined by query id. */
-function buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang }) {
+function buildDetail({ queries, without, withPack, detailWithout, detailWith, k, lang, options }) {
   const by = (list, key = 'id') => new Map((list ?? []).map((x) => [x[key], x]));
   const [w, p, dw, dp] = [
     by(without.per_query),
@@ -552,6 +582,7 @@ function buildDetail({ queries, without, withPack, detailWithout, detailWith, k,
   return {
     note: 'PRIVATE: real queries and note paths. Keep outside the repository.',
     pack: lang,
+    pack_options: options,
     k,
     queries: queries.map((q) => {
       const relevant = q.relevant_paths ?? [];
@@ -575,13 +606,18 @@ function printHuman(report) {
 
 export async function main(
   argv,
-  { cwd = process.cwd(), stderrIsTTY = Boolean(process.stderr.isTTY) } = {},
+  // `config` replaces vantt/scripts/quality-gates.json (tests).
+  { cwd = process.cwd(), stderrIsTTY = Boolean(process.stderr.isTTY), config } = {},
 ) {
   let opts;
   try {
     opts = parseCli(argv);
     if (opts['private-detail'] && !opts.private)
       throw new Error('--private-detail is only valid with --private');
+    if (opts['lang-options'] !== undefined && !opts.private)
+      throw new Error(
+        '--lang-options is only valid with --private (the release gate uses pack_options in quality-gates.json)',
+      );
     if (!opts.private && !opts['target-sha'])
       throw new Error('--target-sha is required (or --private)');
   } catch (e) {
@@ -597,7 +633,7 @@ export async function main(
     }
   }
   opts.showDetail = opts['show-child-stderr'] || stderrIsTTY;
-  const config = JSON.parse(readFileSync(path.join(here, 'quality-gates.json'), 'utf8'));
+  config ??= JSON.parse(readFileSync(path.join(here, 'quality-gates.json'), 'utf8'));
   const report = opts.private
     ? await privateMode(opts, root, config)
     : await standard(opts, root, config);
