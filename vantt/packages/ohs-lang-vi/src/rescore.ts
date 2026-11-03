@@ -126,7 +126,7 @@ export function weakBm25Penalty(
 ): number[] {
   const none = candidates.map(() => 0);
   const threshold = options.minBm25Agreement;
-  if (!(threshold > 0)) return none;
+  if (threshold <= 0) return none;
   const bm25Top = candidates.filter(
     (c) => isRank(c.rank.bm25) && c.rank.bm25 <= AGREEMENT_BM25_TOP,
   ).length;

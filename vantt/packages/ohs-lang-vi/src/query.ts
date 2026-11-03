@@ -375,23 +375,9 @@ export function addSpellingVariants(
     const words = tokenize(query);
     const sequence = (view === 'norm' ? data?.target : data?.targetFolded) ?? words;
     const variants: string[] = [];
-    const push = (term: string) => {
-      if (!words.includes(term) && !variants.includes(term)) variants.push(term);
-    };
-    for (const [i, word] of sequence.entries()) {
-      const variant = iyVariant(word);
-      if (!variant) continue;
-      if (TONED_IY_RE.test(word)) {
-        if (cache.termDocs(ctx, view, variant) > 0) push(variant);
-        continue;
-      }
-      const prev = sequence[i - 1];
-      const next = sequence[i + 1];
-      for (const phrase of [prev && `${prev} ${variant}`, next && `${variant} ${next}`])
-        if (phrase && cache.phraseDocs(ctx, view, phrase) > 0) {
-          push(phrase);
-          break;
-        }
+    for (const i of sequence.keys()) {
+      const term = spellingVariantTerm(sequence, i, view, ctx, cache);
+      if (term && !words.includes(term) && !variants.includes(term)) variants.push(term);
     }
     if (variants.length === 0) continue;
     analysis.viewTerms = {
@@ -399,4 +385,23 @@ export function addSpellingVariants(
       [view]: [...words.map((text) => ({ text, prefix: true })), ...variants],
     };
   }
+}
+
+/** The view term for the other i/y spelling of `sequence[i]`, when the vault has it. */
+function spellingVariantTerm(
+  sequence: readonly string[],
+  i: number,
+  view: string,
+  ctx: QueryContext,
+  cache: VocabularyCache,
+): string | null {
+  const word = sequence[i]!;
+  const variant = iyVariant(word);
+  if (!variant) return null;
+  if (TONED_IY_RE.test(word)) return cache.termDocs(ctx, view, variant) > 0 ? variant : null;
+  const prev = sequence[i - 1];
+  const next = sequence[i + 1];
+  for (const phrase of [prev && `${prev} ${variant}`, next && `${variant} ${next}`])
+    if (phrase && cache.phraseDocs(ctx, view, phrase) > 0) return phrase;
+  return null;
 }

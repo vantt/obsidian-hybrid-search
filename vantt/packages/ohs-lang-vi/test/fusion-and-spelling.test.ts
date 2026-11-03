@@ -117,7 +117,7 @@ describe('i/y spellings', () => {
       const a = analyze(query, docs, { accentedFold: 'always' });
       for (const view of ['norm', 'fold']) {
         const terms = a.viewTerms?.[view] ?? [];
-        for (const t of terms) if (typeof t === 'string') expect(t.split(' ').length).toBe(2);
+        for (const t of terms) if (typeof t === 'string') expect(t.split(' ')).toHaveLength(2);
         expect(terms).not.toContain('my');
         expect(terms).not.toContain('ty');
       }
@@ -421,16 +421,16 @@ describe('query analysis bookkeeping', () => {
     expect(lookups(0)).toBeLessThan(lookups(0.5));
   });
 
-  it('reads each vault statistic once per query and again only after a write', () => {
+  it('reads each vault statistic once per query and again only after a write', async () => {
     const docs = ['Danh sách khách hàng tiềm năng', 'Rèn kĩ năng mềm', ...filler(30)];
     const ctx = fakeContext(docs);
     const pack = createPack();
-    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    await pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
     const first = { ...ctx.calls };
-    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    await pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
     expect(ctx.calls).toEqual(first);
     ctx.bump();
-    pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
+    await pack.analyzeQuery('khach hang tiem nang ky nang', ctx);
     expect(ctx.calls.termStats).toBeGreaterThan(first.termStats);
   });
 
@@ -438,7 +438,7 @@ describe('query analysis bookkeeping', () => {
     const docs = ['Rèn kĩ năng mềm', 'Ghi chú khác'];
     const ctx = fakeContext(docs);
     const pack = createPack();
-    const a = (await pack.analyzeQuery('ki nang mem', ctx)) as QueryAnalysis;
+    const a = await pack.analyzeQuery('ki nang mem', ctx);
     expect(a.debug?.viewTerms).toEqual(a.viewTerms);
     expect(a.debug?.segWeight).toBeTypeOf('number');
     const c: Candidate = {
