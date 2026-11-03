@@ -207,7 +207,7 @@ function oneOf<T extends string>(
   if (value === undefined) return fallback;
   if (!allowed.includes(value as T))
     throw new TypeError(
-      `ohs-lang-vi: option "${key}" must be one of ${allowed.map((a) => `"${a}"`).join(', ')}`,
+      `ohs-lang-vi: option "${key}" must be one of ${allowed.map((a) => '"' + a + '"').join(', ')}`,
     );
   return value as T;
 }

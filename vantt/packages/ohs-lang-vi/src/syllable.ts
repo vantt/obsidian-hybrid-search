@@ -54,6 +54,8 @@ function fits(onset: string, entry: NucleusEntry, coda: string): boolean {
     case 'iy':
       if (!IY_ONSETS.includes(onset) || onset === 'qu') return false;
       break;
+    case 'any':
+      break;
   }
   const first = entry.text[0] as string;
   if (onset === 'qu' && first === 'u') return false;

@@ -5,7 +5,7 @@
  * fold view is the alias view: "Ke hoach quy bon" finds the alias "Kế hoạch
  * quý bốn" because both fold to the same string.
  */
-import { createProjector } from './views.js';
+import type { createProjector } from './views.js';
 
 /** Views whose projected aliases and titles are exact-lookup keys. */
 export const ALIAS_VIEWS: readonly string[] = ['fold'];

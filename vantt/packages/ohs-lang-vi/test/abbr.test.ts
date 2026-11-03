@@ -100,6 +100,14 @@ describe('learnAbbreviations', () => {
   });
 });
 
+describe('learnAbbreviations: trailing dots', () => {
+  it('drops the dots that end an abbreviation token', () => {
+    const texts = ['khách hàng một. khách hàng hai. khách hàng ba. Gọi KH.. Gặp KH...'];
+    const out = learnAbbreviations(texts, knownEntries(null));
+    expect(out).toEqual([{ abbr: 'KH', expansion: 'khách hàng', source: 'frequent', count: 3 }]);
+  });
+});
+
 describe('addPending', () => {
   const props = [{ abbr: 'KH', expansion: 'khách hàng', source: 'definition' as const, count: 1 }];
 

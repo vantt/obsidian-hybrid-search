@@ -139,7 +139,7 @@ export function weakBm25Penalty(
     for (const [b, r] of Object.entries(c.rank)) if (isRank(r)) branches.add(b);
   const maxScore =
     [...branches].reduce((sum, b) => sum + branchWeight(b, analysis, options), 0) / (RRF_K + 1);
-  if (!(maxScore > 0)) return none;
+  if (Number.isNaN(maxScore) || maxScore <= 0) return none;
   const lost = 1 - agreement / threshold;
   return candidates.map((c) =>
     isRank(c.rank.bm25) ? (lost * CORE_WEIGHTS.bm25!) / (RRF_K + c.rank.bm25) / maxScore : 0,

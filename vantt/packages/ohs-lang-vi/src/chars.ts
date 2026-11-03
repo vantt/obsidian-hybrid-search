@@ -3,6 +3,7 @@
  * All functions are pure.
  */
 
+// eslint-disable-next-line no-control-regex -- ASCII range check; \x00 is its intended lower bound
 export const ASCII_RE = /^[\x00-\x7f]*$/;
 
 /**
@@ -10,7 +11,7 @@ export const ASCII_RE = /^[\x00-\x7f]*$/;
  * - U+00D0 / U+00F0 (Ð, ð), commonly typed instead of Đ / đ;
  * - U+00A0, U+2007, U+202F: non-breaking spaces.
  */
-export const ODD_CHARS_RE = /[   Ðð]/g;
+export const ODD_CHARS_RE = /[\u00a0\u2007\u202fÐð]/g;
 
 export function replaceOddChar(ch: string): string {
   switch (ch) {
@@ -22,6 +23,9 @@ export function replaceOddChar(ch: string): string {
       return ' ';
   }
 }
+
+/** Default `Array#sort` order (UTF-16 code units), spelled out where a digest or listing depends on it. */
+export const byCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 /** Replace look-alike and non-breaking characters. Case is preserved. */
 export function cleanOddChars(text: string): string {

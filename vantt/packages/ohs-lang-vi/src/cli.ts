@@ -22,22 +22,22 @@ interface Parsed {
   help: boolean;
 }
 
-function parseArgs(args: readonly string[]): Parsed | string {
+function parseArgs(args: readonly string[]): Parsed | { error: string } {
   const out: Parsed = { dryRun: false, help: false };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]!;
     const takesValue = arg === '--vault' || arg === '--lexicon' || arg === '--min-count';
     const value = takesValue ? args[++i] : undefined;
-    if (takesValue && value === undefined) return `${arg} needs a value`;
+    if (takesValue && value === undefined) return { error: `${arg} needs a value` };
     if (arg === '--vault') out.vault = value;
     else if (arg === '--lexicon') out.lexicon = value;
     else if (arg === '--min-count') {
       const n = Number(value);
-      if (!Number.isInteger(n) || n < 1) return '--min-count must be a positive integer';
+      if (!Number.isInteger(n) || n < 1) return { error: '--min-count must be a positive integer' };
       out.minCount = n;
     } else if (arg === '--dry-run') out.dryRun = true;
     else if (arg === '--help' || arg === '-h') out.help = true;
-    else return `unknown argument ${arg}`;
+    else return { error: `unknown argument ${arg}` };
   }
   return out;
 }
@@ -54,8 +54,8 @@ export function runCli(argv: readonly string[], io: CliIo): number {
     return 2;
   }
   const parsed = parseArgs(rest);
-  if (typeof parsed === 'string') {
-    io.error(`ohs-lang-vi: ${parsed}\n${USAGE}`);
+  if ('error' in parsed) {
+    io.error(`ohs-lang-vi: ${parsed.error}\n${USAGE}`);
     return 2;
   }
   if (parsed.help) {

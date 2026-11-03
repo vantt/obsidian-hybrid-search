@@ -10,6 +10,7 @@ import {
   parseLexicon,
   resolveOptions,
 } from '../src/index.js';
+import { headingText } from '../src/lexicon.js';
 import type { ViAnalysisData } from '../src/query.js';
 import { fakeContext } from './fake-context.js';
 
@@ -78,6 +79,30 @@ describe('parseLexicon', () => {
   it('ignores lines outside sections and single-form lines', () => {
     const lex = parseLexicon('a = b\n## Đồng nghĩa\nonly\nx = x\n## Khác\ny = z\n');
     expect(lex).toEqual({ synonyms: [], abbreviations: [], compounds: [] });
+  });
+});
+
+describe('headingText', () => {
+  it('reads level-2 headings like /^\\s{0,3}##\\s+(.*?)\\s*#*\\s*$/', () => {
+    expect(headingText('## Viết tắt')).toBe('Viết tắt');
+    expect(headingText('   ##  Đồng nghĩa  ## ')).toBe('Đồng nghĩa');
+    expect(headingText('## a # b ##')).toBe('a # b');
+    expect(headingText('## C#')).toBe('C');
+    expect(headingText('##   ')).toBe('');
+    expect(headingText('## ###')).toBe('');
+    expect(headingText('##\tTab\u00a0')).toBe('Tab');
+    expect(headingText('## a \u2028')).toBe('a');
+    expect(headingText('## a\u2028b')).toBeNull();
+    for (const no of ['', '#', '##', '##x', '# h', '### h', '    ## h', 'x ## h'])
+      expect(headingText(no), JSON.stringify(no)).toBeNull();
+  });
+
+  it('stays linear on long runs of spaces and hashes', () => {
+    const line = `## a${' '.repeat(50_000)}#${' \t'.repeat(50_000)}`;
+    const t0 = performance.now();
+    expect(headingText(line)).toBe('a');
+    expect(headingText(`## ${'# '.repeat(50_000)}x`)).toMatch(/^#/);
+    expect(performance.now() - t0).toBeLessThan(1000);
   });
 });
 

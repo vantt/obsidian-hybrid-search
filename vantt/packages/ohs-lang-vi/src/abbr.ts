@@ -11,11 +11,12 @@
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { byCodeUnit } from './chars.js';
 import { fold } from './fold.js';
 import {
   DEFAULT_LEXICON_PATH,
-  HEADING_RE,
   headingKey,
+  headingText,
   parseLexicon,
   SECTION_ABBREVIATIONS,
   SECTION_COMPOUNDS,
@@ -74,7 +75,8 @@ function isSyllable(token: string): boolean {
   return fold(word) !== word ? isVietnameseSyllable(word) : isPossibleFoldedSyllable(word);
 }
 
-const wordsOf = (text: string): string[] => text.match(new RegExp(WORD, 'gu')) ?? [];
+const WORD_RE = new RegExp(WORD, 'gu');
+const wordsOf = (text: string): string[] => Array.from(text.matchAll(WORD_RE), (m) => m[0]);
 
 /** Words of `candidate` (a run before `(`) whose initials spell `letters`: the longest matching suffix. */
 function suffixWithInitials(candidate: readonly string[], letters: string): string[] | null {
@@ -129,9 +131,9 @@ export function knownEntries(lexiconText: string | null): KnownEntries {
     known.abbreviations.add(abbrKey(group[0]!.join(' ')));
   let pending = false;
   for (const raw of lexiconText.split(/\r\n|\r|\n/)) {
-    const heading = HEADING_RE.exec(raw);
-    if (heading) {
-      pending = headingKey(heading[1] ?? '') === headingKey(SECTION_PENDING);
+    const heading = headingText(raw);
+    if (heading !== null) {
+      pending = headingKey(heading) === headingKey(SECTION_PENDING);
       continue;
     }
     if (!pending) continue;
@@ -142,22 +144,18 @@ export function knownEntries(lexiconText: string | null): KnownEntries {
   return known;
 }
 
-/** Propose abbreviations from the texts of a vault. */
-export function learnAbbreviations(
-  texts: Iterable<string>,
-  known: KnownEntries,
-  options: LearnOptions = {},
-): AbbrProposal[] {
-  const minPhrase = options.minPhraseCount ?? 3;
-  const minAbbr = options.minAbbrCount ?? 2;
-  const maxWords = options.maxWords ?? 6;
-  const docs = [...texts];
+type Proposals = Map<string, AbbrProposal>;
+type Skip = (abbr: string, expansion: string) => boolean;
 
-  const proposals = new Map<string, AbbrProposal>();
-  const skip = (abbr: string, expansion: string) =>
-    known.abbreviations.has(abbrKey(abbr)) || known.pending.has(pairKey(abbr, expansion));
+/** `text` without its trailing dots (`KH..` -> `KH`). */
+function trimTrailingDots(text: string): string {
+  let end = text.length;
+  while (end > 0 && text[end - 1] === '.') end--;
+  return text.slice(0, end);
+}
 
-  // 1. definitions
+/** 1. Definitions in the texts, counted per pair. */
+function addDefinitions(docs: readonly string[], skip: Skip, proposals: Proposals): void {
   for (const text of docs) {
     for (const { abbr, expansion } of findDefinitions(text)) {
       if (skip(abbr, expansion)) continue;
@@ -167,19 +165,32 @@ export function learnAbbreviations(
       else proposals.set(key, { abbr, expansion, source: 'definition', count: 1 });
     }
   }
+}
 
-  // 2. frequent phrases matching an abbreviation seen in the vault
+/** Abbreviations seen at least `minAbbr` times, by letters (first spelling seen). */
+function seenAbbreviations(
+  docs: readonly string[],
+  minAbbr: number,
+  maxWords: number,
+): Map<string, { abbr: string; count: number }> {
   const abbrCount = new Map<string, { abbr: string; count: number }>();
   for (const text of docs)
     for (const m of text.matchAll(ABBR_TOKEN_RE)) {
-      const abbr = m[1]!.replace(/\.+$/, '');
+      const abbr = trimTrailingDots(m[1]!);
       const letters = abbrLetters(abbr);
       if (letters.length < 2 || letters.length > maxWords) continue;
       const entry = abbrCount.get(letters) ?? { abbr, count: 0 };
       entry.count++;
       abbrCount.set(letters, entry);
     }
-  const wanted = new Map([...abbrCount].filter(([, v]) => v.count >= minAbbr));
+  return new Map([...abbrCount].filter(([, v]) => v.count >= minAbbr));
+}
+
+/** Occurrences of syllable runs whose initials spell one of `wanted`, by letters and phrase. */
+function phraseCounts(
+  docs: readonly string[],
+  wanted: ReadonlyMap<string, unknown>,
+): Map<string, Map<string, number>> {
   const lengths = new Set([...wanted.keys()].map((l) => l.length));
   const phrases = new Map<string, Map<string, number>>();
   if (wanted.size > 0)
@@ -198,7 +209,30 @@ export function learnAbbreviations(
             phrases.set(letters, byPhrase);
           }
       }
-  for (const [letters, byPhrase] of phrases) {
+  return phrases;
+}
+
+/** Propose abbreviations from the texts of a vault. */
+export function learnAbbreviations(
+  texts: Iterable<string>,
+  known: KnownEntries,
+  options: LearnOptions = {},
+): AbbrProposal[] {
+  const minPhrase = options.minPhraseCount ?? 3;
+  const minAbbr = options.minAbbrCount ?? 2;
+  const maxWords = options.maxWords ?? 6;
+  const docs = [...texts];
+
+  const proposals: Proposals = new Map();
+  const skip: Skip = (abbr, expansion) =>
+    known.abbreviations.has(abbrKey(abbr)) || known.pending.has(pairKey(abbr, expansion));
+
+  // 1. definitions
+  addDefinitions(docs, skip, proposals);
+
+  // 2. frequent phrases matching an abbreviation seen in the vault
+  const wanted = seenAbbreviations(docs, minAbbr, maxWords);
+  for (const [letters, byPhrase] of phraseCounts(docs, wanted)) {
     const ranked = [...byPhrase].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
     const [phrase, count] = ranked[0]!;
     const second = ranked[1]?.[1] ?? 0;
@@ -242,15 +276,15 @@ export function addPending(lexiconText: string | null, proposals: readonly AbbrP
   const lines = text.split(/\r\n|\r|\n/);
   const entries = proposals.map((p) => `${p.abbr} = ${p.expansion}`);
   const start = lines.findIndex((l) => {
-    const h = HEADING_RE.exec(l);
-    return h !== null && headingKey(h[1] ?? '') === headingKey(SECTION_PENDING);
+    const h = headingText(l);
+    return h !== null && headingKey(h) === headingKey(SECTION_PENDING);
   });
   if (start < 0) {
     while (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
     lines.push('', `## ${SECTION_PENDING}`, '', ...entries, '');
     return lines.join(eol);
   }
-  let end = lines.findIndex((l, i) => i > start && HEADING_RE.test(l));
+  let end = lines.findIndex((l, i) => i > start && headingText(l) !== null);
   if (end < 0) end = lines.length;
   let last = end;
   while (last > start + 1 && lines[last - 1]!.trim() === '') last--;
@@ -275,7 +309,7 @@ export function listMarkdown(root: string): string[] {
     }
   };
   walk(root);
-  return out.sort();
+  return out.sort(byCodeUnit);
 }
 
 export interface LearnResult {

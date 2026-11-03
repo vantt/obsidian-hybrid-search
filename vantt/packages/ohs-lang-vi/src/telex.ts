@@ -92,7 +92,7 @@ function decodeVniReading(typed: string, style: TonePlacement, pairUo: boolean):
       letters[at - 1] = 'ư';
   }
   const bare = letters.join('').replace(/ưo/g, 'ươ');
-  return /[0-9]/.test(bare) ? null : compose(bare, tone, style);
+  return /\d/.test(bare) ? null : compose(bare, tone, style);
 }
 
 /**
@@ -102,7 +102,7 @@ function decodeVniReading(typed: string, style: TonePlacement, pairUo: boolean):
  */
 export function vniForms(token: string, style: TonePlacement = 'modern'): string[] {
   const typed = token.toLowerCase();
-  if (!VNI_RE.test(typed) || !/[0-9]/.test(typed)) return [];
+  if (!VNI_RE.test(typed) || !/\d/.test(typed)) return [];
   const out: string[] = [];
   for (const pairUo of [true, false]) {
     const form = decodeVniReading(typed, style, pairUo);
@@ -119,7 +119,7 @@ export function decodeVni(token: string, style: TonePlacement = 'modern'): strin
 export function decodeKeystrokes(token: string, style: TonePlacement = 'modern'): string[] {
   const out: string[] = [];
   for (const form of [...telexForms(token, style), ...vniForms(token, style)]) {
-    if (form !== null && form !== token.toLowerCase() && !out.includes(form)) out.push(form);
+    if (form !== token.toLowerCase() && !out.includes(form)) out.push(form);
   }
   return out;
 }

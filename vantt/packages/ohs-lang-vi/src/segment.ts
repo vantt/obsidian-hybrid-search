@@ -18,9 +18,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { byCodeUnit } from './chars.js';
 import type { TonePlacement } from './data.js';
 import { normalize } from './normalize.js';
-import { TOKEN_RE } from './views.js';
+import { TOKEN_RE, tokenize } from './views.js';
 
 /** Join character between the syllables of a compound in the seg view. */
 export const SEG_JOINER = '_';
@@ -29,7 +30,7 @@ export const SEG_JOINER = '_';
 export const SEG_TOKENIZER = "unicode61 remove_diacritics 0 tokenchars '+#_'";
 
 /** Separators that may sit inside a compound: spaces and tabs only (no line breaks, no punctuation). */
-const JOINABLE_SEPARATOR_RE = /^[ \t   ]+$/;
+const JOINABLE_SEPARATOR_RE = /^[ \t\u00a0\u2007\u202f]+$/;
 
 const DICTIONARY_URL = new URL('../data/compounds.txt', import.meta.url);
 
@@ -60,12 +61,12 @@ export function buildDictionary(
   let maxWords = base?.maxWords ?? 0;
   for (const compound of compounds) {
     const text = typeof compound === 'string' ? compound : compound.join(' ');
-    const words = normalize(text, { tonePlacement }).match(TOKEN_RE) ?? [];
+    const words = tokenize(normalize(text, { tonePlacement }));
     if (words.length < 2) continue;
     entries.add(words.join(' '));
     maxWords = Math.max(maxWords, words.length);
   }
-  return { entries, maxWords, digest: digestOf([...entries].sort()) };
+  return { entries, maxWords, digest: digestOf([...entries].sort(byCodeUnit)) };
 }
 
 /**

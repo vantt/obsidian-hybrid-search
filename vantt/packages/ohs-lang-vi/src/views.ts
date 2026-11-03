@@ -26,6 +26,7 @@ export function tokenize(text: string): string[] {
 }
 
 const WHOLE_TOKEN_RE = /^[\p{L}\p{N}\p{Co}\p{M}+#]+$/u;
+// eslint-disable-next-line no-control-regex -- ASCII range check; \x00 is its intended lower bound
 const ASCII_TOKEN_RE = /^[\x00-\x7f]+$/;
 
 function projectToken(view: string, token: string, options: PackOptions): string {

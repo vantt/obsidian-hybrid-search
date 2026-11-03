@@ -10,6 +10,7 @@ export interface FoldOptions {
 }
 
 const COMBINING_MARKS_RE = /[̀-ͯ]/g;
+// eslint-disable-next-line no-control-regex -- ASCII range check; \x00 is its intended lower bound
 const NON_ASCII_RE = /[^\x00-\x7f]/gu;
 const MAX_CACHE = 4096;
 const charCache = new Map<string, string>();

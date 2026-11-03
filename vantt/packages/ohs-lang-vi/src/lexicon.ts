@@ -14,6 +14,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
+import { byCodeUnit } from './chars.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
@@ -58,8 +59,28 @@ export function sectionKind(heading: string): SectionKind | null {
   return SECTION_KINDS.get(headingKey(heading)) ?? null;
 }
 
-/** `## Heading` (level 2) line. */
-export const HEADING_RE = /^\s{0,3}##\s+(.*?)\s*#*\s*$/;
+const HEADING_START_RE = /^\s{0,3}##\s+/;
+const SPACE_RE = /\s/;
+const LINE_TERMINATOR_RE = /[\n\r\u2028\u2029]/;
+
+/**
+ * Text of a `## Heading` (level 2) line, without the closing `#` run and the
+ * surrounding whitespace; null when the line is not such a heading. Same
+ * result as `/^\s{0,3}##\s+(.*?)\s*#*\s*$/`, in linear time: the trailing
+ * `\s*#*\s*` is peeled from the end, and the text left may not hold a line
+ * terminator (`.` does not match one).
+ */
+export function headingText(line: string): string | null {
+  const start = HEADING_START_RE.exec(line);
+  if (!start) return null;
+  const rest = line.slice(start[0].length);
+  let end = rest.length;
+  while (end > 0 && SPACE_RE.test(rest[end - 1]!)) end--;
+  while (end > 0 && rest[end - 1] === '#') end--;
+  while (end > 0 && SPACE_RE.test(rest[end - 1]!)) end--;
+  const text = rest.slice(0, end);
+  return LINE_TERMINATOR_RE.test(text) ? null : text;
+}
 const BULLET_RE = /^\s*[-*+]\s+/;
 
 function toForm(text: string): Form {
@@ -74,10 +95,10 @@ function sameForm(a: Form, b: Form): boolean {
 export function parseLexicon(text: string): Lexicon {
   const lexicon: Lexicon = { synonyms: [], abbreviations: [], compounds: [] };
   let kind: SectionKind | null = null;
-  for (const raw of text.replace(/^﻿/, '').split(/\r\n|\r|\n/)) {
-    const heading = HEADING_RE.exec(raw);
-    if (heading) {
-      kind = sectionKind(heading[1] ?? '');
+  for (const raw of text.replace(/^\uFEFF/, '').split(/\r\n|\r|\n/)) {
+    const heading = headingText(raw);
+    if (heading !== null) {
+      kind = sectionKind(heading);
       continue;
     }
     if (!kind) continue;
@@ -117,7 +138,7 @@ export function compoundDigest(lexicon: Lexicon): string {
   return digest(
     lexicon.compounds
       .map((c) => c.join(' '))
-      .sort()
+      .sort(byCodeUnit)
       .join('\n'),
   );
 }

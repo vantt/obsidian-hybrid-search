@@ -119,19 +119,34 @@ const CLEAN_SOURCES = ['alt', 'personas'];
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
 
+/** Every `<...>` tag replaced by a space: `.replace(/<[^>]*>/g, ' ')` in linear time. */
+function tagsToSpaces(text) {
+  let out = '';
+  let from = 0;
+  for (;;) {
+    const open = text.indexOf('<', from);
+    if (open < 0) break;
+    const close = text.indexOf('>', open + 1);
+    if (close < 0) break;
+    out += `${text.slice(from, open)} `;
+    from = close + 1;
+  }
+  return out + text.slice(from);
+}
+
 /** Plain text of an HTML document: block tags become line breaks, other tags spaces. */
 export function htmlToText(html) {
-  return html
-    .replace(/<(style|script|head)\b[\s\S]*?<\/\1>/gi, ' ')
-    .replace(/<\/?(p|div|br|tr|td|th|li|h[1-6]|table|ul|ol)\b[^>]*>/gi, '\n')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
-      if (e[0] === '#')
-        return String.fromCodePoint(
-          e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1)),
-        );
-      return ENTITIES[e.toLowerCase()] ?? m;
-    });
+  return tagsToSpaces(
+    html
+      .replace(/<(style|script|head)\b[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<\/?(p|div|br|tr|td|th|li|h[1-6]|table|ul|ol)\b[^>]*>/gi, '\n'),
+  ).replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
+    if (e[0] === '#')
+      return String.fromCodePoint(
+        e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1)),
+      );
+    return ENTITIES[e.toLowerCase()] ?? m;
+  });
 }
 
 /** A word written in title case ("Ngọc"): a capital, then lower case only. */
@@ -220,7 +235,10 @@ class Counter {
         if (prev >= 0) {
           const key = prev * 65536 + id;
           let n = this.pairs.get(key);
-          if (n === undefined) this.pairs.set(key, (n = [...SOURCES.map(() => 0), 0]));
+          if (n === undefined) {
+            n = [...SOURCES.map(() => 0), 0];
+            this.pairs.set(key, n);
+          }
           n[this.source]++;
           if (prevTitle && title) n[SOURCES.length]++;
           if (prev2 >= 0) {
@@ -348,7 +366,6 @@ const ASCII_WORD_RE = /^[a-z]+$/;
  *   people and places: "Ngọc Anh", "Hà Nội").
  */
 export function scorePairs({ syllables, unigram, pairs, titled, triples }, t = THRESHOLDS) {
-  const sources = SOURCES.length;
   const clean = SOURCES.map((s) => CLEAN_SOURCES.includes(s.name));
   const words = SOURCES.map((_, s) => unigram.reduce((sum, u) => sum + u[s], 0));
   const cleanCount = (counts) => counts.reduce((sum, c, s) => sum + (clean[s] ? c : 0), 0);
