@@ -12,6 +12,7 @@ import {
 } from '../src/index.js';
 import { headingText } from '../src/lexicon.js';
 import type { ViAnalysisData } from '../src/query.js';
+import { tokenize } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
 
 const LEXICON = `# Từ điển
@@ -146,10 +147,98 @@ describe('lexicon in the pack', () => {
   });
 
   it('expands an abbreviation one way and keeps the query words', () => {
-    const a = analyze('KH tiềm năng');
+    const a = analyze('kh tiem nang');
     expect(a.viewQueries.norm).toContain('khách hàng');
-    expect(a.viewQueries.norm).toMatch(/^kh/);
+    expect(a.viewQueries.norm).toMatch(/^kh /);
+    expect(a.baseQuery).toBe('kh tiem nang khách hàng');
     expect(analyze('khách hàng').viewQueries.norm ?? '').not.toMatch(/\bkh\b/);
+    expect(analyze('khách hàng').baseQuery).toBeUndefined();
+  });
+
+  it('takes a word typed in capitals as an acronym, not a syllable to restore', () => {
+    write('## Viết tắt\nBA = business analyst\n');
+    const docs = ['Bà ngoại kể chuyện ba ngày', 'Tuyển business analyst cho dự án'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const acronym = run('tuyển BA');
+    expect((acronym.data as ViAnalysisData).targets.map((t) => t.words.join(' '))).toEqual([
+      'tuyển ba',
+      'tuyển business analyst',
+    ]);
+    expect((acronym.data as ViAnalysisData).literalToken).toBe(true);
+    expect(acronym.viewQueries.norm ?? '').not.toContain('bà');
+    expect(acronym.baseQuery).toBe('tuyển ba business analyst');
+    // lowercase "ba" is still a syllable, and a query typed with caps lock stays Vietnamese
+    expect((run('ba ngay').data as ViAnalysisData).target).toEqual(['ba', 'ngày']);
+    expect((run('ba ngay').data as ViAnalysisData).literalToken).toBe(false);
+    expect((run('BA NGAY').data as ViAnalysisData).literalToken).toBe(false);
+  });
+
+  it('reads only A-Z and Đ capitals as acronyms, not Vietnamese words typed in capitals', () => {
+    write('');
+    const docs = ['Trường đại học bách khoa', 'Danh sách khách hàng tiềm năng', 'Ngày nghỉ lễ'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const data = (q: string) => run(q).data as ViAnalysisData;
+    expect(data('trường ĐẠI HỌC').vietnamese).toBe(true);
+    expect(data('trường ĐẠI HỌC').literalToken).toBe(false);
+    expect(data('Khách HÀNG tiềm năng').literalToken).toBe(false);
+    expect(run('Khách HÀNG tiềm năng').viewQueries.seg).not.toBeNull();
+    expect(data('NGÀY').literalToken).toBe(false);
+    expect(data('giấy ĐKKD').literalToken).toBe(true);
+  });
+
+  it('a word typed in capitals turns the seg branch off (literalToken)', () => {
+    write('');
+    const docs = ['Hợp đồng IT với đối tác', 'Hợp đồng thuê nhà', 'Ghi chú khác'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const caps = run('hop dong IT');
+    expect((caps.data as ViAnalysisData).literalToken).toBe(true);
+    expect(caps.viewQueries.seg ?? null).toBeNull();
+    expect((run('hop dong it').data as ViAnalysisData).literalToken).toBe(false);
+  });
+
+  it('expands an abbreviation spelled like a syllable only when typed in capitals', () => {
+    write('## Viết tắt\nBA = business analyst\nKH = khách hàng\n');
+    const docs = ['Bà ngoại kể chuyện ba ngày', 'Tuyển business analyst', 'Khách hàng mới'];
+    const run = (q: string) =>
+      createPack().analyzeQuery(q, { ...fakeContext(docs), vaultPath: dir }) as QueryAnalysis;
+    const lower = run('ba ngay');
+    expect(lower.baseQuery).toBeUndefined();
+    expect(lower.viewQueries.norm ?? '').not.toContain('business');
+    expect(run('BA NGAY').baseQuery).toBeUndefined(); // caps lock: no acronym
+    expect(run('BA ngay').baseQuery).toBe('ba ngay business analyst');
+    // a form that is no syllable keeps matching in any case
+    expect(run('kh moi').baseQuery).toBe('kh moi khách hàng');
+  });
+
+  it('does not repeat in BM25 an expansion word the query already has in another accent form', () => {
+    for (const [q, base] of [
+      ['khach hang KH', undefined],
+      ['KH khach', 'kh khach hàng'],
+      ['KH tiềm năng', 'kh tiềm năng khách hàng'],
+    ] as const)
+      expect(analyze(q).baseQuery, q).toBe(base);
+  });
+
+  it('never searches an abbreviation expansion alone in a view the query skips', () => {
+    // An accented query does not search the norm and fold views; an expansion-only branch there
+    // would vote for every note dense in "khách hàng" and bury the note the query describes.
+    for (const q of ['KH tiềm năng', 'quy trình chăm sóc KH', 'KH']) {
+      const a = analyze(q);
+      expect(a.viewQueries.norm ?? null, q).toBeNull();
+      expect(a.viewQueries.fold ?? null, q).toBeNull();
+      expect(tokenize(a.baseQuery ?? ''), q).toEqual([
+        ...tokenize(q.toLowerCase()),
+        'khách',
+        'hàng',
+      ]);
+      expect((a.data as ViAnalysisData).targets.at(-1)?.words, q).toContain('khách');
+    }
+    expect(analyze('quy trình chăm sóc KH').debug?.baseQuery).toBe(
+      'quy trình chăm sóc kh khách hàng',
+    );
   });
 
   it('a lexicon word is never typo-corrected', () => {

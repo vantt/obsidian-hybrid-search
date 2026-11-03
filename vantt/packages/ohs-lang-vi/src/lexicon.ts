@@ -18,6 +18,7 @@ import { byCodeUnit } from './chars.js';
 import { fold } from './fold.js';
 import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
+import { isPossibleFoldedSyllable } from './syllable.js';
 import { tokenize } from './views.js';
 
 export const DEFAULT_LEXICON_PATH = '_ohs/lexicon.md';
@@ -161,6 +162,8 @@ export interface QueryTokenForms {
   folded: string;
   /** Typed with a diacritic: it must then match the lexicon word exactly (`lượng` is not `lương`). */
   marked: boolean;
+  /** Typed in capitals (`BA`, `KH`). */
+  acronym?: boolean;
 }
 
 /**
@@ -182,15 +185,15 @@ export function expandQuery(
     seen.add(key);
     substitutions.push(abbreviation ? { start, end, words, abbreviation } : { start, end, words });
   };
-  const find = (form: Form): number[] => {
+  const matches = (token: QueryTokenForms, w: string, abbreviation: boolean) =>
+    (token.marked ? token.norm === w : token.folded === foldWord(w)) &&
+    // An abbreviation spelled like a syllable (BA, DA, AI) is also an ordinary word
+    // ("ba ngày", "da mặt"): only a token typed in capitals is the abbreviation.
+    (!abbreviation || token.acronym === true || !isPossibleFoldedSyllable(foldWord(w)));
+  const find = (form: Form, abbreviation = false): number[] => {
     const starts: number[] = [];
     for (let i = 0; i + form.length <= tokens.length; i++)
-      if (
-        form.every((w, j) =>
-          tokens[i + j]!.marked ? tokens[i + j]!.norm === w : tokens[i + j]!.folded === foldWord(w),
-        )
-      )
-        starts.push(i);
+      if (form.every((w, j) => matches(tokens[i + j]!, w, abbreviation))) starts.push(i);
     return starts;
   };
   for (const group of lexicon.synonyms) {
@@ -202,7 +205,7 @@ export function expandQuery(
   }
   for (const group of lexicon.abbreviations) {
     const abbreviation = group[0]!;
-    for (const start of find(abbreviation))
+    for (const start of find(abbreviation, true))
       for (const words of group.slice(1)) add(start, start + abbreviation.length, words, true);
   }
   return substitutions;

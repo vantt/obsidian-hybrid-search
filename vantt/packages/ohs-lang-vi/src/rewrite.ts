@@ -40,6 +40,7 @@ export function rewriteTokens(
   // A token is known when the vault contains it as typed (either view).
   const lexiconWords = env.lexicon?.knownWords((w) => foldToken(w, options), ctx.vaultPath);
   const known = (t: QueryToken) =>
+    t.acronym === true ||
     !PLAIN_TOKEN.test(t.norm) ||
     lexiconWords?.has(t.folded) === true ||
     cache.termDocs(ctx, 'fold', t.folded) > 0 ||

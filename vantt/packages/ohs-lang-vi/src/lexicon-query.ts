@@ -1,8 +1,10 @@
 /**
  * Applies lexicon rewrites (synonyms, abbreviations) to a query analysis:
- * the other forms of a matched group join the view queries (OR, so they only
- * add candidates) and become extra `rescore` targets with `lexiconWeight`
- * probability. The `embedQuery` is untouched.
+ * the other forms of a matched group join the query (OR, so they only add
+ * candidates) and become extra `rescore` targets with `lexiconWeight`
+ * probability. Synonyms join both view queries; abbreviation expansions join
+ * the upstream BM25 query and the views the query already searches. The
+ * `embedQuery` is untouched.
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
 import type { LexiconStore } from './lexicon.js';
@@ -19,6 +21,39 @@ function extend(current: string | null | undefined, extra: readonly string[]): s
   return current ? `${current} ${add.join(' ')}` : add.join(' ');
 }
 
+/**
+ * An abbreviation is one word of a longer query ("quy trình chăm sóc KH"). A view the query
+ * does not search (an accented query skips norm and fold) would search the expansion alone and
+ * vote for every note dense in it, burying the note the rest of the query describes. So an
+ * expansion joins only the views the query searches, and the upstream BM25 query, where it is
+ * ranked together with the other query words. A synonym usually is the whole query ("phone",
+ * "xe hơi"): its forms join both views.
+ */
+function addExpansions(
+  analysis: QueryAnalysis,
+  state: QueryState,
+  abbreviationWords: readonly string[],
+  synonymWords: readonly string[],
+  foldWord: (w: string) => string,
+): void {
+  const { viewQueries } = analysis;
+  if (abbreviationWords.length > 0) {
+    if (viewQueries.norm) viewQueries.norm = extend(viewQueries.norm, abbreviationWords);
+    if (viewQueries.fold)
+      viewQueries.fold = extend(viewQueries.fold, abbreviationWords.map(foldWord));
+    // The upstream tokenizer drops diacritics, and FTS5 adds the score of a repeated term: an
+    // expansion word already in the query in any accent form ("khach hang KH") is left out.
+    const base = analysis.baseQuery ?? state.normalized;
+    const have = new Set(tokenize(base).map(foldWord));
+    const add = abbreviationWords.filter((w) => !have.has(foldWord(w)));
+    if (add.length > 0) analysis.baseQuery = `${base} ${add.join(' ')}`;
+  }
+  if (synonymWords.length > 0) {
+    viewQueries.norm = extend(viewQueries.norm, synonymWords);
+    viewQueries.fold = extend(viewQueries.fold, synonymWords.map(foldWord));
+  }
+}
+
 export function applyLexicon(
   analysis: QueryAnalysis,
   state: QueryState,
@@ -32,9 +67,9 @@ export function applyLexicon(
   const foldWord = (w: string) => foldToken(w, options);
   // Match the query as typed as well as after telex/typo rewriting (token for token), so a
   // typo-corrected word ("hoi" -> "moi") never hides a lexicon form the user typed.
-  const typed = tokenize(state.normalized).map((norm) => {
+  const typed = tokenize(state.normalized).map((norm, i) => {
     const folded = foldWord(norm);
-    return { norm, folded, marked: folded !== norm };
+    return { norm, folded, marked: folded !== norm, acronym: state.tokens[i]?.acronym };
   });
   const substitutions = expandQuery(lexicon, state.tokens, foldWord);
   if (typed.length === state.tokens.length) {
@@ -55,13 +90,14 @@ export function applyLexicon(
         : cache.phraseDocs(ctx, 'fold', folded.join(' '));
     return isCommon(docs, cache.noteCount(ctx), options.abbrMaxDocShare);
   };
-  const words: string[] = [];
-  for (const s of substitutions)
-    if (!common(s)) for (const w of s.words) if (!words.includes(w)) words.push(w);
-  if (words.length > 0) {
-    analysis.viewQueries.norm = extend(analysis.viewQueries.norm, words);
-    analysis.viewQueries.fold = extend(analysis.viewQueries.fold, words.map(foldWord));
+  const synonymWords: string[] = [];
+  const abbreviationWords: string[] = [];
+  for (const s of substitutions) {
+    if (common(s)) continue;
+    const list = s.abbreviation ? abbreviationWords : synonymWords;
+    for (const w of s.words) if (!list.includes(w)) list.push(w);
   }
+  addExpansions(analysis, state, abbreviationWords, synonymWords, foldWord);
 
   const data = analysis.data as ViAnalysisData | undefined;
   const rewrites: Array<{ from: string; to: string }> = [];

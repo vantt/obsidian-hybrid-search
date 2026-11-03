@@ -243,14 +243,16 @@ describe('abbreviations with a common expansion', () => {
       'Danh sách khách hàng tiềm năng',
       ...filler(60),
     ];
-    const a = analyze('KH tiềm năng', common, {}, dir);
+    const a = analyze('kh tiem nang', common, {}, dir);
     expect(a.viewQueries.norm ?? '').not.toContain('khách');
+    expect(a.baseQuery ?? '').not.toContain('khách');
     expect(
       (a.data as ViAnalysisData).targets.some((t) => t.words.join(' ') === 'khách hàng tiềm năng'),
     ).toBe(true);
     const rare = ['Danh sách khách hàng tiềm năng', ...filler(60)];
-    expect(analyze('KH tiềm năng', rare, {}, dir).viewQueries.norm).toContain('khách hàng');
-    expect(analyze('KH tiềm năng', common, { abbrMaxDocShare: 1 }, dir).viewQueries.norm).toContain(
+    expect(analyze('kh tiem nang', rare, {}, dir).viewQueries.norm).toContain('khách hàng');
+    expect(analyze('KH tiềm năng', rare, {}, dir).baseQuery).toBe('kh tiềm năng khách hàng');
+    expect(analyze('kh tiem nang', common, { abbrMaxDocShare: 1 }, dir).viewQueries.norm).toContain(
       'khách hàng',
     );
   });
@@ -309,6 +311,28 @@ describe('weak BM25 votes in hybrid fusion', () => {
     const plain = await scores('lỗi kết nối khi gọi máy chủ');
     // same evidence for the exact note either way ("lỗi", "máy chủ" are in neither title); only the plain query loses BM25 votes
     expect(withId[1]! - plain[1]!).toBeGreaterThan(0);
+  });
+
+  it('keeps the BM25 votes of a misspelled query', async () => {
+    // The vector branch embedded the typo, so its disagreement with BM25 is no evidence.
+    const answer = candidate('answer.md', 0.2, { semantic: 1 });
+    const exact = candidate('exact.md', 0.35, { semantic: 16, bm25: 1, 'view:seg': 2 });
+    const docs = ['Kế hoạch giữ chân khách hàng', ...filler(10, 'Khách hàng mới')];
+    const ctx = fakeContext(docs);
+    const pack = createPack();
+    const list = [answer, exact, ...moreBm25];
+    const typo = await pack.analyzeQuery('giu chna khahc hang', ctx);
+    expect((typo.data as ViAnalysisData).typoCorrected).toBe(true);
+    const plain = await pack.analyzeQuery('giu chan khach hang', ctx);
+    expect((plain.data as ViAnalysisData).typoCorrected).toBe(false);
+    // a correct word the vault lacks ("chun", a possible syllable) is no misspelling
+    const unknownWord = await pack.analyzeQuery('giu chun khach hang', ctx);
+    expect(JSON.stringify(unknownWord.debug?.rewrite)).toContain('"typo":[1]');
+    expect((unknownWord.data as ViAnalysisData).typoCorrected).toBe(false);
+    expect((await pack.rescore!(list, typo, ctx))[1]!.score).toBeCloseTo(exact.score, 6);
+    expect(typo.debug?.bm25Penalty).toBe(0);
+    await pack.rescore!(list, plain, ctx);
+    expect(plain.debug?.bm25Penalty as number).toBeGreaterThan(0);
   });
 
   it('keeps every vote when BM25 agrees, when off, and for non-Vietnamese queries', async () => {

@@ -48,6 +48,8 @@ export interface QueryToken {
   marked: boolean;
   /** A Vietnamese syllable (accented) or a possible unaccented one. */
   syllable: boolean;
+  /** Typed in capitals (an acronym): taken literally, never restored, decoded or corrected. */
+  acronym?: boolean;
 }
 
 export interface QueryState {
@@ -78,6 +80,8 @@ export interface ViAnalysisData {
   vietnamese: boolean;
   /** A query token is not a Vietnamese syllable (an identifier, a number, an English word). */
   literalToken: boolean;
+  /** A query word that cannot be a syllable was replaced by a typo correction. */
+  typoCorrected?: boolean;
 }
 
 /** Restorations handed to rescore (most probable first). */
@@ -95,9 +99,33 @@ export function makeQueryToken(norm: string, options: PackOptions): QueryToken {
   };
 }
 
+/**
+ * A word typed in capitals, at least two letters: `KH`, `BA`, `ĐKKD`, `SE3`. Only A-Z and Đ:
+ * a capital vowel with a diacritic (`ĐẠI HỌC`, `HÀNG`) is a Vietnamese word typed in capitals.
+ */
+const CAPITALS_RE = /^(?=(?:[^A-ZĐ]*[A-ZĐ]){2})[A-ZĐ0-9]+$/u;
+
+/**
+ * Tokens typed in capitals are acronyms ("BA", "DA", "AI"), not syllables to restore or
+ * decode, even when their letters spell one ("ba", "da", "ai"); unless the whole query of
+ * several words is typed in capitals (caps lock). Indexes of such tokens.
+ */
+function acronymIndexes(query: string, count: number): Set<number> {
+  const typed = tokenize(query.normalize('NFC'));
+  if (typed.length !== count) return new Set();
+  const capitals = typed.map((t) => CAPITALS_RE.test(t));
+  const lettered = typed.filter((t) => /\p{L}/u.test(t)).length;
+  if (lettered > 1 && capitals.filter(Boolean).length === lettered) return new Set();
+  return new Set(capitals.flatMap((c, i) => (c ? [i] : [])));
+}
+
 export function tokenizeQuery(query: string, options: PackOptions): QueryState {
   const normalized = normalize(query, { tonePlacement: options.tonePlacement });
   const tokens = tokenize(normalized).map((norm) => makeQueryToken(norm, options));
+  for (const i of acronymIndexes(query, tokens.length)) {
+    tokens[i]!.syllable = false;
+    tokens[i]!.acronym = true;
+  }
   return {
     query,
     normalized,
@@ -226,6 +254,19 @@ function restoredText(state: QueryState, options: PackOptions): string {
   });
 }
 
+/**
+ * Indexes of typo-corrected words that cannot be a Vietnamese syllable ("chna", "khahc"):
+ * the query was misspelled there. A possible syllable the vault lacks ("ban" corrected to
+ * "an") may be a correct word.
+ */
+function misspelled(state: QueryState): number[] {
+  const typed = tokenize(state.normalized);
+  return (state.rewrite?.typo ?? []).filter((i) => {
+    const word = typed[i];
+    return word !== undefined && !isPossibleFoldedSyllable(word);
+  });
+}
+
 export function buildAnalysis(
   state: QueryState,
   options: PackOptions,
@@ -272,6 +313,7 @@ export function buildAnalysis(
     accented: state.accented,
     vietnamese,
     literalToken: state.tokens.some((t) => !t.syllable),
+    typoCorrected: misspelled(state).length > 0,
   };
   analysis.data = data;
   // Decoded Telex/VNI: the typed keystrokes mean nothing to the upstream BM25
@@ -345,6 +387,7 @@ export function analyzeQuery(
     }
   }
   if (analysis.viewTerms && analysis.debug) analysis.debug.viewTerms = analysis.viewTerms;
+  if (analysis.baseQuery && analysis.debug) analysis.debug.baseQuery = analysis.baseQuery;
   return analysis;
 }
 
