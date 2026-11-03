@@ -355,7 +355,7 @@ const program = new Command()
   .version(version)
   .option(
     '--db <path>',
-    'Path to .obsidian-hybrid-search.db (auto-discovered from CWD by default)',
+    'Path to .obsidian-hybrid-search.db (auto-discovered from CWD by default; an existing database of the active vault is used in place)',
   );
 
 // eslint-disable-next-line @typescript-eslint/require-await
