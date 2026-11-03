@@ -943,7 +943,8 @@ describe('quality-gate CLI on a stub eval', () => {
         { config: configWith({ foldIY: false, lexiconPath: 'old/lexicon.txt' }) },
       );
       expect(code).toBe(0);
-      expect(report.pack_options).toEqual(given);
+      // The shared report hides the lexicon location; the private detail file keeps it.
+      expect(report.pack_options).toEqual({ ...given, lexiconPath: '[set]' });
       const [without, withPack] = runs();
       expect(without).toMatchObject({ run: 'eval', pack: false, options: null });
       expect(withPack).toMatchObject({ run: 'eval', pack: true });

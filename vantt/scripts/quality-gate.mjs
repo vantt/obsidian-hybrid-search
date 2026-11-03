@@ -475,7 +475,9 @@ async function privateMode(opts, root, config) {
       opts['lang-options'] === undefined
         ? (config.pack_options?.[lang] ?? null)
         : parseLangOptions(opts['lang-options']);
-    report.pack_options = options;
+    // The report is shared: keep a lexicon path (a vault location) out of it.
+    report.pack_options =
+      options && 'lexiconPath' in options ? { ...options, lexiconPath: '[set]' } : options;
     if (!existsSync(golden)) throw new ReportableError('private golden set not found');
     if (!opts.vault && !process.env.OHS_PRIVATE_VAULT && !(isDir && existsSync(vault)))
       throw new ReportableError(
