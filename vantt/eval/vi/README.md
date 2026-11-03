@@ -4,15 +4,15 @@ Bộ câu hỏi vàng (golden set) và vault mẫu để đo chất lượng tì
 
 ## Thành phần
 
-| Đường dẫn                                      | Nội dung                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `golden-set.json`                              | 270 câu = 17 hạng mục × 15 câu, riêng `vi-compound` 30 câu (15 câu thêm từ fixture `v0.11.0` có trường `hard`), đúng định dạng upstream `{id, query, relevant_paths, partial_paths, category, notes}`. Mỗi câu có đúng một note đúng. `vi-unaccented` và `vi-dd` có thêm `query_accented` (cùng câu, có dấu). Hạng `vi-snippet` có thêm `snippet_contains` và `matched_terms` (upstream bỏ qua, cổng chất lượng sẽ dùng) |
-| `smoke-golden-set.json`, `smoke-vault/`        | 10 note viết tay (có alias, note không dấu, note CRLF, note NFD, `_ohs/lexicon.md`) và 16 câu phủ gần hết hạng mục; chạy nhanh để thử máy                                                                                                                                                                                                                                                                                |
-| `run-eval.mjs`                                 | Dựng corpus trong thư mục tạm, chạy eval, ghi kết quả                                                                                                                                                                                                                                                                                                                                                                    |
-| `../baselines/linux-x64/0.17.2.vi-search.json` | Baseline: upstream `0.17.2`, không gói ngôn ngữ, corpus sinh                                                                                                                                                                                                                                                                                                                                                             |
-| `../baselines/linux-x64/0.17.2.smoke.json`     | Baseline của smoke-vault                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Đường dẫn                                      | Nội dung                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `golden-set.json`                              | 315 câu = 17 hạng mục × 15 câu, thêm 15 câu `vi-compound` từ fixture `v0.11.0` (trường `hard`) và 45 câu từ `v0.12.0` (trường `cause`, bảng dưới), đúng định dạng upstream `{id, query, relevant_paths, partial_paths, category, notes}`. Mỗi câu có đúng một note đúng. `vi-unaccented` và `vi-dd` có thêm `query_accented` (cùng câu, có dấu). Hạng `vi-snippet` có thêm `snippet_contains` và `matched_terms` (upstream bỏ qua, cổng chất lượng sẽ dùng) |
+| `smoke-golden-set.json`, `smoke-vault/`        | 10 note viết tay (có alias, note không dấu, note CRLF, note NFD, `_ohs/lexicon.md`) và 16 câu phủ gần hết hạng mục; chạy nhanh để thử máy                                                                                                                                                                                                                                                                                                                   |
+| `run-eval.mjs`                                 | Dựng corpus trong thư mục tạm, chạy eval, ghi kết quả                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `../baselines/linux-x64/0.17.2.vi-search.json` | Baseline: upstream `0.17.2`, không gói ngôn ngữ, corpus sinh                                                                                                                                                                                                                                                                                                                                                                                                |
+| `../baselines/linux-x64/0.17.2.smoke.json`     | Baseline của smoke-vault                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
-Corpus lớn không nằm trong repo này: nó do preset `vi-search` của [vantt/obsidian-test-fixture](https://github.com/vantt/obsidian-test-fixture) sinh ra (423 note + `_ohs/lexicon.md`, xác định theo `--seed`, chỉ có văn bản sinh). `run-eval.mjs` ghim thẻ `v0.11.0` của fixture và từ chối chạy nếu `golden-set.json` không khớp với bộ câu hỏi mà thẻ đó sinh ra. Lexicon mẫu theo định dạng PRD Q8 (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` không được dùng).
+Corpus lớn không nằm trong repo này: nó do preset `vi-search` của [vantt/obsidian-test-fixture](https://github.com/vantt/obsidian-test-fixture) sinh ra (621 note + `_ohs/lexicon.md`, xác định theo `--seed`, chỉ có văn bản sinh). `run-eval.mjs` ghim thẻ `v0.12.0` của fixture và từ chối chạy nếu `golden-set.json` không khớp với bộ câu hỏi mà thẻ đó sinh ra. Lexicon mẫu theo định dạng PRD Q8 (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` không được dùng).
 
 ## Chạy
 
@@ -84,9 +84,49 @@ Mỗi hạng 15 câu, riêng `vi-compound` 30 (`vi-unaccented` và `vi-dd` mỗi
 | `vi-synonym`, `vi-abbr`            | câu hỏi dùng dạng khác trong `_ohs/lexicon.md` so với dạng trong note                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `vi-alias`                         | câu hỏi (không dấu) chỉ khớp alias ở front matter; tiêu đề và thân note là tiếng Anh                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Khi build corpus, preset tự kiểm: cụm của mỗi câu chỉ xuất hiện đúng ở note đúng; dạng chính tả phía câu hỏi (`kĩ`, `hoà`) và chữ viết tắt không xuất hiện ở đâu trong vault. Với `vi-unaccented` và `vi-dd` nó còn kiểm câu đã bỏ dấu chỉ nằm trong đúng note đích. Nên bộ câu hỏi không thể lệch khỏi corpus.
+Từ `v0.12.0`, 45 câu khó hơn (5 câu mỗi `cause`) tái hiện các nguyên nhân tụt đo trên vault thật (V15b), nơi các hạng ở trên đã gần 1,000 với gói. Chỉ có văn bản sinh; 270 câu và 423 note cũ giữ nguyên từng chữ, 198 note mới (có 80 note nền `Ghi việc tuần NN` làm sáu từ ghép thành phổ biến) làm đổi IDF và nhánh vector của câu cũ.
+
+| `cause`                | Hạng mục      | Phép thử                                                                                                                                         |
+| ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `iy-mixed`             | `vi-iy`       | các note cùng chủ đề viết lẫn `kĩ`/`kỹ`; note đúng viết cụm theo cách kia, hai note gần viết như câu nhưng chỉ có một phần cụm                   |
+| `common-compound`      | `vi-compound` | câu mở đầu bằng từ ghép có trong hơn 10% số note (`thời gian`, `công việc`…); note đúng có các chữ còn lại nhưng không thành cụm                 |
+| `common-abbr`          | `vi-abbr`     | chữ viết tắt mới của lexicon (`CV`, `TT`, `SP`, `TG`, `CTy`) có dạng đầy đủ trong hơn 5% số note; note đúng viết đầy đủ hoặc viết tắt            |
+| `function-pairs`       | `vi-accented` | câu có dấu chung một cặp từ chức năng với các note gõ không dấu (`Nhan nhanh NN`); note đúng có dấu                                              |
+| `few-unaccented-pairs` | `vi-accented` | câu có dấu mà note đúng gõ không dấu, dưới một nửa số cặp chữ của câu có trong vault ở dạng không dấu                                            |
+| `idea`                 | `vi-semantic` | câu hỏi theo ý; note gần chỉ chung chữ chung chung, note đúng không chung chữ nội dung nào                                                       |
+| `title-phrase`         | `vi-accented` | note tổng quan trả lời câu (cụm một lần trong thân); note hẹp có cụm trong tiêu đề nằm trong `partial_paths`                                     |
+| `rare-identifier`      | `vi-accented` | mã hay tên riêng (`ECONNRESET`, `SE3`) chỉ note đúng có, một lần, giữa các note cùng chủ đề chung                                                |
+| `toneless-iy`          | `vi-mixed-en` | câu không dấu có âm tiết i/y không thanh (`mi`, `ti`, `hi`, `vi`, `li`); vault có note tiếng Anh và chữ phổ biến viết cách kia (`my`, `công ty`) |
+
+Khi build corpus, preset tự kiểm: cụm của mỗi câu chỉ xuất hiện đúng ở note đúng; dạng chính tả phía câu hỏi (`kĩ`, `hoà`) và chữ viết tắt không xuất hiện ở đâu trong vault. Với `vi-unaccented` và `vi-dd` nó còn kiểm câu đã bỏ dấu chỉ nằm trong đúng note đích; với câu `cause` nó kiểm tính chất của từng loại (từ ghép, cụm đầy đủ đủ phổ biến; cặp chữ không dấu có hoặc dưới một nửa). Nên bộ câu hỏi không thể lệch khỏi corpus.
 
 ## Baseline (upstream 0.17.2, không gói, linux-x64, Node 24, e5-small, k=10)
+
+Corpus `vi-search@v0.12.0`, 621 note, 315 câu: nDCG@5 0,623; nDCG@10 0,635; MRR 0,582; Hit@1 0,483; Hit@3 0,660; Hit@5 0,749; Recall@10 0,787. Ghi lại ngày 2026-11-03 khi fixture thêm 45 câu `cause` (V15b). 270 câu cũ trên corpus mới: 0,631 (trên `v0.11.0`: 0,646); 45 câu mới: 0,580. Chạy lại upstream hai lần cho cùng số nhưng thứ tự hạng 10 của một câu có thể đổi (điểm bằng nhau).
+
+| Hạng mục            | nDCG@5 | MRR   | Hit@1 | Hit@5 |
+| ------------------- | ------ | ----- | ----- | ----- |
+| `vi-accented`       | 0,770  | 0,698 | 0,60  | 0,86  |
+| `vi-partial-accent` | 0,830  | 0,774 | 0,67  | 1,00  |
+| `vi-telex`          | 0,330  | 0,297 | 0,20  | 0,47  |
+| `vi-typo`           | 0,533  | 0,474 | 0,33  | 0,73  |
+| `vi-snippet`        | 0,468  | 0,402 | 0,27  | 0,67  |
+| `vi-unaccented`     | 0,059  | 0,036 | 0,00  | 0,13  |
+| `vi-dd`             | 0,162  | 0,134 | 0,00  | 0,33  |
+| `vi-iy`             | 0,920  | 0,892 | 0,80  | 1,00  |
+| `vi-tone-placement` | 1,000  | 1,000 | 1,00  | 1,00  |
+| `vi-tone-precision` | 0,942  | 0,922 | 0,87  | 1,00  |
+| `vi-compound`       | 0,678  | 0,599 | 0,43  | 0,91  |
+| `vi-mixed-en`       | 0,853  | 0,838 | 0,80  | 0,90  |
+| `vi-semantic`       | 0,274  | 0,242 | 0,10  | 0,45  |
+| `vi-names`          | 0,885  | 0,847 | 0,73  | 1,00  |
+| `vi-synonym`        | 0,062  | 0,046 | 0,00  | 0,13  |
+| `vi-abbr`           | 0,932  | 0,930 | 0,90  | 0,95  |
+| `vi-alias`          | 0,471  | 0,383 | 0,20  | 0,73  |
+
+G3 trên corpus này: `vi-unaccented` Hit@5 0,13 và `vi-dd` 0,33, nên vẫn cần ≥ 0,85 cho cả hai; `vi-accented` giờ 0,770 ở upstream (câu `cause` khó), gói không được thấp hơn. Gói mặc định đo 2026-11-03: tổng 0,914, `vi-dd` Hit@5 0,87, mọi mục tiêu G3/G8 đạt (số từng hạng ở plan V15b, mục "Kết quả fixture v0.12.0").
+
+### Baseline trên `v0.11.0` (lịch sử)
 
 Corpus `vi-search@v0.11.0`, 423 note, 270 câu: nDCG@5 0,646; nDCG@10 0,664; MRR 0,617; Hit@1 0,526; Hit@3 0,685; Hit@5 0,756; Recall@10 0,811. Ghi lại ngày 2026-11-02 khi fixture thêm 15 câu `vi-compound` khó (V20b); baseline trên `v0.10.0` (363 note, 255 câu) là nDCG@5 0,666, `vi-compound` 0,844. 60 note mới cũng làm nhích các hạng khác (IDF và nhánh vector): `vi-semantic` 0,555 → 0,446, `vi-alias` 0,535 → 0,477, `vi-typo` 0,488 → 0,543, `vi-mixed-en` 0,975 → 1,000, `vi-dd` 0,263 → 0,239, `vi-partial-accent` 0,872 → 0,863, `vi-snippet` 0,463 → 0,466; các hạng còn lại giữ nguyên.
 
@@ -112,9 +152,9 @@ Corpus `vi-search@v0.11.0`, 423 note, 270 câu: nDCG@5 0,646; nDCG@10 0,664; MRR
 
 `vi-compound` 0,632 gồm câu 1–15 0,844 (như trước) và câu 16–30 0,421.
 
-Nhận xét cho các mục tiêu ở PRD 11.6:
+Nhận xét cho các mục tiêu ở PRD 11.6 (số trên `v0.11.0`):
 
-- `vi-iy`, `vi-tone-placement`, `vi-accented` đã 1,000 ở upstream (gói chỉ được giữ nguyên, không có chỗ để hơn).
+- Trên `v0.11.0`, `vi-iy`, `vi-tone-placement`, `vi-accented` đã 1,000 ở upstream (gói chỉ được giữ nguyên, không có chỗ để hơn); `v0.12.0` thêm câu khó cho `vi-iy` và `vi-accented`.
 - `vi-compound`: mục tiêu G8 là hơn baseline tối thiểu 0,1, tức đạt 0,732 trở lên (trên `v0.10.0` là 0,944).
 - `vi-synonym` Hit@5 0,13 so với mục tiêu 0,8; `vi-telex` 0,47, `vi-typo` 0,80, `vi-alias` 0,67, `vi-abbr` 0,93 (mục tiêu G8 cho `vi-telex`, `vi-typo`, `vi-synonym`, `vi-alias`: Hit@5 ≥ 0,8; `vi-abbr` đã đạt).
 - G3 (`vi-unaccented`, `vi-dd` Hit@5 ≥ 0,85 _và_ gấp 2 lần baseline): baseline 0,27 và 0,40, nên cần ≥ 0,85 cho cả hai (0,40 × 2 = 0,80 < 0,85). Corpus bản đầu (0,93 và 0,87) làm điều này bất khả vì tiêu đề note chứa nguyên cụm tìm và nhánh vector đã đủ; từ fixture `v0.10.0` mỗi câu là một trong 25 note cùng khuôn chữ, chỉ khác một từ khoá, tiêu đề không lộ. Kiểm đạt được: với dấu phục hồi (`--accented-sanity`) cả hai hạng đạt Hit@5 = 1,00 (nDCG@5 0,832), nên 0,85 trở lên là đạt được bằng khớp chữ gộp dấu.

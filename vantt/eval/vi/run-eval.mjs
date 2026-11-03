@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { npmCommand } from '../../scripts/lib/proc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_TAG = 'v0.11.0';
+const FIXTURE_TAG = 'v0.12.0';
 const GOLDEN = path.join(here, 'golden-set.json');
 const SMOKE_GOLDEN = path.join(here, 'smoke-golden-set.json');
 const SMOKE_VAULT = path.join(here, 'smoke-vault');

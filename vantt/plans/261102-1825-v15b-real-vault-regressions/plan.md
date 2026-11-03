@@ -142,6 +142,90 @@ Giới hạn: corpus sinh đã 1,000 ở `vi-iy`, `vi-accented`, `vi-abbr` và g
 
 Bước 5 cần đo trên vault thật: tổng và từng hạng với mặc định V15b; thêm `{"minBm25Agreement":1}` và `{"minBm25Agreement":0}` để chốt ngưỡng; `vi-semantic` có tách được câu "hạng 7 ở semantic, 41 ở hybrid" không; `vi-iy`, `vi-compound`, `vi-accented`, `vi-abbr` (với lexicon) so với không gói. Sau đó mới đo lại reranker (V22).
 
+## Kết quả fixture v0.12.0 (corpus sinh, 2026-11-03)
+
+Fixture `vi-search@v0.12.0` (repo `vantt/obsidian-test-fixture`, commit `ffa1e44`, thẻ `v0.12.0` mới có ở bản clone cục bộ, chưa đẩy lên GitHub) thêm 45 câu, 5 câu mỗi `cause`, tái hiện nguyên nhân ở mục Kết quả bước 2 và các phát hiện review của `fb37546`: `iy-mixed` (`vi-iy`), `common-compound` (`vi-compound`), `common-abbr` (`vi-abbr`), `function-pairs`, `few-unaccented-pairs`, `title-phrase`, `rare-identifier` (`vi-accented`), `idea` (`vi-semantic`), `toneless-iy` (`vi-mixed-en`). 270 câu và 423 note cũ giữ nguyên từng chữ; 198 note mới (80 note nền làm sáu từ ghép phổ biến) nên số câu cũ cũng đổi. Chỉ văn bản sinh. Baseline upstream ghi lại trên fixture mới, không gói: `vantt/eval/baselines/linux-x64/0.17.2.vi-search.json`.
+
+Eval chính thức (`run-eval.mjs --otf <bản clone fixture>`, lõi `origin/vantt/v0.17.2` `a326169`, e5-small, k = 10), nDCG@5. "Trước fb37546" là gói ở `fb37546^`; "Hiện tại" là gói ở `master` (`fb37546`); "Mới" là gói nhánh này (sửa sau review + mặc định mới).
+
+| Hạng mục                      | Không gói (upstream) | Trước fb37546 | Hiện tại | Mới       | Mới − hiện tại |
+| ----------------------------- | -------------------- | ------------- | -------- | --------- | -------------- |
+| Tổng (315 câu)                | 0,623                | 0,891         | 0,908    | **0,914** | +0,006         |
+| `vi-accented`                 | 0,770                | 0,796         | 0,796    | 0,796     | 0              |
+| `vi-partial-accent`           | 0,830                | 1,000         | 1,000    | 1,000     | 0              |
+| `vi-telex`                    | 0,330                | 1,000         | 1,000    | 1,000     | 0              |
+| `vi-typo`                     | 0,533                | 1,000         | 1,000    | 1,000     | 0              |
+| `vi-snippet`                  | 0,468                | 0,975         | 0,975    | 0,975     | 0              |
+| `vi-unaccented`               | 0,059                | 0,975         | 0,975    | 0,975     | 0              |
+| `vi-dd`                       | 0,162                | 0,826         | 0,829    | 0,842     | +0,013         |
+| `vi-iy`                       | 0,920                | 0,926         | 1,000    | 1,000     | 0              |
+| `vi-tone-placement`           | 1,000                | 1,000         | 1,000    | 1,000     | 0              |
+| `vi-tone-precision`           | 0,942                | 1,000         | 1,000    | 1,000     | 0              |
+| `vi-compound`                 | 0,678                | 0,986         | 0,986    | 0,986     | 0              |
+| `vi-mixed-en`                 | 0,853                | 1,000         | 0,982    | 1,000     | +0,018         |
+| `vi-semantic`                 | 0,274                | 0,287         | 0,350    | 0,399     | +0,049         |
+| `vi-names`                    | 0,885                | 0,975         | 0,975    | 0,975     | 0              |
+| `vi-synonym`                  | 0,062                | 0,642         | 0,721    | 0,730     | +0,009         |
+| `vi-abbr`                     | 0,932                | 0,957         | 1,000    | 1,000     | 0              |
+| `vi-alias`                    | 0,471                | 0,933         | 1,000    | 1,000     | 0              |
+| 270 câu cũ                    | 0,631                | 0,928         | 0,940    | 0,945     | +0,005         |
+| 45 câu mới                    | 0,580                | 0,667         | 0,721    | 0,729     | +0,008         |
+| `cause: iy-mixed`             | 0,679                | 0,705         | 1,000    | 1,000     | 0              |
+| `cause: common-compound`      | 0,812                | 0,900         | 0,900    | 0,900     | 0              |
+| `cause: common-abbr`          | 0,926                | 0,826         | 1,000    | 1,000     | 0              |
+| `cause: function-pairs`       | 0,886                | 1,000         | 1,000    | 1,000     | 0              |
+| `cause: few-unaccented-pairs` | 0,000                | 0,000         | 0,000    | 0,000     | 0              |
+| `cause: idea`                 | 0,000                | 0,000         | 0,086    | 0,086     | 0              |
+| `cause: title-phrase`         | 0,820                | 0,860         | 0,860    | 0,860     | 0              |
+| `cause: rare-identifier`      | 0,686                | 0,712         | 0,712    | 0,712     | 0              |
+| `cause: toneless-iy`          | 0,412                | 1,000         | 0,926    | 1,000     | +0,074         |
+
+Trên fixture cũ `v0.11.0` (eval nhanh, trùng số chính thức): không gói 0,646, trước fb37546 0,944, hiện tại 0,959, mới **0,961** (`vi-semantic` 0,564 → 0,588, `vi-synonym` 0,739 → 0,764, các hạng khác không đổi).
+
+Kiểm khác: G3 và G8 đạt trên `v0.12.0` (`vi-unaccented` Hit@5 1,00, `vi-dd` 0,87 ≥ 0,85 và ≥ 2 × 0,33; `vi-accented` 0,796 ≥ upstream 0,770; `vi-tone-precision` MRR 1,00; `vi-telex`, `vi-typo`, `vi-abbr`, `vi-alias` Hit@5 1,00, `vi-synonym` 0,87; `vi-compound` hơn upstream 0,308; `check-snippets` 15/15); không hạng nào có gói thấp hơn không gói. `obsidian-help` 0,735 cho không gói, gói hiện tại và gói mới; gói mới và gói hiện tại cho 58/58 danh sách top 10 giống hệt. Không gói trên lõi phát hành bằng baseline upstream từng chỉ số; danh sách top 10 khác ở một câu, hạng 10 (điểm bằng nhau: hai lần chạy upstream cũng khác nhau ở một câu như vậy). Smoke-vault 0,906.
+
+Thấy được nhờ fixture mới: sửa i/y của `fb37546` (`iy-mixed` 0,705 → 1,000) và `abbrMaxDocShare` (`common-abbr` 0,826 → 1,000; `abbrMaxDocShare: 1` cho 0,826) có tác dụng; `toneless-iy` tụt ở `fb37546` (0,926: `hi vong con do dai hoc`, note đúng hạng 1 ở mọi nhánh chữ nhưng không có ở nhánh vector, nên phiếu BM25 bị trừ). Không gói nào giải được `few-unaccented-pairs` (note gõ không dấu cho câu có dấu: chỉ nhánh `fold` 0,75 tìm được, `rescore` so đúng dấu) và `idea`; `title-phrase` mọi cấu hình xếp note hẹp có cụm ở tiêu đề lên trên (kể cả upstream). Thử so chữ đã bỏ dấu ở `rescore` cho ứng viên gõ không dấu: không đổi số nào (note đúng hạng 21), bỏ.
+
+### Sửa sau review `fb37546` (nhánh `vantt/work/fx12`)
+
+| Phát hiện                                                                                                | Sửa                                                                                                                                              | Đo                                                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| H1: phạt BM25 xoá khớp đúng duy nhất của câu có dấu (mã lỗi), đồng thuận trên danh sách BM25 một kết quả | phạt chỉ khi nhánh BM25 có đủ 5 kết quả đầu và câu không có chữ nào ngoài âm tiết tiếng Việt (mã, số hiệu, chữ tiếng Anh)                        | trung tính trên cả hai fixture. Điều kiện "câu có ít nhất một nhánh view" như review đề xuất bị loại: `vi-semantic` −0,118 (`v0.11.0`); giới hạn `lost` 0,5: `vi-semantic` −0,055 |
+| H2: biến thể i/y của âm tiết không thanh thành term riêng (`mi`→`my`, `ty`→`ti`, fold `ky`→`ki`)         | âm tiết có thanh: term khớp đúng như trước; không thanh (và mọi chữ của `fold`): chỉ cụm hai chữ với chữ bên cạnh trong câu, khi vault có cụm đó | trung tính (câu `toneless-iy` tụt vì phục hồi `do` → `dở`, không vì H2)                                                                                                           |
+| M4: kiểm `accentedFold: auto` không dừng sớm                                                             | dừng khi đã đủ hoặc không thể đủ số cặp                                                                                                          | test số lần tra                                                                                                                                                                   |
+| M5: `termStats`/`phraseDocs`/`noteCount` không qua bộ đệm                                                | `seg`, lexicon, biến thể i/y đi qua `VocabularyCache` (thêm `noteCount` theo `dbVersion`)                                                        | test: câu lặp lại không tra thêm, tra lại sau khi ghi                                                                                                                             |
+| L6: độ phủ `seg` tính cả từ ghép vault không có; phủ 0 vẫn chạy nhánh trọng số 0                         | chỉ tính từ ghép vault có (kể cả cách viết i/y kia), lấy tổ hợp mục tiêu phủ tốt nhất (phục hồi, dạng lexicon); phủ 0 thì không tìm `seg`        | bản đầu chỉ tính tổ hợp đầu làm `vi-synonym` −0,059 (`xe hơi` → `ô_tô` mất), đã sửa                                                                                               |
+| L7: thiếu dữ liệu chẩn đoán                                                                              | `debug.viewTerms`, `debug.segWeight`, `debug.bm25Agreement`, `debug.bm25Penalty`                                                                 |                                                                                                                                                                                   |
+| M3 (hằng số trộn của lõi chép trong gói)                                                                 | lead làm ở P01; trong gói hằng số ở một chỗ, có chú thích trỏ về hàm của lõi                                                                     |                                                                                                                                                                                   |
+
+Kèm: test thuộc tính `seg` (chiếu và tách câu giống nhau) dùng vault một note thay vault rỗng và gói mới mỗi lần; test bất biến token so khoảng trắng đã gộp (nối từ ghép qua tab là cố ý), trước đây thỉnh thoảng hỏng.
+
+### Tuỳ chọn (eval nhanh, so với mã mới + mặc định cũ: `v0.12.0` 0,908, `v0.11.0` 0,959)
+
+| Thử                                                  | `v0.12.0` | `v0.11.0` | Hạng mục đổi (nDCG@5; `*` = câu `cause`)                                                                                | Kết luận                     |
+| ---------------------------------------------------- | --------- | --------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `minBm25Agreement` 0                                 | 0,896     | 0,945     | `v0.12.0`: `vi-semantic` −0,075, `vi-synonym` −0,079, `vi-alias` −0,067, `vi-semantic*` −0,086                          | loại                         |
+| `minBm25Agreement` 0,5                               | 0,910     | 0,958     | `v0.11.0` `vi-semantic` −0,005                                                                                          |                              |
+| `minBm25Agreement` 0,8                               | 0,911     | 0,960     | `v0.12.0` `vi-semantic` +0,038; `v0.11.0` `vi-semantic` −0,005                                                          |                              |
+| `minBm25Agreement` 1                                 | 0,911     | 0,961     | `vi-semantic` +0,033 / +0,021, `vi-synonym` +0,009 / +0,026, `vi-dd` +0,013                                             | **giữ**                      |
+| `accentedFoldMinShare` 0 / 0,25                      | 0,910     | 0,959     | `v0.12.0` `vi-semantic` +0,025                                                                                          | **0,25**                     |
+| `accentedFoldMinShare` 0,75 / 1                      | 0,908     | 0,959     | không đổi                                                                                                               |                              |
+| `accentedFold: always`                               | 0,911     | 0,956     | `vi-semantic` −0,020 / −0,053, `vi-accented*` +0,028, `vi-semantic*` +0,114                                             | loại                         |
+| `accentedFold: never`                                | 0,908     | 0,959     | không đổi                                                                                                               |                              |
+| `segMaxDocShare` 0,05                                | 0,908     | 0,959     | không đổi                                                                                                               | giữ 0,1                      |
+| `segMaxDocShare` 0,2 / 1                             | 0,908     | 0,959     | `vi-semantic*` −0,009                                                                                                   |                              |
+| `segWeightByCoverage` false                          | 0,909     | 0,959     | `vi-mixed-en*` +0,074, `vi-semantic` −0,005                                                                             | **false** (cùng các thử kia) |
+| `abbrMaxDocShare` 0,02 / 0,1                         | 0,908     | 0,959     | không đổi                                                                                                               | giữ 0,05                     |
+| `abbrMaxDocShare` 1                                  | 0,906     | 0,959     | `vi-abbr*` −0,174                                                                                                       |                              |
+| `foldIY` true                                        | 0,904     | 0,954     | `vi-alias` −0,087                                                                                                       | loại                         |
+| `minBm25Agreement` 1 + `accentedFoldMinShare` 0,25   | 0,912     | 0,961     | `vi-semantic` +0,058                                                                                                    |                              |
+| như trên + `segWeightByCoverage` false               | **0,914** | **0,961** | so với gói hiện tại: `vi-semantic` +0,065 / +0,024, `vi-synonym` +0,009 / +0,026, `vi-dd` +0,013, `vi-mixed-en*` +0,074 | **mặc định mới**             |
+| `minBm25Agreement` 0,8 + `accentedFoldMinShare` 0,25 | 0,912     | 0,960     | `v0.11.0` `vi-semantic` −0,005                                                                                          |                              |
+
+Chọn theo quy tắc: tổng nDCG@5 cao nhất, không hạng mục nào tụt quá 0,01 so với gói hiện tại trên cả hai fixture. `accentedFoldMinShare` 0,25 và `segWeightByCoverage` false nới lại hai sửa của `fb37546` cho nguyên nhân 1, 2 của vault thật; trên corpus sinh chúng chỉ thắng nhờ vài câu, nên phải đo lại trên vault thật.
+
+Bước 5 (vault thật) cần đo thêm, lõi `v0.17.2-vantt.5` + gói nhánh này: mặc định mới; `{"accentedFoldMinShare":0.5,"segWeightByCoverage":true}` (giữ hai sửa cũ); `{"minBm25Agreement":0.2}`; `{"minBm25Agreement":0}`. Đặc biệt `vi-iy`, `vi-compound`, `vi-accented`, `vi-semantic`, `vi-mixed-en` (với note tiếng Anh) và `vi-abbr` (với lexicon) so với không gói, và câu có mã lỗi/tên sản phẩm.
+
 ## Xong khi
 
 - [ ] Chạy lại V15 sau khi sửa: không hạng mục nào tụt quá 0,02 nDCG@5 so với không gói (cổng `private-regression` đạt), hoặc user chấp nhận từng hạng mục còn tụt kèm lý do.

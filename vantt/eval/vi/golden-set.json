@@ -2233,5 +2233,410 @@
     "category": "vi-compound",
     "notes": "Harder: the note has \"mùa đông\" once; three other notes have \"mùa\" and \"đông\" more often, reversed or apart.",
     "hard": "context"
+  },
+  {
+    "id": "vi-iy-16",
+    "query": "kỹ năng đàm phán giá thuê nhà",
+    "relevant_paths": ["notes/Thuê căn hộ đầu tiên.md"],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "The answer spells \"kĩ năng đàm phán giá thuê nhà\"; near notes on the topic use the query's spelling for part of the phrase.",
+    "cause": "iy-mixed"
+  },
+  {
+    "id": "vi-iy-17",
+    "query": "lí do bỏ lớp học thêm",
+    "relevant_paths": ["notes/Con không muốn đi học thêm.md"],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "The answer spells \"lý do bỏ lớp học thêm\"; near notes on the topic use the query's spelling for part of the phrase.",
+    "cause": "iy-mixed"
+  },
+  {
+    "id": "vi-iy-18",
+    "query": "kĩ thuật ghép cành bưởi",
+    "relevant_paths": ["notes/Vườn nhà ông ngoại.md"],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "The answer spells \"kỹ thuật ghép cành bưởi\"; near notes on the topic use the query's spelling for part of the phrase.",
+    "cause": "iy-mixed"
+  },
+  {
+    "id": "vi-iy-19",
+    "query": "quản lí giấy tờ nhà đất",
+    "relevant_paths": ["notes/Hộp hồ sơ gia đình.md"],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "The answer spells \"quản lý giấy tờ nhà đất\"; near notes on the topic use the query's spelling for part of the phrase.",
+    "cause": "iy-mixed"
+  },
+  {
+    "id": "vi-iy-20",
+    "query": "kỳ nghỉ hè ở quê ngoại",
+    "relevant_paths": ["notes/Tuổi thơ ở làng.md"],
+    "partial_paths": [],
+    "category": "vi-iy",
+    "notes": "The answer spells \"kì nghỉ hè ở quê ngoại\"; near notes on the topic use the query's spelling for part of the phrase.",
+    "cause": "iy-mixed"
+  },
+  {
+    "id": "vi-compound-31",
+    "query": "thời gian ủ bột bánh mì",
+    "relevant_paths": ["notes/Mẻ bánh đầu tiên.md"],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "\"thời gian\" is in more than 10% of the notes; the answer has the other words, not as one phrase.",
+    "cause": "common-compound"
+  },
+  {
+    "id": "vi-compound-32",
+    "query": "công việc sửa mái tôn bị dột",
+    "relevant_paths": ["notes/Nhà sau mưa lớn.md"],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "\"công việc\" is in more than 10% of the notes; the answer has the other words, not as one phrase.",
+    "cause": "common-compound"
+  },
+  {
+    "id": "vi-compound-33",
+    "query": "kế hoạch trồng hoa hồng leo ban công",
+    "relevant_paths": ["notes/Ban công hướng đông.md"],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "\"kế hoạch\" is in more than 10% of the notes; the answer has the other words, not as one phrase.",
+    "cause": "common-compound"
+  },
+  {
+    "id": "vi-compound-34",
+    "query": "thông tin lịch tiêm phòng cho chó con",
+    "relevant_paths": ["notes/Bé cún mới về.md"],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "\"thông tin\" is in more than 10% of the notes; the answer has the other words, not as one phrase.",
+    "cause": "common-compound"
+  },
+  {
+    "id": "vi-compound-35",
+    "query": "sản phẩm nến thơm từ sáp đậu nành",
+    "relevant_paths": ["notes/Làm nến ở nhà.md"],
+    "partial_paths": [],
+    "category": "vi-compound",
+    "notes": "\"sản phẩm\" is in more than 10% of the notes; the answer has the other words, not as one phrase.",
+    "cause": "common-compound"
+  },
+  {
+    "id": "vi-abbr-16",
+    "query": "CV bàn giao kho lạnh",
+    "relevant_paths": ["notes/Xưởng mới.md"],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "Lexicon: CV = công việc, a phrase in more than 5% of the notes; the answer spells it out.",
+    "cause": "common-abbr"
+  },
+  {
+    "id": "vi-abbr-17",
+    "query": "TT tuyển sinh lớp vẽ thiếu nhi",
+    "relevant_paths": ["notes/Lớp vẽ cho bé.md"],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "Lexicon: TT = thông tin, a phrase in more than 5% of the notes; the answer writes the abbreviation.",
+    "cause": "common-abbr"
+  },
+  {
+    "id": "vi-abbr-18",
+    "query": "SP gốm men lam",
+    "relevant_paths": ["notes/Lò gốm quê.md"],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "Lexicon: SP = sản phẩm, a phrase in more than 5% of the notes; the answer spells it out.",
+    "cause": "common-abbr"
+  },
+  {
+    "id": "vi-abbr-19",
+    "query": "TG phơi mực một nắng",
+    "relevant_paths": ["notes/Mực câu ở làng biển.md"],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "Lexicon: TG = thời gian, a phrase in more than 5% of the notes; the answer writes the abbreviation.",
+    "cause": "common-abbr"
+  },
+  {
+    "id": "vi-abbr-20",
+    "query": "CTy lắp đặt điện mặt trời",
+    "relevant_paths": ["notes/Mái xưởng bên cạnh.md"],
+    "partial_paths": [],
+    "category": "vi-abbr",
+    "notes": "Lexicon: CTy = công ty, a phrase in more than 5% of the notes; the answer spells it out.",
+    "cause": "common-abbr"
+  },
+  {
+    "id": "vi-accented-16",
+    "query": "những điều cần biết khi nuôi ong lấy mật",
+    "relevant_paths": ["notes/Thùng ong sau vườn.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Unaccented notes share a function-word pair of the query; the answer is an accented note.",
+    "cause": "function-pairs"
+  },
+  {
+    "id": "vi-accented-17",
+    "query": "khi nào nên thay lọc gió điều hoà",
+    "relevant_paths": ["notes/Bảo dưỡng máy lạnh.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Unaccented notes share a function-word pair of the query; the answer is an accented note.",
+    "cause": "function-pairs"
+  },
+  {
+    "id": "vi-accented-18",
+    "query": "có thể trồng rau thơm trong chậu nhỏ không",
+    "relevant_paths": ["notes/Góc rau thơm.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Unaccented notes share a function-word pair of the query; the answer is an accented note.",
+    "cause": "function-pairs"
+  },
+  {
+    "id": "vi-accented-19",
+    "query": "nên bắt đầu từ đâu khi học vẽ màu nước",
+    "relevant_paths": ["notes/Vẽ màu nước.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Unaccented notes share a function-word pair of the query; the answer is an accented note.",
+    "cause": "function-pairs"
+  },
+  {
+    "id": "vi-accented-20",
+    "query": "như vậy có nên mua máy hút bụi không dây",
+    "relevant_paths": ["notes/Dọn nhà cuối tuần.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Unaccented notes share a function-word pair of the query; the answer is an accented note.",
+    "cause": "function-pairs"
+  },
+  {
+    "id": "vi-accented-21",
+    "query": "cách làm mứt dừa non",
+    "relevant_paths": ["notes/Mut tet nam nay.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "The answer is typed without diacritics; fewer than half of the query word pairs occur unaccented in the vault.",
+    "cause": "few-unaccented-pairs"
+  },
+  {
+    "id": "vi-accented-22",
+    "query": "kinh nghiệm thuê xe tự lái đi Mộc Châu",
+    "relevant_paths": ["notes/Len vung cao.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "The answer is typed without diacritics; fewer than half of the query word pairs occur unaccented in the vault.",
+    "cause": "few-unaccented-pairs"
+  },
+  {
+    "id": "vi-accented-23",
+    "query": "lịch tập chạy bộ cho người mới bắt đầu",
+    "relevant_paths": ["notes/Chay bo 5km.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "The answer is typed without diacritics; fewer than half of the query word pairs occur unaccented in the vault.",
+    "cause": "few-unaccented-pairs"
+  },
+  {
+    "id": "vi-accented-24",
+    "query": "cách khử mùi hôi tủ lạnh",
+    "relevant_paths": ["notes/Tu lanh nha bep.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "The answer is typed without diacritics; fewer than half of the query word pairs occur unaccented in the vault.",
+    "cause": "few-unaccented-pairs"
+  },
+  {
+    "id": "vi-accented-25",
+    "query": "tự sửa bóng đèn huỳnh quang bị nhấp nháy",
+    "relevant_paths": ["notes/Den phong khach.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "The answer is typed without diacritics; fewer than half of the query word pairs occur unaccented in the vault.",
+    "cause": "few-unaccented-pairs"
+  },
+  {
+    "id": "vi-semantic-16",
+    "query": "làm sao để bớt run khi đứng trước nhiều người",
+    "relevant_paths": ["notes/Sợ sân khấu.md"],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "Idea-style query; near notes share only its generic words, the answer none of its content words.",
+    "cause": "idea"
+  },
+  {
+    "id": "vi-semantic-17",
+    "query": "cách giữ cho đầu óc tỉnh táo suốt buổi chiều",
+    "relevant_paths": ["notes/Uể oải sau bữa trưa.md"],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "Idea-style query; near notes share only its generic words, the answer none of its content words.",
+    "cause": "idea"
+  },
+  {
+    "id": "vi-semantic-18",
+    "query": "muốn con nhỏ chịu ăn rau thì nên làm gì",
+    "relevant_paths": ["notes/Bé kén ăn.md"],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "Idea-style query; near notes share only its generic words, the answer none of its content words.",
+    "cause": "idea"
+  },
+  {
+    "id": "vi-semantic-19",
+    "query": "làm thế nào để không quên những việc nhỏ trong ngày",
+    "relevant_paths": ["notes/Gạch đầu dòng mỗi sáng.md"],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "Idea-style query; near notes share only its generic words, the answer none of its content words.",
+    "cause": "idea"
+  },
+  {
+    "id": "vi-semantic-20",
+    "query": "làm sao để căn phòng nhỏ trông rộng hơn",
+    "relevant_paths": ["notes/Góc ở mười hai mét vuông.md"],
+    "partial_paths": [],
+    "category": "vi-semantic",
+    "notes": "Idea-style query; near notes share only its generic words, the answer none of its content words.",
+    "cause": "idea"
+  },
+  {
+    "id": "vi-accented-26",
+    "query": "chuẩn bị đồ đi cắm trại",
+    "relevant_paths": ["notes/Danh sách mang theo khi đi dã ngoại.md"],
+    "partial_paths": ["notes/Chuẩn bị đồ đi cắm trại cho mèo.md"],
+    "category": "vi-accented",
+    "notes": "The overview note answers the query; a narrow note with the phrase in its title is only partly relevant.",
+    "cause": "title-phrase"
+  },
+  {
+    "id": "vi-accented-27",
+    "query": "tập bơi cho người lớn",
+    "relevant_paths": ["notes/Bơi lội ở tuổi ba mươi.md"],
+    "partial_paths": ["notes/Tập bơi cho người lớn: chọn kính bơi.md"],
+    "category": "vi-accented",
+    "notes": "The overview note answers the query; a narrow note with the phrase in its title is only partly relevant.",
+    "cause": "title-phrase"
+  },
+  {
+    "id": "vi-accented-28",
+    "query": "làm sữa chua tại nhà",
+    "relevant_paths": ["notes/Hũ men cái và những mẻ đầu tiên.md"],
+    "partial_paths": ["notes/Làm sữa chua tại nhà bị chảy nước.md"],
+    "category": "vi-accented",
+    "notes": "The overview note answers the query; a narrow note with the phrase in its title is only partly relevant.",
+    "cause": "title-phrase"
+  },
+  {
+    "id": "vi-accented-29",
+    "query": "sửa vòi nước bị rỉ",
+    "relevant_paths": ["notes/Tự xoay xở với đồ nước trong bếp.md"],
+    "partial_paths": ["notes/Sửa vòi nước bị rỉ: mua ron ở đâu.md"],
+    "category": "vi-accented",
+    "notes": "The overview note answers the query; a narrow note with the phrase in its title is only partly relevant.",
+    "cause": "title-phrase"
+  },
+  {
+    "id": "vi-accented-30",
+    "query": "lên thực đơn ăn dặm cho bé",
+    "relevant_paths": ["notes/Bé tập ăn từ tháng thứ sáu.md"],
+    "partial_paths": ["notes/Lên thực đơn ăn dặm cho bé: cháo bí đỏ.md"],
+    "category": "vi-accented",
+    "notes": "The overview note answers the query; a narrow note with the phrase in its title is only partly relevant.",
+    "cause": "title-phrase"
+  },
+  {
+    "id": "vi-accented-31",
+    "query": "lỗi ECONNRESET khi gọi máy chủ",
+    "relevant_paths": ["notes/Sự cố đêm thứ sáu.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Only the answer has \"ECONNRESET\", once; near notes are about the general topic.",
+    "cause": "rare-identifier"
+  },
+  {
+    "id": "vi-accented-32",
+    "query": "cài Zotero để viết luận văn",
+    "relevant_paths": ["notes/Trích dẫn nguồn tham khảo.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Only the answer has \"Zotero\", once; near notes are about the general topic.",
+    "cause": "rare-identifier"
+  },
+  {
+    "id": "vi-accented-33",
+    "query": "bảo hành máy giặt Toshiba",
+    "relevant_paths": ["notes/Máy giặt kêu to.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Only the answer has \"Toshiba\", once; near notes are about the general topic.",
+    "cause": "rare-identifier"
+  },
+  {
+    "id": "vi-accented-34",
+    "query": "đặt vé tàu SE3 đi Huế",
+    "relevant_paths": ["notes/Về miền Trung dịp lễ.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Only the answer has \"SE3\", once; near notes are about the general topic.",
+    "cause": "rare-identifier"
+  },
+  {
+    "id": "vi-accented-35",
+    "query": "mã lỗi E21 bếp từ",
+    "relevant_paths": ["notes/Bếp nhà mình.md"],
+    "partial_paths": [],
+    "category": "vi-accented",
+    "notes": "Only the answer has \"E21\", once; near notes are about the general topic.",
+    "cause": "rare-identifier"
+  },
+  {
+    "id": "vi-mixed-en-16",
+    "query": "uon mi cong tu nhien",
+    "relevant_paths": ["notes/Trang điểm nhẹ.md"],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "Unaccented query with a toneless i/y syllable; English notes and other notes use the other spelling as a word.",
+    "cause": "toneless-iy"
+  },
+  {
+    "id": "vi-mixed-en-17",
+    "query": "sua ti vi bi mat tieng",
+    "relevant_paths": ["notes/Góc giải trí.md"],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "Unaccented query with a toneless i/y syllable; English notes and other notes use the other spelling as a word.",
+    "cause": "toneless-iy"
+  },
+  {
+    "id": "vi-mixed-en-18",
+    "query": "hi vong con do dai hoc",
+    "relevant_paths": ["notes/Mùa thi của con.md"],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "Unaccented query with a toneless i/y syllable; English notes and other notes use the other spelling as a word.",
+    "cause": "toneless-iy"
+  },
+  {
+    "id": "vi-mixed-en-19",
+    "query": "vi khuan tren thot go",
+    "relevant_paths": ["notes/Vệ sinh bếp.md"],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "Unaccented query with a toneless i/y syllable; English notes and other notes use the other spelling as a word.",
+    "cause": "toneless-iy"
+  },
+  {
+    "id": "vi-mixed-en-20",
+    "query": "li nuoc ep cam buoi sang",
+    "relevant_paths": ["notes/Bữa sáng nhanh.md"],
+    "partial_paths": [],
+    "category": "vi-mixed-en",
+    "notes": "Unaccented query with a toneless i/y syllable; English notes and other notes use the other spelling as a word.",
+    "cause": "toneless-iy"
   }
 ]
