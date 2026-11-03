@@ -12,6 +12,7 @@ import {
 } from '../src/index.js';
 import { headingText } from '../src/lexicon.js';
 import type { ViAnalysisData } from '../src/query.js';
+import { tokenize } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
 
 const LEXICON = `# Từ điển
@@ -146,10 +147,31 @@ describe('lexicon in the pack', () => {
   });
 
   it('expands an abbreviation one way and keeps the query words', () => {
-    const a = analyze('KH tiềm năng');
+    const a = analyze('kh tiem nang');
     expect(a.viewQueries.norm).toContain('khách hàng');
-    expect(a.viewQueries.norm).toMatch(/^kh/);
+    expect(a.viewQueries.norm).toMatch(/^kh /);
+    expect(a.baseQuery).toBe('kh tiem nang khách hàng');
     expect(analyze('khách hàng').viewQueries.norm ?? '').not.toMatch(/\bkh\b/);
+    expect(analyze('khách hàng').baseQuery).toBeUndefined();
+  });
+
+  it('never searches an abbreviation expansion alone in a view the query skips', () => {
+    // An accented query does not search the norm and fold views; an expansion-only branch there
+    // would vote for every note dense in "khách hàng" and bury the note the query describes.
+    for (const q of ['KH tiềm năng', 'quy trình chăm sóc KH', 'KH']) {
+      const a = analyze(q);
+      expect(a.viewQueries.norm ?? null, q).toBeNull();
+      expect(a.viewQueries.fold ?? null, q).toBeNull();
+      expect(tokenize(a.baseQuery ?? ''), q).toEqual([
+        ...tokenize(q.toLowerCase()),
+        'khách',
+        'hàng',
+      ]);
+      expect((a.data as ViAnalysisData).targets.at(-1)?.words, q).toContain('khách');
+    }
+    expect(analyze('quy trình chăm sóc KH').debug?.baseQuery).toBe(
+      'quy trình chăm sóc kh khách hàng',
+    );
   });
 
   it('a lexicon word is never typo-corrected', () => {

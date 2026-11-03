@@ -243,14 +243,16 @@ describe('abbreviations with a common expansion', () => {
       'Danh sách khách hàng tiềm năng',
       ...filler(60),
     ];
-    const a = analyze('KH tiềm năng', common, {}, dir);
+    const a = analyze('kh tiem nang', common, {}, dir);
     expect(a.viewQueries.norm ?? '').not.toContain('khách');
+    expect(a.baseQuery ?? '').not.toContain('khách');
     expect(
       (a.data as ViAnalysisData).targets.some((t) => t.words.join(' ') === 'khách hàng tiềm năng'),
     ).toBe(true);
     const rare = ['Danh sách khách hàng tiềm năng', ...filler(60)];
-    expect(analyze('KH tiềm năng', rare, {}, dir).viewQueries.norm).toContain('khách hàng');
-    expect(analyze('KH tiềm năng', common, { abbrMaxDocShare: 1 }, dir).viewQueries.norm).toContain(
+    expect(analyze('kh tiem nang', rare, {}, dir).viewQueries.norm).toContain('khách hàng');
+    expect(analyze('KH tiềm năng', rare, {}, dir).baseQuery).toBe('kh tiềm năng khách hàng');
+    expect(analyze('kh tiem nang', common, { abbrMaxDocShare: 1 }, dir).viewQueries.norm).toContain(
       'khách hàng',
     );
   });
