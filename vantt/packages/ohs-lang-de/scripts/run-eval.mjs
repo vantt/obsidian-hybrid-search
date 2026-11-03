@@ -43,7 +43,9 @@ const server = createServer((req, res) => {
     try {
       const parsed = JSON.parse(body || '{}');
       inputs = Array.isArray(parsed.input) ? parsed.input : [parsed.input ?? ''];
-    } catch {}
+    } catch {
+      // A malformed body embeds one empty input; the vectors carry no signal anyway.
+    }
     const data = inputs.map((text, index) => {
       const v = Array.from({ length: 8 }, (_, i) => ((String(text).length + i) % 7) + 1);
       const n = Math.hypot(...v);
@@ -59,7 +61,7 @@ const { port } = server.address();
 const checks = [];
 const check = (name, ok, detail = '') => {
   checks.push({ name, ok, detail });
-  console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${ok ? '' : ` ${detail}`}`);
+  console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${ok ? '' : ' ' + detail}`);
 };
 
 function envFor(vault, withPack) {
@@ -172,7 +174,7 @@ function summarize(rows) {
   };
 }
 
-let exitCode = 0;
+let exitCode;
 try {
   const base = await evaluate('base', false);
   const withPack = await evaluate('pack', true);
@@ -238,7 +240,7 @@ try {
   );
   const line = (name, n, x, y) =>
     console.log(
-      `${name.padEnd(12)}${String(n).padStart(3)}  ${METRICS.map((m) => pad(`${x[m].toFixed(2)}>${y[m].toFixed(2)}`)).join('')}`,
+      `${name.padEnd(12)}${String(n).padStart(3)}  ${METRICS.map((m) => pad(x[m].toFixed(2) + '>' + y[m].toFixed(2))).join('')}`,
     );
   line('ALL', golden.length, a.summary, b.summary);
   for (const c of Object.keys(a.by_category))

@@ -12,6 +12,9 @@ export type * from './types.js';
 export const PACK_VERSION = '0.1.0';
 const VIEW = 'de';
 
+/** Default `Array#sort` order (UTF-16 code units), spelled out so the signature stays stable. */
+const byCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
 export interface GermanPackOptions {
   /** Split long compounds into components (default true). */
   splitCompounds?: boolean;
@@ -40,7 +43,8 @@ export function createPack(options: GermanPackOptions = {}): LanguagePackV1 {
     apiVersion: 1,
     id: 'de',
     version: PACK_VERSION,
-    signature: () => `${PACK_VERSION}:${split ? 1 : 0}:${JSON.stringify([...extra].sort())}`,
+    signature: () =>
+      `${PACK_VERSION}:${split ? 1 : 0}:${JSON.stringify([...extra].sort(byCodeUnit))}`,
     views: [{ name: VIEW, weight: 1.0, tokenizer: VIEW_TOKENIZER }],
     aliasViews: [VIEW],
     project: (_view, _field, text) => projectText(text, splitter),

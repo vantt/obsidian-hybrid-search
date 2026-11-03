@@ -27,7 +27,7 @@ describe('projection', () => {
       fc.property(fc.string({ unit: 'binary', maxLength: 60 }), (text) => {
         const view = viewTokens(projectText(text, splitter));
         const plain = view.filter((t) => !t.startsWith(J));
-        expect(plain.length).toBe(sourceTokens(text).length);
+        expect(plain).toHaveLength(sourceTokens(text).length);
         expect(view.every((t, i) => !t.startsWith(J) || i > 0)).toBe(true);
       }),
       { numRuns: 300 },
@@ -50,7 +50,7 @@ describe('pack contract', () => {
   const pack = createPack();
   it('declares a valid layout', () => {
     expect(pack.apiVersion).toBe(1);
-    expect(pack.views.length).toBe(1);
+    expect(pack.views).toHaveLength(1);
     expect(pack.views[0]?.name).toMatch(/^[a-z][a-z0-9_]{0,15}$/);
     expect(pack.views[0]?.tokenizer).toContain(J);
     expect(pack.aliasViews).toEqual(['de']);
