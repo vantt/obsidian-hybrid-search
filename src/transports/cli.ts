@@ -7,7 +7,7 @@ import { promisify } from 'node:util';
 import pc from 'picocolors';
 import { parseCliIntegerOption, parseCliNumberOption } from '../contracts/boundary-validation.js';
 import { createIndexService, openIndexDatabase } from '../indexing/index-service.js';
-import { formatDuration, renderProgressLine } from '../indexing/indexer.js';
+import { formatDuration, onIndexEvent, renderProgressLine } from '../indexing/indexer.js';
 import { activeModelName, getContextLength, primeEmbeddingDim } from '../inference/embedder.js';
 import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings.js';
 import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
@@ -938,6 +938,9 @@ const serveCommand = program
       process.on('SIGINT', cleanup);
 
       const writeLine = (s: string) => process.stdout.write(s + '\n');
+      // Opt-in: unsolicited `{"event":...}` lines (no `id`) after each index write batch.
+      if (process.env.OHS_STDIO_EVENTS === '1')
+        onIndexEvent((event) => writeLine(JSON.stringify(event)));
       const actions: StdioActionHandlers = {
         read: (paths, options) => readNotes(paths, options),
         vectors: (params) => exportNoteVectors({ ...params, ohsVersion: version }),
