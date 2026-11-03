@@ -13,6 +13,12 @@ import { MAX_CPU_THREADS, saveCpuThreads } from '../inference/inference-settings
 import { enableModelDownloadProgress } from '../inference/model-download-progress.js';
 import { config } from '../runtime/config.js';
 import { packageIdentity, updateCheckDisabled } from '../runtime/package-identity.js';
+import {
+  exportNoteVectors,
+  findNoteNeighbors,
+  type Pooling,
+  type VectorExport,
+} from '../search/note-vectors.js';
 import { isAmbiguousNotePathError, readNotes, search } from '../search/searcher.js';
 import {
   applyDbConfigDefaults,
@@ -725,6 +731,119 @@ program
         process.stdout.write(r.content);
         if (!r.content.endsWith('\n')) process.stdout.write('\n');
       }
+    },
+  );
+
+function parsePooling(raw: string): Pooling {
+  if (raw === 'mean' || raw === 'max') return raw;
+  throw new Error('Invalid --pooling: expected mean or max');
+}
+
+/** One JSON object per line: the meta line, then a line per note. */
+function printJsonLines<T>(result: VectorExport<T>): void {
+  process.stdout.write(`${JSON.stringify({ meta: result.meta })}\n`);
+  for (const record of result.records) {
+    if ('error' in (record as object)) process.exitCode = 1;
+    process.stdout.write(`${JSON.stringify(record)}\n`);
+  }
+}
+
+async function runVectorExport<T>(produce: () => VectorExport<T>): Promise<void> {
+  try {
+    await openIndexDatabase();
+    printJsonLines(produce());
+  } catch (err) {
+    failCliValidation(err);
+  } finally {
+    closeDb();
+  }
+}
+
+program
+  .command('vectors')
+  .description(
+    'Print note-level embedding vectors as JSON Lines (meta line, then one note per line)',
+  )
+  .option(
+    '--path <note>',
+    'Vault-relative note path; repeat for several (default: every note)',
+    collectOption,
+    [],
+  )
+  .option('--pooling <mode>', 'How chunk vectors are combined: mean or max', 'mean')
+  .option('--normalize', 'L2-normalise the pooled vector (default)')
+  .option('--no-normalize', 'Keep the raw pooled vector')
+  .action(async (opts: { path: string[]; pooling: string; normalize?: boolean }) => {
+    let pooling: Pooling;
+    try {
+      pooling = parsePooling(opts.pooling);
+    } catch (err) {
+      failCliValidation(err);
+    }
+    await runVectorExport(() =>
+      exportNoteVectors({
+        paths: opts.path,
+        pooling,
+        normalize: opts.normalize !== false,
+        ohsVersion: version,
+      }),
+    );
+  });
+
+program
+  .command('neighbors')
+  .description(
+    'Print the K nearest notes per note as JSON Lines (meta line, then one note per line)',
+  )
+  .option(
+    '--path <note>',
+    'Vault-relative note path; repeat for several (default: every note)',
+    collectOption,
+    [],
+  )
+  .option('--k <n>', 'Neighbours per note', '10')
+  .option('--min-score <x>', 'Drop neighbours with cosine similarity below x')
+  .option('--exclude-linked', 'Drop notes that link to or from the source note')
+  .option(
+    '--scope <prefix>',
+    'Only consider candidates under this folder; repeat or prefix - to exclude',
+    collectOption,
+    [],
+  )
+  .option('--pooling <mode>', 'How chunk vectors are combined: mean or max', 'mean')
+  .action(
+    async (opts: {
+      path: string[];
+      k: string;
+      minScore?: string;
+      excludeLinked?: boolean;
+      scope: string[];
+      pooling: string;
+    }) => {
+      let parsed: { k: number; minScore?: number; pooling: Pooling };
+      try {
+        parsed = {
+          k: parseCliIntegerOption('--k', opts.k, { min: 1 }),
+          minScore:
+            opts.minScore === undefined
+              ? undefined
+              : parseCliNumberOption('--min-score', opts.minScore, { min: -1, max: 1 }),
+          pooling: parsePooling(opts.pooling),
+        };
+      } catch (err) {
+        failCliValidation(err);
+      }
+      await runVectorExport(() =>
+        findNoteNeighbors({
+          paths: opts.path,
+          k: parsed.k,
+          minScore: parsed.minScore,
+          excludeLinked: opts.excludeLinked,
+          scope: opts.scope,
+          pooling: parsed.pooling,
+          ohsVersion: version,
+        }),
+      );
     },
   );
 
