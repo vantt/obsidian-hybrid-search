@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { createSplitter } from '../src/index.js';
 
 const parts = (word: string, extra: string[] = []) =>
-  createSplitter(extra).split(word).map((p) => p.fold);
+  createSplitter(extra)
+    .split(word)
+    .map((p) => p.fold);
 
 describe('compound splitting', () => {
   const cases: Array<[string, string[]]> = [

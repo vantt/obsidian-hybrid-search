@@ -4,7 +4,20 @@ import { fold } from '../src/fold.js';
 
 describe('fold', () => {
   it('strips every toned vowel to its ASCII base letter', () => {
-    const base: Record<string, string> = { a: 'a', ă: 'a', â: 'a', e: 'e', ê: 'e', i: 'i', o: 'o', ô: 'o', ơ: 'o', u: 'u', ư: 'u', y: 'y' };
+    const base: Record<string, string> = {
+      a: 'a',
+      ă: 'a',
+      â: 'a',
+      e: 'e',
+      ê: 'e',
+      i: 'i',
+      o: 'o',
+      ô: 'o',
+      ơ: 'o',
+      u: 'u',
+      ư: 'u',
+      y: 'y',
+    };
     for (const v of BASE_VOWELS) {
       for (const t of TONES) {
         const nfc = toneVowel(v, t);
@@ -53,9 +66,24 @@ describe('fold with foldIY', () => {
   const opts = { foldIY: true };
 
   it.each([
-    ['kĩ', 'ki'], ['kỹ', 'ki'], ['lí', 'li'], ['lý', 'li'], ['mĩ', 'mi'], ['mỹ', 'mi'],
-    ['hi', 'hi'], ['hy', 'hi'], ['tí', 'ti'], ['tý', 'ti'], ['sĩ', 'si'], ['sỹ', 'si'],
-    ['vi', 'vi'], ['vy', 'vi'], ['quý', 'qui'], ['qui', 'qui'], ['kỳ', 'ki'], ['dy', 'di'],
+    ['kĩ', 'ki'],
+    ['kỹ', 'ki'],
+    ['lí', 'li'],
+    ['lý', 'li'],
+    ['mĩ', 'mi'],
+    ['mỹ', 'mi'],
+    ['hi', 'hi'],
+    ['hy', 'hi'],
+    ['tí', 'ti'],
+    ['tý', 'ti'],
+    ['sĩ', 'si'],
+    ['sỹ', 'si'],
+    ['vi', 'vi'],
+    ['vy', 'vi'],
+    ['quý', 'qui'],
+    ['qui', 'qui'],
+    ['kỳ', 'ki'],
+    ['dy', 'di'],
   ])('%s -> %s', (input, expected) => {
     expect(fold(input, opts)).toBe(expected);
   });

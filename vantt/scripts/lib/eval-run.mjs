@@ -37,7 +37,8 @@ export const nfdGolden = (queries) =>
 export function evalEnv(extra = {}) {
   const env = childEnv();
   for (const name of Object.keys(env)) {
-    if (/^(OBSIDIAN_|OHS_|OPENAI_|RERANKER_)/.test(name) || name === 'LOCAL_EMBEDDING_MODEL') delete env[name];
+    if (/^(OBSIDIAN_|OHS_|OPENAI_|RERANKER_)/.test(name) || name === 'LOCAL_EMBEDDING_MODEL')
+      delete env[name];
   }
   env.LOCAL_EMBEDDING_MODEL = 'Xenova/multilingual-e5-small';
   // Evaluation selects the whole pinned corpus (same policy as upstream's scripts/eval-quality.mjs).
@@ -68,12 +69,18 @@ export function privateEvalEnv(extra = {}, source = process.env) {
     OBSIDIAN_IGNORE_PATTERNS: ignore.join(','),
     OBSIDIAN_INCLUDE_PATTERNS: source.OBSIDIAN_INCLUDE_PATTERNS ?? '',
   });
-  if (source.OBSIDIAN_CONTENT_IGNORE_PATTERNS !== undefined) env.OBSIDIAN_CONTENT_IGNORE_PATTERNS = source.OBSIDIAN_CONTENT_IGNORE_PATTERNS;
+  if (source.OBSIDIAN_CONTENT_IGNORE_PATTERNS !== undefined)
+    env.OBSIDIAN_CONTENT_IGNORE_PATTERNS = source.OBSIDIAN_CONTENT_IGNORE_PATTERNS;
   return { ...env, ...extra };
 }
 
 /** Last `lines` non-empty lines of a child's output. */
-export const outputTail = (text, lines = 40) => text.split(/\r?\n/).filter((l) => l.trim()).slice(-lines).join('\n');
+export const outputTail = (text, lines = 40) =>
+  text
+    .split(/\r?\n/)
+    .filter((l) => l.trim())
+    .slice(-lines)
+    .join('\n');
 
 /**
  * Error of a failed child run. `stderrTail` holds the end of the child's own stderr when it was
@@ -88,7 +95,8 @@ class ChildRunError extends Error {
   }
 }
 
-const copyFilter = (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src);
+const copyFilter = (src) =>
+  !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src);
 
 const tsx = (cwd, argv, env, capture) => {
   const res = spawnSync(process.execPath, ['--import', 'tsx', ...argv], {
@@ -98,21 +106,35 @@ const tsx = (cwd, argv, env, capture) => {
     stdio: ['ignore', capture ? 'pipe' : 2, capture ? 'pipe' : 2],
     maxBuffer: 512 * 1024 * 1024,
   });
-  return { ok: res.status === 0, status: res.status, signal: res.signal, error: res.error?.message, stdout: res.stdout ?? '', stderr: res.stderr ?? '' };
+  return {
+    ok: res.status === 0,
+    status: res.status,
+    signal: res.signal,
+    error: res.error?.message,
+    stdout: res.stdout ?? '',
+    stderr: res.stderr ?? '',
+  };
 };
 
 /** How a child run ended: exit code, signal, or spawn error (e.g. output over maxBuffer). */
-const exitText = (res) => (res.error ? `spawn error: ${res.error}` : res.signal ? `signal ${res.signal}` : `exit ${res.status}`);
+const exitText = (res) =>
+  res.error
+    ? `spawn error: ${res.error}`
+    : res.signal
+      ? `signal ${res.signal}`
+      : `exit ${res.status}`;
 
 /** Make sure `<tree>/fixtures/<corpus>/dataset` exists (downloads on first use). Returns its path. */
 export function prepareDataset(tree, corpus, log) {
   const spec = CORPORA[corpus];
-  if (!spec) throw new Error(`unknown corpus "${corpus}" (known: ${Object.keys(CORPORA).join(', ')})`);
+  if (!spec)
+    throw new Error(`unknown corpus "${corpus}" (known: ${Object.keys(CORPORA).join(', ')})`);
   const dir = datasetDir(tree, corpus);
   if (!existsSync(dir)) {
     log(`  preparing ${corpus} dataset (first use, needs network)`);
     const res = tsx(tree, spec.prepare, evalEnv());
-    if (!res.ok || !existsSync(dir)) throw new Error(`could not prepare the ${corpus} dataset in ${tree}`);
+    if (!res.ok || !existsSync(dir))
+      throw new Error(`could not prepare the ${corpus} dataset in ${tree}`);
   }
   return dir;
 }
@@ -122,7 +144,16 @@ export function prepareDataset(tree, corpus, log) {
  * Returns the parsed result JSON. `capture` keeps the child's output away from the
  * terminal (private mode). Throws on failure.
  */
-export function runEvaluate({ tree, vault, golden, scratch, k = 10, env = evalEnv(), capture = false, log = () => {} }) {
+export function runEvaluate({
+  tree,
+  vault,
+  golden,
+  scratch,
+  k = 10,
+  env = evalEnv(),
+  capture = false,
+  log = () => {},
+}) {
   mkdirSync(scratch, { recursive: true });
   const work = mkdtempSync(path.join(scratch, 'eval-'));
   try {
@@ -131,11 +162,25 @@ export function runEvaluate({ tree, vault, golden, scratch, k = 10, env = evalEn
     const out = path.join(work, 'result.json');
     const res = tsx(
       tree,
-      ['eval/evaluate.ts', '--vault', copy, '--golden-set', golden, '--output', out, '--k', String(k)],
+      [
+        'eval/evaluate.ts',
+        '--vault',
+        copy,
+        '--golden-set',
+        golden,
+        '--output',
+        out,
+        '--k',
+        String(k),
+      ],
       env,
       capture,
     );
-    if (!res.ok) throw new ChildRunError(`eval failed in ${capture ? 'private run' : tree} (${exitText(res)})`, res);
+    if (!res.ok)
+      throw new ChildRunError(
+        `eval failed in ${capture ? 'private run' : tree} (${exitText(res)})`,
+        res,
+      );
     log('  eval done');
     return JSON.parse(readFileSync(out, 'utf8'));
   } finally {
@@ -156,7 +201,24 @@ export function runDetail({ tree, vault, golden, scratch, k = 10, env = evalEnv(
     cpSync(vault, copy, { recursive: true, filter: copyFilter });
     const out = path.join(work, 'detail.json');
     const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'detail-search.mjs');
-    const res = tsx(tree, [script, '--tree', tree, '--vault', copy, '--queries', golden, '--output', out, '--k', String(k)], env, true);
+    const res = tsx(
+      tree,
+      [
+        script,
+        '--tree',
+        tree,
+        '--vault',
+        copy,
+        '--queries',
+        golden,
+        '--output',
+        out,
+        '--k',
+        String(k),
+      ],
+      env,
+      true,
+    );
     if (!res.ok) throw new ChildRunError(`detail run failed (${exitText(res)})`, res);
     return JSON.parse(readFileSync(out, 'utf8'));
   } finally {

@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { createPack, CONTINUATION as J, projectText } from '../src/index.js';
 import { createSplitter } from '../src/compound.js';
+import { createPack, CONTINUATION as J, projectText } from '../src/index.js';
 
 const splitter = createSplitter();
 const SOURCE_TOKEN = /[\p{L}\p{N}\p{M}\p{Co}+#]+/gu;
@@ -76,7 +76,9 @@ describe('pack contract', () => {
     expect(pack.analyzeQuery('  ', ctx).viewQueries.de).toBeNull();
   });
   it('alias key equals the projection of the alias', () => {
-    expect(pack.analyzeQuery('Fußweg', ctx).aliasKeys?.de).toBe(pack.project('de', 'aliases', 'Fußweg'));
+    expect(pack.analyzeQuery('Fußweg', ctx).aliasKeys?.de).toBe(
+      pack.project('de', 'aliases', 'Fußweg'),
+    );
   });
   it('splits query compounds into component spellings', () => {
     const words = (pack.analyzeQuery('Fußgängerbrücke', ctx).viewQueries.de ?? '').split(' ');

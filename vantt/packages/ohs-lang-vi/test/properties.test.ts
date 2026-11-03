@@ -14,29 +14,77 @@ const letterPool = [
   ...vowelChars.map((c) => c.toUpperCase()),
   ...'bcdđghklmnpqrstvxfjwzBCDĐGHKLMNPQRSTVXFJWZ',
   ...'abcdefghijklmnopqrstuvwxyz',
-  'Đ', 'Ð', 'ð',
+  'Đ',
+  'Ð',
+  'ð',
 ];
-const nonLetterPool = [' ', ' ', ' ', ',', '.', '-', ':', '!', '?', '(', ')', '#', '+', '_', '/', '\n', '\t', '0', '7', '2026', '🎉', '😀', '…', '“', '”'];
+const nonLetterPool = [
+  ' ',
+  ' ',
+  ' ',
+  ',',
+  '.',
+  '-',
+  ':',
+  '!',
+  '?',
+  '(',
+  ')',
+  '#',
+  '+',
+  '_',
+  '/',
+  '\n',
+  '\t',
+  '0',
+  '7',
+  '2026',
+  '🎉',
+  '😀',
+  '…',
+  '“',
+  '”',
+];
 const nbspPool = [' ', ' ', ' '];
 
 /** Free-form text mixing letters, digits, punctuation, emoji. */
-const textChars = fc.string({ unit: fc.constantFrom(...letterPool, ...nonLetterPool), maxLength: 80 });
-const textCharsNbsp = fc.string({ unit: fc.constantFrom(...letterPool, ...nonLetterPool, ...nbspPool), maxLength: 80 });
+const textChars = fc.string({
+  unit: fc.constantFrom(...letterPool, ...nonLetterPool),
+  maxLength: 80,
+});
+const textCharsNbsp = fc.string({
+  unit: fc.constantFrom(...letterPool, ...nonLetterPool, ...nbspPool),
+  maxLength: 80,
+});
 
 /** Text made of real syllables with arbitrary tones, case and separators. */
 const syllableList = allSyllables();
 const syllableWord = fc
-  .tuple(fc.integer({ min: 0, max: syllableList.length - 1 }), fc.constantFrom(...TONES), fc.boolean(), fc.constantFrom('modern', 'classic') as fc.Arbitrary<'modern' | 'classic'>)
+  .tuple(
+    fc.integer({ min: 0, max: syllableList.length - 1 }),
+    fc.constantFrom(...TONES),
+    fc.boolean(),
+    fc.constantFrom('modern', 'classic') as fc.Arbitrary<'modern' | 'classic'>,
+  )
   .map(([i, tone, upper, style]) => {
-    const w = composeSyllable({ ...(syllableList[i] as ReturnType<typeof parseSyllable> & object), tone: tone as Tone }, style);
+    const w = composeSyllable(
+      { ...(syllableList[i] as ReturnType<typeof parseSyllable> & object), tone: tone as Tone },
+      style,
+    );
     return upper ? w.toUpperCase() : w;
   });
 const syllableText = fc
-  .array(fc.tuple(syllableWord, fc.constantFrom(' ', ', ', '. ', '\n', ' - ', '1 ', '')), { maxLength: 12 })
+  .array(fc.tuple(syllableWord, fc.constantFrom(' ', ', ', '. ', '\n', ' - ', '1 ', '')), {
+    maxLength: 12,
+  })
   .map((parts) => parts.map(([w, sep]) => w + sep).join(''));
 
 const vietnameseLike = fc.oneof(textChars, syllableText);
-const anyUnicode = fc.oneof(fc.string({ unit: 'binary', maxLength: 40 }), fc.string({ unit: 'grapheme', maxLength: 30 }), vietnameseLike);
+const anyUnicode = fc.oneof(
+  fc.string({ unit: 'binary', maxLength: 40 }),
+  fc.string({ unit: 'grapheme', maxLength: 30 }),
+  vietnameseLike,
+);
 const styles = fc.constantFrom('modern', 'classic') as fc.Arbitrary<'modern' | 'classic'>;
 
 const run = { numRuns: NUM_RUNS };
@@ -55,7 +103,9 @@ describe('normalize properties', () => {
   it('gives the same result for NFC and NFD input', () => {
     fc.assert(
       fc.property(vietnameseLike, styles, (x, tonePlacement) => {
-        expect(normalize(x.normalize('NFD'), { tonePlacement })).toBe(normalize(x.normalize('NFC'), { tonePlacement }));
+        expect(normalize(x.normalize('NFD'), { tonePlacement })).toBe(
+          normalize(x.normalize('NFC'), { tonePlacement }),
+        );
       }),
       run,
     );
@@ -72,7 +122,11 @@ describe('normalize properties', () => {
 
   it('only changes case for English-like text with punctuation and emoji', () => {
     const english = fc.string({
-      unit: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:!?-_()#+/'.split(''), '🎉', '…'),
+      unit: fc.constantFrom(
+        ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,;:!?-_()#+/'.split(''),
+        '🎉',
+        '…',
+      ),
       maxLength: 80,
     });
     fc.assert(
@@ -144,7 +198,9 @@ describe('fold properties', () => {
   it('fold(normalize(x)) equals lowercase(fold(x))', () => {
     fc.assert(
       fc.property(vietnameseLike, fc.boolean(), styles, (x, foldIY, tonePlacement) => {
-        expect(fold(normalize(x, { tonePlacement }), { foldIY })).toBe(fold(x, { foldIY }).toLowerCase());
+        expect(fold(normalize(x, { tonePlacement }), { foldIY })).toBe(
+          fold(x, { foldIY }).toLowerCase(),
+        );
       }),
       run,
     );
@@ -224,7 +280,9 @@ describe('fold properties', () => {
 
 describe('syllable properties', () => {
   const syllables = allSyllables();
-  const anySyllable = fc.integer({ min: 0, max: syllables.length - 1 }).map((i) => syllables[i] as NonNullable<ReturnType<typeof parseSyllable>>);
+  const anySyllable = fc
+    .integer({ min: 0, max: syllables.length - 1 })
+    .map((i) => syllables[i] as NonNullable<ReturnType<typeof parseSyllable>>);
 
   it('has a healthy number of syllables', () => {
     expect(syllables.length).toBeGreaterThan(2000);

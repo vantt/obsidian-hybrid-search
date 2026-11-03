@@ -14,11 +14,11 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { applyPins, parsePins, PLATFORM_PINS } from './bundle.mjs';
+import { datasetDir, evalEnv, goldenFile, prepareDataset, runEvaluate } from './lib/eval-run.mjs';
 import { judgeRegression, ruleText } from './lib/parity-rule.mjs';
-import { evalEnv, goldenFile, prepareDataset, datasetDir, runEvaluate } from './lib/eval-run.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const log = (m) => process.stderr.write(`[parity] ${m}\n`);
@@ -41,12 +41,24 @@ function run(values) {
     scratch: path.join(out, 'scratch'),
     log,
   });
-  writeFileSync(path.join(out, 'obsidian-help.json'), JSON.stringify({ ...help, parity: meta }, null, 2) + '\n');
+  writeFileSync(
+    path.join(out, 'obsidian-help.json'),
+    JSON.stringify({ ...help, parity: meta }, null, 2) + '\n',
+  );
 
-  const viArgs = [path.join(here, '..', 'eval', 'vi', 'run-eval.mjs'), '--ohs', tree, '--out', path.join(out, 'vi.json')];
+  const viArgs = [
+    path.join(here, '..', 'eval', 'vi', 'run-eval.mjs'),
+    '--ohs',
+    tree,
+    '--out',
+    path.join(out, 'vi.json'),
+  ];
   if (values.otf) viArgs.push('--otf', path.resolve(values.otf));
   if (values['lang-pack']) viArgs.push('--lang-pack', path.resolve(values['lang-pack']));
-  const res = spawnSync(process.execPath, viArgs, { stdio: ['ignore', 2, 2], env: evalEnv({ TMPDIR: out }) });
+  const res = spawnSync(process.execPath, viArgs, {
+    stdio: ['ignore', 2, 2],
+    env: evalEnv({ TMPDIR: out }),
+  });
   if (res.status !== 0) throw new Error(`vi eval failed (exit ${res.status})`);
   const vi = JSON.parse(readFileSync(path.join(out, 'vi.json'), 'utf8'));
   writeFileSync(path.join(out, 'vi.json'), JSON.stringify({ ...vi, parity: meta }, null, 2) + '\n');
@@ -59,7 +71,12 @@ function compare(values) {
   for (const corpus of ['obsidian-help', 'vi']) {
     const a = JSON.parse(readFileSync(path.join(values.ref, `${corpus}.json`), 'utf8'));
     const b = JSON.parse(readFileSync(path.join(values.other, `${corpus}.json`), 'utf8'));
-    const cats = { ALL: [a.summary, b.summary], ...Object.fromEntries(Object.keys(a.by_category ?? {}).map((c) => [c, [a.by_category[c], b.by_category?.[c]]])) };
+    const cats = {
+      ALL: [a.summary, b.summary],
+      ...Object.fromEntries(
+        Object.keys(a.by_category ?? {}).map((c) => [c, [a.by_category[c], b.by_category?.[c]]]),
+      ),
+    };
     for (const [cat, [x, y]] of Object.entries(cats)) {
       const delta = y ? y.ndcg_5 - x.ndcg_5 : NaN;
       let ok;
@@ -72,19 +89,33 @@ function compare(values) {
       rows.push({ corpus, category: cat, ref: x.ndcg_5, other: y?.ndcg_5, delta, status, ok });
     }
   }
-  const lines = ['| corpus | category | ref nDCG@5 | other nDCG@5 | delta | ok |', '|---|---|---|---|---|---|'];
+  const lines = [
+    '| corpus | category | ref nDCG@5 | other nDCG@5 | delta | ok |',
+    '|---|---|---|---|---|---|',
+  ];
   for (const r of rows)
-    lines.push(`| ${r.corpus} | ${r.category} | ${r.ref.toFixed(3)} | ${r.other?.toFixed(3) ?? '-'} | ${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(3)} | ${r.status} |`);
+    lines.push(
+      `| ${r.corpus} | ${r.category} | ${r.ref.toFixed(3)} | ${r.other?.toFixed(3) ?? '-'} | ${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(3)} | ${r.status} |`,
+    );
   const ok = rows.every((r) => r.ok);
   lines.push('', `Tolerance ${tol}; parity ${ok ? 'PASS' : 'FAIL'}.`);
   if (values['regressions-only']) {
     lines.push('', ruleText());
     const better = rows.filter((r) => r.status === 'improved');
     if (better.length)
-      lines.push('', 'Improvements (informational): ' + better.map((r) => `${r.corpus}:${r.category} +${r.delta.toFixed(3)}`).join(', ') + '.');
+      lines.push(
+        '',
+        'Improvements (informational): ' +
+          better.map((r) => `${r.corpus}:${r.category} +${r.delta.toFixed(3)}`).join(', ') +
+          '.',
+      );
   }
   process.stdout.write(lines.join('\n') + '\n');
-  if (values.out) writeFileSync(path.resolve(values.out), JSON.stringify({ tolerance: tol, ok, rows }, null, 2) + '\n');
+  if (values.out)
+    writeFileSync(
+      path.resolve(values.out),
+      JSON.stringify({ tolerance: tol, ok, rows }, null, 2) + '\n',
+    );
   process.exit(ok ? 0 : 1);
 }
 
@@ -92,8 +123,16 @@ const [cmd, ...rest] = process.argv.slice(2);
 const { values } = parseArgs({
   args: rest,
   options: {
-    tree: { type: 'string' }, out: { type: 'string' }, pin: { type: 'string', multiple: true }, 'lang-pack': { type: 'string' }, otf: { type: 'string' }, 'pins-of': { type: 'string' },
-    'regressions-only': { type: 'boolean', default: false }, ref: { type: 'string' }, other: { type: 'string' }, tolerance: { type: 'string' },
+    tree: { type: 'string' },
+    out: { type: 'string' },
+    pin: { type: 'string', multiple: true },
+    'lang-pack': { type: 'string' },
+    otf: { type: 'string' },
+    'pins-of': { type: 'string' },
+    'regressions-only': { type: 'boolean', default: false },
+    ref: { type: 'string' },
+    other: { type: 'string' },
+    tolerance: { type: 'string' },
   },
 });
 try {

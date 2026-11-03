@@ -10,7 +10,8 @@ const NOTES: Record<string, string> = {
   'a.md': 'Chăm sóc khách hàng (KH) là việc quan trọng.\nDoanh nghiệp (DN) vừa và nhỏ.\n',
   'b.md': 'TMĐT: thương mại điện tử đang tăng.\nBCTC = báo cáo tài chính quý ba.\n',
   'c.md': 'Sinh ở TP.HCM. Thành phố Hồ Chí Minh (TP.HCM) rất lớn.\n',
-  'd.md': 'Gặp khách hàng hôm nay. KH mới. Gặp khách hàng khác. KH cũ. Có khách hàng nữa. Danh sách NV.\n',
+  'd.md':
+    'Gặp khách hàng hôm nay. KH mới. Gặp khách hàng khác. KH cũ. Có khách hàng nữa. Danh sách NV.\n',
   'sub/e.md': 'GĐ họp. Giám đốc điều hành. GĐ nghỉ. Giám đốc kinh doanh. giám đốc về.\n',
   '_ohs/skip.md': 'XX: xe xe\n',
   '.hidden/skip.md': 'YY: yêu yêu\n',
@@ -27,9 +28,15 @@ function vault(files: Record<string, string>): string {
 
 describe('findDefinitions', () => {
   it('finds phrase (ABBR), ABBR: phrase and ABBR = phrase', () => {
-    expect(findDefinitions('Chăm sóc khách hàng (KH) là tốt')).toEqual([{ abbr: 'KH', expansion: 'khách hàng' }]);
-    expect(findDefinitions('TMĐT: thương mại điện tử đang')).toEqual([{ abbr: 'TMĐT', expansion: 'thương mại điện tử' }]);
-    expect(findDefinitions('BCTC = báo cáo tài chính quý')).toEqual([{ abbr: 'BCTC', expansion: 'báo cáo tài chính' }]);
+    expect(findDefinitions('Chăm sóc khách hàng (KH) là tốt')).toEqual([
+      { abbr: 'KH', expansion: 'khách hàng' },
+    ]);
+    expect(findDefinitions('TMĐT: thương mại điện tử đang')).toEqual([
+      { abbr: 'TMĐT', expansion: 'thương mại điện tử' },
+    ]);
+    expect(findDefinitions('BCTC = báo cáo tài chính quý')).toEqual([
+      { abbr: 'BCTC', expansion: 'báo cáo tài chính' },
+    ]);
     expect(findDefinitions('Thành phố Hồ Chí Minh (TP.HCM) lớn')).toEqual([
       { abbr: 'TP.HCM', expansion: 'Thành phố Hồ Chí Minh' },
     ]);
@@ -44,7 +51,8 @@ describe('findDefinitions', () => {
 
 describe('learnAbbreviations', () => {
   const none = knownEntries(null);
-  const learn = (known = none, options = {}) => learnAbbreviations(Object.values(NOTES), known, options);
+  const learn = (known = none, options = {}) =>
+    learnAbbreviations(Object.values(NOTES), known, options);
   const pairs = (list: ReturnType<typeof learn>) => list.map((p) => `${p.abbr} = ${p.expansion}`);
 
   it('proposes definitions and frequent phrases', () => {
@@ -69,7 +77,9 @@ describe('learnAbbreviations', () => {
   });
 
   it('skips abbreviations already in the main section and pairs already pending', () => {
-    const known = knownEntries('## Viết tắt\nKH = khách hàng\n\n## Chờ duyệt\nGĐ = giám đốc\nBCTC = báo cáo tài chính\n');
+    const known = knownEntries(
+      '## Viết tắt\nKH = khách hàng\n\n## Chờ duyệt\nGĐ = giám đốc\nBCTC = báo cáo tài chính\n',
+    );
     const out = pairs(learn(known));
     expect(out.some((l) => l.startsWith('KH ='))).toBe(false);
     expect(out).not.toContain('GĐ = giám đốc');
@@ -82,7 +92,10 @@ describe('learnAbbreviations', () => {
   });
 
   it('does not guess when two phrases tie', () => {
-    const texts = ['CN: x', 'CN công nghệ. công nghệ. công nghệ. chủ nhiệm. chủ nhiệm. chủ nhiệm. CN.'];
+    const texts = [
+      'CN: x',
+      'CN công nghệ. công nghệ. công nghệ. chủ nhiệm. chủ nhiệm. chủ nhiệm. CN.',
+    ];
     expect(learnAbbreviations(texts, none).filter((p) => p.abbr === 'CN')).toEqual([]);
   });
 });
@@ -91,7 +104,8 @@ describe('addPending', () => {
   const props = [{ abbr: 'KH', expansion: 'khách hàng', source: 'definition' as const, count: 1 }];
 
   it('appends under Chờ duyệt and leaves other text byte for byte', () => {
-    const before = '# T\n\n## Viết tắt\n\nHĐ = hợp đồng\n\n## Chờ duyệt\n\nGD = giáo dục\n\n## Ghi chú\n\nxin chào\n';
+    const before =
+      '# T\n\n## Viết tắt\n\nHĐ = hợp đồng\n\n## Chờ duyệt\n\nGD = giáo dục\n\n## Ghi chú\n\nxin chào\n';
     const after = addPending(before, props);
     expect(after).toBe(
       '# T\n\n## Viết tắt\n\nHĐ = hợp đồng\n\n## Chờ duyệt\n\nGD = giáo dục\nKH = khách hàng\n\n## Ghi chú\n\nxin chào\n',
@@ -124,7 +138,8 @@ describe('learn-abbr command', () => {
     errors.length = 0;
     dir = vault({
       ...NOTES,
-      '_ohs/lexicon.md': '## Đồng nghĩa\n\nô tô = xe hơi\n\n## Viết tắt\n\nHĐ = hợp đồng\n\n## Chờ duyệt\n',
+      '_ohs/lexicon.md':
+        '## Đồng nghĩa\n\nô tô = xe hơi\n\n## Viết tắt\n\nHĐ = hợp đồng\n\n## Chờ duyệt\n',
     });
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));

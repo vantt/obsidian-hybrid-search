@@ -22,7 +22,9 @@ describe('tags', () => {
     expect(upstreamTagOf('main')).toBeNull();
   });
   it('picks the highest stable tag numerically', () => {
-    expect(highestStableTag(['v0.9.9', 'v0.17.2', 'v0.17.10', 'v0.18.0-rc.1', 'x'])).toBe('v0.17.10');
+    expect(highestStableTag(['v0.9.9', 'v0.17.2', 'v0.17.10', 'v0.18.0-rc.1', 'x'])).toBe(
+      'v0.17.10',
+    );
     expect(highestStableTag([])).toBeNull();
   });
 });
@@ -40,13 +42,20 @@ describe('probe verdicts', () => {
     expect(suggestPatch({ upstream: 'present', apply: 'conflict' })).toMatch(/^rewrite/);
     expect(suggestPatch({ upstream: 'solved', apply: 'applies' })).toMatch(/^drop candidate/);
     expect(suggestPatch({ upstream: 'error', apply: 'applies' })).toMatch(/^unknown/);
-    expect(suggestPatch({ upstream: 'present', apply: 'applies', upstreamStatus: 'merged' })).toMatch(/^drop/);
+    expect(
+      suggestPatch({ upstream: 'present', apply: 'applies', upstreamStatus: 'merged' }),
+    ).toMatch(/^drop/);
   });
 });
 
 const result = (ndcg, cats) => ({
   summary: { ndcg_5: ndcg, mrr: ndcg, hit_1: ndcg, hit_5: ndcg, recall_k: ndcg },
-  by_category: Object.fromEntries(Object.entries(cats).map(([c, v]) => [c, { ndcg_5: v, mrr: v, hit_1: v, hit_5: v, recall_k: v }])),
+  by_category: Object.fromEntries(
+    Object.entries(cats).map(([c, v]) => [
+      c,
+      { ndcg_5: v, mrr: v, hit_1: v, hit_5: v, recall_k: v },
+    ]),
+  ),
 });
 
 describe('quality table', () => {
@@ -59,7 +68,13 @@ describe('quality table', () => {
   it('has ALL plus every category for every metric', () => {
     expect(rows).toHaveLength(3 * 5);
     const r = rows.find((x) => x.category === 'a' && x.metric === 'ndcg_5');
-    expect(r).toMatchObject({ up_new: 0.5, fork_prev: 0.8, fork_new: 0.8, delta: 0.3, delta_vs_prev: 0 });
+    expect(r).toMatchObject({
+      up_new: 0.5,
+      fork_prev: 0.8,
+      fork_new: 0.8,
+      delta: 0.3,
+      delta_vs_prev: 0,
+    });
   });
   it('flags upstream-better and fork-regressed cells above the threshold only', () => {
     // ALL: fork_new - up_new = +0.05 (fine), fork_new - fork_prev = -0.05 (regressed)
@@ -68,7 +83,9 @@ describe('quality table', () => {
     expect(flags).toContainEqual({ kind: 'fork_regressed', category: 'ALL', delta: -0.05 });
     expect(flags).toContainEqual({ kind: 'upstream_better', category: 'b', delta: -0.05 });
     expect(flags.some((f) => f.category === 'a')).toBe(false);
-    expect(flagQuality(buildQualityRows({ up_new: result(0.6, {}), fork_new: result(0.59, {}) }))).toEqual([]);
+    expect(
+      flagQuality(buildQualityRows({ up_new: result(0.6, {}), fork_new: result(0.59, {}) })),
+    ).toEqual([]);
   });
   it('gives null cells for a missing side', () => {
     const r = buildQualityRows({ up_new: result(0.6, {}) }).find((x) => x.metric === 'mrr');
@@ -119,7 +136,12 @@ describe('blind comparison', () => {
   });
   it('hides the side behind A/B and keeps the key apart', () => {
     const ids = ['q1', 'q2', 'q4'];
-    const { pairs, key } = makeBlindPairs(ids, { q1: 'one', q2: 'two', q4: 'four' }, (side, id) => [{ title: `${side}:${id}`, snippet: '' }], { seed: 3 });
+    const { pairs, key } = makeBlindPairs(
+      ids,
+      { q1: 'one', q2: 'two', q4: 'four' },
+      (side, id) => [{ title: `${side}:${id}`, snippet: '' }],
+      { seed: 3 },
+    );
     expect(pairs).toHaveLength(3);
     for (const p of pairs) {
       expect(Object.keys(p).sort()).toEqual(['A', 'B', 'id', 'query']);
@@ -139,8 +161,20 @@ describe('blind comparison', () => {
       p05: { A: 'fork', B: 'upstream' },
       p06: { A: 'fork', B: 'upstream' },
     };
-    const t = tallyVerdicts({ p01: 'A++', p02: 'B+', p03: 'tie', p04: 'A+', p05: 'B++', p06: 'nonsense' }, key);
-    expect(t).toMatchObject({ fork_clear: 1, fork_slight: 1, tie: 1, other_slight: 1, other_clear: 1, judged: 5, fork_wins: 2, fork_losses: 2 });
+    const t = tallyVerdicts(
+      { p01: 'A++', p02: 'B+', p03: 'tie', p04: 'A+', p05: 'B++', p06: 'nonsense' },
+      key,
+    );
+    expect(t).toMatchObject({
+      fork_clear: 1,
+      fork_slight: 1,
+      tie: 1,
+      other_slight: 1,
+      other_clear: 1,
+      judged: 5,
+      fork_wins: 2,
+      fork_losses: 2,
+    });
     expect(t.missing).toEqual(['p06']);
   });
 });

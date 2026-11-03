@@ -43,8 +43,8 @@ import {
   checkApplicability,
   hookChanges,
   readJsonIfExists,
-  runProbe,
   runEvaluateTimed,
+  runProbe,
   runViEval,
   upstreamChanges,
   upstreamOverview,
@@ -86,7 +86,8 @@ export function parseCli(argv) {
 }
 
 const sha256 = (file) => createHash('sha256').update(readFileSync(file)).digest('hex');
-const refExists = (root, ref) => git(root, ['rev-parse', '--verify', '-q', `${ref}^{commit}`], { allowFail: true }).ok;
+const refExists = (root, ref) =>
+  git(root, ['rev-parse', '--verify', '-q', `${ref}^{commit}`], { allowFail: true }).ok;
 const shaOf = (root, ref) => git(root, ['rev-parse', `${ref}^{commit}`]);
 
 /** Previous side: explicit --prev, else highest fork release tag below NEW, else previous upstream tag. */
@@ -96,21 +97,35 @@ function resolvePrev(root, tagNew, explicit) {
     const up = upstreamTagOf(t);
     return up && up !== tagNew && highestStableTag([up, tagNew]) === tagNew;
   };
-  const pick = explicit ?? tags.filter((t) => FORK_TAG.test(t) && below(t)).sort().at(-1) ?? highestStableTag(tags.filter(below));
+  const pick =
+    explicit ??
+    tags
+      .filter((t) => FORK_TAG.test(t) && below(t))
+      .sort()
+      .at(-1) ??
+    highestStableTag(tags.filter(below));
   const up = pick && upstreamTagOf(pick);
-  if (!up) throw new Error(`cannot work out the previous release from "${pick ?? ''}" (use --prev <vX.Y.Z or vX.Y.Z-vantt.N>)`);
+  if (!up)
+    throw new Error(
+      `cannot work out the previous release from "${pick ?? ''}" (use --prev <vX.Y.Z or vX.Y.Z-vantt.N>)`,
+    );
   return { given: pick, upstream_tag: up, fork_tag: FORK_TAG.test(pick) ? pick : null };
 }
 
 /** Fork build ref for an upstream tag: local branch, origin branch, or the fork release tag. */
 function findForkRef(root, upTag, forkTag) {
   const branch = forkBranchOf(upTag);
-  return [branch, `origin/${branch}`, forkTag].filter(Boolean).find((r) => refExists(root, r)) ?? null;
+  return (
+    [branch, `origin/${branch}`, forkTag].filter(Boolean).find((r) => refExists(root, r)) ?? null
+  );
 }
 
 function catchupBranch(root, upTag) {
   log(`Building ${forkBranchOf(upTag)} with catchup (tests and quality gate skipped).`);
-  const res = sh(root, `node ${JSON.stringify(path.join(here, 'catchup.mjs'))} --ref ${upTag} --skip-tests --skip-quality`);
+  const res = sh(
+    root,
+    `node ${JSON.stringify(path.join(here, 'catchup.mjs'))} --ref ${upTag} --skip-tests --skip-quality`,
+  );
   if (res.status === 3) sh(root, `node ${JSON.stringify(path.join(here, 'catchup.mjs'))} --abort`);
   return { exit: res.status, ok: res.status === 0 };
 }
@@ -140,7 +155,15 @@ function viVault(workDir, otf) {
   const vault = path.join(workDir, 'vi-vault');
   if (!existsSync(vault)) {
     mkdirSync(workDir, { recursive: true });
-    const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', path.join(workDir, 'vi-answers.json')];
+    const gen = [
+      'generate',
+      '--preset',
+      'vi-search',
+      '--out',
+      vault,
+      '--answers-out',
+      path.join(workDir, 'vi-answers.json'),
+    ];
     const res = otf
       ? sh(workDir, `node ${JSON.stringify(otf)} ${gen.join(' ')}`)
       : sh(workDir, `npx --yes github:vantt/obsidian-test-fixture#v0.11.0 ${gen.join(' ')}`);
@@ -160,13 +183,21 @@ function viVault(workDir, otf) {
 
 function blindFiles(workDir) {
   const dir = path.join(workDir, 'blind');
-  return { dir, pairs: path.join(dir, 'pairs.json'), key: path.join(dir, 'key.json'), verdicts: path.join(dir, 'verdicts.json') };
+  return {
+    dir,
+    pairs: path.join(dir, 'pairs.json'),
+    key: path.join(dir, 'key.json'),
+    verdicts: path.join(dir, 'verdicts.json'),
+  };
 }
 
 function buildBlind({ workDir, a, b, otf, seed, max }) {
   const files = viVault(workDir, otf);
   const queries = Object.fromEntries(a.per_query.map((q) => [q.id, q.query]));
-  const byId = { upstream: new Map(a.per_query.map((q) => [q.id, q])), fork: new Map(b.per_query.map((q) => [q.id, q])) };
+  const byId = {
+    upstream: new Map(a.per_query.map((q) => [q.id, q])),
+    fork: new Map(b.per_query.map((q) => [q.id, q])),
+  };
   const view = (side, id) =>
     byId[side]
       .get(id)
@@ -174,7 +205,10 @@ function buildBlind({ workDir, a, b, otf, seed, max }) {
       .map((p) => {
         const file = files.get(p.normalize('NFC'));
         const text = file ? readFileSync(file, 'utf8') : '';
-        return { title: path.basename(p, '.md').normalize('NFC'), snippet: makeSnippet(text, queries[id]) };
+        return {
+          title: path.basename(p, '.md').normalize('NFC'),
+          snippet: makeSnippet(text, queries[id]),
+        };
       });
   const ids = pickBlindQueries(a.per_query, b.per_query, { max, seed });
   const { pairs, key } = makeBlindPairs(ids, queries, view, { seed });
@@ -194,7 +228,9 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   }
   if (opts['trends-only']) {
     const r = writeTrends(path.resolve(opts.out ?? path.join(forkDir, 'vantt/reviews')));
-    log(`Trends over ${r.tags.join(', ') || 'no releases'}: ${r.svg}${r.report ? `, refreshed ${r.report}` : ''}`);
+    log(
+      `Trends over ${r.tags.join(', ') || 'no releases'}: ${r.svg}${r.report ? `, refreshed ${r.report}` : ''}`,
+    );
     return 0;
   }
   const root = git(cwd, ['rev-parse', '--show-toplevel']);
@@ -203,12 +239,25 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   try {
     if (opts.fetch) {
       log('Fetching upstream master and tags.');
-      git(root, ['fetch', '--quiet', '--tags', 'upstream', '+refs/heads/master:refs/remotes/upstream/master']);
+      git(root, [
+        'fetch',
+        '--quiet',
+        '--tags',
+        'upstream',
+        '+refs/heads/master:refs/remotes/upstream/master',
+      ]);
     }
     const tagNew =
-      opts.tag ?? highestStableTag(git(root, ['tag', '--list', 'v*']).split('\n').filter((t) => upstreamTagOf(t) === t));
+      opts.tag ??
+      highestStableTag(
+        git(root, ['tag', '--list', 'v*'])
+          .split('\n')
+          .filter((t) => upstreamTagOf(t) === t),
+      );
     if (!tagNew || !refExists(root, tagNew)) {
-      log(`review-upstream: tag "${tagNew ?? ''}" not found (pass --tag, or --fetch to get new tags)`);
+      log(
+        `review-upstream: tag "${tagNew ?? ''}" not found (pass --tag, or --fetch to get new tags)`,
+      );
       return 2;
     }
     const outDir = path.resolve(opts.out ?? path.join(forkDir, 'vantt/reviews'));
@@ -218,7 +267,8 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     if (opts.unblind) {
       const data = readJsonIfExists(dataFile);
       const f = blindFiles(workDir);
-      if (!data?.blind || !existsSync(f.verdicts)) throw new Error(`need ${dataFile} and ${f.verdicts}`);
+      if (!data?.blind || !existsSync(f.verdicts))
+        throw new Error(`need ${dataFile} and ${f.verdicts}`);
       data.blind.tally = tallyVerdicts(readJsonIfExists(f.verdicts), readJsonIfExists(f.key));
       writeJson(dataFile, data);
       log(JSON.stringify(data.blind.tally));
@@ -226,15 +276,21 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     }
 
     const prev = resolvePrev(root, tagNew, opts.prev);
-    if (!refExists(root, prev.upstream_tag)) throw new Error(`upstream tag ${prev.upstream_tag} not found`);
+    if (!refExists(root, prev.upstream_tag))
+      throw new Error(`upstream tag ${prev.upstream_tag} not found`);
     const seriesFile = path.join(forkDir, 'vantt/patches/series.toml');
     const patches = parseSeries(readFileSync(seriesFile, 'utf8')).patches;
     const patchesDir = path.dirname(seriesFile);
-    log(`Review ${tagNew} against ${prev.given} (upstream ${prev.upstream_tag}); ${patches.length} patches.`);
+    log(
+      `Review ${tagNew} against ${prev.given} (upstream ${prev.upstream_tag}); ${patches.length} patches.`,
+    );
 
     const warnings = [];
     const refs = {};
-    for (const [side, up, ft] of [['new', tagNew, null], ['prev', prev.upstream_tag, prev.fork_tag]]) {
+    for (const [side, up, ft] of [
+      ['new', tagNew, null],
+      ['prev', prev.upstream_tag, prev.fork_tag],
+    ]) {
       let ref = findForkRef(root, up, ft);
       if (!ref && opts['build-missing']) {
         const r = catchupBranch(root, up);
@@ -249,14 +305,25 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     log('Patch applicability.');
     const apply = {
       new: checkApplicability(root, patches, tagNew, path.join(workDir, 'apply-new'), patchesDir),
-      prev: checkApplicability(root, patches, prev.upstream_tag, path.join(workDir, 'apply-prev'), patchesDir),
+      prev: checkApplicability(
+        root,
+        patches,
+        prev.upstream_tag,
+        path.join(workDir, 'apply-prev'),
+        patchesDir,
+      ),
     };
 
     // Four trees.
     const npmErr = ensureNpm(root, log);
     if (npmErr) throw new Error(npmErr);
     const treeInfo = {};
-    for (const [name, ref] of [['up_new', tagNew], ['up_prev', prev.upstream_tag], ['fork_prev', refs.prev], ['fork_new', refs.new]]) {
+    for (const [name, ref] of [
+      ['up_new', tagNew],
+      ['up_prev', prev.upstream_tag],
+      ['fork_prev', refs.prev],
+      ['fork_new', refs.new],
+    ]) {
       log(`Tree ${name} (${ref ?? 'none'})`);
       trees[name] = makeTree(root, name, ref, workDir, treeInfo);
       if (!trees[name]) warnings.push(`tree ${name} unavailable: ${treeInfo[name].error}`);
@@ -272,8 +339,14 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
       log(`Probe ${p.id}`);
       const probe = {};
       for (const name of Object.keys(trees)) {
-        if (!p.probe) probe[name] = { verdict: 'error', exit: null, output: 'no probe declared in series.toml' };
-        else if (!trees[name]) probe[name] = { verdict: 'skipped', exit: null, output: `tree ${name} unavailable` };
+        if (!p.probe)
+          probe[name] = {
+            verdict: 'error',
+            exit: null,
+            output: 'no probe declared in series.toml',
+          };
+        else if (!trees[name])
+          probe[name] = { verdict: 'skipped', exit: null, output: `tree ${name} unavailable` };
         else {
           probe[name] = runProbe(path.join(forkDir, p.probe), trees[name].dir);
           log(`  ${name}: ${probe[name].verdict}`);
@@ -288,7 +361,11 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
         apply: { new: apply.new[p.id], prev: apply.prev[p.id] },
         upstream_changes: upstreamChanges(root, prev.upstream_tag, tagNew, p.touches),
         probe_results: probe,
-        suggestion: suggestPatch({ upstream: probe.up_new.verdict, apply: apply.new[p.id], upstreamStatus: p.upstream_status }),
+        suggestion: suggestPatch({
+          upstream: probe.up_new.verdict,
+          apply: apply.new[p.id],
+          upstreamStatus: p.upstream_status,
+        }),
         fork_probe_ok: trees.fork_new ? probe.fork_new.verdict === 'solved' : null,
       });
     }
@@ -306,46 +383,92 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
         writeJson(f, r);
         return r;
       };
-      const light = (r) => ({ summary: r.summary, by_category: r.by_category, note_count: r.meta?.note_count ?? null, timing: r.review_timing ?? null });
+      const light = (r) => ({
+        summary: r.summary,
+        by_category: r.by_category,
+        note_count: r.meta?.note_count ?? null,
+        timing: r.review_timing ?? null,
+      });
       const available = (names) => names.filter((n) => trees[n]);
 
       if (trees.up_new) {
         log('Eval obsidian-help');
         const shared = path.join(forkDir, 'fixtures/obsidian-help/dataset');
-        const vault = existsSync(shared) ? shared : prepareDataset(trees.up_new.dir, 'obsidian-help', log);
+        const vault = existsSync(shared)
+          ? shared
+          : prepareDataset(trees.up_new.dir, 'obsidian-help', log);
         const golden = goldenFile(trees.up_new.dir, 'obsidian-help');
         const sides = {};
         for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
           log(` side ${n}`);
           sides[n] = await cached(`obsidian-help-${n}`, () =>
-            runEvaluateTimed({ tree: trees[n].dir, vault, golden, scratch: path.join(workDir, 'scratch'), env: evalEnv() }));
+            runEvaluateTimed({
+              tree: trees[n].dir,
+              vault,
+              golden,
+              scratch: path.join(workDir, 'scratch'),
+              env: evalEnv(),
+            }),
+          );
         }
         const lightSides = Object.fromEntries(Object.entries(sides).map(([n, r]) => [n, light(r)]));
         const rows = buildQualityRows(lightSides);
         quality['obsidian-help'] = { sides: lightSides, rows, flags: flagQuality(rows) };
 
         log('Eval vi');
-        const packDir = path.resolve(opts['lang-pack'] ?? path.join(forkDir, 'vantt/packages/ohs-lang-vi'));
+        const packDir = path.resolve(
+          opts['lang-pack'] ?? path.join(forkDir, 'vantt/packages/ohs-lang-vi'),
+        );
         const pack = packDir;
         // A pack without its build output is silently ignored by OHS, which makes the fork look like upstream.
         buildPack(packDir, log);
         const vi = {};
-        const viRuns = [['up_new', null], ['fork_prev', pack], ['fork_new', pack], ['fork_new_nopack', null]];
+        const viRuns = [
+          ['up_new', null],
+          ['fork_prev', pack],
+          ['fork_new', pack],
+          ['fork_new_nopack', null],
+        ];
         for (const [n, p] of viRuns) {
           const tree = trees[n === 'fork_new_nopack' ? 'fork_new' : n];
           if (!tree) continue;
           log(` side ${n}`);
           vi[n] = await cached(`vi-${n}`, () =>
-            runViEval({ forkDir, tree: tree.dir, out: path.join(workDir, 'scratch', `vi-${n}.json`), pack: p, otf: opts.otf }));
+            runViEval({
+              forkDir,
+              tree: tree.dir,
+              out: path.join(workDir, 'scratch', `vi-${n}.json`),
+              pack: p,
+              otf: opts.otf,
+            }),
+          );
         }
         const lightVi = Object.fromEntries(Object.entries(vi).map(([n, r]) => [n, light(r)]));
         const rowsVi = buildQualityRows(lightVi);
-        if (vi.fork_new && vi.fork_new_nopack && JSON.stringify(vi.fork_new.summary) === JSON.stringify(vi.fork_new_nopack.summary))
-          warnings.push('vi eval of fork_new is identical with and without the language pack: the pack may not have loaded');
-        quality.vi = { pack: pack ? path.relative(forkDir, packDir) : null, sides: lightVi, rows: rowsVi, flags: flagQuality(rowsVi) };
+        if (
+          vi.fork_new &&
+          vi.fork_new_nopack &&
+          JSON.stringify(vi.fork_new.summary) === JSON.stringify(vi.fork_new_nopack.summary)
+        )
+          warnings.push(
+            'vi eval of fork_new is identical with and without the language pack: the pack may not have loaded',
+          );
+        quality.vi = {
+          pack: pack ? path.relative(forkDir, packDir) : null,
+          sides: lightVi,
+          rows: rowsVi,
+          flags: flagQuality(rowsVi),
+        };
         if (vi.up_new && vi.fork_new) {
           log('Blind pairs');
-          blind = buildBlind({ workDir, a: vi.up_new, b: vi.fork_new, otf: opts.otf, seed: Number(opts.seed), max: Number(opts['blind-max']) });
+          blind = buildBlind({
+            workDir,
+            a: vi.up_new,
+            b: vi.fork_new,
+            otf: opts.otf,
+            seed: Number(opts.seed),
+            max: Number(opts['blind-max']),
+          });
         }
       }
 
@@ -354,14 +477,16 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
         const dir = path.resolve(opts.private);
         const sides = {};
         for (const n of available(['up_new', 'fork_prev', 'fork_new'])) {
-          sides[n] = scrubPrivate(runEvaluate({
-            tree: trees[n].dir,
-            vault: path.join(dir, 'vault'),
-            golden: path.join(dir, 'golden-set.json'),
-            scratch: path.join(workDir, 'scratch'),
-            capture: true,
-            log,
-          }));
+          sides[n] = scrubPrivate(
+            runEvaluate({
+              tree: trees[n].dir,
+              vault: path.join(dir, 'vault'),
+              golden: path.join(dir, 'golden-set.json'),
+              scratch: path.join(workDir, 'scratch'),
+              capture: true,
+              log,
+            }),
+          );
         }
         const rows = buildQualityRows(sides);
         quality.private = { sides, rows, flags: flagQuality(rows) };
@@ -386,7 +511,9 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
     writeJson(dataFile, data);
     log(`Wrote ${dataFile}`);
     const tr = writeTrends(outDir);
-    log(`Trends over ${tr.tags.join(', ')}: ${tr.svg}${tr.report ? `, refreshed ${tr.report}` : ' (no report yet; rerun with --trends-only after writing it)'}`);
+    log(
+      `Trends over ${tr.tags.join(', ')}: ${tr.svg}${tr.report ? `, refreshed ${tr.report}` : ' (no report yet; rerun with --trends-only after writing it)'}`,
+    );
     return 0;
   } catch (e) {
     log(`review-upstream: ${e.message}`);

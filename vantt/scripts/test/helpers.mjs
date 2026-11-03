@@ -23,7 +23,12 @@ const ENV = {
 };
 
 export const git = (cwd, ...args) =>
-  execFileSync('git', args, { cwd, env: ENV, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trimEnd();
+  execFileSync('git', args, {
+    cwd,
+    env: ENV,
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+  }).trimEnd();
 
 export function write(dir, rel, content) {
   mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
@@ -44,15 +49,44 @@ const APP_V1 = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', ''].join('\n');
 const APP_V2 = ['alpha', 'beta upstream', 'gamma', 'delta', 'epsilon', ''].join('\n');
 
 function upstreamFiles(dir) {
-  const pkg = { name: 'ohs-fixture', version: '0.1.0', type: 'module', scripts: { build: 'node build.mjs', test: 'node -e "process.exit(0)"' } };
+  const pkg = {
+    name: 'ohs-fixture',
+    version: '0.1.0',
+    type: 'module',
+    scripts: { build: 'node build.mjs', test: 'node -e "process.exit(0)"' },
+  };
   write(dir, 'package.json', JSON.stringify(pkg, null, 2) + '\n');
   write(
     dir,
     'package-lock.json',
-    JSON.stringify({ name: 'ohs-fixture', version: '0.1.0', lockfileVersion: 3, requires: true, packages: { '': { name: 'ohs-fixture', version: '0.1.0' } } }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        name: 'ohs-fixture',
+        version: '0.1.0',
+        lockfileVersion: 3,
+        requires: true,
+        packages: { '': { name: 'ohs-fixture', version: '0.1.0' } },
+      },
+      null,
+      2,
+    ) + '\n',
   );
   write(dir, 'build.mjs', BUILD);
-  write(dir, 'server.json', JSON.stringify({ version: '0.1.0', packages: [{ identifier: 'ohs-fixture', version: '0.1.0' }, { identifier: 'other', version: '9.0.0' }] }, null, 2) + '\n');
+  write(
+    dir,
+    'server.json',
+    JSON.stringify(
+      {
+        version: '0.1.0',
+        packages: [
+          { identifier: 'ohs-fixture', version: '0.1.0' },
+          { identifier: 'other', version: '9.0.0' },
+        ],
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   write(dir, '.gitignore', 'node_modules/\ndist/\nreports/\n');
   write(dir, '.github/workflows/ci.yml', 'name: ci\n');
   write(dir, 'src/app.txt', APP_V1);

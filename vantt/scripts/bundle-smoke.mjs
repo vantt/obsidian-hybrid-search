@@ -13,14 +13,24 @@
 // 6. imports the bundled Vietnamese pack with the bundled Node
 // Exit code 0 only when every check passed. A JSON report with timings and sizes goes to --out.
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import path from 'node:path';
-import { parseArgs } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { parseArgs } from 'node:util';
 import { dirSize, sha256File, walk } from './bundle.mjs';
 
 const isWin = process.platform === 'win32';
-const TAR = isWin ? path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe') : 'tar';
+const TAR = isWin
+  ? path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+  : 'tar';
 const log = (m) => process.stderr.write(`[smoke] ${m}\n`);
 const nfc = (s) => s.normalize('NFC');
 
@@ -38,14 +48,20 @@ function launcher(root, name) {
 /** Spawn a launcher; .cmd files need a shell, so the path is quoted for it. */
 function start(root, name, args, env) {
   const file = launcher(root, name);
-  return spawn(isWin ? `"${file}"` : file, args, { env, shell: isWin, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+  return spawn(isWin ? `"${file}"` : file, args, {
+    env,
+    shell: isWin,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
 }
 
 function runOnce(root, name, args, env, timeoutMs = 600_000) {
   return new Promise((resolve) => {
     const t0 = Date.now();
     const p = start(root, name, args, env);
-    let out = '', err = '';
+    let out = '',
+      err = '';
     p.stdout.on('data', (d) => (out += d));
     p.stderr.on('data', (d) => (err += d));
     p.stdin.end();
@@ -63,7 +79,14 @@ function killTree(p) {
 }
 
 /** Newline-delimited JSON conversation: send requests one by one, wait for the reply with the same id. */
-async function converse(root, name, args, env, steps, { timeoutMs = 120_000, readyLine = false } = {}) {
+async function converse(
+  root,
+  name,
+  args,
+  env,
+  steps,
+  { timeoutMs = 120_000, readyLine = false } = {},
+) {
   const p = start(root, name, args, env);
   let buf = '';
   let err = '';
@@ -88,7 +111,10 @@ async function converse(root, name, args, env, steps, { timeoutMs = 120_000, rea
   const exited = new Promise((r) => p.on('close', () => r('exit')));
   const wait = (pred) =>
     new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error(`timeout waiting for reply; stderr: ${err.slice(-400)}`)), timeoutMs);
+      const timer = setTimeout(
+        () => reject(new Error(`timeout waiting for reply; stderr: ${err.slice(-400)}`)),
+        timeoutMs,
+      );
       const probe = () => {
         const hit = lines.find(pred);
         if (hit) {
@@ -117,7 +143,10 @@ async function converse(root, name, args, env, steps, { timeoutMs = 120_000, rea
     }
   } finally {
     p.stdin.end();
-    const done = await Promise.race([exited, new Promise((r) => setTimeout(() => r('slow'), 5000))]);
+    const done = await Promise.race([
+      exited,
+      new Promise((r) => setTimeout(() => r('slow'), 5000)),
+    ]);
     if (done === 'slow') killTree(p);
   }
   return replies;
@@ -139,14 +168,27 @@ async function main() {
   const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const smokeDir = path.join(repo, 'vantt', 'eval', 'vi');
   const vaultSrc = path.resolve(values.vault ?? path.join(smokeDir, 'smoke-vault'));
-  const golden = JSON.parse(readFileSync(path.resolve(values.golden ?? path.join(smokeDir, 'smoke-golden-set.json')), 'utf8'));
+  const golden = JSON.parse(
+    readFileSync(
+      path.resolve(values.golden ?? path.join(smokeDir, 'smoke-golden-set.json')),
+      'utf8',
+    ),
+  );
   const work = path.resolve(values.work ?? path.join(repo, 'vantt', '.work', 'smoke'));
-  const report = { archive: path.basename(archive), platform: `${process.platform}-${process.arch}`, node_host: process.versions.node };
+  const report = {
+    archive: path.basename(archive),
+    platform: `${process.platform}-${process.arch}`,
+    node_host: process.versions.node,
+  };
 
   // 1. checksum of the archive
   const sidecar = `${archive}.sha256`;
   const digest = await sha256File(archive);
-  if (existsSync(sidecar)) check('archive sha256 matches the .sha256 file', readFileSync(sidecar, 'utf8').trim().split(/\s+/)[0] === digest);
+  if (existsSync(sidecar))
+    check(
+      'archive sha256 matches the .sha256 file',
+      readFileSync(sidecar, 'utf8').trim().split(/\s+/)[0] === digest,
+    );
   else check('archive has a .sha256 file', false);
 
   // 2. extract into a path with a space and Vietnamese letters
@@ -159,7 +201,14 @@ async function main() {
   check('extract archive', ex.status === 0);
   report.extract_ms = Date.now() - t0;
   const roots = readdirSync(base).filter((d) => d.startsWith('ohs-'));
-  if (!check('archive holds one ohs-<version>-<platform> directory', roots.length === 1, roots.join(','))) return finish(report);
+  if (
+    !check(
+      'archive holds one ohs-<version>-<platform> directory',
+      roots.length === 1,
+      roots.join(','),
+    )
+  )
+    return finish(report);
   const root = path.join(base, roots[0]);
   report.size_unpacked = dirSize(root);
 
@@ -170,11 +219,20 @@ async function main() {
   const bad = [];
   for (const [f, h] of Object.entries(manifest.files)) {
     if (f === 'MANIFEST.json') continue;
-    if (!existsSync(path.join(root, f)) || (await sha256File(path.join(root, f))) !== h) bad.push(f);
+    if (!existsSync(path.join(root, f)) || (await sha256File(path.join(root, f))) !== h)
+      bad.push(f);
     onDisk.delete(f);
   }
-  check('MANIFEST.json hashes match every file', bad.length === 0 && onDisk.size === 0, `bad=${bad.slice(0, 3)} extra=${[...onDisk].slice(0, 3)}`);
-  check('manifest platform matches this machine', manifest.platform === report.platform, manifest.platform);
+  check(
+    'MANIFEST.json hashes match every file',
+    bad.length === 0 && onDisk.size === 0,
+    `bad=${bad.slice(0, 3)} extra=${[...onDisk].slice(0, 3)}`,
+  );
+  check(
+    'manifest platform matches this machine',
+    manifest.platform === report.platform,
+    manifest.platform,
+  );
 
   // vault copy next to the bundle, also with a Vietnamese name
   const vault = path.join(work, 'Kho thử');
@@ -189,20 +247,54 @@ async function main() {
 
   // The embedder loads this optional dependency lazily and hides the cause when it fails.
   const nodeBin = path.join(root, 'node', isWin ? 'node.exe' : path.join('bin', 'node'));
-  const hf = spawnSync(nodeBin, ['--input-type=module', '-e', "await import('@huggingface/transformers'); process.stdout.write('ok')"], { cwd: path.join(root, 'app'), encoding: 'utf8', env });
-  check('bundled @huggingface/transformers imports', hf.status === 0, hf.status === 0 ? '' : `${hf.stderr}`.split('\n').slice(0, 6).join(' | '));
+  const hf = spawnSync(
+    nodeBin,
+    [
+      '--input-type=module',
+      '-e',
+      "await import('@huggingface/transformers'); process.stdout.write('ok')",
+    ],
+    { cwd: path.join(root, 'app'), encoding: 'utf8', env },
+  );
+  check(
+    'bundled @huggingface/transformers imports',
+    hf.status === 0,
+    hf.status === 0 ? '' : `${hf.stderr}`.split('\n').slice(0, 6).join(' | '),
+  );
 
   // The vault path must reach the bundled Node intact (Vietnamese letters, spaces), with and without a shell in between.
-  const probe = "const p = process.env.OBSIDIAN_VAULT_PATH; process.stdout.write(JSON.stringify({ p, dir: require('node:fs').statSync(p).isDirectory() }));";
+  const probe =
+    "const p = process.env.OBSIDIAN_VAULT_PATH; process.stdout.write(JSON.stringify({ p, dir: require('node:fs').statSync(p).isDirectory() }));";
   const direct = spawnSync(nodeBin, ['-e', probe], { encoding: 'utf8', env });
-  check('vault directory exists for the smoke process', existsSync(vault), `${vault} entries=${existsSync(vault) ? readdirSync(vault).length : '-'}`);
-  check('vault path is a directory for the bundled Node', direct.status === 0 && direct.stdout.includes('"dir":true'), `${direct.stdout} ${String(direct.stderr).split('\n').filter((l) => /Error|ENOENT|errno|path/i.test(l)).join(' | ')} codepoints=${[...path.basename(vault)].map((c) => c.codePointAt(0).toString(16))}`);
+  check(
+    'vault directory exists for the smoke process',
+    existsSync(vault),
+    `${vault} entries=${existsSync(vault) ? readdirSync(vault).length : '-'}`,
+  );
+  check(
+    'vault path is a directory for the bundled Node',
+    direct.status === 0 && direct.stdout.includes('"dir":true'),
+    `${direct.stdout} ${String(direct.stderr)
+      .split('\n')
+      .filter((l) => /Error|ENOENT|errno|path/i.test(l))
+      .join(
+        ' | ',
+      )} codepoints=${[...path.basename(vault)].map((c) => c.codePointAt(0).toString(16))}`,
+  );
 
   // 3. CLI through launchers
   const ver = await runOnce(root, 'ohs', ['--version'], env, 60_000);
-  check('ohs --version prints the bundle version', ver.code === 0 && ver.out.includes(manifest.version), ver.out.trim() || ver.err);
+  check(
+    'ohs --version prints the bundle version',
+    ver.code === 0 && ver.out.includes(manifest.version),
+    ver.out.trim() || ver.err,
+  );
   const st0 = await runOnce(root, 'ohs', ['status'], env, 120_000);
-  check('ohs status runs on an empty index', st0.code === 0 && /"total":\s*0/.test(st0.out), st0.code !== 0 ? st0.err : st0.out.slice(0, 100));
+  check(
+    'ohs status runs on an empty index',
+    st0.code === 0 && /"total":\s*0/.test(st0.out),
+    st0.code !== 0 ? st0.err : st0.out.slice(0, 100),
+  );
   const re = await runOnce(root, 'ohs', ['reindex'], env, 1_200_000);
   report.index_ms = re.ms;
   check('ohs reindex indexes the smoke vault', re.code === 0, re.code !== 0 ? re.err : '');
@@ -213,18 +305,39 @@ async function main() {
   } catch {}
   report.db_size_mb = status.db_size_mb;
   report.chunks = status.chunks;
-  check('ohs status reports indexed notes', st1.code === 0 && status.indexed > 0 && status.failed_chunks === 0, `indexed=${status.indexed} chunks=${status.chunks} failed=${status.failed_chunks}`);
+  check(
+    'ohs status reports indexed notes',
+    st1.code === 0 && status.indexed > 0 && status.failed_chunks === 0,
+    `indexed=${status.indexed} chunks=${status.chunks} failed=${status.failed_chunks}`,
+  );
   const se = await runOnce(root, 'ohs', ['search', 'giu chan khach', '--json'], env, 180_000);
   let hits = [];
   try {
     hits = JSON.parse(se.out);
   } catch {}
-  check('ohs search --json returns results', se.code === 0 && Array.isArray(hits) && hits.length > 0, se.code !== 0 ? se.err : `${hits.length} results`);
+  check(
+    'ohs search --json returns results',
+    se.code === 0 && Array.isArray(hits) && hits.length > 0,
+    se.code !== 0 ? se.err : `${hits.length} results`,
+  );
 
   // 4. golden queries over stdio IPC
-  const queries = golden.map((g, i) => ({ send: { id: `q${i}`, query: g.query, options: { limit: 5 } } }));
-  const replies = await converse(root, 'ohs', ['serve', '--stdio'], env, [{ send: { id: 'st', action: 'status' } }, ...queries], { readyLine: true, timeoutMs: 300_000 });
-  check('ohs serve --stdio answers status', !!replies[0]?.status && !replies[0].error, replies[0]?.error);
+  const queries = golden.map((g, i) => ({
+    send: { id: `q${i}`, query: g.query, options: { limit: 5 } },
+  }));
+  const replies = await converse(
+    root,
+    'ohs',
+    ['serve', '--stdio'],
+    env,
+    [{ send: { id: 'st', action: 'status' } }, ...queries],
+    { readyLine: true, timeoutMs: 300_000 },
+  );
+  check(
+    'ohs serve --stdio answers status',
+    !!replies[0]?.status && !replies[0].error,
+    replies[0]?.error,
+  );
   let hit5 = 0;
   const misses = [];
   golden.forEach((g, i) => {
@@ -236,7 +349,11 @@ async function main() {
   });
   report.hit5 = Number((hit5 / golden.length).toFixed(3));
   report.hit5_misses = misses;
-  check(`golden Hit@5 >= ${values['min-hit5']} (no language pack: upstream baseline 0.938)`, hit5 / golden.length >= Number(values['min-hit5']), `${hit5}/${golden.length}, misses ${misses}`);
+  check(
+    `golden Hit@5 >= ${values['min-hit5']} (no language pack: upstream baseline 0.938)`,
+    hit5 / golden.length >= Number(values['min-hit5']),
+    `${hit5}/${golden.length}, misses ${misses}`,
+  );
 
   // 5. MCP over stdio
   const mcp = await converse(
@@ -245,22 +362,44 @@ async function main() {
     [],
     env,
     [
-      { send: { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'bundle-smoke', version: '1' } } } },
+      {
+        send: {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-06-18',
+            capabilities: {},
+            clientInfo: { name: 'bundle-smoke', version: '1' },
+          },
+        },
+      },
       { notify: { jsonrpc: '2.0', method: 'notifications/initialized' } },
       { send: { jsonrpc: '2.0', id: 2, method: 'tools/list' } },
     ],
     { timeoutMs: 120_000 },
   );
   const tools = (mcp[1]?.result?.tools ?? []).map((t) => t.name);
-  check('ohs-mcp initialize answers', !!mcp[0]?.result?.serverInfo, JSON.stringify(mcp[0]?.error ?? mcp[0]?.result?.serverInfo));
+  check(
+    'ohs-mcp initialize answers',
+    !!mcp[0]?.result?.serverInfo,
+    JSON.stringify(mcp[0]?.error ?? mcp[0]?.result?.serverInfo),
+  );
   check('ohs-mcp tools/list has search', tools.includes('search'), tools.join(','));
 
   // 6. bundled language pack loads under the bundled Node
   if (manifest.lang_packs?.vi) {
     const entry = pathToFileURL(path.join(root, 'lang', 'ohs-lang-vi', 'build', 'index.js')).href;
     const code = `const m = await import(${JSON.stringify(entry)}); process.stdout.write(typeof m.fold === 'function' ? String(m.fold('Giữ chân khách')) : 'no-fold');`;
-    const r = spawnSync(nodeBin, ['--input-type=module', '-e', code], { encoding: 'utf8', env: { ...env } });
-    check('bundled ohs-lang-vi loads and folds under the bundled Node', r.status === 0 && /giu chan khach/i.test(r.stdout), r.status !== 0 ? r.stderr : r.stdout);
+    const r = spawnSync(nodeBin, ['--input-type=module', '-e', code], {
+      encoding: 'utf8',
+      env: { ...env },
+    });
+    check(
+      'bundled ohs-lang-vi loads and folds under the bundled Node',
+      r.status === 0 && /giu chan khach/i.test(r.stdout),
+      r.status !== 0 ? r.stderr : r.stdout,
+    );
   }
   return finish(report);
 }

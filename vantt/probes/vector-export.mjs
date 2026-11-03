@@ -50,7 +50,9 @@ for (const [name, text] of Object.entries(NOTES)) writeFileSync(path.join(vault,
 // Deterministic embeddings from word hashes: similar texts get similar vectors.
 function embedText(text) {
   const vector = new Array(DIM).fill(0);
-  for (const word of String(text).toLowerCase().match(/[a-z]+/g) ?? []) {
+  for (const word of String(text)
+    .toLowerCase()
+    .match(/[a-z]+/g) ?? []) {
     let hash = 0;
     for (const char of word) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
     vector[hash % DIM] += 1;

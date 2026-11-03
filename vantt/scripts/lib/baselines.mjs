@@ -6,7 +6,8 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-const NAME = /^(\d+\.\d+\.\d+(?:-vantt\.\d+)?)\.(obsidian-help|vi-search|smoke)(?:\.([a-z]{2,3}))?\.json$/;
+const NAME =
+  /^(\d+\.\d+\.\d+(?:-vantt\.\d+)?)\.(obsidian-help|vi-search|smoke)(?:\.([a-z]{2,3}))?\.json$/;
 const VERSION = /^(\d+)\.(\d+)\.(\d+)(?:-vantt\.(\d+)(?:\..*)?)?$/;
 
 const parts = (v) => {
@@ -29,7 +30,12 @@ export function listBaselines(dir) {
   return readdirSync(dir)
     .map((file) => ({ file, m: NAME.exec(file) }))
     .filter((x) => x.m)
-    .map(({ file, m }) => ({ file: path.join(dir, file), version: m[1], set: m[2], lang: m[3] ?? null }));
+    .map(({ file, m }) => ({
+      file: path.join(dir, file),
+      version: m[1],
+      set: m[2],
+      lang: m[3] ?? null,
+    }));
 }
 
 /**
@@ -54,7 +60,9 @@ export function pickBaseline(dir, { set, lang = null, version }) {
 export function writeBaseline(dir, { version, set, lang = null, result, force = false }) {
   const file = path.join(dir, `${version}.${set}${lang ? `.${lang}` : ''}.json`);
   if (existsSync(file) && !force)
-    throw new Error(`${file} exists; lowering a baseline needs a reviewed PR (--force overwrites it locally)`);
+    throw new Error(
+      `${file} exists; lowering a baseline needs a reviewed PR (--force overwrites it locally)`,
+    );
   mkdirSync(dir, { recursive: true });
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`);
   return file;

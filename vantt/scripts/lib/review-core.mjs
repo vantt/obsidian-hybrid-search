@@ -52,7 +52,8 @@ export function probeVerdict(status) {
  */
 export function suggestPatch({ upstream, apply, upstreamStatus }) {
   if (upstreamStatus === 'merged') return 'drop (marked merged in series.toml)';
-  if (upstream === 'solved') return 'drop candidate: check spec invariants against upstream behaviour';
+  if (upstream === 'solved')
+    return 'drop candidate: check spec invariants against upstream behaviour';
   if (upstream === 'present') {
     return apply === 'conflict' ? 'rewrite: still needed, does not apply on the new tag' : 'keep';
   }
@@ -74,7 +75,8 @@ export function buildQualityRows(sides, metrics = METRICS) {
     return typeof v === 'number' ? v : null;
   };
   const cats = new Set(['ALL']);
-  for (const r of Object.values(sides)) for (const c of Object.keys(r?.by_category ?? {})) cats.add(c);
+  for (const r of Object.values(sides))
+    for (const c of Object.keys(r?.by_category ?? {})) cats.add(c);
   const rows = [];
   for (const category of cats) {
     for (const metric of metrics) {
@@ -170,7 +172,11 @@ export function blindCandidates(perA, perB) {
     const x = top5(qa);
     const y = top5(qb);
     if (x.length === y.length && x.every((p, i) => p === y[i])) continue;
-    out.push({ id: qa.id, category: qa.category, diff: Math.abs((qa.ndcg_5 ?? 0) - (qb.ndcg_5 ?? 0)) });
+    out.push({
+      id: qa.id,
+      category: qa.category,
+      diff: Math.abs((qa.ndcg_5 ?? 0) - (qb.ndcg_5 ?? 0)),
+    });
   }
   return out;
 }
@@ -180,7 +186,12 @@ export function blindCandidates(perA, perB) {
  * Returns {pairs, key}: `pairs` has only A/B lists (what the judge reads); `key` maps pair id to
  * which side is A (kept apart until the tally).
  */
-export function makeBlindPairs(ids, queries, view, { seed = 1, sides = ['upstream', 'fork'] } = {}) {
+export function makeBlindPairs(
+  ids,
+  queries,
+  view,
+  { seed = 1, sides = ['upstream', 'fork'] } = {},
+) {
   const random = rng(seed + 7919);
   const pairs = [];
   const key = {};
@@ -200,7 +211,15 @@ export const VERDICTS = ['A++', 'A+', 'tie', 'B+', 'B++'];
  * A+ = A slightly better, ...). `key` is from makeBlindPairs.
  */
 export function tallyVerdicts(verdicts, key, forkSide = 'fork') {
-  const t = { fork_clear: 0, fork_slight: 0, tie: 0, other_slight: 0, other_clear: 0, judged: 0, missing: [] };
+  const t = {
+    fork_clear: 0,
+    fork_slight: 0,
+    tie: 0,
+    other_slight: 0,
+    other_clear: 0,
+    judged: 0,
+    missing: [],
+  };
   for (const [pid, k] of Object.entries(key)) {
     const v = verdicts[pid];
     if (!VERDICTS.includes(v)) {
@@ -218,20 +237,22 @@ export function tallyVerdicts(verdicts, key, forkSide = 'fork') {
     if (forkWins) t[clear ? 'fork_clear' : 'fork_slight']++;
     else t[clear ? 'other_clear' : 'other_slight']++;
   }
-  return { ...t, fork_wins: t.fork_clear + t.fork_slight, fork_losses: t.other_clear + t.other_slight };
+  return {
+    ...t,
+    fork_wins: t.fork_clear + t.fork_slight,
+    fork_losses: t.other_clear + t.other_slight,
+  };
 }
 
 const fold = (s) =>
-  s
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase();
+  s.normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
 
 /** Readable excerpt of a note around the first query word it contains (accent-insensitive), else its start. */
 export function makeSnippet(text, query, max = 200) {
-  const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '').replace(/\s+/g, ' ').trim();
+  const body = text
+    .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   const words = fold(query)
     .split(/[^\p{L}\p{N}]+/u)
     .filter((w) => w.length > 1);
@@ -252,7 +273,11 @@ export function makeSnippet(text, query, max = 200) {
 
 /** Aggregate-only view of an eval result: no query text, no paths, no per-query data. */
 export function scrubPrivate(result) {
-  return { summary: result.summary, by_category: result.by_category, queries: result.per_query?.length ?? null };
+  return {
+    summary: result.summary,
+    by_category: result.by_category,
+    queries: result.per_query?.length ?? null,
+  };
 }
 
 // ---------------------------------------------------------------- timing
@@ -272,5 +297,10 @@ export function extractTiming(events) {
   const round = (x) => Math.round(x * 1000) / 1000;
   const indexS = (indexed.t - start.t) / 1000;
   const queryS = (end.t - indexed.t) / 1000;
-  return { index_s: round(indexS), query_s: round(queryS), queries, per_query_ms: round((queryS * 1000) / queries) };
+  return {
+    index_s: round(indexS),
+    query_s: round(queryS),
+    queries,
+    per_query_ms: round((queryS * 1000) / queries),
+  };
 }

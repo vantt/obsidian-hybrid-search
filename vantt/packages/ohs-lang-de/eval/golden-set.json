@@ -2,59 +2,39 @@
   {
     "id": "exact-01",
     "query": "Große Straße",
-    "relevant_paths": [
-      "grosse-strasse.md"
-    ],
-    "partial_paths": [
-      "schweizer-strassen.md"
-    ],
+    "relevant_paths": ["grosse-strasse.md"],
+    "partial_paths": ["schweizer-strassen.md"],
     "category": "exact",
     "notes": "Query is the phrase as written in the note."
   },
   {
     "id": "eszett-01",
     "query": "grosse strasse",
-    "relevant_paths": [
-      "grosse-strasse.md"
-    ],
-    "partial_paths": [
-      "schweizer-strassen.md"
-    ],
+    "relevant_paths": ["grosse-strasse.md"],
+    "partial_paths": ["schweizer-strassen.md"],
     "category": "eszett",
     "notes": "ß typed as ss."
   },
   {
     "id": "eszett-02",
     "query": "Straße",
-    "relevant_paths": [
-      "grosse-strasse.md",
-      "schweizer-strassen.md"
-    ],
-    "partial_paths": [
-      "stau.md"
-    ],
+    "relevant_paths": ["grosse-strasse.md", "schweizer-strassen.md"],
+    "partial_paths": ["stau.md"],
     "category": "eszett",
     "notes": "Note spelled with ß and note spelled with ss."
   },
   {
     "id": "eszett-03",
     "query": "strassen",
-    "relevant_paths": [
-      "schweizer-strassen.md",
-      "grosse-strasse.md"
-    ],
-    "partial_paths": [
-      "stau.md"
-    ],
+    "relevant_paths": ["schweizer-strassen.md", "grosse-strasse.md"],
+    "partial_paths": ["stau.md"],
     "category": "eszett",
     "notes": "Plural typed with ss."
   },
   {
     "id": "eszett-04",
     "query": "fussball",
-    "relevant_paths": [
-      "fussball.md"
-    ],
+    "relevant_paths": ["fussball.md"],
     "partial_paths": [],
     "category": "eszett",
     "notes": "ß typed as ss, in title and body."
@@ -62,23 +42,15 @@
   {
     "id": "eszett-05",
     "query": "STRASSE",
-    "relevant_paths": [
-      "grosse-strasse.md",
-      "schweizer-strassen.md"
-    ],
-    "partial_paths": [
-      "stau.md"
-    ],
+    "relevant_paths": ["grosse-strasse.md", "schweizer-strassen.md"],
+    "partial_paths": ["stau.md"],
     "category": "eszett",
     "notes": "Upper case with ss."
   },
   {
     "id": "umlaut-01",
     "query": "kase",
-    "relevant_paths": [
-      "kaesekuchen.md",
-      "kaese-einkaufen.md"
-    ],
+    "relevant_paths": ["kaesekuchen.md", "kaese-einkaufen.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ä typed as a."
@@ -86,10 +58,7 @@
   {
     "id": "umlaut-02",
     "query": "kaese",
-    "relevant_paths": [
-      "kaesekuchen.md",
-      "kaese-einkaufen.md"
-    ],
+    "relevant_paths": ["kaesekuchen.md", "kaese-einkaufen.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ä typed as ae; one note spells it Kaese."
@@ -97,10 +66,7 @@
   {
     "id": "umlaut-03",
     "query": "Käse",
-    "relevant_paths": [
-      "kaesekuchen.md",
-      "kaese-einkaufen.md"
-    ],
+    "relevant_paths": ["kaesekuchen.md", "kaese-einkaufen.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "Query keeps the umlaut; a note spells it Kaese."
@@ -108,9 +74,7 @@
   {
     "id": "umlaut-04",
     "query": "schoene aussicht",
-    "relevant_paths": [
-      "schoene-aussicht.md"
-    ],
+    "relevant_paths": ["schoene-aussicht.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ö typed as oe."
@@ -118,9 +82,7 @@
   {
     "id": "umlaut-05",
     "query": "schone aussicht",
-    "relevant_paths": [
-      "schoene-aussicht.md"
-    ],
+    "relevant_paths": ["schoene-aussicht.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ö typed as o."
@@ -128,9 +90,7 @@
   {
     "id": "umlaut-06",
     "query": "Mueller Schaefer",
-    "relevant_paths": [
-      "mueller.md"
-    ],
+    "relevant_paths": ["mueller.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "Names with ue and ae."
@@ -138,9 +98,7 @@
   {
     "id": "umlaut-07",
     "query": "Muller Schafer",
-    "relevant_paths": [
-      "mueller.md"
-    ],
+    "relevant_paths": ["mueller.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "Names with u and a."
@@ -148,9 +106,7 @@
   {
     "id": "umlaut-08",
     "query": "gruesse",
-    "relevant_paths": [
-      "gruesse.md"
-    ],
+    "relevant_paths": ["gruesse.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ü and ß both folded."
@@ -158,9 +114,7 @@
   {
     "id": "umlaut-09",
     "query": "fruhling",
-    "relevant_paths": [
-      "garten.md"
-    ],
+    "relevant_paths": ["garten.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ü typed as u."
@@ -168,9 +122,7 @@
   {
     "id": "umlaut-10",
     "query": "fruehling garten",
-    "relevant_paths": [
-      "garten.md"
-    ],
+    "relevant_paths": ["garten.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "ü typed as ue."
@@ -178,9 +130,7 @@
   {
     "id": "umlaut-11",
     "query": "Schlusselbund",
-    "relevant_paths": [
-      "schluesselbund.md"
-    ],
+    "relevant_paths": ["schluesselbund.md"],
     "partial_paths": [],
     "category": "umlaut",
     "notes": "Whole compound with ü typed as u."
@@ -188,10 +138,7 @@
   {
     "id": "compound-01",
     "query": "Brücke",
-    "relevant_paths": [
-      "fussgaengerbruecke.md",
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md", "eisenbahnbruecke.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Component of two compounds."
@@ -199,10 +146,7 @@
   {
     "id": "compound-02",
     "query": "bruecke",
-    "relevant_paths": [
-      "fussgaengerbruecke.md",
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md", "eisenbahnbruecke.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Component, ü typed as ue."
@@ -210,10 +154,7 @@
   {
     "id": "compound-03",
     "query": "brucke",
-    "relevant_paths": [
-      "fussgaengerbruecke.md",
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md", "eisenbahnbruecke.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Component, ü typed as u."
@@ -221,9 +162,7 @@
   {
     "id": "compound-04",
     "query": "Fußgänger",
-    "relevant_paths": [
-      "fussgaengerbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Leading components of a compound."
@@ -231,9 +170,7 @@
   {
     "id": "compound-05",
     "query": "Versicherung",
-    "relevant_paths": [
-      "krankenversicherung.md"
-    ],
+    "relevant_paths": ["krankenversicherung.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Last component."
@@ -241,9 +178,7 @@
   {
     "id": "compound-06",
     "query": "Vertrag",
-    "relevant_paths": [
-      "arbeitsvertrag.md"
-    ],
+    "relevant_paths": ["arbeitsvertrag.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Last component, in title and body."
@@ -251,9 +186,7 @@
   {
     "id": "compound-07",
     "query": "Schifffahrt",
-    "relevant_paths": [
-      "dampfschiff.md"
-    ],
+    "relevant_paths": ["dampfschiff.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Inner component of a very long compound."
@@ -261,9 +194,7 @@
   {
     "id": "compound-08",
     "query": "Dampfschiff",
-    "relevant_paths": [
-      "dampfschiff.md"
-    ],
+    "relevant_paths": ["dampfschiff.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Components glued without a linking element."
@@ -271,9 +202,7 @@
   {
     "id": "compound-09",
     "query": "Gesellschaft",
-    "relevant_paths": [
-      "dampfschiff.md"
-    ],
+    "relevant_paths": ["dampfschiff.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Last component of a very long compound."
@@ -281,9 +210,7 @@
   {
     "id": "compound-10",
     "query": "Begrenzung",
-    "relevant_paths": [
-      "geschwindigkeit.md"
-    ],
+    "relevant_paths": ["geschwindigkeit.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Component after a linking s."
@@ -291,9 +218,7 @@
   {
     "id": "compound-11",
     "query": "Geschwindigkeit",
-    "relevant_paths": [
-      "geschwindigkeit.md"
-    ],
+    "relevant_paths": ["geschwindigkeit.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "First component before a linking s."
@@ -301,9 +226,7 @@
   {
     "id": "compound-12",
     "query": "Braten",
-    "relevant_paths": [
-      "gaensebraten.md"
-    ],
+    "relevant_paths": ["gaensebraten.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Last component of Gänsebraten."
@@ -311,9 +234,7 @@
   {
     "id": "compound-13",
     "query": "Gans",
-    "relevant_paths": [
-      "gaensebraten.md"
-    ],
+    "relevant_paths": ["gaensebraten.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Body has the plain word Gans, title the compound."
@@ -321,9 +242,7 @@
   {
     "id": "compound-14",
     "query": "Eisenbahn Stein",
-    "relevant_paths": [
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["eisenbahnbruecke.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Component query plus a plain word."
@@ -331,21 +250,15 @@
   {
     "id": "compound-15",
     "query": "Fußgängerbrücke",
-    "relevant_paths": [
-      "fussgaengerbruecke.md"
-    ],
-    "partial_paths": [
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md"],
+    "partial_paths": ["eisenbahnbruecke.md"],
     "category": "compound",
     "notes": "Whole compound query."
   },
   {
     "id": "compound-16",
     "query": "Donaudampfschifffahrtsgesellschaft",
-    "relevant_paths": [
-      "dampfschiff.md"
-    ],
+    "relevant_paths": ["dampfschiff.md"],
     "partial_paths": [],
     "category": "compound",
     "notes": "Whole very long compound."
@@ -353,9 +266,7 @@
   {
     "id": "alias-01",
     "query": "Fussweg zum Gipfel",
-    "relevant_paths": [
-      "wanderweg.md"
-    ],
+    "relevant_paths": ["wanderweg.md"],
     "partial_paths": [],
     "category": "alias",
     "notes": "Alias typed with ss."
@@ -363,9 +274,7 @@
   {
     "id": "alias-02",
     "query": "Hbf",
-    "relevant_paths": [
-      "hauptbahnhof.md"
-    ],
+    "relevant_paths": ["hauptbahnhof.md"],
     "partial_paths": [],
     "category": "alias",
     "notes": "Plain ASCII alias."
@@ -373,21 +282,15 @@
   {
     "id": "stopword-01",
     "query": "die Brücke über den Fluss",
-    "relevant_paths": [
-      "fussgaengerbruecke.md"
-    ],
-    "partial_paths": [
-      "eisenbahnbruecke.md"
-    ],
+    "relevant_paths": ["fussgaengerbruecke.md"],
+    "partial_paths": ["eisenbahnbruecke.md"],
     "category": "stopword",
     "notes": "Stop words around a component."
   },
   {
     "id": "control-01",
     "query": "Wetterbericht",
-    "relevant_paths": [
-      "wetter.md"
-    ],
+    "relevant_paths": ["wetter.md"],
     "partial_paths": [],
     "category": "control",
     "notes": "Plain word, no pack needed."
@@ -395,9 +298,7 @@
   {
     "id": "control-02",
     "query": "Kaffeehaus Wien",
-    "relevant_paths": [
-      "kaffeehaus.md"
-    ],
+    "relevant_paths": ["kaffeehaus.md"],
     "partial_paths": [],
     "category": "control",
     "notes": "Plain words, no pack needed."
@@ -405,9 +306,7 @@
   {
     "id": "control-03",
     "query": "Probezeit Kündigungsfrist",
-    "relevant_paths": [
-      "arbeitsvertrag.md"
-    ],
+    "relevant_paths": ["arbeitsvertrag.md"],
     "partial_paths": [],
     "category": "control",
     "notes": "Plain words, one with umlaut as in the note."

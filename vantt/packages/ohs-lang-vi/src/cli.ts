@@ -76,10 +76,13 @@ export function runCli(argv: readonly string[], io: CliIo): number {
     minPhraseCount: parsed.minCount,
   });
   io.log(`Scanned ${result.notes} notes.`);
-  for (const p of result.proposals) io.log(`  ${p.abbr} = ${p.expansion}   (${p.source}, ${p.count}x)`);
+  for (const p of result.proposals)
+    io.log(`  ${p.abbr} = ${p.expansion}   (${p.source}, ${p.count}x)`);
   if (result.proposals.length === 0) io.log('No new abbreviations to propose.');
   else if (result.written)
-    io.log(`Wrote ${result.proposals.length} proposal(s) under "## Chờ duyệt" in ${result.lexiconFile}`);
+    io.log(
+      `Wrote ${result.proposals.length} proposal(s) under "## Chờ duyệt" in ${result.lexiconFile}`,
+    );
   else io.log(`Dry run: ${result.lexiconFile} not changed.`);
   return 0;
 }

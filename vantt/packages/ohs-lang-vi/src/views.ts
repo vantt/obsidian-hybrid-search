@@ -58,7 +58,9 @@ const TOKEN_CACHE_MAX = 65_536;
 const unknownView = (view: string) => new Error(`ohs-lang-vi: unknown view "${view}"`);
 
 /** Per-token projection to `norm` or `fold`, with a per-view token cache. */
-export function createTokenProjector(options: PackOptions): (view: string, token: string) => string {
+export function createTokenProjector(
+  options: PackOptions,
+): (view: string, token: string) => string {
   const caches: Record<string, Map<string, string>> = { norm: new Map(), fold: new Map() };
   return (view, token) => {
     const cache = caches[view];

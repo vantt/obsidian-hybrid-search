@@ -1,5 +1,5 @@
-import { foldWord, transliterateWord } from './fold.js';
 import type { Splitter } from './compound.js';
+import { foldWord, transliterateWord } from './fold.js';
 
 /** WORD JOINER: marks a view token that belongs to the source token before it. */
 export const CONTINUATION = '⁠';

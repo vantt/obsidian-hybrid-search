@@ -18,7 +18,10 @@ export interface FakeContext extends QueryContext {
  * the pack's own views, then term document counts and adjacent-pair phrase
  * counts are computed like FTS5 would (prefix-free, exact token match).
  */
-export function fakeContext(docs: readonly string[], options: PackOptions = resolveOptions()): FakeContext {
+export function fakeContext(
+  docs: readonly string[],
+  options: PackOptions = resolveOptions(),
+): FakeContext {
   const pack = createPack(options);
   const views = pack.views.map((v) => v.name);
   const termDocs = new Map<string, Map<string, number>>();
@@ -28,7 +31,9 @@ export function fakeContext(docs: readonly string[], options: PackOptions = reso
     const phrases = new Map<string, number>();
     for (const doc of docs) {
       const projected = pack.project(view, 'content', doc);
-      const words = (view === 'seg' ? segTokenize(projected) : tokenize(projected)).map((w) => w.toLowerCase());
+      const words = (view === 'seg' ? segTokenize(projected) : tokenize(projected)).map((w) =>
+        w.toLowerCase(),
+      );
       for (const w of new Set(words)) terms.set(w, (terms.get(w) ?? 0) + 1);
       const pairs = new Set<string>();
       for (let i = 1; i < words.length; i++) pairs.add(`${words[i - 1]} ${words[i]}`);
@@ -60,7 +65,8 @@ export function fakeContextFromCounts(
     },
     termsWithPrefix(view, prefix, limit) {
       const out: Array<{ term: string; docs: number }> = [];
-      for (const [term, docs] of termDocs.get(view) ?? []) if (term.startsWith(prefix)) out.push({ term, docs });
+      for (const [term, docs] of termDocs.get(view) ?? [])
+        if (term.startsWith(prefix)) out.push({ term, docs });
       return out.sort((a, b) => b.docs - a.docs || (a.term < b.term ? -1 : 1)).slice(0, limit);
     },
     phraseDocs(view, phrase) {

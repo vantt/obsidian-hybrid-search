@@ -2,8 +2,14 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { bundledDictionary, createPack, packSignature, parseLexicon, resolveOptions } from '../src/index.js';
 import type { QueryAnalysis } from '../src/contract.js';
+import {
+  bundledDictionary,
+  createPack,
+  packSignature,
+  parseLexicon,
+  resolveOptions,
+} from '../src/index.js';
 import type { ViAnalysisData } from '../src/query.js';
 import { fakeContext } from './fake-context.js';
 
@@ -30,7 +36,11 @@ GD = giáo dục
 máy bay = airplane
 `;
 
-const VAULT_DOCS = ['Danh sách khách hàng tiềm năng', 'Quà cho bố mẹ: điện thoại mới', 'Mua xe ô tô cũ'];
+const VAULT_DOCS = [
+  'Danh sách khách hàng tiềm năng',
+  'Quà cho bố mẹ: điện thoại mới',
+  'Mua xe ô tô cũ',
+];
 
 describe('parseLexicon', () => {
   it('reads the three sections and ignores pending proposals', () => {
@@ -53,9 +63,15 @@ describe('parseLexicon', () => {
   });
 
   it('accepts CRLF, bullets, NFD text and heading variants', () => {
-    const text = '## Dong nghia\r\n- a b = c d\r\n\r\n## VIẾT TẮT\r\n* kh = khách hàng\r\n'.normalize('NFD');
+    const text =
+      '## Dong nghia\r\n- a b = c d\r\n\r\n## VIẾT TẮT\r\n* kh = khách hàng\r\n'.normalize('NFD');
     const lex = parseLexicon(text);
-    expect(lex.synonyms).toEqual([[['a', 'b'], ['c', 'd']]]);
+    expect(lex.synonyms).toEqual([
+      [
+        ['a', 'b'],
+        ['c', 'd'],
+      ],
+    ]);
     expect(lex.abbreviations).toEqual([[['kh'], ['khách', 'hàng']]]);
   });
 
@@ -74,7 +90,10 @@ describe('lexicon in the pack', () => {
   };
   const analyze = (query: string, raw: unknown = {}): QueryAnalysis => {
     const pack = createPack(raw);
-    return pack.analyzeQuery(query, { ...fakeContext(VAULT_DOCS), vaultPath: dir }) as QueryAnalysis;
+    return pack.analyzeQuery(query, {
+      ...fakeContext(VAULT_DOCS),
+      vaultPath: dir,
+    }) as QueryAnalysis;
   };
 
   beforeEach(() => {
@@ -191,7 +210,9 @@ describe('lexicon in the pack', () => {
   it('signature without a lexicon is the plain one', () => {
     rmSync(join(dir, '_ohs'), { recursive: true });
     expect(createPack({ segment: false }).signature()).not.toContain('seg=');
-    expect(createPack().signature()).toBe(packSignature(resolveOptions(), bundledDictionary('modern').digest));
+    expect(createPack().signature()).toBe(
+      packSignature(resolveOptions(), bundledDictionary('modern').digest),
+    );
   });
 
   it('reports the file as read (sanity)', () => {

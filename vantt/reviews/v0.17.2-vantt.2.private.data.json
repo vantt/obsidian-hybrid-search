@@ -272,7 +272,5 @@
       "now": 0.698
     }
   ],
-  "failed": [
-    "private-regression-categories"
-  ]
+  "failed": ["private-regression-categories"]
 }

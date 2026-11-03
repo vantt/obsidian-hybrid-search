@@ -12,17 +12,17 @@
  *      (hook) alias keys for aliasViews (V19) go here
  *   5. segQuery          compound words of the query for the seg view (segment-query.ts)
  */
-import type { QueryAnalysis, QueryContext } from './contract.js';
 import { aliasKeys } from './alias.js';
+import type { QueryAnalysis, QueryContext } from './contract.js';
 import { fold, iyVariant } from './fold.js';
-import { normalize } from './normalize.js';
-import type { LexiconStore } from './lexicon.js';
 import { applyLexicon } from './lexicon-query.js';
+import type { LexiconStore } from './lexicon.js';
+import { normalize } from './normalize.js';
 import type { PackOptions } from './options.js';
-import { rewriteTokens, rewrittenText, type RewriteInfo } from './rewrite.js';
 import { restoreTokens, type RestoreResult, type VocabularyCache } from './restore.js';
-import type { CompoundDictionary } from './segment.js';
+import { rewriteTokens, rewrittenText, type RewriteInfo } from './rewrite.js';
 import { SEG_VIEW, segQuery } from './segment-query.js';
+import type { CompoundDictionary } from './segment.js';
 import { isPossibleFoldedSyllable, isVietnameseSyllable } from './syllable.js';
 import { TOKEN_RE, foldToken, tokenize } from './views.js';
 
@@ -96,7 +96,14 @@ export function makeQueryToken(norm: string, options: PackOptions): QueryToken {
 export function tokenizeQuery(query: string, options: PackOptions): QueryState {
   const normalized = normalize(query, { tonePlacement: options.tonePlacement });
   const tokens = tokenize(normalized).map((norm) => makeQueryToken(norm, options));
-  return { query, normalized, tokens, accented: false, restoration: null, unaccentedInVault: false };
+  return {
+    query,
+    normalized,
+    tokens,
+    accented: false,
+    restoration: null,
+    unaccentedInVault: false,
+  };
 }
 
 // 2. -------------------------------------------------------------------------
@@ -128,7 +135,11 @@ export function restoreAccents(state: QueryState, ctx: QueryContext, env: QueryE
  * words in an unaccented note), so at least `accentedFoldMinShare` of the
  * query's pairs must be found that way.
  */
-export function findUnaccentedSpelling(state: QueryState, ctx: QueryContext, env: QueryEnvironment): void {
+export function findUnaccentedSpelling(
+  state: QueryState,
+  ctx: QueryContext,
+  env: QueryEnvironment,
+): void {
   if (!state.accented || env.options.accentedFold !== 'auto') return;
   env.cache.sync(ctx);
   const plain = (t: QueryToken) => fold(t.norm, { foldIY: false });
@@ -161,7 +172,10 @@ function normQueryWords(state: QueryState, options: PackOptions): string[] | nul
   const words: string[] = [];
   for (const token of restoration.tokens) {
     for (const [index, variant] of token.variants.entries()) {
-      if (index === 0 || (token.restored && variant.marginal >= options.restoreParams.alternativeThreshold))
+      if (
+        index === 0 ||
+        (token.restored && variant.marginal >= options.restoreParams.alternativeThreshold)
+      )
         words.push(variant.form);
     }
   }
@@ -206,7 +220,11 @@ function restoredText(state: QueryState, options: PackOptions): string {
   });
 }
 
-export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pick<QueryEnvironment, 'project'>): QueryAnalysis {
+export function buildAnalysis(
+  state: QueryState,
+  options: PackOptions,
+  env?: Pick<QueryEnvironment, 'project'>,
+): QueryAnalysis {
   const restoration = state.restoration;
   const target =
     !state.accented && restoration?.candidates[0]
@@ -219,7 +237,8 @@ export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pic
   const vietnamese = isVietnameseQuery(state, options);
   const useNorm = vietnamese && (!state.accented || options.accentedNorm);
   const foldAccented =
-    options.accentedFold === 'always' || (options.accentedFold === 'auto' && state.unaccentedInVault);
+    options.accentedFold === 'always' ||
+    (options.accentedFold === 'auto' && state.unaccentedInVault);
   const useFold = vietnamese && (!state.accented || foldAccented);
   const viewQueries: Record<string, string | null> = {
     norm: useNorm && normWords && normWords.length > 0 ? normWords.join(' ') : null,
@@ -235,7 +254,9 @@ export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pic
   }
   const targets =
     !state.accented && restoration && restoration.candidates.length > 0
-      ? restoration.candidates.slice(0, MAX_RESCORE_TARGETS).map((c) => ({ words: c.forms, p: c.probability }))
+      ? restoration.candidates
+          .slice(0, MAX_RESCORE_TARGETS)
+          .map((c) => ({ words: c.forms, p: c.probability }))
       : [{ words: target, p: 1 }];
   const data: ViAnalysisData = {
     target,
@@ -279,7 +300,11 @@ export function buildAnalysis(state: QueryState, options: PackOptions, env?: Pic
 }
 
 /** Analyze one query (P01 `analyzeQuery`). */
-export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnvironment): QueryAnalysis {
+export function analyzeQuery(
+  query: string,
+  ctx: QueryContext,
+  env: QueryEnvironment,
+): QueryAnalysis {
   const state = tokenizeQuery(query, env.options);
   rewriteTokens(state, ctx, env, (norm) => makeQueryToken(norm, env.options));
   classifyAccents(state, env.options);
@@ -293,7 +318,10 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
     analysis.viewQueries[SEG_VIEW] = seg?.query ?? null;
     // The branch searches the compounds only: its vote counts as much as the share of the query they cover.
     if (seg && env.options.segWeightByCoverage)
-      analysis.viewWeights = { ...analysis.viewWeights, [SEG_VIEW]: env.options.viewWeights.seg * seg.coverage };
+      analysis.viewWeights = {
+        ...analysis.viewWeights,
+        [SEG_VIEW]: env.options.viewWeights.seg * seg.coverage,
+      };
     if (seg && analysis.debug) analysis.debug.segCoverage = Number(seg.coverage.toFixed(3));
   }
   return analysis;
@@ -305,7 +333,11 @@ export function analyzeQuery(query: string, ctx: QueryContext, env: QueryEnviron
  * spelling of each query word joins the view query as an exact term when the
  * vault has it (the query's own words stay prefix terms, as in `viewQueries`).
  */
-export function addSpellingVariants(analysis: QueryAnalysis, ctx: QueryContext, options: PackOptions): void {
+export function addSpellingVariants(
+  analysis: QueryAnalysis,
+  ctx: QueryContext,
+  options: PackOptions,
+): void {
   for (const view of ['norm', 'fold'] as const) {
     if (view === 'fold' && options.foldIY) continue;
     const query = analysis.viewQueries[view];
@@ -314,10 +346,18 @@ export function addSpellingVariants(analysis: QueryAnalysis, ctx: QueryContext, 
     const variants: string[] = [];
     for (const word of words) {
       const variant = iyVariant(word);
-      if (variant && !words.includes(variant) && !variants.includes(variant) && ctx.termStats(view, variant).docs > 0)
+      if (
+        variant &&
+        !words.includes(variant) &&
+        !variants.includes(variant) &&
+        ctx.termStats(view, variant).docs > 0
+      )
         variants.push(variant);
     }
     if (variants.length === 0) continue;
-    analysis.viewTerms = { ...analysis.viewTerms, [view]: [...words.map((text) => ({ text, prefix: true })), ...variants] };
+    analysis.viewTerms = {
+      ...analysis.viewTerms,
+      [view]: [...words.map((text) => ({ text, prefix: true })), ...variants],
+    };
   }
 }

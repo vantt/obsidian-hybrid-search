@@ -18,7 +18,9 @@ import {
 
 const side = (nd, timing = null, cats = {}) => ({
   summary: { ndcg_5: nd, hit_5: nd + 0.1 },
-  by_category: Object.fromEntries(Object.entries(cats).map(([c, v]) => [c, { ndcg_5: v, hit_5: v }])),
+  by_category: Object.fromEntries(
+    Object.entries(cats).map(([c, v]) => [c, { ndcg_5: v, hit_5: v }]),
+  ),
   timing,
 });
 
@@ -45,7 +47,12 @@ describe('extractTiming', () => {
       ev(14000, '─────────────────────────────────────────'),
       ev(14010, 'nDCG@5: 1'),
     ];
-    expect(extractTiming(events)).toEqual({ index_s: 10, query_s: 3, queries: 3, per_query_ms: 1000 });
+    expect(extractTiming(events)).toEqual({
+      index_s: 10,
+      query_s: 3,
+      queries: 3,
+      per_query_ms: 1000,
+    });
   });
   it('gives null when markers are missing', () => {
     expect(extractTiming([ev(0, 'nothing')])).toBeNull();
@@ -71,7 +78,11 @@ describe('collectTrends', () => {
     expect(panel('help_ndcg5').fork['v0.17.2']).toBe(0.7);
   });
   it('keeps the newest review for a tag measured twice and skips missing metrics', () => {
-    const r2 = review('v0.17.3', 'v0.17.2', '2026-11-05T10:00:00Z', { fork: side(0.85), up: side(0.6), prev: side(0.81) });
+    const r2 = review('v0.17.3', 'v0.17.2', '2026-11-05T10:00:00Z', {
+      fork: side(0.85),
+      up: side(0.6),
+      prev: side(0.81),
+    });
     const t = collectTrends([r2, r1]);
     expect(t.tags).toEqual(['v0.17.1', 'v0.17.2', 'v0.17.3']);
     expect(t.panels.find((p) => p.id === 'vi_ndcg5').fork['v0.17.2']).toBe(0.81); // the newer review (r2) re-measured v0.17.2 as its previous side
@@ -100,7 +111,12 @@ describe('renderTrendSvg', () => {
     expect(svg.startsWith('<svg xmlns="http://www.w3.org/2000/svg"')).toBe(true);
     expect(svg.trimEnd().endsWith('</svg>')).toBe(true);
     expect((svg.match(/<polyline/g) ?? []).length).toBeGreaterThanOrEqual(1);
-    for (const title of ['vi: nDCG@5 (tổng)', 'vi-snippet: nDCG@5', 'Thời gian index', 'Thời gian mỗi câu'])
+    for (const title of [
+      'vi: nDCG@5 (tổng)',
+      'vi-snippet: nDCG@5',
+      'Thời gian index',
+      'Thời gian mỗi câu',
+    ])
       expect(svg).toContain(title);
     expect(svg).toContain('v0.17.1');
     expect(svg).not.toMatch(/NaN|undefined/);
@@ -135,7 +151,11 @@ describe('report block and files', () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'trends-'));
     dirs.push(dir);
     mkdirSync(dir, { recursive: true });
-    const data = review('v0.17.2', 'v0.17.1', '2026-11-02T10:00:00Z', { fork: side(0.8), up: side(0.6), prev: side(0.7) });
+    const data = review('v0.17.2', 'v0.17.1', '2026-11-02T10:00:00Z', {
+      fork: side(0.8),
+      up: side(0.6),
+      prev: side(0.7),
+    });
     writeFileSync(path.join(dir, 'v0.17.2.data.json'), JSON.stringify(data));
     writeFileSync(path.join(dir, 'v0.17.2.md'), '# a\n## Việc cần người quyết\n');
     writeFileSync(path.join(dir, 'v0.17.1.md'), '# old\n');

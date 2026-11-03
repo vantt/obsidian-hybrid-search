@@ -15,10 +15,13 @@ export function judgeRegression(corpus, category, delta, limit = REGRESSION_LIMI
   const floor = -(allowed ?? limit);
   if (delta < floor - EPS) return { ok: false, status: 'FAIL', limit: -floor };
   if (delta > limit + EPS) return { ok: true, status: 'improved', limit: -floor };
-  if (allowed !== undefined && delta < -limit - EPS) return { ok: true, status: 'allowed-drop', limit: -floor };
+  if (allowed !== undefined && delta < -limit - EPS)
+    return { ok: true, status: 'allowed-drop', limit: -floor };
   return { ok: true, status: 'pass', limit: -floor };
 }
 
 export const ruleText = () =>
   `A category passes unless pinned nDCG@5 is more than ${REGRESSION_LIMIT} below locked; improvements always pass. ` +
-  `Drops accepted further (user chốt 2026-11-02): ${Object.entries(DROP_ALLOWED).map(([k, v]) => `${k} down to -${v}`).join(', ')}.`;
+  `Drops accepted further (user chốt 2026-11-02): ${Object.entries(DROP_ALLOWED)
+    .map(([k, v]) => `${k} down to -${v}`)
+    .join(', ')}.`;

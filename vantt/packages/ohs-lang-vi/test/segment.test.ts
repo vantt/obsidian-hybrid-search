@@ -1,9 +1,9 @@
+import fc from 'fast-check';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import type { QueryAnalysis } from '../src/contract.js';
 import { TONES, type Tone } from '../src/data.js';
@@ -12,10 +12,10 @@ import { resolveOptions } from '../src/options.js';
 import {
   buildDictionary,
   bundledCompounds,
-  readCompoundList,
-  CompoundSource,
   compoundsOf,
+  CompoundSource,
   projectSegmented,
+  readCompoundList,
   SEG_TOKENIZER,
   segmentWords,
 } from '../src/segment.js';
@@ -52,16 +52,28 @@ describe('bundled dictionary', () => {
 
   it('knows common compounds', () => {
     const set = new Set(entries);
-    for (const w of ['khách hàng', 'hàng hoá', 'học sinh', 'sinh học', 'ngân hàng', 'nhà hàng', 'kế toán'])
+    for (const w of [
+      'khách hàng',
+      'hàng hoá',
+      'học sinh',
+      'sinh học',
+      'ngân hàng',
+      'nhà hàng',
+      'kế toán',
+    ])
       expect(set.has(w)).toBe(true);
   });
 
   it('fails loudly when the data file is missing or empty', () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'ohs-lang-vi-'));
     try {
-      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(/installed without its data/);
+      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(
+        /installed without its data/,
+      );
       writeFileSync(path.join(dir, 'compounds.txt'), '# comment only\n');
-      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(/is empty/);
+      expect(() => readCompoundList(pathToFileURL(path.join(dir, 'compounds.txt')))).toThrow(
+        /is empty/,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -79,9 +91,12 @@ describe('bundled dictionary', () => {
     const packed = Array.isArray(parsed) ? parsed[0] : Object.values(parsed)[0];
     expect(packed, res.stdout).toBeDefined();
     const files = packed!.files.map((f) => f.path);
-    for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md']) expect(files).toContain(f);
+    for (const f of ['data/compounds.txt', 'data/README.md', 'data/ATTRIBUTION.md'])
+      expect(files).toContain(f);
     // The compiled output only exists after the package is compiled, so check it is declared for packing.
-    const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8')) as {
+    const pkg = JSON.parse(
+      readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'),
+    ) as {
       files: string[];
     };
     expect(pkg.files).toContain('build');
@@ -94,7 +109,14 @@ describe('bundled dictionary', () => {
 });
 
 describe('segmentWords', () => {
-  const dict = buildDictionary(['học sinh', 'sinh học', 'khách hàng', 'hàng hoá', 'thân thiết', 'khách hàng thân thiết']);
+  const dict = buildDictionary([
+    'học sinh',
+    'sinh học',
+    'khách hàng',
+    'hàng hoá',
+    'thân thiết',
+    'khách hàng thân thiết',
+  ]);
 
   it('joins compounds and leaves other words alone', () => {
     expect(segmentWords(['khách', 'hàng', 'mua', 'hàng', 'hoá'], dict)).toEqual([2, 1, 2]);
@@ -105,7 +127,10 @@ describe('segmentWords', () => {
   it('prefers the fewest words, then the longest first word', () => {
     expect(segmentWords(['học', 'sinh', 'học'], dict)).toEqual([2, 1]);
     expect(segmentWords(['khách', 'hàng', 'thân', 'thiết'], dict)).toEqual([4]);
-    expect(compoundsOf(['em', 'học', 'sinh', 'học', 'sinh'], dict)).toEqual(['học sinh', 'học sinh']);
+    expect(compoundsOf(['em', 'học', 'sinh', 'học', 'sinh'], dict)).toEqual([
+      'học sinh',
+      'học sinh',
+    ]);
   });
 });
 
@@ -125,7 +150,9 @@ describe('seg view projection', () => {
   });
 
   it('follows the tone placement of the pack', () => {
-    expect(createPack({ segment: true, tonePlacement: 'classic' }).project('seg', 'content', 'hàng hoá')).toBe('hàng_hóa');
+    expect(
+      createPack({ segment: true, tonePlacement: 'classic' }).project('seg', 'content', 'hàng hoá'),
+    ).toBe('hàng_hóa');
   });
 
   it('keeps text without tokens unchanged', () => {
@@ -134,34 +161,66 @@ describe('seg view projection', () => {
 
   const syllables = allSyllables();
   const word = fc
-    .tuple(fc.integer({ min: 0, max: syllables.length - 1 }), fc.constantFrom(...TONES), fc.boolean())
+    .tuple(
+      fc.integer({ min: 0, max: syllables.length - 1 }),
+      fc.constantFrom(...TONES),
+      fc.boolean(),
+    )
     .map(([i, tone, upper]) => {
       const w = composeSyllable({ ...syllables[i]!, tone: tone as Tone }, 'classic');
       return upper ? w.toUpperCase() : w;
     });
   const compound = fc.constantFrom(...bundledCompounds().slice(0, 2000));
-  const sep = fc.constantFrom(' ', ' ', ' ', ', ', '.\n', ' - ', '_', '__', ' c++ ', ' #x ', ' ', '\t', '🎉', '2026', '⁠');
+  const sep = fc.constantFrom(
+    ' ',
+    ' ',
+    ' ',
+    ', ',
+    '.\n',
+    ' - ',
+    '_',
+    '__',
+    ' c++ ',
+    ' #x ',
+    ' ',
+    '\t',
+    '🎉',
+    '2026',
+    '⁠',
+  );
   const text = fc.oneof(
-    fc.array(fc.tuple(fc.oneof(word, compound), sep), { maxLength: 15 }).map((parts) => parts.map(([w, s]) => w + s).join('')),
+    fc
+      .array(fc.tuple(fc.oneof(word, compound), sep), { maxLength: 15 })
+      .map((parts) => parts.map(([w, s]) => w + s).join('')),
     fc.string({ unit: 'grapheme', maxLength: 40 }),
     fc.string({ unit: 'binary', maxLength: 40 }),
   );
 
   it('keeps the P01 token invariant (fast-check, every field and index option)', () => {
-    const packs = [segPack, createPack({ ...SEG, foldIY: true }), createPack({ ...SEG, tonePlacement: 'classic' })];
+    const packs = [
+      segPack,
+      createPack({ ...SEG, foldIY: true }),
+      createPack({ ...SEG, tonePlacement: 'classic' }),
+    ];
     fc.assert(
-      fc.property(text, fc.constantFrom('title', 'aliases', 'content') as fc.Arbitrary<'title'>, (t, field) => {
-        const source = sourceTokens(t);
-        for (const p of packs) {
-          const projected = p.project('seg', field, t);
-          const parts = viewParts(projected);
-          // Same count; part k of the view is the norm projection of source token k.
-          expect(parts).toHaveLength(source.length);
-          parts.forEach((part, k) => expect(part).toBe(p.project('norm', field, source[k]!)));
-          // Removing the joins gives the norm view back.
-          expect(projected.replace(/_/g, ' ')).toBe(p.project('norm', field, t).replace(/_/g, ' '));
-        }
-      }),
+      fc.property(
+        text,
+        fc.constantFrom('title', 'aliases', 'content') as fc.Arbitrary<'title'>,
+        (t, field) => {
+          const source = sourceTokens(t);
+          for (const p of packs) {
+            const projected = p.project('seg', field, t);
+            const parts = viewParts(projected);
+            // Same count; part k of the view is the norm projection of source token k.
+            expect(parts).toHaveLength(source.length);
+            parts.forEach((part, k) => expect(part).toBe(p.project('norm', field, source[k]!)));
+            // Removing the joins gives the norm view back.
+            expect(projected.replace(/_/g, ' ')).toBe(
+              p.project('norm', field, t).replace(/_/g, ' '),
+            );
+          }
+        },
+      ),
       { numRuns: 400 },
     );
   });
@@ -190,7 +249,9 @@ describe('pack with segment', () => {
     const pack = createPack({ segment: true, viewWeights: { seg: 2 } });
     expect(pack.views.map((v) => v.name)).toEqual(['norm', 'fold', 'seg']);
     expect(pack.views[2]).toEqual({ name: 'seg', weight: 2, tokenizer: SEG_TOKENIZER });
-    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(/unknown view/);
+    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(
+      /unknown view/,
+    );
   });
 
   it('puts the dictionary digest into the signature', () => {
@@ -257,20 +318,29 @@ describe('seg view query', () => {
     expect(q).toContain('học_sinh');
     expect(q).toContain('sinh_học');
     // Without that note, only the segmentation itself.
-    const other = createPack(SEG).analyzeQuery('học sinh học', fakeContext(VAULT.slice(3), resolveOptions(SEG))) as QueryAnalysis;
+    const other = createPack(SEG).analyzeQuery(
+      'học sinh học',
+      fakeContext(VAULT.slice(3), resolveOptions(SEG)),
+    ) as QueryAnalysis;
     expect(other.viewQueries.seg).toBe('học_sinh');
   });
 
   it('segments queries and notes the same way', () => {
     const emptyVault = fakeContext([], resolveOptions(SEG));
     fc.assert(
-      fc.property(fc.array(fc.constantFrom('khách', 'hàng', 'hoá', 'học', 'sinh', 'mua', 'thân', 'thiết'), { minLength: 1, maxLength: 8 }), (words) => {
-        const projected = seg(words.join(' '));
-        const compounds = projected.split(' ').filter((t) => t.includes('_'));
-        const query = segPack.analyzeQuery(words.join(' '), emptyVault) as QueryAnalysis;
-        const queried = query.viewQueries.seg?.split(' ') ?? [];
-        for (const c of compounds) expect(queried).toContain(c);
-      }),
+      fc.property(
+        fc.array(fc.constantFrom('khách', 'hàng', 'hoá', 'học', 'sinh', 'mua', 'thân', 'thiết'), {
+          minLength: 1,
+          maxLength: 8,
+        }),
+        (words) => {
+          const projected = seg(words.join(' '));
+          const compounds = projected.split(' ').filter((t) => t.includes('_'));
+          const query = segPack.analyzeQuery(words.join(' '), emptyVault) as QueryAnalysis;
+          const queried = query.viewQueries.seg?.split(' ') ?? [];
+          for (const c of compounds) expect(queried).toContain(c);
+        },
+      ),
       { numRuns: 200 },
     );
   });

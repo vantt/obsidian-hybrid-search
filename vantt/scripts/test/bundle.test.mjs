@@ -1,23 +1,42 @@
 // Pure helpers of bundle.mjs (PRD 8.2): what pruning may delete, which onnxruntime builds are foreign,
 // and the launchers. The full build and smoke run on real runners (vantt-bundles.yml).
-import { afterEach, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { afterEach, describe, expect, it } from 'vitest';
 import { foreignOnnxDirs, isPrunable, wrapperScripts } from '../bundle.mjs';
 
 describe('isPrunable', () => {
   it('drops docs, maps, headers and tests', () => {
-    for (const f of ['x/README.md', 'x/CHANGELOG.md', 'x/lib/a.js.map', 'x/include/node_api.h', 'x/test/a.js', 'x/__tests__/b.js'])
+    for (const f of [
+      'x/README.md',
+      'x/CHANGELOG.md',
+      'x/lib/a.js.map',
+      'x/include/node_api.h',
+      'x/test/a.js',
+      'x/__tests__/b.js',
+    ])
       expect(isPrunable(f), f).toBe(true);
   });
   it('keeps licenses, code and typings', () => {
-    for (const f of ['x/LICENSE', 'x/LICENSE.md', 'x/license.txt', 'x/NOTICE', 'x/index.js', 'x/index.d.ts', 'x/package.json'])
+    for (const f of [
+      'x/LICENSE',
+      'x/LICENSE.md',
+      'x/license.txt',
+      'x/NOTICE',
+      'x/index.js',
+      'x/index.d.ts',
+      'x/package.json',
+    ])
       expect(isPrunable(f), f).toBe(false);
   });
   it('drops CUDA/TensorRT providers and the onnxruntime-web WASM builds, but keeps the CPU runtime', () => {
-    expect(isPrunable('onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_cuda.so')).toBe(true);
-    expect(isPrunable('onnxruntime-node/bin/napi-v6/win32/x64/onnxruntime_providers_tensorrt.dll')).toBe(true);
+    expect(
+      isPrunable('onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_cuda.so'),
+    ).toBe(true);
+    expect(
+      isPrunable('onnxruntime-node/bin/napi-v6/win32/x64/onnxruntime_providers_tensorrt.dll'),
+    ).toBe(true);
     expect(isPrunable('onnxruntime-web/' + 'di' + 'st/ort-wasm-simd-threaded.wasm')).toBe(true);
     expect(isPrunable('onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so.1')).toBe(false);
     expect(isPrunable('onnxruntime-node/bin/napi-v6/win32/x64/DirectML.dll')).toBe(false);
@@ -31,7 +50,14 @@ describe('foreignOnnxDirs', () => {
     const nm = mkdtempSync(path.join(os.tmpdir(), 'ohs-bundle-'));
     dirs.push(nm);
     const napi = path.join(nm, 'onnxruntime-node', 'bin', 'napi-v6');
-    for (const p of ['darwin/arm64', 'darwin/x64', 'linux/x64', 'linux/arm64', 'win32/x64', 'win32/arm64']) {
+    for (const p of [
+      'darwin/arm64',
+      'darwin/x64',
+      'linux/x64',
+      'linux/arm64',
+      'win32/x64',
+      'win32/arm64',
+    ]) {
       mkdirSync(path.join(napi, p), { recursive: true });
       writeFileSync(path.join(napi, p, 'a.node'), '');
     }

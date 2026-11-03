@@ -13,7 +13,10 @@ describe('judgeRegression', () => {
 
   it('passes improvements of any size and flags the large ones as informational', () => {
     expect(judge('vi-snippet', 0.024)).toMatchObject({ ok: true, status: 'improved' });
-    expect(judge('multilingual', 0.063, 'obsidian-help')).toMatchObject({ ok: true, status: 'improved' });
+    expect(judge('multilingual', 0.063, 'obsidian-help')).toMatchObject({
+      ok: true,
+      status: 'improved',
+    });
     expect(judge('vi-names', 0.5).ok).toBe(true);
   });
 

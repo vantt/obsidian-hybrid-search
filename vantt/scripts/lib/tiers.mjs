@@ -33,9 +33,12 @@ function hookScript(cwd, rel, ctx, log) {
     return { status: 'skipped', detail: null };
   }
   const args = [
-    '--target-ref', ctx.target.ref,
-    '--target-sha', ctx.target.sha,
-    '--branch', ctx.target.branch,
+    '--target-ref',
+    ctx.target.ref,
+    '--target-sha',
+    ctx.target.sha,
+    '--branch',
+    ctx.target.branch,
     '--json',
     ...ctx.withLang.flatMap((l) => ['--with-lang', l]),
   ].map((a) => JSON.stringify(a));

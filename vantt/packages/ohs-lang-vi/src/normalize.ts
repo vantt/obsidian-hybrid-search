@@ -12,7 +12,10 @@ export interface NormalizeOptions {
 
 const WORD_RE = /[\p{L}\p{M}]+/gu;
 const MAX_CACHE = 32768;
-const caches: Record<TonePlacement, Map<string, string>> = { modern: new Map(), classic: new Map() };
+const caches: Record<TonePlacement, Map<string, string>> = {
+  modern: new Map(),
+  classic: new Map(),
+};
 
 function lowerCase(s: string): string {
   if (!s.includes('İ')) return s.toLowerCase();

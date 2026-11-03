@@ -6,25 +6,56 @@ import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { highestStableTag } from './review-core.mjs';
 
-export const VI_CATEGORIES = ['vi-unaccented', 'vi-dd', 'vi-semantic', 'vi-synonym', 'vi-compound', 'vi-snippet'];
+export const VI_CATEGORIES = [
+  'vi-unaccented',
+  'vi-dd',
+  'vi-semantic',
+  'vi-synonym',
+  'vi-compound',
+  'vi-snippet',
+];
 
 /** Panels of the chart: id, title, unit and how to read the value from one side of a review. */
 export const PANELS = [
   { id: 'vi_ndcg5', title: 'vi: nDCG@5 (tổng)', set: 'vi', category: 'ALL', metric: 'ndcg_5' },
   { id: 'vi_hit5', title: 'vi: Hit@5 (tổng)', set: 'vi', category: 'ALL', metric: 'hit_5' },
-  { id: 'help_ndcg5', title: 'obsidian-help: nDCG@5', set: 'obsidian-help', category: 'ALL', metric: 'ndcg_5' },
-  ...VI_CATEGORIES.map((c) => ({ id: c, title: `${c}: nDCG@5`, set: 'vi', category: c, metric: 'ndcg_5' })),
+  {
+    id: 'help_ndcg5',
+    title: 'obsidian-help: nDCG@5',
+    set: 'obsidian-help',
+    category: 'ALL',
+    metric: 'ndcg_5',
+  },
+  ...VI_CATEGORIES.map((c) => ({
+    id: c,
+    title: `${c}: nDCG@5`,
+    set: 'vi',
+    category: c,
+    metric: 'ndcg_5',
+  })),
   { id: 'index_s', title: 'Thời gian index (giây, vi)', set: 'vi', timing: 'index_s', unit: 's' },
-  { id: 'per_query_ms', title: 'Thời gian mỗi câu (ms, vi)', set: 'vi', timing: 'per_query_ms', unit: 'ms' },
+  {
+    id: 'per_query_ms',
+    title: 'Thời gian mỗi câu (ms, vi)',
+    set: 'vi',
+    timing: 'per_query_ms',
+    unit: 'ms',
+  },
 ];
 
-const SIDE_OF = { fork_new: ['new', 'fork'], up_new: ['new', 'upstream'], fork_prev: ['prev', 'fork'] };
+const SIDE_OF = {
+  fork_new: ['new', 'fork'],
+  up_new: ['new', 'upstream'],
+  fork_prev: ['prev', 'fork'],
+};
 
 function readValue(side, panel) {
   if (!side) return null;
   const v = panel.timing
     ? side.timing?.[panel.timing]
-    : (panel.category === 'ALL' ? side.summary : side.by_category?.[panel.category])?.[panel.metric];
+    : (panel.category === 'ALL' ? side.summary : side.by_category?.[panel.category])?.[
+        panel.metric
+      ];
   return typeof v === 'number' ? v : null;
 }
 
@@ -34,7 +65,9 @@ function readValue(side, panel) {
  * Returns {tags: [sorted semver], panels: [{...panel, fork: {tag: value}, upstream: {tag: value}}]}.
  */
 export function collectTrends(reviews) {
-  const ordered = [...reviews].sort((a, b) => String(a.generated_at).localeCompare(String(b.generated_at)));
+  const ordered = [...reviews].sort((a, b) =>
+    String(a.generated_at).localeCompare(String(b.generated_at)),
+  );
   const points = new Map(); // panel id -> kind -> tag -> value
   const tags = new Set();
   for (const r of ordered) {
@@ -53,7 +86,10 @@ export function collectTrends(reviews) {
     }
   }
   const sorted = sortTags([...tags]);
-  return { tags: sorted, panels: PANELS.map((p) => ({ ...p, ...(points.get(p.id) ?? { fork: {}, upstream: {} }) })) };
+  return {
+    tags: sorted,
+    panels: PANELS.map((p) => ({ ...p, ...(points.get(p.id) ?? { fork: {}, upstream: {} }) })),
+  };
 }
 
 export function sortTags(tags) {
@@ -72,7 +108,12 @@ export function readReviews(dir) {
     .map((f) => JSON.parse(readFileSync(path.join(dir, f), 'utf8')));
 }
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 const fmt = (v, unit) => (unit ? (v >= 100 ? v.toFixed(0) : v.toFixed(1)) : v.toFixed(3));
 
 /** Y range of a panel: 0..1 for scores, 0..max*1.15 for times. */
@@ -111,7 +152,9 @@ export function renderTrendSvg(trends, { columns = 3, cellW = 330, cellH = 190 }
     const x = (idx) => left + (tags.length <= 1 ? pw / 2 : (idx * pw) / (tags.length - 1));
     const y = (v) => top + ph - ((v - lo) / (hi - lo)) * ph;
     out.push(`<g transform="translate(${gx},${gy})">`);
-    out.push(`<rect x="0" y="0" width="${cellW - 10}" height="${cellH - 6}" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>`);
+    out.push(
+      `<rect x="0" y="0" width="${cellW - 10}" height="${cellH - 6}" rx="6" fill="#f6f8fa" stroke="#d0d7de"/>`,
+    );
     out.push(`<text x="10" y="17" font-weight="600" fill="#1f2328">${esc(panel.title)}</text>`);
     for (const frac of [0, 0.5, 1]) {
       const v = lo + frac * (hi - lo);
@@ -121,11 +164,18 @@ export function renderTrendSvg(trends, { columns = 3, cellW = 330, cellH = 190 }
       );
     }
     tags.forEach((t, idx) =>
-      out.push(`<text x="${x(idx).toFixed(1)}" y="${top + ph + 16}" text-anchor="middle" fill="#59636e">${esc(t)}</text>`),
+      out.push(
+        `<text x="${x(idx).toFixed(1)}" y="${top + ph + 16}" text-anchor="middle" fill="#59636e">${esc(t)}</text>`,
+      ),
     );
-    if (!values.length) out.push(`<text x="${left + pw / 2}" y="${top + ph / 2}" text-anchor="middle" fill="#8c959f">chưa có dữ liệu</text>`);
+    if (!values.length)
+      out.push(
+        `<text x="${left + pw / 2}" y="${top + ph / 2}" text-anchor="middle" fill="#8c959f">chưa có dữ liệu</text>`,
+      );
     for (const kind of ['upstream', 'fork']) {
-      const pts = tags.map((t, idx) => (panel[kind][t] === undefined ? null : { t, idx, v: panel[kind][t] })).filter(Boolean);
+      const pts = tags
+        .map((t, idx) => (panel[kind][t] === undefined ? null : { t, idx, v: panel[kind][t] }))
+        .filter(Boolean);
       if (pts.length > 1)
         out.push(
           `<polyline fill="none" stroke="${COLORS[kind]}" stroke-width="2" points="${pts.map((p) => `${x(p.idx).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')}"/>`,
@@ -165,7 +215,8 @@ export function trendsBlock(trends, svgName) {
 export function injectTrends(markdown, block) {
   const a = markdown.indexOf(TRENDS_START);
   const b = markdown.indexOf(TRENDS_END);
-  if (a >= 0 && b > a) return `${markdown.slice(0, a)}${block}${markdown.slice(b + TRENDS_END.length)}`;
+  if (a >= 0 && b > a)
+    return `${markdown.slice(0, a)}${block}${markdown.slice(b + TRENDS_END.length)}`;
   const last = markdown.lastIndexOf('\n## ');
   if (last < 0) return `${markdown.trimEnd()}\n\n${block}\n`;
   return `${markdown.slice(0, last)}\n${block}\n${markdown.slice(last)}`;
@@ -189,6 +240,10 @@ export function writeTrends(dir) {
   const svg = path.join(dir, 'trends.svg');
   writeFileSync(svg, renderTrendSvg(trends));
   const report = newestReport(dir);
-  if (report) writeFileSync(report, injectTrends(readFileSync(report, 'utf8'), trendsBlock(trends, 'trends.svg')));
+  if (report)
+    writeFileSync(
+      report,
+      injectTrends(readFileSync(report, 'utf8'), trendsBlock(trends, 'trends.svg')),
+    );
   return { svg, report, tags: trends.tags };
 }

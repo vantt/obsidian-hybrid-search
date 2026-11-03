@@ -25,7 +25,12 @@ await indexing.reindex({ force: true }).finally(() => indexing.close());
 
 const rows = [];
 for (const q of queries) {
-  const results = await search(q.query, { mode: 'hybrid', limit: k, scope: q.scope, explain: true });
+  const results = await search(q.query, {
+    mode: 'hybrid',
+    limit: k,
+    scope: q.scope,
+    explain: true,
+  });
   rows.push({
     id: q.id,
     results: results.slice(0, k).map((r) => ({

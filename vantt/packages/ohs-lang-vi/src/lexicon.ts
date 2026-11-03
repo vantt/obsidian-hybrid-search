@@ -85,7 +85,8 @@ export function parseLexicon(text: string): Lexicon {
     if (line === '' || line.startsWith('#') || line.startsWith('<!--')) continue;
     if (kind === 'compounds') {
       const form = toForm(line);
-      if (form.length >= 2 && !lexicon.compounds.some((c) => sameForm(c, form))) lexicon.compounds.push(form);
+      if (form.length >= 2 && !lexicon.compounds.some((c) => sameForm(c, form)))
+        lexicon.compounds.push(form);
       continue;
     }
     const forms: Form[] = [];
@@ -98,7 +99,8 @@ export function parseLexicon(text: string): Lexicon {
   return lexicon;
 }
 
-const digest = (text: string): string => createHash('sha256').update(text).digest('hex').slice(0, 16);
+const digest = (text: string): string =>
+  createHash('sha256').update(text).digest('hex').slice(0, 16);
 
 const joinGroups = (groups: readonly Form[][]): string =>
   groups.map((g) => g.map((f) => f.join(' ')).join('=')).join('\n');
@@ -162,14 +164,19 @@ export function expandQuery(
   const find = (form: Form): number[] => {
     const starts: number[] = [];
     for (let i = 0; i + form.length <= tokens.length; i++)
-      if (form.every((w, j) => (tokens[i + j]!.marked ? tokens[i + j]!.norm === w : tokens[i + j]!.folded === foldWord(w))))
+      if (
+        form.every((w, j) =>
+          tokens[i + j]!.marked ? tokens[i + j]!.norm === w : tokens[i + j]!.folded === foldWord(w),
+        )
+      )
         starts.push(i);
     return starts;
   };
   for (const group of lexicon.synonyms) {
     for (const [index, form] of group.entries()) {
       for (const start of find(form))
-        for (const [other, words] of group.entries()) if (other !== index) add(start, start + form.length, words);
+        for (const [other, words] of group.entries())
+          if (other !== index) add(start, start + form.length, words);
     }
   }
   for (const group of lexicon.abbreviations) {

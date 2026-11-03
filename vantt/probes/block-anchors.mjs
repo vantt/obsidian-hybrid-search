@@ -89,7 +89,17 @@ try {
   try {
     const { stdout } = await run(
       process.execPath,
-      [cli, 'search', 'steady watering', '--mode', 'fulltext', '--anchors', '--snippet-length', '60', '--json'],
+      [
+        cli,
+        'search',
+        'steady watering',
+        '--mode',
+        'fulltext',
+        '--anchors',
+        '--snippet-length',
+        '60',
+        '--json',
+      ],
       options,
     );
     results = JSON.parse(stdout);

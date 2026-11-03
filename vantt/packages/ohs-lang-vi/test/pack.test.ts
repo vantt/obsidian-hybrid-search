@@ -1,14 +1,14 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import createPackDefault, { createPack, PACK_VERSION } from '../src/index.js';
 import type { Candidate, QueryAnalysis } from '../src/contract.js';
+import { TONES, type Tone } from '../src/data.js';
+import createPackDefault, { createPack, PACK_VERSION } from '../src/index.js';
 import { resolveOptions } from '../src/options.js';
 import type { ViAnalysisData } from '../src/query.js';
+import { composeSyllable } from '../src/syllable.js';
 import { tokenize } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
 import { allSyllables, viewTokens } from './helpers.js';
-import { composeSyllable } from '../src/syllable.js';
-import { TONES, type Tone } from '../src/data.js';
 
 const VAULT = [
   'Kế hoạch bán hàng online cho quý một',
@@ -78,7 +78,9 @@ describe('project', () => {
   });
 
   it('fold merges i/y only with foldIY', () => {
-    expect(createPack({ foldIY: true }).project('fold', 'content', 'kỹ thuật, tay')).toBe('ki thuat, tay');
+    expect(createPack({ foldIY: true }).project('fold', 'content', 'kỹ thuật, tay')).toBe(
+      'ki thuat, tay',
+    );
     expect(pack.project('fold', 'content', 'kỹ thuật')).toBe('ky thuat');
   });
 
@@ -86,13 +88,16 @@ describe('project', () => {
     // U+1D15E is NFC-decomposed into a symbol plus a combining mark (a token
     // character for unicode61); a lone combining mark is a token that folding would delete.
     for (const t of ['a \u{1D15E} b', 'x \u0301 y', '\u0301']) {
-      for (const view of ['norm', 'fold']) expect(tokenize(pack.project(view, 'content', t))).toHaveLength(tokenize(t).length);
+      for (const view of ['norm', 'fold'])
+        expect(tokenize(pack.project(view, 'content', t))).toHaveLength(tokenize(t).length);
     }
   });
 
   it('throws on an unknown view', () => {
     expect(() => pack.project('xyz', 'content', 'x')).toThrow(/unknown view/);
-    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(/unknown view/);
+    expect(() => createPack({ segment: false }).project('seg', 'content', 'x')).toThrow(
+      /unknown view/,
+    );
   });
 
   it('never changes English or code-like text beyond case', () => {
@@ -102,36 +107,50 @@ describe('project', () => {
 
   const syllables = allSyllables();
   const word = fc
-    .tuple(fc.integer({ min: 0, max: syllables.length - 1 }), fc.constantFrom(...TONES), fc.boolean())
+    .tuple(
+      fc.integer({ min: 0, max: syllables.length - 1 }),
+      fc.constantFrom(...TONES),
+      fc.boolean(),
+    )
     .map(([i, tone, upper]) => {
       const w = composeSyllable({ ...syllables[i]!, tone: tone as Tone }, 'classic');
       return upper ? w.toUpperCase() : w;
     });
   const sep = fc.constantFrom(' ', ', ', '.\n', ' - ', '_', ' c++ ', ' #x ', ' ', '🎉', '2026');
   const text = fc.oneof(
-    fc.array(fc.tuple(word, sep), { maxLength: 15 }).map((parts) => parts.map(([w, s]) => w + s).join('')),
+    fc
+      .array(fc.tuple(word, sep), { maxLength: 15 })
+      .map((parts) => parts.map(([w, s]) => w + s).join('')),
     fc.string({ unit: 'grapheme', maxLength: 40 }),
     fc.string({ unit: 'binary', maxLength: 40 }),
   );
 
   it('keeps the token invariant for every view, field and index option (fast-check)', () => {
-    const packs = [createPack(), createPack({ foldIY: true }), createPack({ tonePlacement: 'classic' })];
+    const packs = [
+      createPack(),
+      createPack({ foldIY: true }),
+      createPack({ tonePlacement: 'classic' }),
+    ];
     fc.assert(
-      fc.property(text, fc.constantFrom('title', 'aliases', 'content') as fc.Arbitrary<'title'>, (t, field) => {
-        const source = tokenize(t);
-        for (const p of packs) {
-          for (const view of ['norm', 'fold']) {
-            const projected = tokenize(p.project(view, field, t));
-            expect(projected.length).toBe(source.length);
-            // Same count with an independent emulation of the view tokenizer (tokenchars '+#').
-            expect(viewTokens(p.project(view, field, t))).toHaveLength(viewTokens(t).length);
-            projected.forEach((tok, k) => {
-              // token k of the view is the projection of source token k
-              expect(tok.toLowerCase()).toBe(p.project(view, field, source[k]!).toLowerCase());
-            });
+      fc.property(
+        text,
+        fc.constantFrom('title', 'aliases', 'content') as fc.Arbitrary<'title'>,
+        (t, field) => {
+          const source = tokenize(t);
+          for (const p of packs) {
+            for (const view of ['norm', 'fold']) {
+              const projected = tokenize(p.project(view, field, t));
+              expect(projected.length).toBe(source.length);
+              // Same count with an independent emulation of the view tokenizer (tokenchars '+#').
+              expect(viewTokens(p.project(view, field, t))).toHaveLength(viewTokens(t).length);
+              projected.forEach((tok, k) => {
+                // token k of the view is the projection of source token k
+                expect(tok.toLowerCase()).toBe(p.project(view, field, source[k]!).toLowerCase());
+              });
+            }
           }
-        }
-      }),
+        },
+      ),
       { numRuns: Number(process.env.FC_NUM_RUNS ?? 400) },
     );
   });
@@ -139,8 +158,20 @@ describe('project', () => {
   it('keeps the token invariant when a combining mark is glued to + or #', () => {
     // A combining mark next to `#` is one token ("\u0338#"); fold drops the
     // mark and must leave "#" (still one token), never an empty token.
-    const packs = [createPack(), createPack({ foldIY: true }), createPack({ tonePlacement: 'classic' })];
-    for (const t of ['↚#', '\u2190\u0338#', '\u0301#', 'a\u0301+', '#\u0300', 'x ↚# y', 'c\u0338++']) {
+    const packs = [
+      createPack(),
+      createPack({ foldIY: true }),
+      createPack({ tonePlacement: 'classic' }),
+    ];
+    for (const t of [
+      '↚#',
+      '\u2190\u0338#',
+      '\u0301#',
+      'a\u0301+',
+      '#\u0300',
+      'x ↚# y',
+      'c\u0338++',
+    ]) {
       for (const p of packs) {
         for (const view of ['norm', 'fold']) {
           const out = p.project(view, 'title', t);
@@ -156,7 +187,9 @@ describe('project', () => {
     fc.assert(
       fc.property(text, (t) => {
         expect(pack.project('norm', 'content', t)).toBe(pack.project('norm', 'content', t));
-        expect(pack.project('fold', 'content', t)).toBe(pack.project('fold', 'content', pack.project('norm', 'content', t)));
+        expect(pack.project('fold', 'content', t)).toBe(
+          pack.project('fold', 'content', pack.project('norm', 'content', t)),
+        );
       }),
       { numRuns: 200 },
     );
@@ -168,7 +201,11 @@ describe('analyzeQuery', () => {
 
   it('accented query, both views on: norm is the normalized query, fold the folded one, no restoration', () => {
     const a = analyze('Giữ chân khách hàng', BOTH);
-    expect(a.viewQueries).toEqual({ norm: 'giữ chân khách hàng', fold: 'giu chan khach hang', seg: 'giữ_chân khách_hàng' });
+    expect(a.viewQueries).toEqual({
+      norm: 'giữ chân khách hàng',
+      fold: 'giu chan khach hang',
+      seg: 'giữ_chân khách_hàng',
+    });
     expect(a.embedQuery).toBeUndefined();
     expect(a.baseQuery).toBeUndefined();
     expect((a.data as ViAnalysisData).accented).toBe(true);
@@ -180,9 +217,16 @@ describe('analyzeQuery', () => {
     expect(a.viewQueries).toEqual({ norm: null, fold: null, seg: 'giữ_chân khách_hàng' });
     expect((a.data as ViAnalysisData).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
     const typedPlain = analyze('Giữ chân khách hàng', {}, [...VAULT, 'ghi chu: giu chan khach cu']);
-    expect(typedPlain.viewQueries).toEqual({ norm: null, fold: 'giu chan khach hang', seg: 'giữ_chân khách_hàng' });
+    expect(typedPlain.viewQueries).toEqual({
+      norm: null,
+      fold: 'giu chan khach hang',
+      seg: 'giữ_chân khách_hàng',
+    });
     expect(analyze('khách', {}, [...VAULT, 'khach moi']).viewQueries.fold).toBe('khach');
-    expect(analyze('Giữ chân khách hàng', { accentedFold: 'never' }, [...VAULT, 'giu chan khach']).viewQueries.fold).toBeNull();
+    expect(
+      analyze('Giữ chân khách hàng', { accentedFold: 'never' }, [...VAULT, 'giu chan khach'])
+        .viewQueries.fold,
+    ).toBeNull();
   });
 
   it('accented query with classic tone placement normalizes to the index style', () => {
@@ -227,7 +271,11 @@ describe('analyzeQuery', () => {
 
   it('English query without Vietnamese evidence leaves the pack inert', () => {
     const docs = [...VAULT, 'How to install plugins', 'Go to the settings'];
-    expect(analyze('how to install plugins', {}, docs).viewQueries).toEqual({ norm: null, fold: null, seg: null });
+    expect(analyze('how to install plugins', {}, docs).viewQueries).toEqual({
+      norm: null,
+      fold: null,
+      seg: null,
+    });
     // "to" has an accented form in this vault ("tô"), so it is Vietnamese evidence
     // once enough of the query is made of syllables.
     expect(analyze('how to install', {}, [...docs, 'bát tô lớn']).viewQueries.fold).toBeNull();
@@ -236,8 +284,14 @@ describe('analyzeQuery', () => {
 
   it('Telex keystrokes with few real syllables leave the pack inert (minSyllableShare)', () => {
     const docs = [...VAULT, 'chân dung', 'sử dụng'];
-    expect(analyze('bis quyeets chupj anhr chaan dung', {}, docs).viewQueries).toEqual({ norm: null, fold: null, seg: null });
-    expect(analyze('bis quyeets chupj anhr chaan dung', { minSyllableShare: 0 }, docs).viewQueries.fold).not.toBeNull();
+    expect(analyze('bis quyeets chupj anhr chaan dung', {}, docs).viewQueries).toEqual({
+      norm: null,
+      fold: null,
+      seg: null,
+    });
+    expect(
+      analyze('bis quyeets chupj anhr chaan dung', { minSyllableShare: 0 }, docs).viewQueries.fold,
+    ).not.toBeNull();
   });
 
   it('restore: false never restores', () => {
@@ -253,9 +307,14 @@ describe('analyzeQuery', () => {
   });
 
   it('restoreForEmbedding sends the restored text (punctuation kept) when confident', () => {
-    const a = analyze('Giu chan, khach hang!', { restoreForEmbedding: true, embedMinConfidence: 0 });
+    const a = analyze('Giu chan, khach hang!', {
+      restoreForEmbedding: true,
+      embedMinConfidence: 0,
+    });
     expect(a.embedQuery).toBe('giữ chân, khách hàng!');
-    expect(analyze('giu chan khach hang', { restoreForEmbedding: false }).embedQuery).toBeUndefined();
+    expect(
+      analyze('giu chan khach hang', { restoreForEmbedding: false }).embedQuery,
+    ).toBeUndefined();
     expect(analyze('giu chan khach hang').embedQuery).toBe('giữ chân khách hàng'); // on by default
   });
 
@@ -283,7 +342,11 @@ describe('analyzeQuery', () => {
     });
 
     it('does not restore a word below the confidence threshold', () => {
-      const a = analyze('Hội an nhieu quan', { restoreForEmbedding: true, embedMinConfidence: 1 }, NAMES);
+      const a = analyze(
+        'Hội an nhieu quan',
+        { restoreForEmbedding: true, embedMinConfidence: 1 },
+        NAMES,
+      );
       expect(a.embedQuery).toBeUndefined();
     });
   });
@@ -291,7 +354,12 @@ describe('analyzeQuery', () => {
 
 describe('rescore', () => {
   const pack = createPack();
-  function candidate(path: string, score: number, snippet: string, rank: Record<string, number | null> = {}): Candidate {
+  function candidate(
+    path: string,
+    score: number,
+    snippet: string,
+    rank: Record<string, number | null> = {},
+  ): Candidate {
     return { path, score, title: path, snippet, matchedViews: [], rank };
   }
 
@@ -311,24 +379,42 @@ describe('rescore', () => {
 
   it('scales the bonus by restoration confidence for unaccented queries', async () => {
     const analysis = analyze('ban hang');
-    const out = await pack.rescore!([candidate('a.md', 0.01, 'bán hàng'), candidate('b.md', 0.02, 'nothing')], analysis, fakeContext(VAULT));
+    const out = await pack.rescore!(
+      [candidate('a.md', 0.01, 'bán hàng'), candidate('b.md', 0.02, 'nothing')],
+      analysis,
+      fakeContext(VAULT),
+    );
     expect(out[0]!.score).toBeGreaterThan(0.01);
     expect(out[1]!.score).toBe(0.02);
   });
 
   it('passes scores through when the analysis carries no pack data', async () => {
-    const out = await pack.rescore!([candidate('a.md', 0.5, 'bán hàng')], { viewQueries: {} }, fakeContext(VAULT));
+    const out = await pack.rescore!(
+      [candidate('a.md', 0.5, 'bán hàng')],
+      { viewQueries: {} },
+      fakeContext(VAULT),
+    );
     expect(out).toEqual([{ path: 'a.md', score: 0.5 }]);
   });
 
   it('keeps the candidate set for arbitrary inputs (fast-check)', () => {
     fc.assert(
       fc.property(
-        fc.array(fc.tuple(fc.string(), fc.double({ min: 0, max: 1, noNaN: true }), fc.string({ unit: 'grapheme' })), { maxLength: 20 }),
+        fc.array(
+          fc.tuple(
+            fc.string(),
+            fc.double({ min: 0, max: 1, noNaN: true }),
+            fc.string({ unit: 'grapheme' }),
+          ),
+          { maxLength: 20 },
+        ),
         fc.string({ unit: 'grapheme', maxLength: 30 }),
         (rows, query) => {
           const candidates = rows.map(([p, s, snip], i) => candidate(`${i}${p}`, s, snip));
-          const out = pack.rescore!(candidates, analyze(query), fakeContext(VAULT)) as Array<{ path: string; score: number }>;
+          const out = pack.rescore!(candidates, analyze(query), fakeContext(VAULT)) as Array<{
+            path: string;
+            score: number;
+          }>;
           expect(out.map((c) => c.path)).toEqual(candidates.map((c) => c.path));
           out.forEach((c, i) => {
             expect(Number.isFinite(c.score)).toBe(true);
@@ -353,13 +439,17 @@ describe('alias views', () => {
     const pack = createPack();
     const stored = pack.project('fold', 'aliases', 'Kế hoạch quý bốn');
     for (const q of ['Ke hoach quy bon', 'kế hoạch quý bốn', '  KẾ   hoạch quy bon ']) {
-      expect((pack.analyzeQuery(q, fakeContext(VAULT)) as QueryAnalysis).aliasKeys?.fold).toBe(stored);
+      expect((pack.analyzeQuery(q, fakeContext(VAULT)) as QueryAnalysis).aliasKeys?.fold).toBe(
+        stored,
+      );
     }
   });
 
   it('keys đ and title projections the same way', () => {
     const pack = createPack();
-    expect(analyze('Đường di chuyen').aliasKeys?.fold).toBe(pack.project('fold', 'title', 'Đường di chuyển'));
+    expect(analyze('Đường di chuyen').aliasKeys?.fold).toBe(
+      pack.project('fold', 'title', 'Đường di chuyển'),
+    );
   });
 
   it('gives no key for an empty query', () => {

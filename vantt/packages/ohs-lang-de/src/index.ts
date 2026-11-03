@@ -4,8 +4,8 @@ import { CONTINUATION, projectText, sourceWords, VIEW_TOKENIZER, wordTokens } fr
 import { STOPWORDS } from './stopwords.js';
 import type { LanguagePackV1, QueryAnalysis, QueryContext } from './types.js';
 
-export { foldWord, transliterateWord } from './fold.js';
 export { createSplitter } from './compound.js';
+export { foldWord, transliterateWord } from './fold.js';
 export { CONTINUATION, projectText, VIEW_TOKENIZER } from './project.js';
 export type * from './types.js';
 

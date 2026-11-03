@@ -86,7 +86,8 @@ export function readCompoundList(url: URL): string[] {
     );
   }
   const entries = text.split('\n').filter((line) => line !== '' && !line.startsWith('#'));
-  if (entries.length === 0) throw new Error(`ohs-lang-vi: the bundled compound dictionary ${fileURLToPath(url)} is empty`);
+  if (entries.length === 0)
+    throw new Error(`ohs-lang-vi: the bundled compound dictionary ${fileURLToPath(url)} is empty`);
   return entries;
 }
 
@@ -219,7 +220,8 @@ export class CompoundSource {
     const extra = this.readExtra();
     if (!this.dictionary || extra !== this.extra) {
       const bundled = bundledDictionary(this.tonePlacement);
-      this.dictionary = extra.length === 0 ? bundled : buildDictionary(extra, this.tonePlacement, bundled);
+      this.dictionary =
+        extra.length === 0 ? bundled : buildDictionary(extra, this.tonePlacement, bundled);
       this.extra = extra;
     }
     return this.dictionary;

@@ -19,7 +19,9 @@ export const childEnv = (extra = {}) => ({
 
 export class GitError extends Error {
   constructor(args, res) {
-    super(`git ${args.join(' ')} failed (${res.status}): ${(res.stderr || res.stdout || '').trim()}`);
+    super(
+      `git ${args.join(' ')} failed (${res.status}): ${(res.stderr || res.stdout || '').trim()}`,
+    );
     this.name = 'GitError';
     this.status = res.status;
     this.stdout = res.stdout;
@@ -63,5 +65,10 @@ export function sh(cwd, command, opts = {}) {
     maxBuffer: 512 * 1024 * 1024,
   });
   if (res.error) return { ok: false, status: null, error: res.error.message, stdout: '' };
-  return { ok: res.status === 0, status: res.status, stdout: res.stdout ?? '', stderr: res.stderr ?? '' };
+  return {
+    ok: res.status === 0,
+    status: res.status,
+    stdout: res.stdout ?? '',
+    stderr: res.stderr ?? '',
+  };
 }

@@ -1,12 +1,12 @@
 import { performance } from 'node:perf_hooks';
 import { describe, expect, it } from 'vitest';
 import { fold } from '../src/fold.js';
-import { normalize } from '../src/normalize.js';
-import { composeSyllable, isPossibleFoldedSyllable, parseSyllable } from '../src/syllable.js';
-import { allSyllables, prng, vietnameseText } from './helpers.js';
 import { createPack } from '../src/index.js';
+import { normalize } from '../src/normalize.js';
 import { bundledCompounds } from '../src/segment.js';
+import { composeSyllable, isPossibleFoldedSyllable, parseSyllable } from '../src/syllable.js';
 import { fakeContextFromCounts } from './fake-context.js';
+import { allSyllables, prng, vietnameseText } from './helpers.js';
 
 const ONE_MB = 1024 * 1024;
 /**
@@ -142,7 +142,9 @@ describe('performance: primitives that analyzeQuery (V13) will call', () => {
   });
 
   it('parseSyllable on 50,000 distinct words is fast (uncached path), under 500 ms', () => {
-    const toned = allSyllables().flatMap((s) => [1, 2, 3, 4, 5].map((tone) => composeSyllable({ ...s, tone: tone as 1 })));
+    const toned = allSyllables().flatMap((s) =>
+      [1, 2, 3, 4, 5].map((tone) => composeSyllable({ ...s, tone: tone as 1 })),
+    );
     const sample = toned.slice(0, 50_000);
     const ms = once(() => {
       for (const w of sample) parseSyllable(w);
@@ -176,11 +178,16 @@ describe('performance: pack project() on 1 MB', () => {
     pack.signature(); // loads the compound dictionary, as the core does before indexing
     const compounds = bundledCompounds();
     // Real compounds between the random syllables, so the segmenter has work to do.
-    const withCompounds = nfc.replace(/\n/g, () => ` ${compounds[nfc.length % compounds.length]}\n`);
+    const withCompounds = nfc.replace(
+      /\n/g,
+      () => ` ${compounds[nfc.length % compounds.length]}\n`,
+    );
     const msNfc = once(() => pack.project('seg', 'content', nfc));
     const msNfd = once(() => pack.project('seg', 'content', nfd));
     const msCompounds = once(() => pack.project('seg', 'content', withCompounds));
-    console.log(`project seg 1 MB: NFC ${msNfc.toFixed(1)} ms, NFD ${msNfd.toFixed(1)} ms, with compounds ${msCompounds.toFixed(1)} ms`);
+    console.log(
+      `project seg 1 MB: NFC ${msNfc.toFixed(1)} ms, NFD ${msNfd.toFixed(1)} ms, with compounds ${msCompounds.toFixed(1)} ms`,
+    );
     expect(msNfc).toBeLessThan(PROJECT_BUDGET_MS);
     expect(msNfd).toBeLessThan(PROJECT_BUDGET_MS);
     expect(msCompounds).toBeLessThan(PROJECT_BUDGET_MS);
@@ -245,7 +252,9 @@ describe('performance: analyzeQuery, 12 syllables, 50,000-term vocabulary', () =
     ctx.bump();
     const afterWrite = once(() => pack.analyzeQuery(query, ctx));
     const warm = bestOf(5, () => pack.analyzeQuery(query, ctx));
-    console.log(`analyzeQuery 12 syllables after write: ${afterWrite.toFixed(2)} ms, warm: ${warm.toFixed(3)} ms`);
+    console.log(
+      `analyzeQuery 12 syllables after write: ${afterWrite.toFixed(2)} ms, warm: ${warm.toFixed(3)} ms`,
+    );
     expect(afterWrite).toBeLessThan(20 * PERF_FACTOR);
     expect(warm).toBeLessThan(5 * PERF_FACTOR);
   });

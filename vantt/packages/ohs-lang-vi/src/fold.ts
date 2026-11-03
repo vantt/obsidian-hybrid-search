@@ -26,7 +26,10 @@ function foldChar(ch: string): string {
   return out;
 }
 
-const IY_RE = new RegExp(`(?<![\\p{L}\\p{N}\\p{M}])(?:${IY_ONSETS.join('|')})y(?![\\p{L}\\p{N}\\p{M}])`, 'giu');
+const IY_RE = new RegExp(
+  `(?<![\\p{L}\\p{N}\\p{M}])(?:${IY_ONSETS.join('|')})y(?![\\p{L}\\p{N}\\p{M}])`,
+  'giu',
+);
 
 function foldIYWord(word: string): string {
   const last = word.charCodeAt(word.length - 1);

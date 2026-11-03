@@ -8,7 +8,10 @@ function base(word: string): string {
 }
 
 function stripMarks(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}+/gu, '').normalize('NFC');
+  return text
+    .normalize('NFD')
+    .replace(/\p{M}+/gu, '')
+    .normalize('NFC');
 }
 
 /**
@@ -24,7 +27,5 @@ export function foldWord(word: string): string {
  * words with an umlaut; "Käse" and "Kaese" share the key `kaese`.
  */
 export function transliterateWord(word: string): string {
-  return stripMarks(
-    base(word).replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue'),
-  );
+  return stripMarks(base(word).replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue'));
 }

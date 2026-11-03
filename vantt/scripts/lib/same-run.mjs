@@ -18,7 +18,13 @@ export function readSameRun(root, { sha, corpus, k }) {
   try {
     const rep = JSON.parse(readFileSync(file, 'utf8'));
     const c = rep.corpora?.[corpus];
-    if (rep.target?.sha !== sha || rep.fork_head !== git(root, ['rev-parse', 'HEAD']) || rep.k !== k || !c?.summary_upstream) return null;
+    if (
+      rep.target?.sha !== sha ||
+      rep.fork_head !== git(root, ['rev-parse', 'HEAD']) ||
+      rep.k !== k ||
+      !c?.summary_upstream
+    )
+      return null;
     return { summary: c.summary_upstream, source: 'invariance' };
   } catch {
     return null;

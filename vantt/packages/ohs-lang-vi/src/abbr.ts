@@ -14,13 +14,13 @@ import { dirname, join } from 'node:path';
 import { fold } from './fold.js';
 import {
   DEFAULT_LEXICON_PATH,
-  headingKey,
   HEADING_RE,
+  headingKey,
+  parseLexicon,
   SECTION_ABBREVIATIONS,
   SECTION_COMPOUNDS,
   SECTION_PENDING,
   SECTION_SYNONYMS,
-  parseLexicon,
 } from './lexicon.js';
 import { normalize } from './normalize.js';
 import { isPossibleFoldedSyllable, isVietnameseSyllable } from './syllable.js';
@@ -50,8 +50,14 @@ const WORD = `${LETTER}+`;
 /** All-capital token, dots allowed inside (`KH`, `TMĐT`, `TP.HCM`). */
 const ABBR = '\\p{Lu}[\\p{Lu}.]{1,9}';
 const ABBR_TOKEN_RE = new RegExp(`(?<![\\p{L}\\p{N}.])(${ABBR})(?![\\p{L}\\p{N}])`, 'gu');
-const DEFINED_AFTER_RE = new RegExp(`(?<![\\p{L}\\p{N}.])(${ABBR})(?<!\\.)\\s*[:=\\-–—]\\s*((?:${WORD}[ \\t]+){0,7}${WORD})`, 'gu');
-const DEFINED_BEFORE_RE = new RegExp(`((?:${WORD}[ \\t]+){1,7}${WORD})[ \\t]*\\([ \\t]*(${ABBR})(?<!\\.)[ \\t]*\\)`, 'gu');
+const DEFINED_AFTER_RE = new RegExp(
+  `(?<![\\p{L}\\p{N}.])(${ABBR})(?<!\\.)\\s*[:=\\-–—]\\s*((?:${WORD}[ \\t]+){0,7}${WORD})`,
+  'gu',
+);
+const DEFINED_BEFORE_RE = new RegExp(
+  `((?:${WORD}[ \\t]+){1,7}${WORD})[ \\t]*\\([ \\t]*(${ABBR})(?<!\\.)[ \\t]*\\)`,
+  'gu',
+);
 
 /** Letters of an abbreviation, folded and uppercase: `TP.HCM` -> `TPHCM`, `ĐKKD` -> `DKKD`. */
 export function abbrLetters(abbr: string): string {
@@ -105,7 +111,8 @@ const SEGMENT_SPLIT_RE = /[.,;:!?()[\]{}"“”<>|\n\r]+/;
 
 /** Keys that identify an abbreviation or a proposal, ignoring case, dots and diacritics. */
 const abbrKey = (abbr: string): string => abbrLetters(abbr);
-const pairKey = (abbr: string, expansion: string): string => `${abbrKey(abbr)}=${fold(normalize(expansion))}`;
+const pairKey = (abbr: string, expansion: string): string =>
+  `${abbrKey(abbr)}=${fold(normalize(expansion))}`;
 
 export interface KnownEntries {
   /** Abbreviations the user already decided on (the `## Viết tắt` section). */
@@ -118,7 +125,8 @@ export interface KnownEntries {
 export function knownEntries(lexiconText: string | null): KnownEntries {
   const known: KnownEntries = { abbreviations: new Set(), pending: new Set() };
   if (lexiconText === null) return known;
-  for (const group of parseLexicon(lexiconText).abbreviations) known.abbreviations.add(abbrKey(group[0]!.join(' ')));
+  for (const group of parseLexicon(lexiconText).abbreviations)
+    known.abbreviations.add(abbrKey(group[0]!.join(' ')));
   let pending = false;
   for (const raw of lexiconText.split(/\r\n|\r|\n/)) {
     const heading = HEADING_RE.exec(raw);
@@ -128,7 +136,8 @@ export function knownEntries(lexiconText: string | null): KnownEntries {
     }
     if (!pending) continue;
     const parts = raw.replace(/^\s*[-*+]\s+/, '').split('=');
-    if (parts.length >= 2 && parts[0]!.trim()) for (const p of parts.slice(1)) known.pending.add(pairKey(parts[0]!.trim(), p.trim()));
+    if (parts.length >= 2 && parts[0]!.trim())
+      for (const p of parts.slice(1)) known.pending.add(pairKey(parts[0]!.trim(), p.trim()));
   }
   return known;
 }
@@ -201,7 +210,10 @@ export function learnAbbreviations(
   }
 
   return [...proposals.values()].sort(
-    (a, b) => (a.source === b.source ? 0 : a.source === 'definition' ? -1 : 1) || a.abbr.localeCompare(b.abbr) || a.expansion.localeCompare(b.expansion),
+    (a, b) =>
+      (a.source === b.source ? 0 : a.source === 'definition' ? -1 : 1) ||
+      a.abbr.localeCompare(b.abbr) ||
+      a.expansion.localeCompare(b.expansion),
   );
 }
 
@@ -255,7 +267,8 @@ export function listMarkdown(root: string): string[] {
   const out: string[] = [];
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name.startsWith('.') || entry.name === '_ohs' || SKIP_DIRS.has(entry.name)) continue;
+      if (entry.name.startsWith('.') || entry.name === '_ohs' || SKIP_DIRS.has(entry.name))
+        continue;
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
       else if (entry.isFile() && entry.name.toLowerCase().endsWith('.md')) out.push(full);

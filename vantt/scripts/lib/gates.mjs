@@ -7,7 +7,10 @@ const check = (id, status, detail, extra = {}) => ({ id, status, detail, ...extr
 const metricOf = (result, category, metric) => result?.by_category?.[category]?.[metric];
 
 /** Per-category and overall drop of `metric` against a reference result. */
-export function regressionChecks(idPrefix, { result, ref, refLabel, metric, categoryMax, overallMax }) {
+export function regressionChecks(
+  idPrefix,
+  { result, ref, refLabel, metric, categoryMax, overallMax },
+) {
   const bad = [];
   const rows = {};
   for (const name of Object.keys(ref.by_category ?? {})) {
@@ -31,10 +34,15 @@ export function regressionChecks(idPrefix, { result, ref, refLabel, metric, cate
         : `no category drops more than ${categoryMax} ${metric} vs ${refLabel}`,
       { categories: rows },
     ),
-    check(`${idPrefix}-overall`, t - o > overallMax + EPS ? 'fail' : 'pass', `overall ${metric} ${t} -> ${o} vs ${refLabel}`, {
-      ref: t,
-      now: o,
-    }),
+    check(
+      `${idPrefix}-overall`,
+      t - o > overallMax + EPS ? 'fail' : 'pass',
+      `overall ${metric} ${t} -> ${o} vs ${refLabel}`,
+      {
+        ref: t,
+        now: o,
+      },
+    ),
   ];
 }
 
@@ -50,7 +58,11 @@ const driftCheck = (id, cfg, now, baseline, label) =>
         id,
         Math.abs(now - baseline.result.summary[cfg.metric]) > cfg.tolerance + EPS ? 'warn' : 'pass',
         `informational: ${cfg.metric} ${baseline.result.summary[cfg.metric]} (stored ${label} ${baseline.version}, recorded on another machine) vs ${now} measured here`,
-        { value: now, baseline: baseline.result.summary[cfg.metric], baseline_version: baseline.version },
+        {
+          value: now,
+          baseline: baseline.result.summary[cfg.metric],
+          baseline_version: baseline.version,
+        },
       )
     : check(id, 'skipped', `no stored ${label} baseline for this platform`);
 
@@ -60,9 +72,15 @@ export function upstreamChecks(cfg, { platform, result, reference, baseline, flo
   const now = result.summary[m];
   const checks = [];
   if (platform === 'darwin-arm64' && floors) {
-    checks.push(check('upstream-no-pack', floors.ok ? 'pass' : 'fail', floors.message, { value: now }));
+    checks.push(
+      check('upstream-no-pack', floors.ok ? 'pass' : 'fail', floors.message, { value: now }),
+    );
   } else if (!reference) {
-    checks.push(check('upstream-no-pack', 'pending', 'pristine upstream was not measured in this run', { value: now }));
+    checks.push(
+      check('upstream-no-pack', 'pending', 'pristine upstream was not measured in this run', {
+        value: now,
+      }),
+    );
   } else {
     const then = reference.summary[m];
     checks.push(
@@ -98,14 +116,17 @@ function targetCheck(t, { result, upstream }) {
   for (const c of categories) {
     const v = metricOf(result, c, t.metric);
     const u = metricOf(upstream, c, t.metric);
-    if (v !== undefined) values.push(`${c} ${t.metric} ${r3(v)}${u === undefined ? '' : ` (upstream ${r3(u)})`}`);
+    if (v !== undefined)
+      values.push(`${c} ${t.metric} ${r3(v)}${u === undefined ? '' : ` (upstream ${r3(u)})`}`);
     if (v === undefined) {
       missing = true;
       continue;
     }
     if (t.min !== undefined && v < t.min - EPS) problems.push(`${c} ${t.metric} ${v} < ${t.min}`);
     const needsUpstream =
-      t.min_gain_over_upstream !== undefined || t.min_ratio_over_upstream !== undefined || t.max_drop_vs_upstream !== undefined;
+      t.min_gain_over_upstream !== undefined ||
+      t.min_ratio_over_upstream !== undefined ||
+      t.max_drop_vs_upstream !== undefined;
     if (needsUpstream && u === undefined) {
       missing = true;
       continue;
@@ -119,13 +140,24 @@ function targetCheck(t, { result, upstream }) {
   }
   const dep = t.depends_on ? ` [${t.depends_on}]` : '';
   if (missing && !problems.length)
-    return check(t.id, t.status === 'enforced' ? 'fail' : 'pending', `metric or upstream baseline not available${dep}`);
+    return check(
+      t.id,
+      t.status === 'enforced' ? 'fail' : 'pending',
+      `metric or upstream baseline not available${dep}`,
+    );
   const ok = problems.length === 0;
   if (t.status !== 'enforced')
-    return check(t.id, 'pending', `${ok ? 'already met' : 'not met yet'}${ok ? '' : `: ${problems.join('; ')}`}${dep}`, {
-      would: ok ? 'pass' : 'fail',
-    });
-  return check(t.id, ok ? 'pass' : 'fail', ok ? `met: ${values.join('; ')}` : problems.join('; '), { values });
+    return check(
+      t.id,
+      'pending',
+      `${ok ? 'already met' : 'not met yet'}${ok ? '' : `: ${problems.join('; ')}`}${dep}`,
+      {
+        would: ok ? 'pass' : 'fail',
+      },
+    );
+  return check(t.id, ok ? 'pass' : 'fail', ok ? `met: ${values.join('; ')}` : problems.join('; '), {
+    values,
+  });
 }
 
 /**
@@ -156,14 +188,21 @@ export function viChecks(cfg, { result, upstream, stored, prevRelease }) {
       categoryMax: cfg.category_regression_max,
       overallMax: cfg.overall_regression_max,
     }))
-      checks.push(cfg.previous_release_enforced || c.status !== 'fail' ? c : { ...c, status: 'warn', detail: `informational: ${c.detail}` });
+      checks.push(
+        cfg.previous_release_enforced || c.status !== 'fail'
+          ? c
+          : { ...c, status: 'warn', detail: `informational: ${c.detail}` },
+      );
   }
   if (stored && upstream) {
     const sizes = [stored.result.meta?.golden_set_size, upstream.result.meta?.golden_set_size];
     const worst = Math.max(
       Math.abs(stored.result.summary[cfg.metric] - upstream.result.summary[cfg.metric]),
       ...Object.keys(stored.result.by_category ?? {}).map((c) =>
-        Math.abs((metricOf(stored.result, c, cfg.metric) ?? 0) - (metricOf(upstream.result, c, cfg.metric) ?? 0)),
+        Math.abs(
+          (metricOf(stored.result, c, cfg.metric) ?? 0) -
+            (metricOf(upstream.result, c, cfg.metric) ?? 0),
+        ),
       ),
     );
     const stale = sizes[0] !== sizes[1];

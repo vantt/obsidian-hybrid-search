@@ -6,7 +6,13 @@
  * to". Whether to trust the answer is decided against the vault vocabulary
  * (`rewrite.ts`), which is what keeps English words such as "team" untouched.
  */
-import { TELEX_LETTER_KEYS, TELEX_TONE_KEYS, VNI_TONE_KEYS, type Tone, type TonePlacement } from './data.js';
+import {
+  TELEX_LETTER_KEYS,
+  TELEX_TONE_KEYS,
+  VNI_TONE_KEYS,
+  type Tone,
+  type TonePlacement,
+} from './data.js';
 import { composeSyllable, parseSyllable } from './syllable.js';
 
 const TELEX_RE = /^[a-z]+$/;
@@ -82,7 +88,8 @@ function decodeVniReading(typed: string, style: TonePlacement, pairUo: boolean):
     while (at >= 0 && modifier[letters[at]!] === undefined) at--;
     if (at < 0 || letters.length - at > 3) return null;
     letters[at] = modifier[letters[at]!]!;
-    if (pairUo && ch === '7' && letters[at] === 'ơ' && letters[at - 1] === 'u') letters[at - 1] = 'ư';
+    if (pairUo && ch === '7' && letters[at] === 'ơ' && letters[at - 1] === 'u')
+      letters[at - 1] = 'ư';
   }
   const bare = letters.join('').replace(/ưo/g, 'ươ');
   return /[0-9]/.test(bare) ? null : compose(bare, tone, style);

@@ -18,7 +18,9 @@ export function ensureNpm(root, log) {
   const dir = path.join(root, 'vantt', '.work', 'tools', `npm-${want.version}`);
   const bin = path.join(dir, 'node_modules', '.bin');
   if (!existsSync(path.join(bin, 'npm'))) {
-    log(`npm ${have} found, upstream requires ${want.version}; installing it into vantt/.work/tools.`);
+    log(
+      `npm ${have} found, upstream requires ${want.version}; installing it into vantt/.work/tools.`,
+    );
     mkdirSync(dir, { recursive: true });
     // Own package.json so this install is not checked against upstream's devEngines.
     writeFileSync(path.join(dir, 'package.json'), '{ "private": true }\n');

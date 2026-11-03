@@ -42,9 +42,7 @@
     }
   },
   "upstream": {
-    "commits": [
-      "201dd1f chore: update dependencies (#90)"
-    ],
+    "commits": ["201dd1f chore: update dependencies (#90)"],
     "diffstat_tail": "3 files changed, 378 insertions(+), 530 deletions(-)",
     "changelog_diff": "",
     "hook_files_changed": {
@@ -292,9 +290,7 @@
       "id": "unicode-inline-tags",
       "name": "fix(content): accept Unicode letters in inline tags",
       "upstream_status": "unsubmitted",
-      "touches": [
-        "src/content/note-extractor.ts"
-      ],
+      "touches": ["src/content/note-extractor.ts"],
       "probe": "vantt/probes/unicode-inline-tags.mjs",
       "apply": {
         "new": "applies",
@@ -427,11 +423,7 @@
       "id": "index-events",
       "name": "feat(stdio): emit indexed and removed events after index writes",
       "upstream_status": "unsubmitted",
-      "touches": [
-        "src/indexing/indexer.ts",
-        "src/runtime/config.ts",
-        "src/transports/cli.ts"
-      ],
+      "touches": ["src/indexing/indexer.ts", "src/runtime/config.ts", "src/transports/cli.ts"],
       "probe": "vantt/probes/index-events.mjs",
       "apply": {
         "new": "applies",

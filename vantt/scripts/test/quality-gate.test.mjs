@@ -1,13 +1,27 @@
 // Quality gate (PRD 11.6): rule functions on synthetic results, baseline files, and the CLI
 // (standard and --private) on a throw-away repo whose eval is a stub.
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { baseVersion, compareVersions, pickBaseline, writeBaseline } from '../lib/baselines.mjs';
 import { nfdGolden, outputTail, platformKey, privateEvalEnv } from '../lib/eval-run.mjs';
-import { regressionChecks, upstreamChecks, upstreamPackCheck, verdict, viChecks } from '../lib/gates.mjs';
+import {
+  regressionChecks,
+  upstreamChecks,
+  upstreamPackCheck,
+  verdict,
+  viChecks,
+} from '../lib/gates.mjs';
 import { detailPathError, main } from '../quality-gate.mjs';
 import { git, write } from './helpers.mjs';
 
@@ -25,7 +39,9 @@ const byId = (checks) => Object.fromEntries(checks.map((c) => [c.id, c]));
 describe('nfdGolden', () => {
   it('turns relevant and partial paths into NFD and keeps everything else', () => {
     const nfc = 'Đường về nhà.md'.normalize('NFC');
-    const [q] = nfdGolden([{ id: 'a', query: nfc, relevant_paths: [nfc], partial_paths: [nfc, 'x.md'], category: 'c' }]);
+    const [q] = nfdGolden([
+      { id: 'a', query: nfc, relevant_paths: [nfc], partial_paths: [nfc, 'x.md'], category: 'c' },
+    ]);
     expect(q.relevant_paths).toEqual([nfc.normalize('NFD')]);
     expect(q.partial_paths).toEqual([nfc.normalize('NFD'), 'x.md']);
     expect(q.query).toBe(nfc);
@@ -35,11 +51,28 @@ describe('nfdGolden', () => {
 
 describe('privateEvalEnv', () => {
   it("keeps the user's note selection and always ignores the lexicon folder", () => {
-    const user = privateEvalEnv({}, { OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**, templates/**,*.canvas', OBSIDIAN_INCLUDE_PATTERNS: 'notes/**', OHS_LANGUAGE_PACK: 'x' });
-    expect(user).toMatchObject({ OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**', OBSIDIAN_INCLUDE_PATTERNS: 'notes/**', OBSIDIAN_RESPECT_GITIGNORE: 'false' });
-    expect(privateEvalEnv({}, { OBSIDIAN_IGNORE_PATTERNS: '_ohs/**' }).OBSIDIAN_IGNORE_PATTERNS).toBe('_ohs/**');
+    const user = privateEvalEnv(
+      {},
+      {
+        OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**, templates/**,*.canvas',
+        OBSIDIAN_INCLUDE_PATTERNS: 'notes/**',
+        OHS_LANGUAGE_PACK: 'x',
+      },
+    );
+    expect(user).toMatchObject({
+      OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**',
+      OBSIDIAN_INCLUDE_PATTERNS: 'notes/**',
+      OBSIDIAN_RESPECT_GITIGNORE: 'false',
+    });
+    expect(
+      privateEvalEnv({}, { OBSIDIAN_IGNORE_PATTERNS: '_ohs/**' }).OBSIDIAN_IGNORE_PATTERNS,
+    ).toBe('_ohs/**');
     const fallback = privateEvalEnv({ OHS_LANGUAGE_PACK: '/p' }, {});
-    expect(fallback).toMatchObject({ OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**', OBSIDIAN_INCLUDE_PATTERNS: '', OHS_LANGUAGE_PACK: '/p' });
+    expect(fallback).toMatchObject({
+      OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**',
+      OBSIDIAN_INCLUDE_PATTERNS: '',
+      OHS_LANGUAGE_PACK: '/p',
+    });
     expect(fallback.LOCAL_EMBEDDING_MODEL).toBe('Xenova/multilingual-e5-small');
   });
 
@@ -52,7 +85,14 @@ describe('upstreamChecks', () => {
   const cfg = CONFIG.upstream;
   const reference = res({ ndcg_5: 0.8 });
   const baseline = { version: '1.0.0', exact: true, result: res({ ndcg_5: 0.8 }) };
-  const run = (v, extra = {}) => upstreamChecks(cfg, { platform: 'linux-x64', result: res({ ndcg_5: v }), reference, baseline, ...extra });
+  const run = (v, extra = {}) =>
+    upstreamChecks(cfg, {
+      platform: 'linux-x64',
+      result: res({ ndcg_5: v }),
+      reference,
+      baseline,
+      ...extra,
+    });
   it('compares with upstream measured in the same run, tolerance both directions', () => {
     const status = (v) => byId(run(v))['upstream-no-pack'].status;
     expect(status(0.804)).toBe('pass');
@@ -62,7 +102,14 @@ describe('upstreamChecks', () => {
   });
   it('a stored baseline from another CPU only warns, never fails', () => {
     // The CI runner scored 0.728 where the dev machine recorded 0.735: same tree, different CPU.
-    const c = byId(upstreamChecks(cfg, { platform: 'linux-x64', result: res({ ndcg_5: 0.728 }), reference: res({ ndcg_5: 0.728 }), baseline: { version: '0.17.2', result: res({ ndcg_5: 0.735 }) } }));
+    const c = byId(
+      upstreamChecks(cfg, {
+        platform: 'linux-x64',
+        result: res({ ndcg_5: 0.728 }),
+        reference: res({ ndcg_5: 0.728 }),
+        baseline: { version: '0.17.2', result: res({ ndcg_5: 0.735 }) },
+      }),
+    );
     expect(c['upstream-no-pack'].status).toBe('pass');
     expect(c['upstream-baseline-drift'].status).toBe('warn');
     expect(verdict(Object.values(c)).status).toBe('pass');
@@ -73,7 +120,9 @@ describe('upstreamChecks', () => {
     expect(c['upstream-baseline-drift'].status).toBe('skipped');
   });
   it('uses the quality.ts floors on darwin-arm64', () => {
-    const c = byId(run(0.8, { platform: 'darwin-arm64', floors: { ok: false, message: 'below floor' } }))['upstream-no-pack'];
+    const c = byId(
+      run(0.8, { platform: 'darwin-arm64', floors: { ok: false, message: 'below floor' } }),
+    )['upstream-no-pack'];
     expect(c).toMatchObject({ status: 'fail', detail: 'below floor' });
   });
 });
@@ -81,16 +130,34 @@ describe('upstreamChecks', () => {
 describe('upstreamPackCheck', () => {
   const cfg = CONFIG.upstream;
   it('allows a drop up to 0.01 nDCG@5 with the pack', () => {
-    expect(upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.79 }) }).status).toBe('pass');
-    expect(upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.789 }) }).status).toBe('fail');
-    expect(upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.9 }) }).status).toBe('pass');
+    expect(
+      upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.79 }) })
+        .status,
+    ).toBe('pass');
+    expect(
+      upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.789 }) })
+        .status,
+    ).toBe('fail');
+    expect(
+      upstreamPackCheck(cfg, { noPack: res({ ndcg_5: 0.8 }), withPack: res({ ndcg_5: 0.9 }) })
+        .status,
+    ).toBe('pass');
   });
 });
 
 describe('regressionChecks', () => {
   const ref = res({ ndcg_5: 0.8 }, { a: { ndcg_5: 0.8 }, b: { ndcg_5: 0.5 } });
   const run = (result) =>
-    byId(regressionChecks('r', { result, ref, refLabel: 'ref', metric: 'ndcg_5', categoryMax: 0.02, overallMax: 0 }));
+    byId(
+      regressionChecks('r', {
+        result,
+        ref,
+        refLabel: 'ref',
+        metric: 'ndcg_5',
+        categoryMax: 0.02,
+        overallMax: 0,
+      }),
+    );
   it('passes at equal or better, allows 0.02 per category', () => {
     const r = run(res({ ndcg_5: 0.8 }, { a: { ndcg_5: 0.78 }, b: { ndcg_5: 0.9 } }));
     expect(r['r-categories'].status).toBe('pass');
@@ -107,17 +174,36 @@ describe('regressionChecks', () => {
   });
 });
 
-const PENDING = { ...CONFIG.vi, targets: CONFIG.vi.targets.map((t) => ({ ...t, status: 'pending' })) };
+const PENDING = {
+  ...CONFIG.vi,
+  targets: CONFIG.vi.targets.map((t) => ({ ...t, status: 'pending' })),
+};
 
 describe('viChecks', () => {
   const upstream = {
     version: '1.0.0',
-    result: res({ ndcg_5: 0.7 }, { 'vi-telex': { ndcg_5: 0.4, hit_5: 0.5 }, 'vi-compound': { ndcg_5: 0.85 }, 'vi-accented': { ndcg_5: 1 } }),
+    result: res(
+      { ndcg_5: 0.7 },
+      {
+        'vi-telex': { ndcg_5: 0.4, hit_5: 0.5 },
+        'vi-compound': { ndcg_5: 0.85 },
+        'vi-accented': { ndcg_5: 1 },
+      },
+    ),
   };
-  const cats = (o) => ({ 'vi-telex': { hit_5: 0.5, ndcg_5: 0.4 }, 'vi-compound': { ndcg_5: 0.85 }, 'vi-accented': { ndcg_5: 1 }, ...o });
+  const cats = (o) => ({
+    'vi-telex': { hit_5: 0.5, ndcg_5: 0.4 },
+    'vi-compound': { ndcg_5: 0.85 },
+    'vi-accented': { ndcg_5: 1 },
+    ...o,
+  });
 
   it('pending targets are reported, never failed, even when not met', () => {
-    const checks = viChecks(PENDING, { result: res({ ndcg_5: 0.7 }, cats()), upstream, prevRelease: null });
+    const checks = viChecks(PENDING, {
+      result: res({ ndcg_5: 0.7 }, cats()),
+      upstream,
+      prevRelease: null,
+    });
     const c = byId(checks);
     expect(c['G8-telex']).toMatchObject({ status: 'pending', would: 'fail' });
     expect(c['vi-regression-categories'].status).toBe('pass');
@@ -126,7 +212,12 @@ describe('viChecks', () => {
   });
 
   it('reports a pending target that is already met', () => {
-    const c = byId(viChecks(PENDING, { result: res({ ndcg_5: 0.7 }, cats({ 'vi-telex': { hit_5: 0.9, ndcg_5: 0.4 } })), upstream }));
+    const c = byId(
+      viChecks(PENDING, {
+        result: res({ ndcg_5: 0.7 }, cats({ 'vi-telex': { hit_5: 0.9, ndcg_5: 0.4 } })),
+        upstream,
+      }),
+    );
     expect(c['G8-telex']).toMatchObject({ status: 'pending', would: 'pass' });
   });
 
@@ -135,17 +226,52 @@ describe('viChecks', () => {
       ...CONFIG.vi,
       targets: [
         { id: 't-min', category: 'vi-telex', metric: 'hit_5', min: 0.8, status: 'enforced' },
-        { id: 't-gain', category: 'vi-compound', metric: 'ndcg_5', min_gain_over_upstream: 0.1, status: 'enforced' },
-        { id: 't-ratio', category: 'vi-telex', metric: 'hit_5', min_ratio_over_upstream: 2, status: 'enforced' },
-        { id: 't-snippet', category: 'vi-snippet', metric: 'snippet_ok', min: 1, status: 'enforced' },
+        {
+          id: 't-gain',
+          category: 'vi-compound',
+          metric: 'ndcg_5',
+          min_gain_over_upstream: 0.1,
+          status: 'enforced',
+        },
+        {
+          id: 't-ratio',
+          category: 'vi-telex',
+          metric: 'hit_5',
+          min_ratio_over_upstream: 2,
+          status: 'enforced',
+        },
+        {
+          id: 't-snippet',
+          category: 'vi-snippet',
+          metric: 'snippet_ok',
+          min: 1,
+          status: 'enforced',
+        },
       ],
     };
-    const c = byId(viChecks(cfg, { result: res({ ndcg_5: 0.7 }, cats({ 'vi-compound': { ndcg_5: 0.9 } })), upstream }));
+    const c = byId(
+      viChecks(cfg, {
+        result: res({ ndcg_5: 0.7 }, cats({ 'vi-compound': { ndcg_5: 0.9 } })),
+        upstream,
+      }),
+    );
     expect(c['t-min'].status).toBe('fail');
     expect(c['t-gain'].status).toBe('fail');
     expect(c['t-ratio'].status).toBe('fail');
     expect(c['t-snippet'].status).toBe('fail'); // metric not reported: an enforced target cannot pass blind
-    const ok = byId(viChecks(cfg, { result: res({ ndcg_5: 0.7 }, cats({ 'vi-compound': { ndcg_5: 0.96 }, 'vi-telex': { hit_5: 1, ndcg_5: 0.4 }, 'vi-snippet': { snippet_ok: 1 } })), upstream }));
+    const ok = byId(
+      viChecks(cfg, {
+        result: res(
+          { ndcg_5: 0.7 },
+          cats({
+            'vi-compound': { ndcg_5: 0.96 },
+            'vi-telex': { hit_5: 1, ndcg_5: 0.4 },
+            'vi-snippet': { snippet_ok: 1 },
+          }),
+        ),
+        upstream,
+      }),
+    );
     expect(ok['t-min'].status).toBe('pass');
     expect(ok['t-gain'].status).toBe('pass');
     expect(ok['t-ratio'].status).toBe('pass');
@@ -153,7 +279,10 @@ describe('viChecks', () => {
   });
 
   it('the previous release baseline is informational unless enforced', () => {
-    const prev = { version: '1.0.0-vantt.1', result: res({ ndcg_5: 0.9 }, cats({ 'vi-accented': { ndcg_5: 1 } })) };
+    const prev = {
+      version: '1.0.0-vantt.1',
+      result: res({ ndcg_5: 0.9 }, cats({ 'vi-accented': { ndcg_5: 1 } })),
+    };
     const input = { result: res({ ndcg_5: 0.8 }, cats()), upstream, prevRelease: prev };
     const soft = byId(viChecks(PENDING, input));
     expect(soft['vi-previous-release-overall']).toMatchObject({ status: 'warn' });
@@ -172,12 +301,26 @@ describe('viChecks', () => {
   });
 
   it('is pending without a same-run upstream measurement', () => {
-    expect(byId(viChecks(CONFIG.vi, { result: res({}, cats()), upstream: null }))['vi-regression'].status).toBe('pending');
+    expect(
+      byId(viChecks(CONFIG.vi, { result: res({}, cats()), upstream: null }))['vi-regression']
+        .status,
+    ).toBe('pending');
   });
 
   it('the shipped thresholds file lists the PRD targets, all enforced', () => {
     const ids = CONFIG.vi.targets.map((t) => t.id);
-    for (const id of ['G3-unaccented', 'G3-dd', 'G3-tone-precision', 'G8-telex', 'G8-typo', 'G8-synonym', 'G8-abbr', 'G8-alias', 'G8-compound', 'G8-snippet'])
+    for (const id of [
+      'G3-unaccented',
+      'G3-dd',
+      'G3-tone-precision',
+      'G8-telex',
+      'G8-typo',
+      'G8-synonym',
+      'G8-abbr',
+      'G8-alias',
+      'G8-compound',
+      'G8-snippet',
+    ])
       expect(ids).toContain(id);
     expect(CONFIG.vi.targets.filter((t) => t.status !== 'enforced')).toEqual([]);
     expect(CONFIG.upstream).toMatchObject({ tolerance: 0.005, pack_regression_max: 0.01 });
@@ -200,19 +343,36 @@ describe('baselines', () => {
   });
 
   it('picks the newest baseline not newer than the version, per set and language', () => {
-    for (const [version, set, lang] of [['0.17.2', 'vi-search', null], ['0.18.0', 'vi-search', null], ['0.17.2-vantt.1', 'vi-search', 'vi'], ['0.17.2-vantt.2', 'vi-search', 'vi']])
+    for (const [version, set, lang] of [
+      ['0.17.2', 'vi-search', null],
+      ['0.18.0', 'vi-search', null],
+      ['0.17.2-vantt.1', 'vi-search', 'vi'],
+      ['0.17.2-vantt.2', 'vi-search', 'vi'],
+    ])
       writeBaseline(dir, { version, set, lang, result: { v: version } });
-    expect(pickBaseline(dir, { set: 'vi-search', version: '0.17.5' })).toMatchObject({ version: '0.17.2', exact: false });
-    expect(pickBaseline(dir, { set: 'vi-search', version: '0.18.0' })).toMatchObject({ version: '0.18.0', exact: true });
-    expect(pickBaseline(dir, { set: 'vi-search', lang: 'vi', version: '0.17.2-vantt.3' }).version).toBe('0.17.2-vantt.2');
+    expect(pickBaseline(dir, { set: 'vi-search', version: '0.17.5' })).toMatchObject({
+      version: '0.17.2',
+      exact: false,
+    });
+    expect(pickBaseline(dir, { set: 'vi-search', version: '0.18.0' })).toMatchObject({
+      version: '0.18.0',
+      exact: true,
+    });
+    expect(
+      pickBaseline(dir, { set: 'vi-search', lang: 'vi', version: '0.17.2-vantt.3' }).version,
+    ).toBe('0.17.2-vantt.2');
     expect(pickBaseline(dir, { set: 'vi-search', lang: 'vi', version: '0.17.1' })).toBeNull();
     expect(pickBaseline(dir, { set: 'obsidian-help', version: '9.9.9' })).toBeNull();
-    expect(pickBaseline(path.join(dir, 'missing'), { set: 'vi-search', version: '1.0.0' })).toBeNull();
+    expect(
+      pickBaseline(path.join(dir, 'missing'), { set: 'vi-search', version: '1.0.0' }),
+    ).toBeNull();
   });
 
   it('refuses to overwrite a baseline unless forced', () => {
     writeBaseline(dir, { version: '1.0.0', set: 'smoke', result: { a: 1 } });
-    expect(() => writeBaseline(dir, { version: '1.0.0', set: 'smoke', result: { a: 2 } })).toThrow(/reviewed PR/);
+    expect(() => writeBaseline(dir, { version: '1.0.0', set: 'smoke', result: { a: 2 } })).toThrow(
+      /reviewed PR/,
+    );
     writeBaseline(dir, { version: '1.0.0', set: 'smoke', result: { a: 2 }, force: true });
     expect(pickBaseline(dir, { set: 'smoke', version: '1.0.0' }).result).toEqual({ a: 2 });
   });
@@ -263,11 +423,22 @@ describe('quality-gate CLI on a stub eval', () => {
     mkdirSync(root);
     git(root, 'init', '-q', '-b', 'master');
     write(root, 'package.json', '{"name":"x","version":"1.0.0-vantt.1"}\n');
-    write(root, 'package-lock.json', '{"name":"x","version":"1.0.0-vantt.1","packages":{"":{"version":"1.0.0-vantt.1"}}}\n');
+    write(
+      root,
+      'package-lock.json',
+      '{"name":"x","version":"1.0.0-vantt.1","packages":{"":{"version":"1.0.0-vantt.1"}}}\n',
+    );
     write(root, 'eval/evaluate.ts', EVALUATE);
     write(root, 'src/indexing/index-service.ts', INDEX_SERVICE);
     write(root, 'src/search/searcher.ts', SEARCHER);
-    write(root, 'fixtures/obsidian-help/golden-set.json', JSON.stringify([{ id: 'q1', category: 'c' }, { id: 'q2', category: 'c' }]));
+    write(
+      root,
+      'fixtures/obsidian-help/golden-set.json',
+      JSON.stringify([
+        { id: 'q1', category: 'c' },
+        { id: 'q2', category: 'c' },
+      ]),
+    );
     write(root, 'fixtures/obsidian-help/dataset/a.md', '# a\n');
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.79');
     write(root, '.gitignore', 'node_modules\nvantt/.work\nfixtures/*/dataset\n');
@@ -292,9 +463,22 @@ describe('quality-gate CLI on a stub eval', () => {
       process.stdout.write = o;
       process.stderr.write = e;
     }
-    return { code, out: out.join(''), err: err.join(''), report: out.length ? JSON.parse(out.join('')) : null };
+    return {
+      code,
+      out: out.join(''),
+      err: err.join(''),
+      report: out.length ? JSON.parse(out.join('')) : null,
+    };
   }
-  const std = () => ['--target-ref', 'v1.0.0', '--target-sha', STUB_SHA, '--branch', 'vantt/v1.0.0', '--json'];
+  const std = () => [
+    '--target-ref',
+    'v1.0.0',
+    '--target-sha',
+    STUB_SHA,
+    '--branch',
+    'vantt/v1.0.0',
+    '--json',
+  ];
   const baselineDir = () => path.join(root, 'vantt/eval/baselines', platformKey());
 
   it('no pack: measures pristine upstream itself and compares with it; no stored baseline needed', async () => {
@@ -306,7 +490,16 @@ describe('quality-gate CLI on a stub eval', () => {
 
   it('no pack: reuses the invariance measurement of this commit instead of measuring again', async () => {
     const head = git(root, 'rev-parse', 'HEAD');
-    write(root, 'vantt/.work/invariance-last.json', JSON.stringify({ target: { sha: STUB_SHA }, fork_head: head, k: 10, corpora: { 'obsidian-help': { summary_upstream: { ndcg_5: 0.8 } } } }));
+    write(
+      root,
+      'vantt/.work/invariance-last.json',
+      JSON.stringify({
+        target: { sha: STUB_SHA },
+        fork_head: head,
+        k: 10,
+        corpora: { 'obsidian-help': { summary_upstream: { ndcg_5: 0.8 } } },
+      }),
+    );
     const { code, err } = await run(std());
     expect(code).toBe(0);
     expect(err).toMatch(/reusing the invariance run/);
@@ -322,7 +515,11 @@ describe('quality-gate CLI on a stub eval', () => {
   });
 
   it('no pack: a stored baseline recorded on another machine only warns', async () => {
-    writeBaseline(baselineDir(), { version: '1.0.0', set: 'obsidian-help', result: { summary: { ndcg_5: 0.9 } } });
+    writeBaseline(baselineDir(), {
+      version: '1.0.0',
+      set: 'obsidian-help',
+      result: { summary: { ndcg_5: 0.9 } },
+    });
     const { code, report } = await run(std());
     expect(code).toBe(0);
     expect(report.warnings).toEqual(['upstream-baseline-drift']);
@@ -363,8 +560,20 @@ describe('quality-gate CLI on a stub eval', () => {
     const priv = path.join(dir, 'private');
     mkdirSync(path.join(priv, 'vault'), { recursive: true });
     writeFileSync(path.join(priv, 'vault', 'note.md'), '# SECRET-NOTE\n');
-    writeFileSync(path.join(priv, 'golden-set.json'), JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', category: 'c' }, { id: 'p2', category: 'c' }]));
-    const { code, out, err, report } = await run(['--private', priv, '--with-lang', 'de', '--json']);
+    writeFileSync(
+      path.join(priv, 'golden-set.json'),
+      JSON.stringify([
+        { id: 'p1', query: 'SECRET-QUERY', category: 'c' },
+        { id: 'p2', category: 'c' },
+      ]),
+    );
+    const { code, out, err, report } = await run([
+      '--private',
+      priv,
+      '--with-lang',
+      'de',
+      '--json',
+    ]);
     expect(code).toBe(0);
     expect(report).toMatchObject({ private: true, gate: 'pass', pack: 'de' });
     expect(report.without_pack.categories.c).toMatchObject({ n: 2, ndcg_5: 0.8 });
@@ -377,8 +586,21 @@ describe('quality-gate CLI on a stub eval', () => {
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.85');
     const priv = path.join(dir, 'nfc.json');
     const nfc = 'Hoà giải.md'.normalize('NFC');
-    writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'q', relevant_paths: [nfc], partial_paths: [nfc], category: 'c' }]));
-    const { code, report } = await run(['--private', priv, '--vault', path.join(root, 'fixtures/obsidian-help/dataset'), '--with-lang', 'de', '--json']);
+    writeFileSync(
+      priv,
+      JSON.stringify([
+        { id: 'p1', query: 'q', relevant_paths: [nfc], partial_paths: [nfc], category: 'c' },
+      ]),
+    );
+    const { code, report } = await run([
+      '--private',
+      priv,
+      '--vault',
+      path.join(root, 'fixtures/obsidian-help/dataset'),
+      '--with-lang',
+      'de',
+      '--json',
+    ]);
     expect(code).toBe(0);
     expect(report.without_pack.summary.ndcg_5).toBe(0.8);
     expect(report.with_pack.summary.ndcg_5).toBe(0.85);
@@ -389,7 +611,15 @@ describe('quality-gate CLI on a stub eval', () => {
     write(root, 'vantt/packages/ohs-lang-de/score.txt', '0.5');
     const priv = path.join(dir, 'p.json');
     writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', category: 'c' }]));
-    const { code, out, err } = await run(['--private', priv, '--vault', path.join(root, 'fixtures/obsidian-help/dataset'), '--with-lang', 'de', '--json']);
+    const { code, out, err } = await run([
+      '--private',
+      priv,
+      '--vault',
+      path.join(root, 'fixtures/obsidian-help/dataset'),
+      '--with-lang',
+      'de',
+      '--json',
+    ]);
     expect(code).toBe(1);
     expect(out + err).not.toMatch(/SECRET/);
   });
@@ -406,7 +636,15 @@ describe('quality-gate CLI on a stub eval', () => {
     write(root, 'vantt/packages/ohs-lang-de/fail-eval.txt', '1');
     const priv = path.join(dir, 'p.json');
     writeFileSync(priv, JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', category: 'c' }]));
-    const { code, err, report } = await run(['--private', priv, '--vault', path.join(root, 'fixtures/obsidian-help/dataset'), '--with-lang', 'de', '--json']);
+    const { code, err, report } = await run([
+      '--private',
+      priv,
+      '--vault',
+      path.join(root, 'fixtures/obsidian-help/dataset'),
+      '--with-lang',
+      'de',
+      '--json',
+    ]);
     expect(code).toBe(2);
     expect(report.error).toBe('eval failed in private run (exit 1)');
     expect(err).toMatch(/eval-diagnostic from the child/);
@@ -421,23 +659,42 @@ describe('quality-gate CLI on a stub eval', () => {
       mkdirSync(path.join(priv, 'vault'), { recursive: true });
       writeFileSync(path.join(priv, 'vault', 'note.md'), '# SECRET-NOTE\n');
       const rel = 'Hoà giải.md'.normalize('NFC');
-      writeFileSync(path.join(priv, 'golden-set.json'), JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', relevant_paths: [rel], category: 'c' }]));
+      writeFileSync(
+        path.join(priv, 'golden-set.json'),
+        JSON.stringify([{ id: 'p1', query: 'SECRET-QUERY', relevant_paths: [rel], category: 'c' }]),
+      );
       return priv;
     };
 
     it('writes per-query detail to a file outside the repository and prints no content', async () => {
       const priv = setup();
       const file = path.join(dir, 'out', 'detail.json');
-      const { code, out, err } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', file, '--json']);
+      const { code, out, err } = await run([
+        '--private',
+        priv,
+        '--with-lang',
+        'de',
+        '--private-detail',
+        file,
+        '--json',
+      ]);
       expect(code).toBe(0);
       expect(out + err).not.toMatch(/SECRET/);
       const detail = JSON.parse(readFileSync(file, 'utf8'));
       expect(detail).toMatchObject({ pack: 'de', k: 10 });
       const [q] = detail.queries;
-      expect(q).toMatchObject({ id: 'p1', category: 'c', query: 'SECRET-QUERY', relevant_paths: ['Hoà giải.md'.normalize('NFC')] });
+      expect(q).toMatchObject({
+        id: 'p1',
+        category: 'c',
+        query: 'SECRET-QUERY',
+        relevant_paths: ['Hoà giải.md'.normalize('NFC')],
+      });
       expect(q.without_pack.top_paths).toEqual(['SECRET-PATH.md']);
       expect(q.with_pack.relevant_ranks).toEqual({ [q.relevant_paths[0]]: null });
-      expect(q.without_pack.results[0]).toMatchObject({ path: 'SECRET-PATH.md', ranks: { bm25: 1 } });
+      expect(q.without_pack.results[0]).toMatchObject({
+        path: 'SECRET-PATH.md',
+        ranks: { bm25: 1 },
+      });
       expect(q.without_pack.analysis).toBeNull();
       expect(q.with_pack.analysis).toEqual({ restore: 'SECRET-RESTORED SECRET-QUERY' });
       expect(existsSync(path.join(root, 'vantt/.work/quality-private'))).toBe(false);
@@ -447,7 +704,15 @@ describe('quality-gate CLI on a stub eval', () => {
       const priv = setup();
       for (const rel of ['detail.json', 'vantt/reviews/detail.json', 'vantt/.work/d/detail.json']) {
         const file = path.join(root, rel);
-        const { code, out, err } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', file, '--json']);
+        const { code, out, err } = await run([
+          '--private',
+          priv,
+          '--with-lang',
+          'de',
+          '--private-detail',
+          file,
+          '--json',
+        ]);
         expect(code).toBe(2);
         expect(out).toBe('');
         expect(err).toMatch(/outside the repository/);
@@ -459,7 +724,15 @@ describe('quality-gate CLI on a stub eval', () => {
     it('refuses a path that reaches the repository through a symlink', async () => {
       const priv = setup();
       symlinkSync(root, path.join(dir, 'link'), 'dir');
-      const { code } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', path.join(dir, 'link', 'x', 'detail.json'), '--json']);
+      const { code } = await run([
+        '--private',
+        priv,
+        '--with-lang',
+        'de',
+        '--private-detail',
+        path.join(dir, 'link', 'x', 'detail.json'),
+        '--json',
+      ]);
       expect(code).toBe(2);
       expect(existsSync(path.join(root, 'x'))).toBe(false);
     });
@@ -468,7 +741,17 @@ describe('quality-gate CLI on a stub eval', () => {
       const priv = setup();
       write(root, 'vantt/packages/ohs-lang-de/fail-detail.txt', '1');
       const file = path.join(dir, 'out', 'detail.json');
-      const { code, err, report } = await run(['--private', priv, '--with-lang', 'de', '--private-detail', file, '--k', '30', '--json']);
+      const { code, err, report } = await run([
+        '--private',
+        priv,
+        '--with-lang',
+        'de',
+        '--private-detail',
+        file,
+        '--k',
+        '30',
+        '--json',
+      ]);
       expect(code).toBe(2);
       expect(report.error).toBe('detail run failed (exit 1)');
       expect(err).toMatch(/detail-diagnostic from the child/);

@@ -54,13 +54,18 @@ export function prng(seed: number): () => number {
 export function vietnameseText(bytes: number, form: 'NFC' | 'NFD' = 'NFC', seed = 1): string {
   const rand = prng(seed);
   const syllables = allSyllables();
-  const words = syllables.map((s) => composeSyllable({ ...s, tone: TONES[Math.floor(rand() * 6)] as Tone }));
+  const words = syllables.map((s) =>
+    composeSyllable({ ...s, tone: TONES[Math.floor(rand() * 6)] as Tone }),
+  );
   const english = ['online', 'team', 'meeting', 'project', 'deadline', 'review'];
   const seps = [' ', ' ', ' ', ' ', ', ', '. ', '\n', ' - '];
   const parts: string[] = [];
   let size = 0;
   while (size < bytes) {
-    const w = rand() < 0.04 ? (english[Math.floor(rand() * english.length)] as string) : (words[Math.floor(rand() * words.length)] as string);
+    const w =
+      rand() < 0.04
+        ? (english[Math.floor(rand() * english.length)] as string)
+        : (words[Math.floor(rand() * words.length)] as string);
     const cap = rand() < 0.05 ? w.charAt(0).toUpperCase() + w.slice(1) : w;
     const piece = cap + (seps[Math.floor(rand() * seps.length)] as string);
     parts.push(piece);

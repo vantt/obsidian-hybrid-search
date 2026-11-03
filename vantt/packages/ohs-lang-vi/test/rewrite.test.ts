@@ -2,14 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { TELEX_LETTER_KEYS, TELEX_TONE_KEYS, VNI_LETTER_KEYS, VNI_TONE_KEYS } from '../src/data.js';
 import { resolveOptions } from '../src/options.js';
 import { analyzeQuery, type QueryEnvironment } from '../src/query.js';
-import { projectView } from '../src/views.js';
 import { accentedForms, VocabularyCache } from '../src/restore.js';
-import { decodeKeystrokes, decodeTelex, decodeVni, telexForms, vniForms } from '../src/telex.js';
 import { composeSyllable, parseSyllable } from '../src/syllable.js';
+import { decodeKeystrokes, decodeTelex, decodeVni, telexForms, vniForms } from '../src/telex.js';
 import { editNeighbours } from '../src/typo.js';
+import { projectView } from '../src/views.js';
 import { fakeContext } from './fake-context.js';
 
-function typeKeys(word: string, letterKeys: Record<string, string>, toneKeys: readonly string[], toneFirst: boolean): string {
+function typeKeys(
+  word: string,
+  letterKeys: Record<string, string>,
+  toneKeys: readonly string[],
+  toneFirst: boolean,
+): string {
   const syllable = parseSyllable(word)!;
   const bare = composeSyllable({ ...syllable, tone: 0 });
   const keys = [...bare].map((ch) => letterKeys[ch] ?? ch).join('');
@@ -47,11 +52,15 @@ describe('decodeTelex / decodeVni', () => {
         // Telex types a doubled plain vowel ("oong" for "ông") the same way as the modified one.
         if (/aa|ee|oo/.test(composeSyllable({ ...parseSyllable(word)!, tone: 0 }))) continue;
         count++;
-        expect(telexForms(typeKeys(word, TELEX_LETTER_KEYS, TELEX_TONE_KEYS, false))).toContain(word);
+        expect(telexForms(typeKeys(word, TELEX_LETTER_KEYS, TELEX_TONE_KEYS, false))).toContain(
+          word,
+        );
         for (const toneFirst of [false, true]) {
           const typed = typeKeys(word, VNI_LETTER_KEYS, VNI_TONE_KEYS, toneFirst);
           // Without a digit there is nothing to decode (a plain syllable).
-          expect(vniForms(typed), typed).toEqual(/\d/.test(typed) ? expect.arrayContaining([word]) : []);
+          expect(vniForms(typed), typed).toEqual(
+            /\d/.test(typed) ? expect.arrayContaining([word]) : [],
+          );
         }
       }
     }
@@ -59,7 +68,17 @@ describe('decodeTelex / decodeVni', () => {
   });
 
   it('leaves English words and plain syllables undecoded', () => {
-    for (const word of ['team', 'online', 'markdown', 'github', 'ban', 'chan', '2024', 'c++', 'node.js'])
+    for (const word of [
+      'team',
+      'online',
+      'markdown',
+      'github',
+      'ban',
+      'chan',
+      '2024',
+      'c++',
+      'node.js',
+    ])
       expect(decodeKeystrokes(word)).toEqual([]);
   });
 });
@@ -67,7 +86,9 @@ describe('decodeTelex / decodeVni', () => {
 describe('editNeighbours', () => {
   it('covers insert, delete, substitute and swap', () => {
     const n = editNeighbours('chna');
-    expect(n).toEqual(expect.arrayContaining(['chan', 'cha', 'chnaa', ' chna'.trim() + 'x', 'chia']));
+    expect(n).toEqual(
+      expect.arrayContaining(['chan', 'cha', 'chnaa', ' chna'.trim() + 'x', 'chia']),
+    );
     expect(n).not.toContain('chna');
   });
 });
@@ -99,7 +120,12 @@ describe('query rewriting', () => {
     const analysis = analyzeQuery('giuwx chaan khachs hangf', ctx, env({ telex: true }));
     expect(analysis.baseQuery).toBe('giữ chân khách hàng');
     expect(analysis.embedQuery).toBe('giữ chân khách hàng');
-    expect((analysis.data as { target: string[] }).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
+    expect((analysis.data as { target: string[] }).target).toEqual([
+      'giữ',
+      'chân',
+      'khách',
+      'hàng',
+    ]);
   });
 
   it('decodes VNI strings', () => {
@@ -108,7 +134,11 @@ describe('query rewriting', () => {
   });
 
   it('does nothing when the option is off', () => {
-    const analysis = analyzeQuery('giuwx chaan khachs hangf', ctx, env({ telex: false, typo: false }));
+    const analysis = analyzeQuery(
+      'giuwx chaan khachs hangf',
+      ctx,
+      env({ telex: false, typo: false }),
+    );
     expect(analysis.baseQuery).toBeUndefined();
   });
 
@@ -127,14 +157,21 @@ describe('query rewriting', () => {
 
   it('corrects one-letter typos from the vault vocabulary, using neighbours', () => {
     const analysis = analyzeQuery('giu chna khahc hang', ctx, env({ typo: true }));
-    expect((analysis.data as { target: string[] }).target).toEqual(['giữ', 'chân', 'khách', 'hàng']);
+    expect((analysis.data as { target: string[] }).target).toEqual([
+      'giữ',
+      'chân',
+      'khách',
+      'hàng',
+    ]);
     expect(analysis.viewQueries.fold).toBe('giu chan khach hang');
     const swapped = analyzeQuery('thio qune ngu som day som', ctx, env({ typo: true }));
     expect(swapped.viewQueries.fold).toBe('thoi quen ngu som day som');
   });
 
   it('leaves typos alone when the option is off and short or known words always', () => {
-    expect(analyzeQuery('giu chna khahc hang', ctx, env({ telex: false, typo: false })).viewQueries.fold).toBe('giu chna khahc hang');
+    expect(
+      analyzeQuery('giu chna khahc hang', ctx, env({ telex: false, typo: false })).viewQueries.fold,
+    ).toBe('giu chna khahc hang');
     const known = analyzeQuery('giu chan khach hang', ctx, env({ typo: true }));
     expect((known.debug as { rewrite?: unknown }).rewrite).toBeUndefined();
     const short = analyzeQuery('ca', ctx, env({ typo: true }));

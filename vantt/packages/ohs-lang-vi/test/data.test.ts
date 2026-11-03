@@ -9,7 +9,6 @@ import {
   TONE_NAMES,
   VNI_TABLE,
   VNI_TONE_KEYS,
-  VOWEL_TONE_TABLE,
   toneVowel,
   toneVowelNfd,
 } from '../src/data.js';
@@ -46,7 +45,9 @@ describe('vowel x tone table', () => {
         expect(toneVowel(vowel, tone), `${vowel} tone ${TONE_NAMES[tone]}`).toBe(expectedNfc);
         // NFC form is a single code point, NFD is base + diacritics
         expect([...toneVowel(vowel, tone)]).toHaveLength(1);
-        expect(toneVowelNfd(vowel, tone)).toBe((base + mark + (TONE_MARKS[tone] as string)).normalize('NFD'));
+        expect(toneVowelNfd(vowel, tone)).toBe(
+          (base + mark + (TONE_MARKS[tone] as string)).normalize('NFD'),
+        );
         expect(toneVowelNfd(vowel, tone).normalize('NFC')).toBe(toneVowel(vowel, tone));
       }
     }
@@ -59,8 +60,34 @@ describe('vowel x tone table', () => {
 });
 
 describe('Telex and VNI tables', () => {
-  const TELEX_LETTER: Record<string, string> = { a: 'a', ă: 'aw', â: 'aa', e: 'e', ê: 'ee', i: 'i', o: 'o', ô: 'oo', ơ: 'ow', u: 'u', ư: 'uw', y: 'y' };
-  const VNI_LETTER: Record<string, string> = { a: 'a', ă: 'a8', â: 'a6', e: 'e', ê: 'e6', i: 'i', o: 'o', ô: 'o6', ơ: 'o7', u: 'u', ư: 'u7', y: 'y' };
+  const TELEX_LETTER: Record<string, string> = {
+    a: 'a',
+    ă: 'aw',
+    â: 'aa',
+    e: 'e',
+    ê: 'ee',
+    i: 'i',
+    o: 'o',
+    ô: 'oo',
+    ơ: 'ow',
+    u: 'u',
+    ư: 'uw',
+    y: 'y',
+  };
+  const VNI_LETTER: Record<string, string> = {
+    a: 'a',
+    ă: 'a8',
+    â: 'a6',
+    e: 'e',
+    ê: 'e6',
+    i: 'i',
+    o: 'o',
+    ô: 'o6',
+    ơ: 'o7',
+    u: 'u',
+    ư: 'u7',
+    y: 'y',
+  };
 
   it('Telex tone keys are f s r x j (z clears)', () => {
     expect(TELEX_TONE_KEYS).toEqual(['z', 'f', 's', 'r', 'x', 'j']);
@@ -73,7 +100,8 @@ describe('Telex and VNI tables', () => {
   it('covers every vowel x tone in Telex', () => {
     for (const vowel of BASE_VOWELS) {
       for (const tone of TONES) {
-        const typed = (TELEX_LETTER[vowel] as string) + (tone === 0 ? '' : (TELEX_TONE_KEYS[tone] as string));
+        const typed =
+          (TELEX_LETTER[vowel] as string) + (tone === 0 ? '' : (TELEX_TONE_KEYS[tone] as string));
         expect(TELEX_TABLE.get(typed), typed).toBe(toneVowel(vowel, tone));
       }
     }
@@ -85,7 +113,8 @@ describe('Telex and VNI tables', () => {
   it('covers every vowel x tone in VNI', () => {
     for (const vowel of BASE_VOWELS) {
       for (const tone of TONES) {
-        const typed = (VNI_LETTER[vowel] as string) + (tone === 0 ? '' : (VNI_TONE_KEYS[tone] as string));
+        const typed =
+          (VNI_LETTER[vowel] as string) + (tone === 0 ? '' : (VNI_TONE_KEYS[tone] as string));
         expect(VNI_TABLE.get(typed), typed).toBe(toneVowel(vowel, tone));
       }
     }

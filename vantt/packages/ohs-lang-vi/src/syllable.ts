@@ -1,7 +1,7 @@
 import {
   BASE_VOWELS,
-  IY_ONSETS,
   CODAS,
+  IY_ONSETS,
   MODIFIED_VOWELS,
   NUCLEI,
   ONSETS,
@@ -30,7 +30,9 @@ export interface Syllable {
   tone: Tone;
 }
 
-const NUCLEI_BY_LENGTH: readonly NucleusEntry[] = [...NUCLEI].sort((a, b) => b.text.length - a.text.length);
+const NUCLEI_BY_LENGTH: readonly NucleusEntry[] = [...NUCLEI].sort(
+  (a, b) => b.text.length - a.text.length,
+);
 const ONSET_CANDIDATES: readonly string[] = ['', ...ONSETS];
 
 /** Does this onset + vowel cluster + coda follow the orthography? */

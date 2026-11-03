@@ -67,7 +67,8 @@ export function segQuery(
     : data.targets.filter((t, i) => i === 0 || t.p >= threshold).map((t) => t.words);
   const docs = (key: string) => ctx.termStats(SEG_VIEW, key.replaceAll(' ', SEG_JOINER)).docs;
   const useful = (key: string) =>
-    !key.split(' ').every((w) => FUNCTION_WORDS.has(w)) && !isCommon(docs(key), ctx.noteCount(), options.segMaxDocShare);
+    !key.split(' ').every((w) => FUNCTION_WORDS.has(w)) &&
+    !isCommon(docs(key), ctx.noteCount(), options.segMaxDocShare);
   const compounds = new Set<string>();
   const covered = new Set<number>();
   for (const [listIndex, words] of wordLists.entries()) {

@@ -15,8 +15,13 @@
       "default": "./build/index.js"
     }
   },
-  "files": ["build", "data"],
-  "engines": { "node": ">=22.22.0" },
+  "files": [
+    "build",
+    "data"
+  ],
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",

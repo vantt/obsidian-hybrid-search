@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { composeSyllable, isPossibleFoldedSyllable, isVietnameseSyllable, parseSyllable } from '../src/syllable.js';
+import {
+  composeSyllable,
+  isPossibleFoldedSyllable,
+  isVietnameseSyllable,
+  parseSyllable,
+} from '../src/syllable.js';
 import { TONE_PAIRS } from './tone-pairs.js';
 
 describe('parseSyllable', () => {
-  const cases: Array<[string, { onset: string; glide: string; nucleus: string; coda: string; tone: number }]> = [
+  const cases: Array<
+    [string, { onset: string; glide: string; nucleus: string; coda: string; tone: number }]
+  > = [
     ['tiếng', { onset: 't', glide: '', nucleus: 'iê', coda: 'ng', tone: 2 }],
     ['việt', { onset: 'v', glide: '', nucleus: 'iê', coda: 't', tone: 5 }],
     ['nghiêng', { onset: 'ngh', glide: '', nucleus: 'iê', coda: 'ng', tone: 0 }],
@@ -38,7 +45,21 @@ describe('parseSyllable', () => {
   });
 
   it('rejects English and other non-Vietnamese words', () => {
-    for (const w of ['online', 'team', 'seen', 'hello', 'world', 'Python', 'function', 'test', 'xyz', 'ok', 'wifi', 'phone', 'string']) {
+    for (const w of [
+      'online',
+      'team',
+      'seen',
+      'hello',
+      'world',
+      'Python',
+      'function',
+      'test',
+      'xyz',
+      'ok',
+      'wifi',
+      'phone',
+      'string',
+    ]) {
       expect(isVietnameseSyllable(w), w).toBe(false);
     }
   });
@@ -75,13 +96,44 @@ describe('composeSyllable', () => {
 
 describe('isPossibleFoldedSyllable', () => {
   it('accepts unaccented Vietnamese syllables', () => {
-    for (const w of ['ban', 'hang', 'tieng', 'viet', 'nam', 'khach', 'khuyen', 'duong', 'nguoi', 'quoc', 'gia', 'gi', 'giang', 'ngoan', 'thuy', 'quy', 'Hoa', 'KHACH', 'yeu', 'uong']) {
+    for (const w of [
+      'ban',
+      'hang',
+      'tieng',
+      'viet',
+      'nam',
+      'khach',
+      'khuyen',
+      'duong',
+      'nguoi',
+      'quoc',
+      'gia',
+      'gi',
+      'giang',
+      'ngoan',
+      'thuy',
+      'quy',
+      'Hoa',
+      'KHACH',
+      'yeu',
+      'uong',
+    ]) {
       expect(isPossibleFoldedSyllable(w), w).toBe(true);
     }
   });
 
   it('rejects English words', () => {
-    for (const w of ['online', 'team', 'seen', 'hello', 'string', 'wifi', 'phone', 'project', 'meeting']) {
+    for (const w of [
+      'online',
+      'team',
+      'seen',
+      'hello',
+      'string',
+      'wifi',
+      'phone',
+      'project',
+      'meeting',
+    ]) {
       expect(isPossibleFoldedSyllable(w), w).toBe(false);
     }
   });

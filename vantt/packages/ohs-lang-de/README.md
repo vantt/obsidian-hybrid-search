@@ -6,10 +6,10 @@ Gói ngôn ngữ tiếng Đức cho obsidian-hybrid-search, làm theo hợp đ�
 
 Một view `de` (tokenizer `unicode61 remove_diacritics 0 tokenchars '+#<U+2060>'`), đồng thời là alias view.
 
-| Chữ trong note | View `de` chứa | Tìm được bằng |
-|---|---|---|
-| `Käse` | `kase`, `⁠kaese` | `Käse`, `kase`, `kaese` |
-| `Große Straße` | `grosse strasse` | `grosse strasse`, `Strasse` |
+| Chữ trong note    | View `de` chứa                                                                                     | Tìm được bằng                                |
+| ----------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `Käse`            | `kase`, `⁠kaese`                                                                                   | `Käse`, `kase`, `kaese`                      |
+| `Große Straße`    | `grosse strasse`                                                                                   | `grosse strasse`, `Strasse`                  |
 | `Fußgängerbrücke` | `fussgangerbrucke`, rồi các token tiếp nối (`⁠fuss`, `⁠ganger`, `⁠gaenger`, `⁠brucke`, `⁠bruecke`) | `Brücke`, `bruecke`, `Fußgänger`, cả từ ghép |
 
 - Khoá gộp (token đầu): chữ thường, `ß` thành `ss`, `ä ö ü` mất dấu (`a o u`), dấu khác bị bỏ.
@@ -39,16 +39,16 @@ Dữ liệu chỉ là văn bản tổng hợp (22 note, 39 câu hỏi, nhóm: ex
 
 Không gói thành có gói:
 
-| Nhóm | n | Hit@1 | Hit@5 | MRR | nDCG@5 | Recall@10 |
-|---|---|---|---|---|---|---|
-| Tất cả | 39 | 0,64 thành 0,95 | 0,64 thành 1,00 | 0,64 thành 0,97 | 0,57 thành 0,97 | 0,56 thành 0,97 |
-| exact | 1 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 0,83 thành 0,96 | 1,00 thành 1,00 |
-| eszett | 5 | 0,60 thành 0,60 | 0,60 thành 1,00 | 0,60 thành 0,80 | 0,41 thành 0,85 | 0,30 thành 0,90 |
-| umlaut | 11 | 0,82 thành 1,00 | 0,82 thành 1,00 | 0,82 thành 1,00 | 0,71 thành 0,96 | 0,68 thành 0,95 |
-| compound | 16 | 0,38 thành 1,00 | 0,38 thành 1,00 | 0,38 thành 1,00 | 0,36 thành 1,00 | 0,38 thành 1,00 |
-| alias | 2 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 |
-| stopword | 1 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 0,83 thành 1,00 | 1,00 thành 1,00 |
-| control | 3 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 |
+| Nhóm     | n   | Hit@1           | Hit@5           | MRR             | nDCG@5          | Recall@10       |
+| -------- | --- | --------------- | --------------- | --------------- | --------------- | --------------- |
+| Tất cả   | 39  | 0,64 thành 0,95 | 0,64 thành 1,00 | 0,64 thành 0,97 | 0,57 thành 0,97 | 0,56 thành 0,97 |
+| exact    | 1   | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 0,83 thành 0,96 | 1,00 thành 1,00 |
+| eszett   | 5   | 0,60 thành 0,60 | 0,60 thành 1,00 | 0,60 thành 0,80 | 0,41 thành 0,85 | 0,30 thành 0,90 |
+| umlaut   | 11  | 0,82 thành 1,00 | 0,82 thành 1,00 | 0,82 thành 1,00 | 0,71 thành 0,96 | 0,68 thành 0,95 |
+| compound | 16  | 0,38 thành 1,00 | 0,38 thành 1,00 | 0,38 thành 1,00 | 0,36 thành 1,00 | 0,38 thành 1,00 |
+| alias    | 2   | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 |
+| stopword | 1   | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 0,83 thành 1,00 | 1,00 thành 1,00 |
+| control  | 3   | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 | 1,00 thành 1,00 |
 
 Không nhóm nào thấp hơn. 14 câu trượt Hit@5 khi không gói (eszett-01, eszett-04, umlaut-06, umlaut-08, compound-01/02/03/05/06/07/08/09/10/12) đều tìm thấy khi có gói; còn lại không câu nào trượt. Hit@1 của nhóm eszett vẫn 0,60 vì hai note cùng khớp và note phụ `stau.md` (có `Straßenverkehr`) xếp trên; đó là kết quả đúng của việc tách từ ghép chứ không phải lỗi.
 

@@ -1,6 +1,6 @@
 // Target selection, release naming and version stamping (PRD 4.3, 5, 6.2 steps 3 and 8).
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { git } from './proc.mjs';
 
@@ -22,7 +22,9 @@ export function isOnUpstreamMaster(cwd, commit) {
 
 /** Stable `v<semver>` tags (no `-`) reachable from upstream/master, highest first. */
 export function stableUpstreamTags(cwd) {
-  const tags = git(cwd, ['tag', '--list', 'v*']).split('\n').filter((t) => STABLE_TAG.test(t));
+  const tags = git(cwd, ['tag', '--list', 'v*'])
+    .split('\n')
+    .filter((t) => STABLE_TAG.test(t));
   tags.sort((a, b) => cmpSemver(b, a));
   return tags.filter((t) => isOnUpstreamMaster(cwd, `refs/tags/${t}^{commit}`));
 }
@@ -51,7 +53,12 @@ export function resolveTarget(cwd, ref) {
   }
   const resolved = git(
     cwd,
-    ['rev-parse', '--verify', '--quiet', ref === 'upstream/master' ? UPSTREAM_MASTER : `${ref}^{commit}`],
+    [
+      'rev-parse',
+      '--verify',
+      '--quiet',
+      ref === 'upstream/master' ? UPSTREAM_MASTER : `${ref}^{commit}`,
+    ],
     { allowFail: true },
   );
   if (!resolved.ok) throw usage(`cannot resolve ref ${ref}`);
@@ -63,7 +70,8 @@ export function resolveTarget(cwd, ref) {
 }
 
 const lsTree = (cwd, treeish, paths) =>
-  git(cwd, ['ls-tree', '-r', '--full-tree', treeish, '--', ...paths], { allowFail: true }).stdout ?? '';
+  git(cwd, ['ls-tree', '-r', '--full-tree', treeish, '--', ...paths], { allowFail: true }).stdout ??
+  '';
 
 /** Language packs present at treeish: [{id, version, sha256}]. */
 export function langPacks(cwd, treeish) {
@@ -80,11 +88,15 @@ export function langPacks(cwd, treeish) {
       const pkg = git(cwd, ['show', `${treeish}:${dir}/package.json`], { allowFail: true });
       let version = null;
       try {
-        version = pkg.ok ? JSON.parse(pkg.stdout).version ?? null : null;
+        version = pkg.ok ? (JSON.parse(pkg.stdout).version ?? null) : null;
       } catch {
         version = null;
       }
-      return { id: d.slice('ohs-lang-'.length), version, sha256: sha256(lsTree(cwd, treeish, [dir])) };
+      return {
+        id: d.slice('ohs-lang-'.length),
+        version,
+        sha256: sha256(lsTree(cwd, treeish, [dir])),
+      };
     });
 }
 

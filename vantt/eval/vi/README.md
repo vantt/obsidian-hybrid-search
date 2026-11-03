@@ -4,13 +4,13 @@ Bộ câu hỏi vàng (golden set) và vault mẫu để đo chất lượng tì
 
 ## Thành phần
 
-| Đường dẫn | Nội dung |
-|---|---|
-| `golden-set.json` | 270 câu = 17 hạng mục × 15 câu, riêng `vi-compound` 30 câu (15 câu thêm từ fixture `v0.11.0` có trường `hard`), đúng định dạng upstream `{id, query, relevant_paths, partial_paths, category, notes}`. Mỗi câu có đúng một note đúng. `vi-unaccented` và `vi-dd` có thêm `query_accented` (cùng câu, có dấu). Hạng `vi-snippet` có thêm `snippet_contains` và `matched_terms` (upstream bỏ qua, cổng chất lượng sẽ dùng) |
-| `smoke-golden-set.json`, `smoke-vault/` | 10 note viết tay (có alias, note không dấu, note CRLF, note NFD, `_ohs/lexicon.md`) và 16 câu phủ gần hết hạng mục; chạy nhanh để thử máy |
-| `run-eval.mjs` | Dựng corpus trong thư mục tạm, chạy eval, ghi kết quả |
-| `../baselines/linux-x64/0.17.2.vi-search.json` | Baseline: upstream `0.17.2`, không gói ngôn ngữ, corpus sinh |
-| `../baselines/linux-x64/0.17.2.smoke.json` | Baseline của smoke-vault |
+| Đường dẫn                                      | Nội dung                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `golden-set.json`                              | 270 câu = 17 hạng mục × 15 câu, riêng `vi-compound` 30 câu (15 câu thêm từ fixture `v0.11.0` có trường `hard`), đúng định dạng upstream `{id, query, relevant_paths, partial_paths, category, notes}`. Mỗi câu có đúng một note đúng. `vi-unaccented` và `vi-dd` có thêm `query_accented` (cùng câu, có dấu). Hạng `vi-snippet` có thêm `snippet_contains` và `matched_terms` (upstream bỏ qua, cổng chất lượng sẽ dùng) |
+| `smoke-golden-set.json`, `smoke-vault/`        | 10 note viết tay (có alias, note không dấu, note CRLF, note NFD, `_ohs/lexicon.md`) và 16 câu phủ gần hết hạng mục; chạy nhanh để thử máy                                                                                                                                                                                                                                                                                |
+| `run-eval.mjs`                                 | Dựng corpus trong thư mục tạm, chạy eval, ghi kết quả                                                                                                                                                                                                                                                                                                                                                                    |
+| `../baselines/linux-x64/0.17.2.vi-search.json` | Baseline: upstream `0.17.2`, không gói ngôn ngữ, corpus sinh                                                                                                                                                                                                                                                                                                                                                             |
+| `../baselines/linux-x64/0.17.2.smoke.json`     | Baseline của smoke-vault                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Corpus lớn không nằm trong repo này: nó do preset `vi-search` của [vantt/obsidian-test-fixture](https://github.com/vantt/obsidian-test-fixture) sinh ra (423 note + `_ohs/lexicon.md`, xác định theo `--seed`, chỉ có văn bản sinh). `run-eval.mjs` ghim thẻ `v0.11.0` của fixture và từ chối chạy nếu `golden-set.json` không khớp với bộ câu hỏi mà thẻ đó sinh ra. Lexicon mẫu theo định dạng PRD Q8 (ba mục `## Đồng nghĩa`, `## Viết tắt`, `## Từ ghép`; mục `## Chờ duyệt` không được dùng).
 
@@ -67,22 +67,22 @@ Script làm hộ những việc sau, nên tự gõ lệnh tay thì phải làm �
 
 Mỗi hạng 15 câu, riêng `vi-compound` 30 (`vi-unaccented` và `vi-dd` mỗi hạng thêm 10 note mồi); bảng dưới là nội dung phép thử (PRD 11.5).
 
-| `category` | Phép thử |
-|---|---|
-| `vi-accented`, `vi-partial-accent` | cùng 15 cụm từ: đủ dấu, hoặc chỉ giữ dấu ở từ đầu |
-| `vi-unaccented` | 15 tên món ăn bỏ hết dấu. Vault có 25 note cùng một khuôn chữ, chỉ khác tên món; tiêu đề chỉ có số thứ tự. Mọi âm tiết của tên món có dấu mũ/móc/trăng cộng dấu thanh (`nước mắm`), loại dấu chồng mà FTS5 `unicode61` không gộp. Mục có `query_accented` |
-| `vi-telex`, `vi-typo` | cùng 15 cụm từ: gõ Telex chưa bỏ dấu (`giuwx chaan khachs hangf`), hoặc không dấu và đảo hai chữ cuối của hai từ |
-| `vi-snippet` | hai từ giữa của cụm, không dấu; đoạn trích phải là chữ gốc có dấu và chứa chỗ khớp |
-| `vi-dd` | 15 tên phố có `đ`, gõ `d`; 25 note cùng khuôn chữ chỉ khác tên phố, tiêu đề chỉ có số; mục có `query_accented` |
-| `vi-iy` | note viết `kỹ`, câu hỏi viết `kĩ` và ngược lại |
-| `vi-tone-placement` | note viết `hòa`, câu hỏi viết `hoà` và ngược lại |
-| `vi-tone-precision` | "bán hàng" không được để note "bạn hàng" đứng trên (15 cặp sai khác một dấu thanh) |
-| `vi-compound` | câu 1–15: "học sinh" không được để note "sinh học" đứng trên; tiêu đề note không chứa cụm, chỉ phần thân phân biệt. Câu 16–30 (khó hơn, từ `v0.11.0`): từ ghép không có trong lexicon mẫu (`sân bay`, `bảo tàng`…), note đích có cụm một lần, ba note mồi (tiêu đề `Nhật ký NN`) có hai âm tiết nhiều lần hơn, đảo ngược hay rời nhau; câu hỏi là cụm có dấu, cụm bỏ dấu, hoặc cụm sau "nói chuyện" (trường `hard`: `accented`, `folded`, `context`). Gói không tách từ chỉ đạt 0,645 nDCG@5 trên 15 câu này |
-| `vi-mixed-en` | note tiếng Việt xen từ tiếng Anh; câu hỏi hoặc giữ từ Anh, hoặc dịch qua lại |
-| `vi-semantic` | diễn đạt lại ý, không trùng từ nội dung nào với note |
-| `vi-names` | tên người hư cấu (mỗi tên có một tên gần giống làm mồi) và địa danh, có dấu hoặc không dấu |
-| `vi-synonym`, `vi-abbr` | câu hỏi dùng dạng khác trong `_ohs/lexicon.md` so với dạng trong note |
-| `vi-alias` | câu hỏi (không dấu) chỉ khớp alias ở front matter; tiêu đề và thân note là tiếng Anh |
+| `category`                         | Phép thử                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `vi-accented`, `vi-partial-accent` | cùng 15 cụm từ: đủ dấu, hoặc chỉ giữ dấu ở từ đầu                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `vi-unaccented`                    | 15 tên món ăn bỏ hết dấu. Vault có 25 note cùng một khuôn chữ, chỉ khác tên món; tiêu đề chỉ có số thứ tự. Mọi âm tiết của tên món có dấu mũ/móc/trăng cộng dấu thanh (`nước mắm`), loại dấu chồng mà FTS5 `unicode61` không gộp. Mục có `query_accented`                                                                                                                                                                                                                                                    |
+| `vi-telex`, `vi-typo`              | cùng 15 cụm từ: gõ Telex chưa bỏ dấu (`giuwx chaan khachs hangf`), hoặc không dấu và đảo hai chữ cuối của hai từ                                                                                                                                                                                                                                                                                                                                                                                             |
+| `vi-snippet`                       | hai từ giữa của cụm, không dấu; đoạn trích phải là chữ gốc có dấu và chứa chỗ khớp                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `vi-dd`                            | 15 tên phố có `đ`, gõ `d`; 25 note cùng khuôn chữ chỉ khác tên phố, tiêu đề chỉ có số; mục có `query_accented`                                                                                                                                                                                                                                                                                                                                                                                               |
+| `vi-iy`                            | note viết `kỹ`, câu hỏi viết `kĩ` và ngược lại                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `vi-tone-placement`                | note viết `hòa`, câu hỏi viết `hoà` và ngược lại                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `vi-tone-precision`                | "bán hàng" không được để note "bạn hàng" đứng trên (15 cặp sai khác một dấu thanh)                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `vi-compound`                      | câu 1–15: "học sinh" không được để note "sinh học" đứng trên; tiêu đề note không chứa cụm, chỉ phần thân phân biệt. Câu 16–30 (khó hơn, từ `v0.11.0`): từ ghép không có trong lexicon mẫu (`sân bay`, `bảo tàng`…), note đích có cụm một lần, ba note mồi (tiêu đề `Nhật ký NN`) có hai âm tiết nhiều lần hơn, đảo ngược hay rời nhau; câu hỏi là cụm có dấu, cụm bỏ dấu, hoặc cụm sau "nói chuyện" (trường `hard`: `accented`, `folded`, `context`). Gói không tách từ chỉ đạt 0,645 nDCG@5 trên 15 câu này |
+| `vi-mixed-en`                      | note tiếng Việt xen từ tiếng Anh; câu hỏi hoặc giữ từ Anh, hoặc dịch qua lại                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `vi-semantic`                      | diễn đạt lại ý, không trùng từ nội dung nào với note                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `vi-names`                         | tên người hư cấu (mỗi tên có một tên gần giống làm mồi) và địa danh, có dấu hoặc không dấu                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `vi-synonym`, `vi-abbr`            | câu hỏi dùng dạng khác trong `_ohs/lexicon.md` so với dạng trong note                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `vi-alias`                         | câu hỏi (không dấu) chỉ khớp alias ở front matter; tiêu đề và thân note là tiếng Anh                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Khi build corpus, preset tự kiểm: cụm của mỗi câu chỉ xuất hiện đúng ở note đúng; dạng chính tả phía câu hỏi (`kĩ`, `hoà`) và chữ viết tắt không xuất hiện ở đâu trong vault. Với `vi-unaccented` và `vi-dd` nó còn kiểm câu đã bỏ dấu chỉ nằm trong đúng note đích. Nên bộ câu hỏi không thể lệch khỏi corpus.
 
@@ -90,25 +90,25 @@ Khi build corpus, preset tự kiểm: cụm của mỗi câu chỉ xuất hiện
 
 Corpus `vi-search@v0.11.0`, 423 note, 270 câu: nDCG@5 0,646; nDCG@10 0,664; MRR 0,617; Hit@1 0,526; Hit@3 0,685; Hit@5 0,756; Recall@10 0,811. Ghi lại ngày 2026-11-02 khi fixture thêm 15 câu `vi-compound` khó (V20b); baseline trên `v0.10.0` (363 note, 255 câu) là nDCG@5 0,666, `vi-compound` 0,844. 60 note mới cũng làm nhích các hạng khác (IDF và nhánh vector): `vi-semantic` 0,555 → 0,446, `vi-alias` 0,535 → 0,477, `vi-typo` 0,488 → 0,543, `vi-mixed-en` 0,975 → 1,000, `vi-dd` 0,263 → 0,239, `vi-partial-accent` 0,872 → 0,863, `vi-snippet` 0,463 → 0,466; các hạng còn lại giữ nguyên.
 
-| Hạng mục | nDCG@5 | MRR | Hit@1 | Hit@5 |
-|---|---|---|---|---|
-| `vi-accented` | 1,000 | 1,000 | 1,00 | 1,00 |
-| `vi-partial-accent` | 0,863 | 0,819 | 0,73 | 1,00 |
-| `vi-telex` | 0,333 | 0,298 | 0,20 | 0,47 |
-| `vi-typo` | 0,543 | 0,469 | 0,27 | 0,80 |
-| `vi-snippet` | 0,466 | 0,440 | 0,33 | 0,60 |
-| `vi-unaccented` | 0,133 | 0,089 | 0,00 | 0,27 |
-| `vi-dd` | 0,239 | 0,206 | 0,07 | 0,40 |
-| `vi-iy` | 1,000 | 1,000 | 1,00 | 1,00 |
-| `vi-tone-placement` | 1,000 | 1,000 | 1,00 | 1,00 |
-| `vi-tone-precision` | 0,951 | 0,933 | 0,87 | 1,00 |
-| `vi-compound` | 0,632 | 0,543 | 0,33 | 0,90 |
-| `vi-mixed-en` | 1,000 | 1,000 | 1,00 | 1,00 |
-| `vi-semantic` | 0,446 | 0,412 | 0,27 | 0,60 |
-| `vi-names` | 0,909 | 0,911 | 0,87 | 0,93 |
-| `vi-synonym` | 0,067 | 0,073 | 0,00 | 0,13 |
-| `vi-abbr` | 0,933 | 0,940 | 0,93 | 0,93 |
-| `vi-alias` | 0,477 | 0,424 | 0,27 | 0,67 |
+| Hạng mục            | nDCG@5 | MRR   | Hit@1 | Hit@5 |
+| ------------------- | ------ | ----- | ----- | ----- |
+| `vi-accented`       | 1,000  | 1,000 | 1,00  | 1,00  |
+| `vi-partial-accent` | 0,863  | 0,819 | 0,73  | 1,00  |
+| `vi-telex`          | 0,333  | 0,298 | 0,20  | 0,47  |
+| `vi-typo`           | 0,543  | 0,469 | 0,27  | 0,80  |
+| `vi-snippet`        | 0,466  | 0,440 | 0,33  | 0,60  |
+| `vi-unaccented`     | 0,133  | 0,089 | 0,00  | 0,27  |
+| `vi-dd`             | 0,239  | 0,206 | 0,07  | 0,40  |
+| `vi-iy`             | 1,000  | 1,000 | 1,00  | 1,00  |
+| `vi-tone-placement` | 1,000  | 1,000 | 1,00  | 1,00  |
+| `vi-tone-precision` | 0,951  | 0,933 | 0,87  | 1,00  |
+| `vi-compound`       | 0,632  | 0,543 | 0,33  | 0,90  |
+| `vi-mixed-en`       | 1,000  | 1,000 | 1,00  | 1,00  |
+| `vi-semantic`       | 0,446  | 0,412 | 0,27  | 0,60  |
+| `vi-names`          | 0,909  | 0,911 | 0,87  | 0,93  |
+| `vi-synonym`        | 0,067  | 0,073 | 0,00  | 0,13  |
+| `vi-abbr`           | 0,933  | 0,940 | 0,93  | 0,93  |
+| `vi-alias`          | 0,477  | 0,424 | 0,27  | 0,67  |
 
 `vi-compound` 0,632 gồm câu 1–15 0,844 (như trước) và câu 16–30 0,421.
 
@@ -117,7 +117,7 @@ Nhận xét cho các mục tiêu ở PRD 11.6:
 - `vi-iy`, `vi-tone-placement`, `vi-accented` đã 1,000 ở upstream (gói chỉ được giữ nguyên, không có chỗ để hơn).
 - `vi-compound`: mục tiêu G8 là hơn baseline tối thiểu 0,1, tức đạt 0,732 trở lên (trên `v0.10.0` là 0,944).
 - `vi-synonym` Hit@5 0,13 so với mục tiêu 0,8; `vi-telex` 0,47, `vi-typo` 0,80, `vi-alias` 0,67, `vi-abbr` 0,93 (mục tiêu G8 cho `vi-telex`, `vi-typo`, `vi-synonym`, `vi-alias`: Hit@5 ≥ 0,8; `vi-abbr` đã đạt).
-- G3 (`vi-unaccented`, `vi-dd` Hit@5 ≥ 0,85 *và* gấp 2 lần baseline): baseline 0,27 và 0,40, nên cần ≥ 0,85 cho cả hai (0,40 × 2 = 0,80 < 0,85). Corpus bản đầu (0,93 và 0,87) làm điều này bất khả vì tiêu đề note chứa nguyên cụm tìm và nhánh vector đã đủ; từ fixture `v0.10.0` mỗi câu là một trong 25 note cùng khuôn chữ, chỉ khác một từ khoá, tiêu đề không lộ. Kiểm đạt được: với dấu phục hồi (`--accented-sanity`) cả hai hạng đạt Hit@5 = 1,00 (nDCG@5 0,832), nên 0,85 trở lên là đạt được bằng khớp chữ gộp dấu.
+- G3 (`vi-unaccented`, `vi-dd` Hit@5 ≥ 0,85 _và_ gấp 2 lần baseline): baseline 0,27 và 0,40, nên cần ≥ 0,85 cho cả hai (0,40 × 2 = 0,80 < 0,85). Corpus bản đầu (0,93 và 0,87) làm điều này bất khả vì tiêu đề note chứa nguyên cụm tìm và nhánh vector đã đủ; từ fixture `v0.10.0` mỗi câu là một trong 25 note cùng khuôn chữ, chỉ khác một từ khoá, tiêu đề không lộ. Kiểm đạt được: với dấu phục hồi (`--accented-sanity`) cả hai hạng đạt Hit@5 = 1,00 (nDCG@5 0,832), nên 0,85 trở lên là đạt được bằng khớp chữ gộp dấu.
 - Vì sao upstream trượt: FTS5 `unicode61` chỉ gộp dấu khi chữ có đúng một dấu (`ú`, `ê`); chữ có hai dấu (`ế`, `ữ`, `ợ`, `ặ`) và `đ` không bao giờ gộp (đo trực tiếp trên SQLite của upstream, chữ NFC như upstream lưu). Nên hạng 1 trở đi của hai hạng này chỉ do nhánh vector và đoán.
 
 Baseline phụ thuộc nền (ONNX lượng tử cho số khác nhau theo CPU), nên mỗi nền một thư mục; hạ baseline chỉ qua PR có người duyệt (PRD 11.6).

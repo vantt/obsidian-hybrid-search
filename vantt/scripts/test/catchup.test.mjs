@@ -1,7 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { git, head, makeFixture, makePatch, read, runCatchup, setSeries, status, write } from './helpers.mjs';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  git,
+  head,
+  makeFixture,
+  makePatch,
+  read,
+  runCatchup,
+  setSeries,
+  status,
+  write,
+} from './helpers.mjs';
 
 let fx;
 beforeEach(() => {
@@ -10,17 +20,29 @@ beforeEach(() => {
 afterEach(() => fx.cleanup());
 
 const showFile = (rev, file) => git(fx.fork, 'show', `${rev}:${file}`);
-const subjects = (rev) => git(fx.fork, 'log', '--format=%s', `v0.2.0..${rev}`).split('\n').reverse();
+const subjects = (rev) =>
+  git(fx.fork, 'log', '--format=%s', `v0.2.0..${rev}`).split('\n').reverse();
 const appEdit = (line2) => (dir) =>
   write(dir, 'src/app.txt', ['alpha', line2, 'gamma', 'delta', 'epsilon', ''].join('\n'));
 
 describe('target selection', () => {
   it('picks the highest stable tag on upstream/master, skipping pre-releases and off-master tags', () => {
     // dry-run does not fetch; fetch first like a real run would
-    git(fx.fork, 'fetch', '-q', '--tags', 'upstream', '+refs/heads/master:refs/remotes/upstream/master');
+    git(
+      fx.fork,
+      'fetch',
+      '-q',
+      '--tags',
+      'upstream',
+      '+refs/heads/master:refs/remotes/upstream/master',
+    );
     const d = runCatchup(fx.fork, '--dry-run', '--json');
     expect(d.code).toBe(0);
-    expect(d.report).toMatchObject({ status: 'DRY_RUN', target_ref: 'v0.2.0', release_branch: 'vantt/v0.2.0' });
+    expect(d.report).toMatchObject({
+      status: 'DRY_RUN',
+      target_ref: 'v0.2.0',
+      release_branch: 'vantt/v0.2.0',
+    });
     expect(git(fx.fork, 'branch', '--list', 'vantt/*')).toBe('');
   });
 
@@ -61,12 +83,20 @@ describe('release branch', () => {
       'chore(vantt): set version 0.2.0-vantt.1',
       'chore(vantt): drop upstream workflows from release branch',
     ]);
-    expect(JSON.parse(showFile('vantt/v0.2.0', 'package.json'))).toMatchObject({ version: '0.2.0-vantt.1', vanttFork: true });
+    expect(JSON.parse(showFile('vantt/v0.2.0', 'package.json'))).toMatchObject({
+      version: '0.2.0-vantt.1',
+      vanttFork: true,
+    });
     expect(JSON.parse(showFile('vantt/v0.2.0', 'server.json'))).toEqual({
       version: '0.2.0-vantt.1',
-      packages: [{ identifier: 'ohs-fixture', version: '0.2.0-vantt.1' }, { identifier: 'other', version: '9.0.0' }],
+      packages: [
+        { identifier: 'ohs-fixture', version: '0.2.0-vantt.1' },
+        { identifier: 'other', version: '9.0.0' },
+      ],
     });
-    expect(JSON.parse(showFile('vantt/v0.2.0', 'package-lock.json')).packages['']).toMatchObject({ version: '0.2.0-vantt.1' });
+    expect(JSON.parse(showFile('vantt/v0.2.0', 'package-lock.json')).packages['']).toMatchObject({
+      version: '0.2.0-vantt.1',
+    });
     expect(showFile('vantt/v0.2.0', 'vantt/scripts/catchup.mjs')).toContain('Catchup');
     expect(showFile('vantt/v0.2.0', '.claude/skills/ohs-catchup/SKILL.md')).toBe('# skill');
     expect(git(fx.fork, 'ls-tree', '-r', '--name-only', 'vantt/v0.2.0', '.github')).toBe('');
@@ -84,16 +114,31 @@ describe('release branch', () => {
   it('does not carry untracked files onto the release branch', () => {
     write(fx.fork, 'vantt/wip.txt', 'not committed\n');
     expect(runCatchup(fx.fork).code).toBe(0);
-    expect(git(fx.fork, 'ls-tree', '-r', '--name-only', 'vantt/v0.2.0', 'vantt')).not.toContain('wip.txt');
+    expect(git(fx.fork, 'ls-tree', '-r', '--name-only', 'vantt/v0.2.0', 'vantt')).not.toContain(
+      'wip.txt',
+    );
     expect(read(fx.fork, 'vantt/wip.txt')).toBe('not committed\n');
   });
 
   it('applies a fake patch with Patch-Id and runs its test_command', () => {
-    const content = makePatch(fx, 'v0.2.0', 'feat: fake', (d) => write(d, 'src/fake.txt', 'fake\n'));
-    setSeries(fx, [{ id: 'fake', name: 'feat(fake): add fake file', file: '0001-fake.patch', content, extra: 'test_command = "test -f src/fake.txt"\ncapability_check = "node dist/src/cli.js --version"\n' }]);
+    const content = makePatch(fx, 'v0.2.0', 'feat: fake', (d) =>
+      write(d, 'src/fake.txt', 'fake\n'),
+    );
+    setSeries(fx, [
+      {
+        id: 'fake',
+        name: 'feat(fake): add fake file',
+        file: '0001-fake.patch',
+        content,
+        extra:
+          'test_command = "test -f src/fake.txt"\ncapability_check = "node dist/src/cli.js --version"\n',
+      },
+    ]);
     const r = runCatchup(fx.fork, '--json');
     expect(r.code).toBe(0);
-    expect(r.report.patches).toEqual([{ id: 'fake', status: 'APPLIED', commit: expect.any(String) }]);
+    expect(r.report.patches).toEqual([
+      { id: 'fake', status: 'APPLIED', commit: expect.any(String) },
+    ]);
     expect(r.report.tests.patches).toEqual({ fake: 'pass' });
     expect(r.report.capability.patches).toEqual({ fake: 'pass' });
     expect(r.report.reexported_patches).toEqual([]);
@@ -107,11 +152,19 @@ describe('release branch', () => {
     const merged = makePatch(fx, 'v0.2.0', 'merged', (d) => write(d, 'src/m.txt', 'm\n'));
     setSeries(fx, [
       { id: 'has-it', file: '0001.patch', content: has },
-      { id: 'merged-one', file: '0002.patch', content: merged, extra: 'upstream_status = "merged"\n' },
+      {
+        id: 'merged-one',
+        file: '0002.patch',
+        content: merged,
+        extra: 'upstream_status = "merged"\n',
+      },
     ]);
     const r = runCatchup(fx.fork, '--json');
     expect(r.code).toBe(0);
-    expect(r.report.patches.map((p) => p.status)).toEqual(['SKIPPED_UPSTREAM_HAS_IT', 'SKIPPED_UPSTREAM_HAS_IT']);
+    expect(r.report.patches.map((p) => p.status)).toEqual([
+      'SKIPPED_UPSTREAM_HAS_IT',
+      'SKIPPED_UPSTREAM_HAS_IT',
+    ]);
   });
 
   it('bumps -vantt.N only when the fork inputs change', () => {
@@ -126,7 +179,9 @@ describe('release branch', () => {
 
   it('reports test, build and quality failures with their exit codes', () => {
     const p = makePatch(fx, 'v0.2.0', 'feat: t', (d) => write(d, 'src/t.txt', 't\n'));
-    setSeries(fx, [{ id: 't', file: '0001-t.patch', content: p, extra: 'test_command = "exit 1"\n' }]);
+    setSeries(fx, [
+      { id: 't', file: '0001-t.patch', content: p, extra: 'test_command = "exit 1"\n' },
+    ]);
     let r = runCatchup(fx.fork, '--json');
     expect(r.code).toBe(5);
     expect(r.report).toMatchObject({ status: 'TESTS_FAILED', tests: { patches: { t: 'fail' } } });
@@ -144,13 +199,25 @@ describe('release branch', () => {
     expect(r.report.status).toBe('BUILD_FAILED');
 
     setSeries(fx, []);
-    write(fx.fork, 'vantt/scripts/quality-gate.mjs', 'console.log(JSON.stringify({ vi_eval: { ndcg5: 0.1 } })); process.exit(1);\n');
-    write(fx.fork, 'vantt/scripts/invariance.mjs', 'if (!process.argv.includes("--target-sha")) process.exit(1);\n');
+    write(
+      fx.fork,
+      'vantt/scripts/quality-gate.mjs',
+      'console.log(JSON.stringify({ vi_eval: { ndcg5: 0.1 } })); process.exit(1);\n',
+    );
+    write(
+      fx.fork,
+      'vantt/scripts/invariance.mjs',
+      'if (!process.argv.includes("--target-sha")) process.exit(1);\n',
+    );
     git(fx.fork, 'add', '-A');
     git(fx.fork, 'commit', '-q', '-m', 'hooks');
     r = runCatchup(fx.fork, '--json');
     expect(r.code).toBe(6);
-    expect(r.report).toMatchObject({ status: 'QUALITY_FAILED', tests: { invariance: 'pass' }, quality: { gate: 'fail', vi_eval: { ndcg5: 0.1 } } });
+    expect(r.report).toMatchObject({
+      status: 'QUALITY_FAILED',
+      tests: { invariance: 'pass' },
+      quality: { gate: 'fail', vi_eval: { ndcg5: 0.1 } },
+    });
     r = runCatchup(fx.fork, '--json', '--skip-quality');
     expect(r.code).toBe(0);
   });
@@ -175,12 +242,19 @@ describe('usage errors', () => {
 describe('conflict rehearsal (T8)', () => {
   function conflictingSeries() {
     // Made against v0.1.0, edits the line upstream changed in v0.2.0.
-    const before = makePatch(fx, 'v0.2.0', 'feat: before', (d) => write(d, 'src/before.txt', 'b\n'));
+    const before = makePatch(fx, 'v0.2.0', 'feat: before', (d) =>
+      write(d, 'src/before.txt', 'b\n'),
+    );
     const fake = makePatch(fx, 'v0.1.0', 'feat: fork line', appEdit('beta fork'));
     const after = makePatch(fx, 'v0.2.0', 'feat: after', (d) => write(d, 'src/after.txt', 'a\n'));
     setSeries(fx, [
       { id: 'before', file: '0001-before.patch', content: before },
-      { id: 'fake-conflict', file: '0002-fake-conflict.patch', content: fake, extra: 'metadata_file = "0002-fake-conflict.spec.md"\n' },
+      {
+        id: 'fake-conflict',
+        file: '0002-fake-conflict.patch',
+        content: fake,
+        extra: 'metadata_file = "0002-fake-conflict.spec.md"\n',
+      },
       { id: 'after', file: '0003-after.patch', content: after },
     ]);
     return fake;
@@ -235,7 +309,11 @@ describe('conflict rehearsal (T8)', () => {
     const original = conflictingSeries();
     expect(runCatchup(fx.fork).code).toBe(3);
     // Resolve: keep upstream's line 2 and add the fork's intent on a new line.
-    write(fx.fork, 'src/app.txt', ['alpha', 'beta upstream', 'beta fork', 'gamma', 'delta', 'epsilon', ''].join('\n'));
+    write(
+      fx.fork,
+      'src/app.txt',
+      ['alpha', 'beta upstream', 'beta fork', 'gamma', 'delta', 'epsilon', ''].join('\n'),
+    );
     git(fx.fork, 'add', 'src/app.txt');
     const r = runCatchup(fx.fork, '--continue', '--json');
     expect(r.stderr).not.toMatch(/catchup: /);
@@ -274,12 +352,23 @@ describe('conflict rehearsal (T8)', () => {
     git(fx.fork, 'reset', '-q', '--hard', 'HEAD');
     const r = runCatchup(fx.fork, '--continue', '--json');
     expect(r.code).toBe(0);
-    expect(r.report.patches.map((p) => p.status)).toEqual(['APPLIED', 'SKIPPED_UPSTREAM_HAS_IT', 'APPLIED']);
+    expect(r.report.patches.map((p) => p.status)).toEqual([
+      'APPLIED',
+      'SKIPPED_UPSTREAM_HAS_IT',
+      'APPLIED',
+    ]);
   });
 
   it('dry-run previews the conflict without touching git', () => {
     conflictingSeries();
-    git(fx.fork, 'fetch', '-q', '--tags', 'upstream', '+refs/heads/master:refs/remotes/upstream/master');
+    git(
+      fx.fork,
+      'fetch',
+      '-q',
+      '--tags',
+      'upstream',
+      '+refs/heads/master:refs/remotes/upstream/master',
+    );
     const before = git(fx.fork, 'for-each-ref');
     const r = runCatchup(fx.fork, '--dry-run', '--json');
     expect(r.code).toBe(0);

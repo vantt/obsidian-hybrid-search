@@ -34,41 +34,62 @@ const FOLD_CATEGORIES = ['vi-unaccented', 'vi-dd'];
 
 // --compare a.json b.json: per-category deltas of two result files (b minus a), printed and optionally written.
 if (flag('--compare')) {
-  const [fa, fb] = args.slice(args.indexOf('--compare') + 1, args.indexOf('--compare') + 3).map((f) => path.resolve(f));
+  const [fa, fb] = args
+    .slice(args.indexOf('--compare') + 1, args.indexOf('--compare') + 3)
+    .map((f) => path.resolve(f));
   const [a, b] = [fa, fb].map((f) => JSON.parse(fs.readFileSync(f, 'utf8')));
   const METRICS = ['ndcg_5', 'mrr', 'hit_1', 'hit_3', 'hit_5', 'recall_k'];
   const round = (x) => Math.round(x * 1000) / 1000;
-  const diff = (x, y) => Object.fromEntries(METRICS.map((m) => [m, { a: x[m], b: y[m], delta: round(y[m] - x[m]) }]));
+  const diff = (x, y) =>
+    Object.fromEntries(METRICS.map((m) => [m, { a: x[m], b: y[m], delta: round(y[m] - x[m]) }]));
   const out = {
-    a: { file: fa, meta: a.meta }, b: { file: fb, meta: b.meta },
+    a: { file: fa, meta: a.meta },
+    b: { file: fb, meta: b.meta },
     summary: diff(a.summary, b.summary),
-    by_category: Object.fromEntries(Object.keys(a.by_category).map((c) => [c, diff(a.by_category[c], b.by_category[c])])),
+    by_category: Object.fromEntries(
+      Object.keys(a.by_category).map((c) => [c, diff(a.by_category[c], b.by_category[c])]),
+    ),
     // queries whose Hit@5 changed
     changed_queries: a.per_query.flatMap((q, i) => {
       const r = b.per_query[i];
-      return q.id === r.id && q.hit_5 !== r.hit_5 ? [{ id: q.id, query: q.query, hit_5: { a: q.hit_5, b: r.hit_5 } }] : [];
+      return q.id === r.id && q.hit_5 !== r.hit_5
+        ? [{ id: q.id, query: q.query, hit_5: { a: q.hit_5, b: r.hit_5 } }]
+        : [];
     }),
   };
   const pad = (v) => String(v).padStart(7);
-  console.log(`${'category'.padEnd(20)}${['nDCG@5', 'MRR', 'Hit@1', 'Hit@3', 'Hit@5', 'Rec@k'].map(pad).join('')}   (delta b - a)`);
+  console.log(
+    `${'category'.padEnd(20)}${['nDCG@5', 'MRR', 'Hit@1', 'Hit@3', 'Hit@5', 'Rec@k'].map(pad).join('')}   (delta b - a)`,
+  );
   for (const [c, d] of [['ALL', out.summary], ...Object.entries(out.by_category)]) {
-    console.log(`${c.padEnd(20)}${METRICS.map((m) => pad((d[m].delta >= 0 ? '+' : '') + d[m].delta.toFixed(3))).join('')}`);
+    console.log(
+      `${c.padEnd(20)}${METRICS.map((m) => pad((d[m].delta >= 0 ? '+' : '') + d[m].delta.toFixed(3))).join('')}`,
+    );
   }
   console.log(`queries with changed Hit@5: ${out.changed_queries.length}`);
-  if (value('--out')) fs.writeFileSync(path.resolve(value('--out')), JSON.stringify(out, null, 2) + '\n');
+  if (value('--out'))
+    fs.writeFileSync(path.resolve(value('--out')), JSON.stringify(out, null, 2) + '\n');
   process.exit(0);
 }
 
 // Golden set as the fixture writes it (NFC paths) to the form upstream's eval compares (NFD paths).
-const toNfdPaths = (text) => JSON.stringify(JSON.parse(text).map((q) => ({
-  ...q,
-  relevant_paths: q.relevant_paths.map((p) => p.normalize('NFD')),
-  partial_paths: q.partial_paths.map((p) => p.normalize('NFD')),
-})), null, 2) + '\n';
+const toNfdPaths = (text) =>
+  JSON.stringify(
+    JSON.parse(text).map((q) => ({
+      ...q,
+      relevant_paths: q.relevant_paths.map((p) => p.normalize('NFD')),
+      partial_paths: q.partial_paths.map((p) => p.normalize('NFD')),
+    })),
+    null,
+    2,
+  ) + '\n';
 
 const run = (cmd, argv, opts = {}) => {
   const r = spawnSync(cmd, argv, { stdio: 'inherit', ...opts });
-  if (r.status !== 0) { console.error(`failed: ${cmd} ${argv.join(' ')}`); process.exit(r.status ?? 1); }
+  if (r.status !== 0) {
+    console.error(`failed: ${cmd} ${argv.join(' ')}`);
+    process.exit(r.status ?? 1);
+  }
 };
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'ohs-vi-eval-'));
@@ -83,51 +104,115 @@ try {
     const gen = ['generate', '--preset', 'vi-search', '--out', vault, '--answers-out', fresh];
     const otf = value('--otf');
     if (otf) run(process.execPath, [otf, ...gen]);
-    else run('npx', ['--yes', `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`, ...gen], { cwd: work }); // outside the repo: its devEngines pins an npm version
+    else
+      run('npx', ['--yes', `github:vantt/obsidian-test-fixture#${FIXTURE_TAG}`, ...gen], {
+        cwd: work,
+      }); // outside the repo: its devEngines pins an npm version
     // The committed golden set must be the one this corpus generates.
     const expected = toNfdPaths(fs.readFileSync(fresh, 'utf8'));
     if (flag('--update-golden')) fs.writeFileSync(GOLDEN, expected);
     else if (expected !== fs.readFileSync(GOLDEN, 'utf8')) {
-      console.error('golden-set.json differs from the golden set generated with this fixture version; rerun with --update-golden');
+      console.error(
+        'golden-set.json differs from the golden set generated with this fixture version; rerun with --update-golden',
+      );
       process.exit(1);
     }
     goldenFile = GOLDEN;
     // Sanity run: vi-unaccented and vi-dd queries with their marks restored must find their notes (reachability of the target).
     if (flag('--accented-sanity')) {
       goldenFile = path.join(work, 'golden-accented.json');
-      fs.writeFileSync(goldenFile, JSON.stringify(JSON.parse(fs.readFileSync(GOLDEN, 'utf8'))
-        .filter((q) => FOLD_CATEGORIES.includes(q.category)).map((q) => ({ ...q, query: q.query_accented.normalize('NFC') })), null, 2));
+      fs.writeFileSync(
+        goldenFile,
+        JSON.stringify(
+          JSON.parse(fs.readFileSync(GOLDEN, 'utf8'))
+            .filter((q) => FOLD_CATEGORIES.includes(q.category))
+            .map((q) => ({ ...q, query: q.query_accented.normalize('NFC') })),
+          null,
+          2,
+        ),
+      );
     }
   }
 
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
-  if (!fs.existsSync(path.join(repoRoot, 'eval/evaluate.ts'))) { console.error(`no eval/evaluate.ts under ${repoRoot}`); process.exit(1); }
+  if (!fs.existsSync(path.join(repoRoot, 'eval/evaluate.ts'))) {
+    console.error(`no eval/evaluate.ts under ${repoRoot}`);
+    process.exit(1);
+  }
   const platform = `${process.platform}-${process.arch}`;
   const base = smoke ? 'smoke' : 'vi-search';
-  if (flag('--baseline') && (langPack || flag('--ohs'))) { console.error('--baseline records upstream without a pack in the shared tree; do not combine with --lang-pack or --ohs'); process.exit(1); }
-  const out = path.resolve(value('--out')
-    ?? (flag('--baseline') ? path.join(here, '../baselines', platform, `${pkg.version}.${base}.json`) : path.join(work, 'result.json')));
+  if (flag('--baseline') && (langPack || flag('--ohs'))) {
+    console.error(
+      '--baseline records upstream without a pack in the shared tree; do not combine with --lang-pack or --ohs',
+    );
+    process.exit(1);
+  }
+  const out = path.resolve(
+    value('--out') ??
+      (flag('--baseline')
+        ? path.join(here, '../baselines', platform, `${pkg.version}.${base}.json`)
+        : path.join(work, 'result.json')),
+  );
   fs.mkdirSync(path.dirname(out), { recursive: true });
 
   // Local model only, deterministic settings; the lexicon file must not become a search result.
-  const env = { ...process.env, OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**' };
+  const env = {
+    ...process.env,
+    OBSIDIAN_IGNORE_PATTERNS: '.obsidian/**,templates/**,*.canvas,_ohs/**',
+  };
   // Language pack (patch 0001): configured through the two environment variables of src/runtime/config.ts.
-  delete env.OHS_LANGUAGE_PACK; delete env.OHS_LANGUAGE_PACK_OPTIONS;
+  delete env.OHS_LANGUAGE_PACK;
+  delete env.OHS_LANGUAGE_PACK_OPTIONS;
   if (langPack) {
-    env.OHS_LANGUAGE_PACK = /^[./~]/.test(langPack) || fs.existsSync(langPack) ? path.resolve(langPack) : langPack;
-    if (langOptions) { JSON.parse(langOptions); env.OHS_LANGUAGE_PACK_OPTIONS = langOptions; }
-  } else if (langOptions) { console.error('--lang-options needs --lang-pack'); process.exit(1); }
-  for (const v of ['OPENAI_API_KEY', 'OPENAI_BASE_URL', 'OPENAI_EMBEDDING_MODEL', 'LOCAL_EMBEDDING_MODEL']) delete env[v];
+    env.OHS_LANGUAGE_PACK =
+      /^[./~]/.test(langPack) || fs.existsSync(langPack) ? path.resolve(langPack) : langPack;
+    if (langOptions) {
+      JSON.parse(langOptions);
+      env.OHS_LANGUAGE_PACK_OPTIONS = langOptions;
+    }
+  } else if (langOptions) {
+    console.error('--lang-options needs --lang-pack');
+    process.exit(1);
+  }
+  for (const v of [
+    'OPENAI_API_KEY',
+    'OPENAI_BASE_URL',
+    'OPENAI_EMBEDDING_MODEL',
+    'LOCAL_EMBEDDING_MODEL',
+  ])
+    delete env[v];
   // `npm run eval` is `tsx eval/evaluate.ts`; calling tsx through node avoids npm's devEngines check.
-  run(process.execPath, ['--import', 'tsx', 'eval/evaluate.ts', '--vault', vault, '--golden-set', goldenFile, '--output', out, '--k', k, ...(flag('--rerank') ? ['--rerank'] : [])],
-    { cwd: repoRoot, env });
+  run(
+    process.execPath,
+    [
+      '--import',
+      'tsx',
+      'eval/evaluate.ts',
+      '--vault',
+      vault,
+      '--golden-set',
+      goldenFile,
+      '--output',
+      out,
+      '--k',
+      k,
+      ...(flag('--rerank') ? ['--rerank'] : []),
+    ],
+    { cwd: repoRoot, env },
+  );
   // Record what was run so two result files can be compared.
   const result = JSON.parse(fs.readFileSync(out, 'utf8'));
-  const git = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' });
+  const git = spawnSync('git', ['rev-parse', '--short', 'HEAD'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  });
   result.meta.runner = {
-    ohs_tree: repoRoot, ohs_head: git.status === 0 ? git.stdout.trim() : null,
-    lang_pack: langPack ?? null, lang_options: langOptions ? JSON.parse(langOptions) : null,
-    corpus: smoke ? 'smoke' : `vi-search@${FIXTURE_TAG}`, accented_sanity: flag('--accented-sanity'),
+    ohs_tree: repoRoot,
+    ohs_head: git.status === 0 ? git.stdout.trim() : null,
+    lang_pack: langPack ?? null,
+    lang_options: langOptions ? JSON.parse(langOptions) : null,
+    corpus: smoke ? 'smoke' : `vi-search@${FIXTURE_TAG}`,
+    accented_sanity: flag('--accented-sanity'),
   };
   fs.writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
   console.log(`\nresult: ${out}`);

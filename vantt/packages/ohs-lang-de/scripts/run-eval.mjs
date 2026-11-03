@@ -108,13 +108,16 @@ function score(paths, q) {
   const gain = (p) => (rel.has(p) ? 2 : part.has(p) ? 1 : 0);
   const rank = paths.findIndex((p) => rel.has(p)) + 1;
   const top = (n) => (rank > 0 && rank <= n ? 1 : 0);
-  const dcg = (list) => list.slice(0, 5).reduce((s, p, i) => s + (2 ** gain(p) - 1) / Math.log2(i + 2), 0);
+  const dcg = (list) =>
+    list.slice(0, 5).reduce((s, p, i) => s + (2 ** gain(p) - 1) / Math.log2(i + 2), 0);
   const ideal = [...q.relevant_paths, ...(q.partial_paths ?? [])];
   const best = ideal.sort((a, b) => gain(b) - gain(a));
   const seen = paths.slice(0, k);
   const found = q.relevant_paths.filter((p) => seen.includes(p)).length;
   return {
-    hit_1: top(1), hit_3: top(3), hit_5: top(5),
+    hit_1: top(1),
+    hit_3: top(3),
+    hit_5: top(5),
     mrr: rank > 0 ? 1 / rank : 0,
     ndcg_5: dcg(best) === 0 ? 0 : dcg(paths) / dcg(best),
     recall_k: found / q.relevant_paths.length,
@@ -130,9 +133,24 @@ async function evaluate(label, withPack) {
   fs.cpSync(path.join(pkg, 'eval/vault'), vault, { recursive: true });
   await ohsRun(vault, withPack, ['reindex']);
   const rows = await pool(golden, 4, async (q) => {
-    const out = await ohsRun(vault, withPack, ['search', q.query, '--mode', 'fulltext', '--json', '--limit', String(k)]);
+    const out = await ohsRun(vault, withPack, [
+      'search',
+      q.query,
+      '--mode',
+      'fulltext',
+      '--json',
+      '--limit',
+      String(k),
+    ]);
     const results = JSON.parse(out);
-    return { q, results, ...score(results.map((r) => r.path), q) };
+    return {
+      q,
+      results,
+      ...score(
+        results.map((r) => r.path),
+        q,
+      ),
+    };
   });
   return { vault, rows };
 }
@@ -142,7 +160,15 @@ function summarize(rows) {
   const part = (rs) => Object.fromEntries(METRICS.map((m) => [m, round(mean(rs, m))]));
   return {
     summary: part(rows),
-    by_category: Object.fromEntries(cats.map((c) => [c, { n: rows.filter((r) => r.q.category === c).length, ...part(rows.filter((r) => r.q.category === c)) }])),
+    by_category: Object.fromEntries(
+      cats.map((c) => [
+        c,
+        {
+          n: rows.filter((r) => r.q.category === c).length,
+          ...part(rows.filter((r) => r.q.category === c)),
+        },
+      ]),
+    ),
   };
 }
 
@@ -153,40 +179,115 @@ try {
 
   // Integration checks, all through the public CLI of an unmodified OHS.
   const status = JSON.parse(await ohsRun(withPack.vault, true, ['status']));
-  check('status reports the pack loaded', status.language_pack?.loaded === true && status.language_pack?.id === 'de', JSON.stringify(status.language_pack));
+  check(
+    'status reports the pack loaded',
+    status.language_pack?.loaded === true && status.language_pack?.id === 'de',
+    JSON.stringify(status.language_pack),
+  );
   const baseStatus = JSON.parse(await ohsRun(base.vault, false, ['status']));
-  check('no pack: status has no loaded pack', !baseStatus.language_pack || baseStatus.language_pack.loaded !== true, JSON.stringify(baseStatus.language_pack));
+  check(
+    'no pack: status has no loaded pack',
+    !baseStatus.language_pack || baseStatus.language_pack.loaded !== true,
+    JSON.stringify(baseStatus.language_pack),
+  );
 
-  const explain = JSON.parse(await ohsRun(withPack.vault, true, ['search', 'grosse strasse', '--json', '--explain', '--limit', '5']));
+  const explain = JSON.parse(
+    await ohsRun(withPack.vault, true, [
+      'search',
+      'grosse strasse',
+      '--json',
+      '--explain',
+      '--limit',
+      '5',
+    ]),
+  );
   const top = explain[0];
-  check('hybrid search with explain returns a view:de branch rank', explain.some((r) => r.explain?.ranks && 'view:de' in r.explain.ranks), JSON.stringify(top?.explain));
-  check('hybrid search finds the eszett note', explain.some((r) => r.path === 'grosse-strasse.md'));
+  check(
+    'hybrid search with explain returns a view:de branch rank',
+    explain.some((r) => r.explain?.ranks && 'view:de' in r.explain.ranks),
+    JSON.stringify(top?.explain),
+  );
+  check(
+    'hybrid search finds the eszett note',
+    explain.some((r) => r.path === 'grosse-strasse.md'),
+  );
 
-  const snip = JSON.parse(await ohsRun(withPack.vault, true, ['search', 'kaese', '--mode', 'fulltext', '--json', '--limit', '5']));
+  const snip = JSON.parse(
+    await ohsRun(withPack.vault, true, [
+      'search',
+      'kaese',
+      '--mode',
+      'fulltext',
+      '--json',
+      '--limit',
+      '5',
+    ]),
+  );
   const hit = snip.find((r) => r.path === 'kaesekuchen.md');
-  check('snippet from view branch is original text', !!hit && /Käse/.test(hit.snippet ?? ''), JSON.stringify(hit?.snippet));
+  check(
+    'snippet from view branch is original text',
+    !!hit && /Käse/.test(hit.snippet ?? ''),
+    JSON.stringify(hit?.snippet),
+  );
 
   const a = summarize(base.rows);
   const b = summarize(withPack.rows);
   const pad = (v) => String(v).padStart(11);
-  console.log(`\n${'category'.padEnd(12)}${'n'.padStart(3)}  ${['Hit@1', 'Hit@3', 'Hit@5', 'MRR', 'nDCG@5', 'Rec@k'].map(pad).join('')}   (no pack -> pack)`);
+  console.log(
+    `\n${'category'.padEnd(12)}${'n'.padStart(3)}  ${['Hit@1', 'Hit@3', 'Hit@5', 'MRR', 'nDCG@5', 'Rec@k'].map(pad).join('')}   (no pack -> pack)`,
+  );
   const line = (name, n, x, y) =>
-    console.log(`${name.padEnd(12)}${String(n).padStart(3)}  ${METRICS.map((m) => pad(`${x[m].toFixed(2)}>${y[m].toFixed(2)}`)).join('')}`);
+    console.log(
+      `${name.padEnd(12)}${String(n).padStart(3)}  ${METRICS.map((m) => pad(`${x[m].toFixed(2)}>${y[m].toFixed(2)}`)).join('')}`,
+    );
   line('ALL', golden.length, a.summary, b.summary);
-  for (const c of Object.keys(a.by_category)) line(c, a.by_category[c].n, a.by_category[c], b.by_category[c]);
+  for (const c of Object.keys(a.by_category))
+    line(c, a.by_category[c].n, a.by_category[c], b.by_category[c]);
 
   const worse = [];
-  for (const [c, x] of Object.entries(a.by_category)) for (const m of METRICS) if (b.by_category[c][m] < x[m]) worse.push(`${c}.${m}`);
+  for (const [c, x] of Object.entries(a.by_category))
+    for (const m of METRICS) if (b.by_category[c][m] < x[m]) worse.push(`${c}.${m}`);
   for (const m of METRICS) if (b.summary[m] < a.summary[m]) worse.push(`ALL.${m}`);
-  check('pack is not worse than no pack (summary and every category)', worse.length === 0, worse.join(', '));
+  check(
+    'pack is not worse than no pack (summary and every category)',
+    worse.length === 0,
+    worse.join(', '),
+  );
 
   const misses = withPack.rows.filter((r) => r.hit_5 === 0).map((r) => r.q.id);
   console.log(`\nqueries missing Hit@5 with pack: ${misses.join(', ') || 'none'}`);
-  console.log(`queries missing Hit@5 without pack: ${base.rows.filter((r) => r.hit_5 === 0).map((r) => r.q.id).join(', ') || 'none'}`);
+  console.log(
+    `queries missing Hit@5 without pack: ${
+      base.rows
+        .filter((r) => r.hit_5 === 0)
+        .map((r) => r.q.id)
+        .join(', ') || 'none'
+    }`,
+  );
 
   if (value('--out')) {
-    const slim = (rows) => rows.map((r) => ({ id: r.q.id, query: r.q.query, category: r.q.category, top: r.results.slice(0, 5).map((x) => x.path), ...Object.fromEntries(METRICS.map((m) => [m, round(r[m])])) }));
-    fs.writeFileSync(path.resolve(value('--out')), JSON.stringify({ k, golden: golden.length, no_pack: { ...a, per_query: slim(base.rows) }, pack: { ...b, per_query: slim(withPack.rows) }, checks }, null, 2) + '\n');
+    const slim = (rows) =>
+      rows.map((r) => ({
+        id: r.q.id,
+        query: r.q.query,
+        category: r.q.category,
+        top: r.results.slice(0, 5).map((x) => x.path),
+        ...Object.fromEntries(METRICS.map((m) => [m, round(r[m])])),
+      }));
+    fs.writeFileSync(
+      path.resolve(value('--out')),
+      JSON.stringify(
+        {
+          k,
+          golden: golden.length,
+          no_pack: { ...a, per_query: slim(base.rows) },
+          pack: { ...b, per_query: slim(withPack.rows) },
+          checks,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
   }
   exitCode = checks.every((c) => c.ok) ? 0 : 1;
 } catch (error) {

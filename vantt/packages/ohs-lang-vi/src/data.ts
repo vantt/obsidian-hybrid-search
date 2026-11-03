@@ -35,7 +35,9 @@ export type BaseVowel = (typeof BASE_VOWELS)[number];
  * sắc, hỏi, ngã, nặng). The tests cross-check each cell against an
  * independent Unicode composition.
  */
-export const VOWEL_TONE_TABLE: Readonly<Record<BaseVowel, readonly [string, string, string, string, string, string]>> = {
+export const VOWEL_TONE_TABLE: Readonly<
+  Record<BaseVowel, readonly [string, string, string, string, string, string]>
+> = {
   a: ['a', 'à', 'á', 'ả', 'ã', 'ạ'],
   ă: ['ă', 'ằ', 'ắ', 'ẳ', 'ẵ', 'ặ'],
   â: ['â', 'ầ', 'ấ', 'ẩ', 'ẫ', 'ậ'],
@@ -73,8 +75,32 @@ export function toneVowelNfd(vowel: BaseVowel, tone: Tone): string {
  * specially by the parser (see syllable.ts): "gì", "gin" are `g` + `i`.
  */
 export const ONSETS: readonly string[] = [
-  'ngh', 'gh', 'ng', 'nh', 'ph', 'th', 'tr', 'kh', 'ch', 'gi', 'qu',
-  'b', 'c', 'd', 'đ', 'g', 'h', 'k', 'l', 'm', 'n', 'r', 's', 't', 'v', 'x',
+  'ngh',
+  'gh',
+  'ng',
+  'nh',
+  'ph',
+  'th',
+  'tr',
+  'kh',
+  'ch',
+  'gi',
+  'qu',
+  'b',
+  'c',
+  'd',
+  'đ',
+  'g',
+  'h',
+  'k',
+  'l',
+  'm',
+  'n',
+  'r',
+  's',
+  't',
+  'v',
+  'x',
 ];
 
 const FRONT_VOWELS = 'eêiy';
@@ -119,7 +145,12 @@ export interface NucleusEntry {
 const OPEN = [''];
 const C_STOP_NASAL_ALL = ['c', 'ch', 'm', 'n', 'ng', 'nh', 'p', 't'];
 
-function n(text: string, glide: 0 | 1, codas: readonly string[], onset: NucleusEntry['onset'] = 'any'): NucleusEntry {
+function n(
+  text: string,
+  glide: 0 | 1,
+  codas: readonly string[],
+  onset: NucleusEntry['onset'] = 'any',
+): NucleusEntry {
   return { text, glide, codas, onset };
 }
 
@@ -146,9 +177,26 @@ export const NUCLEI: readonly NucleusEntry[] = [
   n('y', 0, OPEN, 'iy'), // kỹ, lý, mỹ, hy: open y after a consonant
   n('oo', 0, ['ng', 'c']),
   // descending diphthongs and open clusters (no coda)
-  ...['ai', 'ao', 'au', 'ay', 'âu', 'ây', 'eo', 'êu', 'iu', 'oi', 'ôi', 'ơi', 'ui', 'ưi', 'ưu', 'ia', 'ua', 'ưa'].map((t) =>
-    n(t, 0, OPEN),
-  ),
+  ...[
+    'ai',
+    'ao',
+    'au',
+    'ay',
+    'âu',
+    'ây',
+    'eo',
+    'êu',
+    'iu',
+    'oi',
+    'ôi',
+    'ơi',
+    'ui',
+    'ưi',
+    'ưu',
+    'ia',
+    'ua',
+    'ưa',
+  ].map((t) => n(t, 0, OPEN)),
   // centring diphthongs (need a coda, except in the triphthongs below)
   n('iê', 0, ['c', 'm', 'n', 'ng', 'p', 't'], 'some'),
   n('yê', 0, ['m', 'n', 'ng', 't'], 'none-or-qu'),
@@ -219,10 +267,22 @@ export const VNI_TONE_KEYS: readonly string[] = ['0', '2', '1', '3', '4', '5'];
 
 /** Keys that type each modified letter (đ included), in the order typed. */
 export const TELEX_LETTER_KEYS: Readonly<Record<string, string>> = {
-  â: 'aa', ă: 'aw', ê: 'ee', ô: 'oo', ơ: 'ow', ư: 'uw', đ: 'dd',
+  â: 'aa',
+  ă: 'aw',
+  ê: 'ee',
+  ô: 'oo',
+  ơ: 'ow',
+  ư: 'uw',
+  đ: 'dd',
 };
 export const VNI_LETTER_KEYS: Readonly<Record<string, string>> = {
-  â: 'a6', ă: 'a8', ê: 'e6', ô: 'o6', ơ: 'o7', ư: 'u7', đ: 'd9',
+  â: 'a6',
+  ă: 'a8',
+  ê: 'e6',
+  ô: 'o6',
+  ơ: 'o7',
+  ư: 'u7',
+  đ: 'd9',
 };
 
 /** Letter-typing keys for a plain vowel (a, e, i, o, u, y have none). */

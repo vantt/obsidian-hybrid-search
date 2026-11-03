@@ -3,7 +3,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { checkApplicability, runProbe, upstreamChanges, upstreamOverview } from '../lib/review-run.mjs';
+import {
+  checkApplicability,
+  runProbe,
+  upstreamChanges,
+  upstreamOverview,
+} from '../lib/review-run.mjs';
 import { git, write } from './helpers.mjs';
 
 let dir;
@@ -51,7 +56,13 @@ describe('checkApplicability', () => {
     { id: 'p3', patch_file: 'p2.patch', upstream_status: 'merged' },
   ];
   it('applies on the old tag', () => {
-    const r = checkApplicability(repo, patches.slice(0, 2), 'v1.0.0', path.join(dir, 'wt1'), patchesDir);
+    const r = checkApplicability(
+      repo,
+      patches.slice(0, 2),
+      'v1.0.0',
+      path.join(dir, 'wt1'),
+      patchesDir,
+    );
     expect(r).toEqual({ p1: 'applies', p2: 'applies' });
   });
   it('reports a conflict and keeps going with the next patch', () => {
@@ -68,7 +79,10 @@ describe('upstreamChanges and overview', () => {
     const a = upstreamChanges(repo, 'v1.0.0', 'v2.0.0', ['src/a.ts']);
     expect(a.commits.map((c) => c.subject)).toEqual(['change a']);
     expect(a.files).toEqual([{ status: 'M', path: 'src/a.ts' }]);
-    expect(upstreamChanges(repo, 'v1.0.0', 'v2.0.0', ['src/b.ts'])).toEqual({ commits: [], files: [] });
+    expect(upstreamChanges(repo, 'v1.0.0', 'v2.0.0', ['src/b.ts'])).toEqual({
+      commits: [],
+      files: [],
+    });
     expect(upstreamChanges(repo, 'v1.0.0', 'v2.0.0', [])).toEqual({ commits: [], files: [] });
   });
   it('summarises the whole range with the changelog diff', () => {
@@ -81,7 +95,10 @@ describe('upstreamChanges and overview', () => {
 describe('runProbe', () => {
   const probe = (code) => {
     const f = path.join(dir, `probe-${code}.mjs`);
-    writeFileSync(f, `console.log('args', process.argv.slice(2).join(' '));\nprocess.exit(${code});\n`);
+    writeFileSync(
+      f,
+      `console.log('args', process.argv.slice(2).join(' '));\nprocess.exit(${code});\n`,
+    );
     return f;
   };
   it('maps exit codes and passes --ohs', () => {
@@ -92,7 +109,10 @@ describe('runProbe', () => {
     expect(runProbe(probe(2), '/t').verdict).toBe('error');
   });
   it('reports a missing probe file as an error', () => {
-    expect(runProbe(path.join(dir, 'nope.mjs'), '/t')).toMatchObject({ verdict: 'error', exit: null });
+    expect(runProbe(path.join(dir, 'nope.mjs'), '/t')).toMatchObject({
+      verdict: 'error',
+      exit: null,
+    });
   });
   it('times out into an error', () => {
     const f = path.join(dir, 'slow.mjs');

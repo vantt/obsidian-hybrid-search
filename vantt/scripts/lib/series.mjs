@@ -114,7 +114,10 @@ export function parseSeries(text) {
     const line = lineOf(i);
     if (src[i] === '[') {
       const close = src.indexOf('\n', i);
-      const header = src.slice(i, close < 0 ? src.length : close).replace(/#.*$/, '').trim();
+      const header = src
+        .slice(i, close < 0 ? src.length : close)
+        .replace(/#.*$/, '')
+        .trim();
       if (header !== '[[patches]]')
         throw new SeriesError(`unsupported table ${header} (only [[patches]])`, line);
       current = { __line: line };

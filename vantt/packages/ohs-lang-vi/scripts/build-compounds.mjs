@@ -20,15 +20,23 @@
  * output, and of other thresholds, against a word list; it never changes
  * what is written. See data/README.md for how a reference list may be used.
  */
-import { createHash } from 'node:crypto';
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { pipeline } from 'node:stream/promises';
-import { createInterface } from 'node:readline';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parseArgs } from 'node:util';
 import { asyncBufferFromFile, parquetMetadataAsync, parquetRead } from 'hyparquet';
 import { compressors } from 'hyparquet-compressors';
+import { createHash } from 'node:crypto';
+import {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
+import path from 'node:path';
+import { createInterface } from 'node:readline';
+import { pipeline } from 'node:stream/promises';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { normalize, parseSyllable } from '../build/index.js';
 
 const HF = 'https://huggingface.co/datasets';
@@ -39,7 +47,12 @@ export const SOURCES = [
     name: 'alt',
     dataset: 'mutiyama/alt',
     revision: 'afbd92e198bbcf17f660e03076fd2938f5a4bbb2',
-    files: [{ path: 'alt-parallel/train-00000-of-00001.parquet', sha256: 'e2d95c41b90c0fe94226f9b424e63f476b6027015df4beba3e5d7e19092a3a44' }],
+    files: [
+      {
+        path: 'alt-parallel/train-00000-of-00001.parquet',
+        sha256: 'e2d95c41b90c0fe94226f9b424e63f476b6027015df4beba3e5d7e19092a3a44',
+      },
+    ],
     columns: ['translation'],
     text: (row) => [row.translation?.vi],
   },
@@ -47,10 +60,23 @@ export const SOURCES = [
     name: 'personas',
     dataset: 'nvidia/Nemotron-Personas-Vietnam',
     revision: '950724d49b7b41eee7925ae035a2059286c890ff',
-    files: [{ path: 'data/train-00000-of-00011.parquet', sha256: '7ba73013539e2edb61dc748086edfe52e0107adf124620f17364c5ec0b244ae4' }],
+    files: [
+      {
+        path: 'data/train-00000-of-00011.parquet',
+        sha256: '7ba73013539e2edb61dc748086edfe52e0107adf124620f17364c5ec0b244ae4',
+      },
+    ],
     columns: [
-      'professional_persona', 'sports_persona', 'arts_persona', 'travel_persona', 'culinary_persona', 'persona',
-      'cultural_background', 'skills_and_expertise', 'hobbies_and_interests', 'career_goals_and_ambitions',
+      'professional_persona',
+      'sports_persona',
+      'arts_persona',
+      'travel_persona',
+      'culinary_persona',
+      'persona',
+      'cultural_background',
+      'skills_and_expertise',
+      'hobbies_and_interests',
+      'career_goals_and_ambitions',
     ],
     text: (row) => Object.values(row),
   },
@@ -58,7 +84,12 @@ export const SOURCES = [
     name: 'legal',
     dataset: 'th1nhng0/vietnamese-legal-documents',
     revision: '8977887f17be2defae4c5171d55562e1cde7d695',
-    files: [{ path: 'data/content.parquet', sha256: '69c5b99c7e22bd14075ebc60e8d216e9eb35c4f1ab28bfc4c0bc38a87de45aab' }],
+    files: [
+      {
+        path: 'data/content.parquet',
+        sha256: '69c5b99c7e22bd14075ebc60e8d216e9eb35c4f1ab28bfc4c0bc38a87de45aab',
+      },
+    ],
     columns: ['content_html'],
     text: (row) => [htmlToText(row.content_html ?? '')],
   },
@@ -95,7 +126,10 @@ export function htmlToText(html) {
     .replace(/<\/?(p|div|br|tr|td|th|li|h[1-6]|table|ul|ol)\b[^>]*>/gi, '\n')
     .replace(/<[^>]*>/g, ' ')
     .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
-      if (e[0] === '#') return String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1)));
+      if (e[0] === '#')
+        return String.fromCodePoint(
+          e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1)),
+        );
       return ENTITIES[e.toLowerCase()] ?? m;
     });
 }
@@ -149,7 +183,6 @@ class Counter {
   runs = 0;
   words = 0;
   source = 0; // index into SOURCES of the text being added
-
 
   idOf(word) {
     let id = this.raw.get(word);
@@ -228,7 +261,9 @@ async function count(work, local) {
         },
       });
       rowStart = rowEnd;
-      process.stdout.write(`\r${source.name}: ${rowStart}/${metadata.num_rows} rows, ${counter.words} syllables`);
+      process.stdout.write(
+        `\r${source.name}: ${rowStart}/${metadata.num_rows} rows, ${counter.words} syllables`,
+      );
     }
     process.stdout.write('\n');
   }
@@ -238,9 +273,11 @@ async function count(work, local) {
   const lines = [`# words ${counter.words} runs ${counter.runs}`];
   counter.syllables.forEach((s, i) => lines.push(`u\t${s}\t${counter.unigram[i].join('\t')}`));
   const stream = createWriteStream(`${out}.part`);
-  const write = (line) => (stream.write(`${line}\n`) ? null : new Promise((r) => stream.once('drain', r)));
+  const write = (line) =>
+    stream.write(`${line}\n`) ? null : new Promise((r) => stream.once('drain', r));
   for (const line of lines) await write(line);
-  for (const [key, n] of counter.pairs) await write(`p\t${Math.floor(key / 65536)}\t${key % 65536}\t${n.join('\t')}`);
+  for (const [key, n] of counter.pairs)
+    await write(`p\t${Math.floor(key / 65536)}\t${key % 65536}\t${n.join('\t')}`);
   for (const [packed, n] of counter.triples) {
     if (n < 2) continue; // a single triple cannot change a win rate much
     const source = packed % 4;
@@ -261,7 +298,10 @@ async function readCounts(file) {
   const titled = new Map();
   const triples = [];
   let words = 0;
-  for await (const line of createInterface({ input: createReadStream(file), crlfDelay: Infinity })) {
+  for await (const line of createInterface({
+    input: createReadStream(file),
+    crlfDelay: Infinity,
+  })) {
     const f = line.split('\t');
     if (line.startsWith('# words ')) words = Number(line.split(' ')[2]);
     else if (f[0] === 'u') {
@@ -271,8 +311,8 @@ async function readCounts(file) {
       const key = Number(f[1]) * 65536 + Number(f[2]);
       pairs.set(key, f.slice(3, -1).map(Number));
       titled.set(key, Number(f.at(-1)));
-    }
-    else if (f[0] === 't') triples.push([Number(f[1]), Number(f[2]), Number(f[3]), Number(f[4]), Number(f[5])]);
+    } else if (f[0] === 't')
+      triples.push([Number(f[1]), Number(f[2]), Number(f[3]), Number(f[4]), Number(f[5])]);
   }
   return { syllables, unigram, pairs, titled, triples, words };
 }
@@ -316,7 +356,10 @@ export function scorePairs({ syllables, unigram, pairs, titled, triples }, t = T
   for (const [key, n] of pairs) {
     const a = Math.floor(key / 65536);
     const b = key % 65536;
-    scores.set(key, n.map((c, s) => npmi(c, unigram[a][s], unigram[b][s], words[s])));
+    scores.set(
+      key,
+      n.map((c, s) => npmi(c, unigram[a][s], unigram[b][s], words[s])),
+    );
   }
   // Losses per source: index key * 4 + source.
   const lostLeft = new Map(); // the pair lost to the pair on its right
@@ -411,14 +454,25 @@ function compare(scored, counts, refFile) {
         const t = { ...THRESHOLDS, minCount, minNpmi, minWinRate };
         // The win rate depends on minCount (sources with too few occurrences are skipped).
         const rescored = minCount === THRESHOLDS.minCount ? scored : scorePairs(counts, t);
-        report(JSON.stringify({ minCount, minNpmi, minWinRate }), rescored.filter((p) => passes(p, t)).map(text), ref, seen);
+        report(
+          JSON.stringify({ minCount, minNpmi, minWinRate }),
+          rescored.filter((p) => passes(p, t)).map(text),
+          ref,
+          seen,
+        );
       }
 }
 
 // ---- main ------------------------------------------------------------------------------------------------------
 
 async function main() {
-  const { values } = parseArgs({ options: { work: { type: 'string' }, reference: { type: 'string' }, 'count-only': { type: 'boolean' } } });
+  const { values } = parseArgs({
+    options: {
+      work: { type: 'string' },
+      reference: { type: 'string' },
+      'count-only': { type: 'boolean' },
+    },
+  });
   if (!values.work) {
     console.error('usage: node scripts/build-compounds.mjs --work <dir> [--reference <words.txt>]');
     process.exit(2);
@@ -433,8 +487,11 @@ async function main() {
   const out = [...new Set(scored.filter((p) => passes(p)).map(text))].sort();
   const target = fileURLToPath(new URL('../data/compounds.txt', import.meta.url));
   writeFileSync(target, `${out.join('\n')}\n`);
-  console.log(`${counts.words} syllables, ${counts.pairs.size} pairs -> ${out.length} compounds in ${target}`);
+  console.log(
+    `${counts.words} syllables, ${counts.pairs.size} pairs -> ${out.length} compounds in ${target}`,
+  );
   if (values.reference) compare(scored, counts, values.reference);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) await main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]))
+  await main();

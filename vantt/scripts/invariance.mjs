@@ -39,7 +39,8 @@ export function parseCli(argv) {
     },
     strict: true,
   });
-  if (!values['target-sha']) throw Object.assign(new Error('--target-sha is required'), { usage: true });
+  if (!values['target-sha'])
+    throw Object.assign(new Error('--target-sha is required'), { usage: true });
   return values;
 }
 
@@ -65,7 +66,11 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   const scratch = path.join(root, 'vantt', '.work', 'invariance');
   const report = {
     status: 'error',
-    target: { ref: opts['target-ref'] ?? null, sha: opts['target-sha'], branch: opts.branch ?? null },
+    target: {
+      ref: opts['target-ref'] ?? null,
+      sha: opts['target-sha'],
+      branch: opts.branch ?? null,
+    },
     fork_head: git(root, ['rev-parse', 'HEAD']),
     k,
     pack: null,
@@ -76,7 +81,9 @@ export async function main(argv, { cwd = process.cwd() } = {}) {
   };
   let upstream;
   try {
-    log(`Invariance: upstream ${opts['target-sha'].slice(0, 9)} vs fork ${report.fork_head.slice(0, 9)} (no pack).`);
+    log(
+      `Invariance: upstream ${opts['target-sha'].slice(0, 9)} vs fork ${report.fork_head.slice(0, 9)} (no pack).`,
+    );
     upstream = createUpstreamTree(root, opts['target-sha'], path.join(scratch, 'upstream'), log);
     report.upstream_deps = upstream.deps;
     for (const corpus of corpora) {

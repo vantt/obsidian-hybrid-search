@@ -40,7 +40,11 @@ export interface QueryAnalysis {
 
 export interface QueryContext {
   termStats(view: string, term: string): { docs: number; hits: number };
-  termsWithPrefix(view: string, prefix: string, limit: number): Array<{ term: string; docs: number }>;
+  termsWithPrefix(
+    view: string,
+    prefix: string,
+    limit: number,
+  ): Array<{ term: string; docs: number }>;
   phraseDocs(view: string, phrase: string): number;
   noteCount(): number;
   dbVersion(): number;

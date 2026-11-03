@@ -12,8 +12,8 @@
  * query is a few point lookups per syllable, independent of vocabulary size.
  * Lookups are cached per `dbVersion`.
  */
-import { CODAS, NUCLEI, ONSETS, TONES, type TonePlacement } from './data.js';
 import type { QueryContext } from './contract.js';
+import { CODAS, NUCLEI, ONSETS, TONES, type TonePlacement } from './data.js';
 import { fold } from './fold.js';
 import type { RestoreParams } from './options.js';
 import { composeSyllable, parseSyllable } from './syllable.js';
@@ -29,7 +29,10 @@ const inventories = new Map<string, Map<string, string[]>>();
  * to it ("ban", "bán", "bàn", "bản", "bãn", "bạn", "băn", ...), written with
  * the given tone placement. Built once per (style, foldIY).
  */
-export function accentedForms(style: TonePlacement, foldIY: boolean): ReadonlyMap<string, readonly string[]> {
+export function accentedForms(
+  style: TonePlacement,
+  foldIY: boolean,
+): ReadonlyMap<string, readonly string[]> {
   const key = `${style}:${foldIY}`;
   let map = inventories.get(key);
   if (map) return map;
@@ -184,7 +187,10 @@ function emissionOptions(
   if (found.length === 0) return literal;
   const total = found.reduce((sum, o) => sum + o.docs, 0);
   const denominator = total + params.unigramSmoothing * found.length;
-  return found.map((o) => ({ ...o, logp: Math.log((o.docs + params.unigramSmoothing) / denominator) }));
+  return found.map((o) => ({
+    ...o,
+    logp: Math.log((o.docs + params.unigramSmoothing) / denominator),
+  }));
 }
 
 /**
@@ -222,14 +228,19 @@ export function restoreTokens(
   let phraseLookups = 0;
   for (const i of ambiguousPairs) {
     const pairs: Array<{ a: number; b: number; p: number }> = [];
-    options[i - 1]!.forEach((oa, a) => options[i]!.forEach((ob, b) => pairs.push({ a, b, p: oa.logp + ob.logp })));
+    options[i - 1]!.forEach((oa, a) =>
+      options[i]!.forEach((ob, b) => pairs.push({ a, b, p: oa.logp + ob.logp })),
+    );
     pairs.sort((x, y) => y.p - x.p);
     for (const { a, b } of pairs.slice(0, perPair)) {
       const phrase = `${options[i - 1]![a]!.form} ${options[i]![b]!.form}`;
       const n = cache.phraseDocs(ctx, 'norm', phrase);
       phraseLookups++;
       if (n > 0)
-        transitions.set(`${i}:${a}:${b}`, params.bigramWeight * Math.log1p(n / params.bigramSmoothing));
+        transitions.set(
+          `${i}:${a}:${b}`,
+          params.bigramWeight * Math.log1p(n / params.bigramSmoothing),
+        );
     }
   }
 

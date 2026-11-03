@@ -1,10 +1,18 @@
 // Side-effecting helpers of the upstream review (PRD 12): worktrees and builds, patch
 // applicability, probes, upstream diffs, vi eval. Pure logic lives in review-core.mjs.
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import path from 'node:path';
 import { childEnv, git, sh } from './proc.mjs';
-import { probeVerdict, HOOK_FILES, extractTiming } from './review-core.mjs';
+import { HOOK_FILES, extractTiming, probeVerdict } from './review-core.mjs';
 
 const tail = (s, n = 600) => (s.length > n ? `…${s.slice(-n)}` : s);
 
@@ -17,10 +25,14 @@ export function buildPack(dir, log = () => {}) {
   const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));
   if (!pkg.scripts?.build) return;
   log(`  building ${pkg.name}`);
-  if (!existsSync(path.join(dir, 'node_modules')) && !sh(dir, existsSync(path.join(dir, 'package-lock.json')) ? 'npm ci' : 'npm install').ok)
+  if (
+    !existsSync(path.join(dir, 'node_modules')) &&
+    !sh(dir, existsSync(path.join(dir, 'package-lock.json')) ? 'npm ci' : 'npm install').ok
+  )
     throw new Error(`npm install failed in ${pkg.name}`);
   if (!sh(dir, 'npm run build').ok) throw new Error(`build of ${pkg.name} failed`);
-  if (pkg.main && !existsSync(path.join(dir, pkg.main))) throw new Error(`${pkg.name} has no ${pkg.main} after the build`);
+  if (pkg.main && !existsSync(path.join(dir, pkg.main)))
+    throw new Error(`${pkg.name} has no ${pkg.main} after the build`);
 }
 
 /** Run `npm run build` (tsc) in a tree; returns {ok, log}. */
@@ -70,7 +82,8 @@ export function checkApplicability(root, patches, sha, dir, patchesDir) {
 
 /** Run one probe on a built tree (PRD 9.2). Returns {verdict, exit, output}. */
 export function runProbe(probeFile, tree, { timeoutMs = 15 * 60_000, env = {} } = {}) {
-  if (!existsSync(probeFile)) return { verdict: 'error', exit: null, output: `probe file missing: ${probeFile}` };
+  if (!existsSync(probeFile))
+    return { verdict: 'error', exit: null, output: `probe file missing: ${probeFile}` };
   const res = spawnSync(process.execPath, [probeFile, '--ohs', tree], {
     env: childEnv(env),
     encoding: 'utf8',
@@ -78,7 +91,11 @@ export function runProbe(probeFile, tree, { timeoutMs = 15 * 60_000, env = {} } 
     maxBuffer: 64 * 1024 * 1024,
   });
   if (res.error) return { verdict: 'error', exit: null, output: res.error.message };
-  return { verdict: probeVerdict(res.status), exit: res.status, output: tail(`${res.stdout}${res.stderr}`.trim()) };
+  return {
+    verdict: probeVerdict(res.status),
+    exit: res.status,
+    output: tail(`${res.stdout}${res.stderr}`.trim()),
+  };
 }
 
 /**
@@ -87,11 +104,18 @@ export function runProbe(probeFile, tree, { timeoutMs = 15 * 60_000, env = {} } 
  */
 export function upstreamChanges(root, oldRef, newRef, paths) {
   if (!paths.length) return { commits: [], files: [] };
-  const log = git(root, ['log', '--format=%h %s', `${oldRef}..${newRef}`, '--', ...paths], { allowFail: true });
-  const names = git(root, ['diff', '--name-status', `${oldRef}..${newRef}`, '--', ...paths], { allowFail: true });
+  const log = git(root, ['log', '--format=%h %s', `${oldRef}..${newRef}`, '--', ...paths], {
+    allowFail: true,
+  });
+  const names = git(root, ['diff', '--name-status', `${oldRef}..${newRef}`, '--', ...paths], {
+    allowFail: true,
+  });
   const lines = (r) => (r.ok && r.stdout ? r.stdout.split('\n').filter(Boolean) : []);
   return {
-    commits: lines(log).map((l) => ({ sha: l.slice(0, l.indexOf(' ')), subject: l.slice(l.indexOf(' ') + 1) })),
+    commits: lines(log).map((l) => ({
+      sha: l.slice(0, l.indexOf(' ')),
+      subject: l.slice(l.indexOf(' ') + 1),
+    })),
     files: lines(names).map((l) => {
       const [status, ...rest] = l.split('\t');
       return { status, path: rest.join('\t') };
@@ -99,16 +123,19 @@ export function upstreamChanges(root, oldRef, newRef, paths) {
   };
 }
 
-export const hookChanges = (root, oldRef, newRef) => upstreamChanges(root, oldRef, newRef, HOOK_FILES);
+export const hookChanges = (root, oldRef, newRef) =>
+  upstreamChanges(root, oldRef, newRef, HOOK_FILES);
 
 /** Overall upstream changes: commit list, diffstat, CHANGELOG diff (bounded). */
 export function upstreamOverview(root, oldRef, newRef) {
   const commits = git(root, ['log', '--format=%h %s', `${oldRef}..${newRef}`], { allowFail: true });
   const stat = git(root, ['diff', '--stat', `${oldRef}..${newRef}`], { allowFail: true });
-  const cl = git(root, ['diff', '--unified=0', `${oldRef}..${newRef}`, '--', 'CHANGELOG.md'], { allowFail: true });
+  const cl = git(root, ['diff', '--unified=0', `${oldRef}..${newRef}`, '--', 'CHANGELOG.md'], {
+    allowFail: true,
+  });
   return {
     commits: commits.ok && commits.stdout ? commits.stdout.split('\n') : [],
-    diffstat_tail: stat.ok ? stat.stdout.split('\n').slice(-1)[0]?.trim() ?? '' : '',
+    diffstat_tail: stat.ok ? (stat.stdout.split('\n').slice(-1)[0]?.trim() ?? '') : '',
     changelog_diff: cl.ok ? tail(cl.stdout, 4000) : '',
   };
 }
@@ -148,12 +175,25 @@ export async function runEvaluateTimed({ tree, vault, golden, scratch, k = 10, e
     const copy = path.join(work, 'vault');
     cpSync(vault, copy, {
       recursive: true,
-      filter: (src) => !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src),
+      filter: (src) =>
+        !/(^|[\\/])(\.git|node_modules|\.obsidian-hybrid-search\.db(-wal|-shm)?)$/.test(src),
     });
     const out = path.join(work, 'result.json');
     const res = await runLogged(
       process.execPath,
-      ['--import', 'tsx', 'eval/evaluate.ts', '--vault', copy, '--golden-set', golden, '--output', out, '--k', String(k)],
+      [
+        '--import',
+        'tsx',
+        'eval/evaluate.ts',
+        '--vault',
+        copy,
+        '--golden-set',
+        golden,
+        '--output',
+        out,
+        '--k',
+        String(k),
+      ],
       { cwd: tree, env },
     );
     if (res.status !== 0) throw new Error(`eval failed in ${tree} (exit ${res.status})`);
@@ -170,7 +210,15 @@ export async function runEvaluateTimed({ tree, vault, golden, scratch, k = 10, e
  */
 export async function runViEval({ forkDir, tree, out, pack = null, otf = null, k = 10, env = {} }) {
   mkdirSync(path.dirname(out), { recursive: true });
-  const argv = [path.join(forkDir, 'vantt/eval/vi/run-eval.mjs'), '--ohs', tree, '--out', out, '--k', String(k)];
+  const argv = [
+    path.join(forkDir, 'vantt/eval/vi/run-eval.mjs'),
+    '--ohs',
+    tree,
+    '--out',
+    out,
+    '--k',
+    String(k),
+  ];
   if (pack) argv.push('--lang-pack', pack);
   if (otf) argv.push('--otf', otf);
   const res = await runLogged(process.execPath, argv, { cwd: forkDir, env: childEnv(env) });
@@ -178,7 +226,8 @@ export async function runViEval({ forkDir, tree, out, pack = null, otf = null, k
   return { ...JSON.parse(readFileSync(out, 'utf8')), review_timing: extractTiming(res.events) };
 }
 
-export const readJsonIfExists = (file) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null);
+export const readJsonIfExists = (file) =>
+  existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
 export const writeJson = (file, value) => {
   mkdirSync(path.dirname(file), { recursive: true });
   writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);

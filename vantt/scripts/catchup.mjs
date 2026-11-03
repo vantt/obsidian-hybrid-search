@@ -7,7 +7,6 @@
 //
 // Safety rules (PRD 5): only tags reachable from upstream/master are built, only
 // upstream `master` (plus tags) is fetched, nothing is pushed, HUSKY=0 everywhere.
-import { parseArgs } from 'node:util';
 import {
   cpSync,
   existsSync,
@@ -19,8 +18,9 @@ import {
 } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { git, sh, GitError } from './lib/proc.mjs';
-import { parseSeries, SeriesError } from './lib/series.mjs';
+import { parseArgs } from 'node:util';
+import { ensureNpm } from './lib/npm.mjs';
+import { git, GitError, sh } from './lib/proc.mjs';
 import {
   computeVersion,
   forkInputs,
@@ -30,8 +30,8 @@ import {
   stampVersion,
   VERSION_FILES,
 } from './lib/release.mjs';
+import { parseSeries, SeriesError } from './lib/series.mjs';
 import { runTiers } from './lib/tiers.mjs';
-import { ensureNpm } from './lib/npm.mjs';
 
 const UPSTREAM_URL = 'https://github.com/flowing-abyss/obsidian-hybrid-search';
 const STATE_REL = 'vantt/.catchup-state.json';
@@ -74,7 +74,8 @@ function parseCli(argv) {
   const modes = ['continue', 'abort', 'dry-run'].filter((k) => values[k]);
   if (modes.length > 1) throw new UsageError(`--${modes.join(' and --')} cannot be combined`);
   for (const l of values['with-lang'] ?? [])
-    if (!/^[a-z]{2,3}$/.test(l)) throw new UsageError(`--with-lang expects a language id like "vi", got "${l}"`);
+    if (!/^[a-z]{2,3}$/.test(l))
+      throw new UsageError(`--with-lang expects a language id like "vi", got "${l}"`);
   return {
     ref: values.ref,
     dryRun: !!values['dry-run'],
@@ -192,7 +193,11 @@ function ensureUpstream(ctx) {
   // Explicit refspec: never fetch other upstream branches (PRD 5, 6.6).
   ctx.log('Fetching upstream master and tags.');
   git(ctx.root, [
-    'fetch', '--quiet', '--no-recurse-submodules', '--tags', 'upstream',
+    'fetch',
+    '--quiet',
+    '--no-recurse-submodules',
+    '--tags',
+    'upstream',
     '+refs/heads/master:refs/remotes/upstream/master',
   ]);
 }
@@ -212,9 +217,13 @@ function dryRun(ctx, target, patches) {
       if (p.upstream_status === 'merged') action = 'SKIP (upstream_status = merged)';
       else if (!existsSync(file)) action = 'ERROR (patch file missing)';
       else if (blocked) action = 'UNKNOWN (after a conflict)';
-      else if (git(ctx.root, ['apply', '--cached', '--reverse', '--check', file], { env, allowFail: true }).ok)
+      else if (
+        git(ctx.root, ['apply', '--cached', '--reverse', '--check', file], { env, allowFail: true })
+          .ok
+      )
         action = 'SKIP (upstream already has it)';
-      else if (git(ctx.root, ['apply', '--cached', file], { env, allowFail: true }).ok) action = 'APPLY';
+      else if (git(ctx.root, ['apply', '--cached', file], { env, allowFail: true }).ok)
+        action = 'APPLY';
       else {
         action = 'CONFLICT (needs 3-way merge or a rewrite)';
         blocked = true;
@@ -241,7 +250,9 @@ function dryRun(ctx, target, patches) {
 }
 
 const branchSha = (root, branch) => {
-  const r = git(root, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`], { allowFail: true });
+  const r = git(root, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`], {
+    allowFail: true,
+  });
   return r.ok ? r.stdout.trim() : null;
 };
 
@@ -254,7 +265,9 @@ function start(ctx) {
       `a catchup session is in progress (${STATE_REL}); run with --continue or --abort`,
     );
   if (!opts.dryRun && trackedDirty(root))
-    throw new UsageError('working tree has uncommitted changes to tracked files; commit or stash them');
+    throw new UsageError(
+      'working tree has uncommitted changes to tracked files; commit or stash them',
+    );
   if (!opts.dryRun) ensureUpstream(ctx);
 
   let target;
@@ -290,7 +303,8 @@ function start(ctx) {
       sameInputs(prev, inputs)
     ) {
       log(`${target.branch} is already green for ${target.ref} (${prev.version}); nothing to do.`);
-      if (opts.json) process.stdout.write(JSON.stringify({ ...prev, already_green: true }, null, 2) + '\n');
+      if (opts.json)
+        process.stdout.write(JSON.stringify({ ...prev, already_green: true }, null, 2) + '\n');
       return EXIT.ok;
     }
   }
@@ -312,7 +326,12 @@ function start(ctx) {
     prev_branch_sha: existing,
     base_commit: null,
     backup_dir: backupRel,
-    options: { skipTests: opts.skipTests, skipQuality: opts.skipQuality, withLang: opts.withLang, report: opts.report },
+    options: {
+      skipTests: opts.skipTests,
+      skipQuality: opts.skipQuality,
+      withLang: opts.withLang,
+      report: opts.report,
+    },
     inputs,
     patch_results: [],
     index: 0,
@@ -331,7 +350,9 @@ function start(ctx) {
     cpSync(path.join(backupAbs, f), ctx.abs(f));
   }
   writeState(ctx, state);
-  git(root, ['add', '-f', '--pathspec-from-file=-', '--pathspec-file-nul'], { input: files.join('\0') });
+  git(root, ['add', '-f', '--pathspec-from-file=-', '--pathspec-file-nul'], {
+    input: files.join('\0'),
+  });
   state.base_commit = commit(root, MAINT_MSG);
   writeState(ctx, state);
   return applyFrom(ctx, state, 0);
@@ -377,8 +398,13 @@ function conflict(ctx, state, patches, i, stderr) {
   let files = unmergedFiles(root);
   if (!files.length) {
     // Plain apply failure without conflict markers (e.g. missing base blobs).
-    const ns = git(root, ['apply', '--numstat', `vantt/patches/${p.patch_file}`], { allowFail: true });
-    files = (ns.stdout || '').split('\n').filter(Boolean).map((l) => l.split('\t')[2]);
+    const ns = git(root, ['apply', '--numstat', `vantt/patches/${p.patch_file}`], {
+      allowFail: true,
+    });
+    files = (ns.stdout || '')
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => l.split('\t')[2]);
   }
   state.index = i;
   state.had_conflict = true;
@@ -387,7 +413,9 @@ function conflict(ctx, state, patches, i, stderr) {
 
   const tags = stableUpstreamTags(root);
   const prevTag = state.target.isTag ? tags[tags.indexOf(state.target.tag) + 1] : tags[0];
-  const range = prevTag ? `${prevTag}..${state.target.sha.slice(0, 12)}` : state.target.sha.slice(0, 12);
+  const range = prevTag
+    ? `${prevTag}..${state.target.sha.slice(0, 12)}`
+    : state.target.sha.slice(0, 12);
   const lines = [
     '',
     `CONFLICT: patch ${p.id} (${i + 1}/${patches.length}) does not apply on ${state.target.ref}.`,
@@ -432,7 +460,9 @@ function cont(ctx) {
   if (markerLines.length)
     throw new UsageError(`conflict markers are still staged:\n${markerLines.join('\n')}`);
   if (git(root, ['diff', '--quiet'], { allowFail: true }).ok === false)
-    throw new UsageError('unstaged changes to tracked files; git add the resolution (or reset it) first');
+    throw new UsageError(
+      'unstaged changes to tracked files; git add the resolution (or reset it) first',
+    );
 
   const patches = loadSeries(ctx, state.base_commit);
   const p = patches[state.index];
@@ -498,12 +528,17 @@ function buildAndTest(ctx, state, patches) {
     patches: {},
   };
   if (report.capability.version === 'fail')
-    log(`Capability: "node dist/src/cli.js --version" printed "${ver.stdout.trim()}", expected "-vantt."`);
+    log(
+      `Capability: "node dist/src/cli.js --version" printed "${ver.stdout.trim()}", expected "-vantt."`,
+    );
   for (const p of applied) {
     if (!p.capability_check) continue;
     report.capability.patches[p.id] = sh(root, p.capability_check).ok ? 'pass' : 'fail';
   }
-  const capFailed = [report.capability.version, ...Object.values(report.capability.patches)].includes('fail');
+  const capFailed = [
+    report.capability.version,
+    ...Object.values(report.capability.patches),
+  ].includes('fail');
 
   // Step 11: test tiers T1-T5.
   if (capFailed) {
@@ -534,15 +569,23 @@ function buildAndTest(ctx, state, patches) {
   if (state.had_conflict) {
     report.reexported_patches = applied.map((p) => {
       const sha = git(root, [
-        'log', '--format=%H', '-1', '--fixed-strings', `--grep=Patch-Id: ${p.id}`,
+        'log',
+        '--format=%H',
+        '-1',
+        '--fixed-strings',
+        `--grep=Patch-Id: ${p.id}`,
         `${state.base_commit}..HEAD`,
       ]);
       return {
         id: p.id,
         patch_file: p.patch_file,
-        content: git(root, ['format-patch', '-1', sha, '--stdout', '--zero-commit', '--no-signature'], {
-          raw: true,
-        }),
+        content: git(
+          root,
+          ['format-patch', '-1', sha, '--stdout', '--zero-commit', '--no-signature'],
+          {
+            raw: true,
+          },
+        ),
       };
     });
   }
@@ -562,7 +605,9 @@ function endSession(ctx, state, report) {
   rmSync(ctx.abs(state.backup_dir), { recursive: true, force: true });
 
   const code = emit(ctx, report, reportPath(ctx, state.target.slug));
-  log(`${report.status}: ${state.target.branch} at ${report.branch_sha?.slice(0, 12)} (${report.version}). Back on ${state.orig}.`);
+  log(
+    `${report.status}: ${state.target.branch} at ${report.branch_sha?.slice(0, 12)} (${report.version}). Back on ${state.orig}.`,
+  );
   if (reexports.length) {
     log('Patches were re-exported after the conflict fix (PRD 6.4). Commit them on master:');
     log(`  git add ${report.reexported_patches.join(' ')}`);
@@ -581,13 +626,16 @@ function abort(ctx) {
   rmSync(ctx.abs(STATE_REL), { force: true });
   git(root, ['checkout', '-q', state.orig]);
   if (state.target.branch !== state.orig) {
-    if (state.prev_branch_sha) git(root, ['branch', '-f', state.target.branch, state.prev_branch_sha]);
+    if (state.prev_branch_sha)
+      git(root, ['branch', '-f', state.target.branch, state.prev_branch_sha]);
     else git(root, ['branch', '-D', '-q', state.target.branch]);
   }
   rmSync(ctx.abs(state.backup_dir), { recursive: true, force: true });
   log(`Aborted catchup of ${state.target.ref}; back on ${state.orig}.`);
   if (ctx.opts.json)
-    process.stdout.write(JSON.stringify({ status: 'ABORTED', target_ref: state.target.ref }, null, 2) + '\n');
+    process.stdout.write(
+      JSON.stringify({ status: 'ABORTED', target_ref: state.target.ref }, null, 2) + '\n',
+    );
   return EXIT.ok;
 }
 
@@ -617,7 +665,8 @@ function main(argv) {
       return EXIT.usage;
     }
     console.error(`catchup: ${e instanceof GitError ? e.message : e.stack || e}`);
-    if (opts.json) process.stdout.write(JSON.stringify({ status: 'ERROR', error: String(e.message) }) + '\n');
+    if (opts.json)
+      process.stdout.write(JSON.stringify({ status: 'ERROR', error: String(e.message) }) + '\n');
     return EXIT.error;
   }
 }

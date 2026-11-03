@@ -7,8 +7,8 @@
  */
 import type { QueryContext } from './contract.js';
 import type { QueryEnvironment, QueryState, QueryToken } from './query.js';
-import { correctTypos, MIN_TYPO_LENGTH } from './typo.js';
 import { decodeKeystrokes } from './telex.js';
+import { correctTypos, MIN_TYPO_LENGTH } from './typo.js';
 import { foldToken, TOKEN_RE } from './views.js';
 
 const PLAIN_TOKEN = /^[a-z0-9]+$/;
@@ -41,7 +41,9 @@ export function rewriteTokens(
   const lexiconWords = env.lexicon?.knownWords((w) => foldToken(w, options), ctx.vaultPath);
   const known = (t: QueryToken) =>
     !PLAIN_TOKEN.test(t.norm) ||
-    lexiconWords?.has(t.folded) === true || cache.termDocs(ctx, 'fold', t.folded) > 0 || cache.termDocs(ctx, 'norm', t.norm) > 0;
+    lexiconWords?.has(t.folded) === true ||
+    cache.termDocs(ctx, 'fold', t.folded) > 0 ||
+    cache.termDocs(ctx, 'norm', t.norm) > 0;
   const unknown = state.tokens.map((t) => !known(t));
 
   if (options.telex) {
@@ -63,7 +65,12 @@ export function rewriteTokens(
     const corrections = correctTypos(
       state.tokens.map((t, i) => ({
         folded: t.folded,
-        unknown: unknown[i]! && !decoded.has(i) && !t.marked && LETTER_TOKEN.test(t.norm) && t.norm.length >= MIN_TYPO_LENGTH,
+        unknown:
+          unknown[i]! &&
+          !decoded.has(i) &&
+          !t.marked &&
+          LETTER_TOKEN.test(t.norm) &&
+          t.norm.length >= MIN_TYPO_LENGTH,
       })),
       ctx,
       cache,
@@ -75,4 +82,3 @@ export function rewriteTokens(
   }
   if (info.telex.length > 0 || info.typo.length > 0) state.rewrite = info;
 }
-

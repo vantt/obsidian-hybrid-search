@@ -191,15 +191,23 @@ function mergeNumbers<T extends object>(base: T, input: unknown, label: string):
 function bool(input: Record<string, unknown>, key: string, fallback: boolean): boolean {
   const value = input[key];
   if (value === undefined) return fallback;
-  if (typeof value !== 'boolean') throw new TypeError(`ohs-lang-vi: option "${key}" must be a boolean`);
+  if (typeof value !== 'boolean')
+    throw new TypeError(`ohs-lang-vi: option "${key}" must be a boolean`);
   return value;
 }
 
-function oneOf<T extends string>(input: Record<string, unknown>, key: string, allowed: readonly T[], fallback: T): T {
+function oneOf<T extends string>(
+  input: Record<string, unknown>,
+  key: string,
+  allowed: readonly T[],
+  fallback: T,
+): T {
   const value = input[key];
   if (value === undefined) return fallback;
   if (!allowed.includes(value as T))
-    throw new TypeError(`ohs-lang-vi: option "${key}" must be one of ${allowed.map((a) => `"${a}"`).join(', ')}`);
+    throw new TypeError(
+      `ohs-lang-vi: option "${key}" must be one of ${allowed.map((a) => `"${a}"`).join(', ')}`,
+    );
   return value as T;
 }
 
@@ -239,8 +247,17 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     accentedRatio: ratio(input, 'accentedRatio', DEFAULT_OPTIONS.accentedRatio),
     minSyllableShare: ratio(input, 'minSyllableShare', DEFAULT_OPTIONS.minSyllableShare),
     accentedNorm: bool(input, 'accentedNorm', DEFAULT_OPTIONS.accentedNorm),
-    accentedFold: oneOf(input, 'accentedFold', ['always', 'auto', 'never'] as const, DEFAULT_OPTIONS.accentedFold),
-    accentedFoldMinShare: ratio(input, 'accentedFoldMinShare', DEFAULT_OPTIONS.accentedFoldMinShare),
+    accentedFold: oneOf(
+      input,
+      'accentedFold',
+      ['always', 'auto', 'never'] as const,
+      DEFAULT_OPTIONS.accentedFold,
+    ),
+    accentedFoldMinShare: ratio(
+      input,
+      'accentedFoldMinShare',
+      DEFAULT_OPTIONS.accentedFoldMinShare,
+    ),
     segment: bool(input, 'segment', DEFAULT_OPTIONS.segment),
     segMaxDocShare: ratio(input, 'segMaxDocShare', DEFAULT_OPTIONS.segMaxDocShare),
     segWeightByCoverage: bool(input, 'segWeightByCoverage', DEFAULT_OPTIONS.segWeightByCoverage),
@@ -250,9 +267,17 @@ export function resolveOptions(input: unknown = {}): PackOptions {
     telex: bool(input, 'telex', DEFAULT_OPTIONS.telex),
     typo: bool(input, 'typo', DEFAULT_OPTIONS.typo),
     viewWeights: mergeNumbers(DEFAULT_OPTIONS.viewWeights, input.viewWeights, 'viewWeights'),
-    restoreParams: mergeNumbers(DEFAULT_OPTIONS.restoreParams, input.restoreParams, 'restoreParams'),
+    restoreParams: mergeNumbers(
+      DEFAULT_OPTIONS.restoreParams,
+      input.restoreParams,
+      'restoreParams',
+    ),
     rescore: bool(input, 'rescore', DEFAULT_OPTIONS.rescore),
-    rescoreWeights: mergeNumbers(DEFAULT_OPTIONS.rescoreWeights, input.rescoreWeights, 'rescoreWeights'),
+    rescoreWeights: mergeNumbers(
+      DEFAULT_OPTIONS.rescoreWeights,
+      input.rescoreWeights,
+      'rescoreWeights',
+    ),
     minBm25Agreement: ratio(input, 'minBm25Agreement', DEFAULT_OPTIONS.minBm25Agreement),
   };
 }

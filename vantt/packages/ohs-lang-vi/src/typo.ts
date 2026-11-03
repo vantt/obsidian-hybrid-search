@@ -88,7 +88,10 @@ export function correctTypos(
   for (const [i, found] of options) {
     const scored = found.map((candidate) => {
       let context = 0;
-      for (const [offset, before] of [[-1, true], [1, false]] as const) {
+      for (const [offset, before] of [
+        [-1, true],
+        [1, false],
+      ] as const) {
         let best = 0;
         for (const other of neighbourWords(i + offset)) {
           const phrase = before ? `${other} ${candidate.word}` : `${candidate.word} ${other}`;
@@ -99,7 +102,10 @@ export function correctTypos(
       return { word: candidate.word, score: Math.log1p(candidate.docs) + CONTEXT_WEIGHT * context };
     });
     scored.sort((a, b) => b.score - a.score || (a.word < b.word ? -1 : 1));
-    out.set(i, scored.slice(0, MAX_TYPO_CANDIDATES).map((s) => s.word));
+    out.set(
+      i,
+      scored.slice(0, MAX_TYPO_CANDIDATES).map((s) => s.word),
+    );
   }
   return out;
 }

@@ -5,9 +5,9 @@
  * probability. The `embedQuery` is untouched.
  */
 import type { QueryAnalysis, QueryContext } from './contract.js';
+import type { LexiconStore } from './lexicon.js';
 import { expandQuery, type Form } from './lexicon.js';
 import { isCommon, type PackOptions } from './options.js';
-import type { LexiconStore } from './lexicon.js';
 import type { QueryState, ViAnalysisData } from './query.js';
 import { foldToken, tokenize } from './views.js';
 
@@ -47,11 +47,15 @@ export function applyLexicon(
   const common = (s: (typeof substitutions)[number]) => {
     if (!s.abbreviation || options.abbrMaxDocShare >= 1) return false;
     const folded = s.words.map(foldWord);
-    const docs = folded.length === 1 ? ctx.termStats('fold', folded[0]!).docs : ctx.phraseDocs('fold', folded.join(' '));
+    const docs =
+      folded.length === 1
+        ? ctx.termStats('fold', folded[0]!).docs
+        : ctx.phraseDocs('fold', folded.join(' '));
     return isCommon(docs, ctx.noteCount(), options.abbrMaxDocShare);
   };
   const words: string[] = [];
-  for (const s of substitutions) if (!common(s)) for (const w of s.words) if (!words.includes(w)) words.push(w);
+  for (const s of substitutions)
+    if (!common(s)) for (const w of s.words) if (!words.includes(w)) words.push(w);
   if (words.length > 0) {
     analysis.viewQueries.norm = extend(analysis.viewQueries.norm, words);
     analysis.viewQueries.fold = extend(analysis.viewQueries.fold, words.map(foldWord));
@@ -60,7 +64,10 @@ export function applyLexicon(
   const data = analysis.data as ViAnalysisData | undefined;
   const rewrites: Array<{ from: string; to: string }> = [];
   for (const s of substitutions) {
-    const base: Form = data && data.target.length === state.tokens.length ? data.target : state.tokens.map((t) => t.norm);
+    const base: Form =
+      data && data.target.length === state.tokens.length
+        ? data.target
+        : state.tokens.map((t) => t.norm);
     const replaced = [...base.slice(0, s.start), ...s.words, ...base.slice(s.end)];
     data?.targets.push({ words: replaced, p: options.lexiconWeight });
     rewrites.push({ from: base.slice(s.start, s.end).join(' '), to: s.words.join(' ') });
