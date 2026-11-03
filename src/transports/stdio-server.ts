@@ -230,6 +230,7 @@ function normalizeSearchOptions(rawOptions: SearchOptionsBoundary | undefined): 
   if (rawOptions.queries !== undefined) options.queries = rawOptions.queries;
   if (rawOptions.anchors !== undefined) options.anchors = rawOptions.anchors;
   if (rawOptions.explain !== undefined) options.explain = rawOptions.explain;
+  if (rawOptions.paths !== undefined) options.paths = rawOptions.paths;
 
   const scope = parseStringArrayParam('scope', rawOptions.scope);
   if (scope !== undefined) options.scope = scope;
