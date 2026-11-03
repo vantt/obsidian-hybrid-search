@@ -3,7 +3,8 @@
 // - generated, gitignored output: compiled language packs (`npm run build` in a pack recreates
 //   them) and catchup scratch;
 // - eval fixture vaults, whose notes are indexed as written and must stay byte for byte
-//   (the vi smoke vault keeps a CRLF note on purpose).
+//   (the vi smoke vault keeps a CRLF note on purpose);
+// - eval baselines, which the eval scripts write as plain JSON.stringify output.
 import { readFileSync } from 'node:fs';
 
 const root = JSON.parse(readFileSync(new URL('../.prettierrc', import.meta.url), 'utf8'));
@@ -18,6 +19,7 @@ export default {
         '.work/**',
         'eval/vi/smoke-vault/**',
         'packages/ohs-lang-de/eval/vault/**',
+        'eval/baselines/**',
       ],
       options: { requirePragma: true },
     },
