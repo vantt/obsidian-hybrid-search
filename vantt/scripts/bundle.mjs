@@ -242,11 +242,254 @@ async function fetchNode(platform, version, work, dest) {
   return { licenseFile: path.join(root, 'LICENSE'), archive: name, sha256: got, extractDir: ex };
 }
 
-function collectLicenses(nodeModules, destDir) {
-  let count = 0;
+export const FORK_REPO = 'https://github.com/vantt/obsidian-hybrid-search';
+export const LICENSE_TEXTS_DIR = path.join(here, '..', 'licenses');
+
+// Declared license id (upper-cased) -> canonical text in vantt/licenses (README there: SPDX tag and hashes).
+// Bare "Apache" (sqlite-vec) means Apache-2.0. The GNU -only/-or-later variants share one text.
+const LICENSE_TEXT_FILES = {
+  MIT: 'MIT',
+  ISC: 'ISC',
+  '0BSD': '0BSD',
+  APACHE: 'Apache-2.0',
+  'APACHE-2.0': 'Apache-2.0',
+  'BSD-2-CLAUSE': 'BSD-2-Clause',
+  'BSD-3-CLAUSE': 'BSD-3-Clause',
+  'LGPL-3.0': 'LGPL-3.0',
+  'LGPL-3.0+': 'LGPL-3.0',
+  'LGPL-3.0-ONLY': 'LGPL-3.0',
+  'LGPL-3.0-OR-LATER': 'LGPL-3.0',
+  'GPL-3.0': 'GPL-3.0',
+  'GPL-3.0+': 'GPL-3.0',
+  'GPL-3.0-ONLY': 'GPL-3.0',
+  'GPL-3.0-OR-LATER': 'GPL-3.0',
+};
+
+/** Canonical license texts by text name (`MIT`, `LGPL-3.0`, ...), read from `dir`. */
+export function loadLicenseTexts(dir = LICENSE_TEXTS_DIR) {
+  const texts = {};
+  for (const name of new Set(Object.values(LICENSE_TEXT_FILES)))
+    texts[name] = readFileSync(path.join(dir, `${name}.txt`), 'utf8');
+  return texts;
+}
+
+/** The `license` of a package.json as an SPDX-like expression (also the legacy `licenses: [{type}]` array). */
+function declaredLicense(pkg) {
+  const one = (l) => (typeof l === 'string' ? l : l?.type);
+  if (pkg.license !== undefined) return one(pkg.license)?.trim() || null;
+  if (Array.isArray(pkg.licenses) && pkg.licenses.length)
+    return pkg.licenses.map(one).filter(Boolean).join(' OR ') || null;
+  return null;
+}
+
+/**
+ * The license texts to ship for a declared expression: every operand of AND, the first operand of OR that has
+ * a text (AND binds tighter than OR, as in SPDX). Returns text names, or throws naming the package.
+ */
+export function chooseLicenseTexts(expr, label) {
+  const tokens = String(expr ?? '').match(/\(|\)|[^\s()]+/g) ?? [];
+  let i = 0;
+  const fail = (why) => {
+    throw new Error(
+      `${label}: ${why} in declared license "${expr ?? ''}"; known ids: ${Object.keys(LICENSE_TEXT_FILES).join(', ')}. Add its text to vantt/licenses (see the README there)`,
+    );
+  };
+  // Each parser returns the chosen text names, or null when an operand has no known text.
+  const primary = () => {
+    const t = tokens[i++];
+    if (t === undefined) fail('unexpected end');
+    if (t === '(') {
+      const r = orExpr();
+      if (tokens[i++] !== ')') fail('unbalanced parentheses');
+      return r;
+    }
+    if (/^(AND|OR|WITH)$/i.test(t) || t === ')') fail(`unexpected "${t}"`);
+    if (/^WITH$/i.test(tokens[i] ?? '')) {
+      i += 2; // a license exception needs its own text: treat the operand as unknown
+      return null;
+    }
+    const name = LICENSE_TEXT_FILES[t.toUpperCase()];
+    return name ? [name] : null;
+  };
+  const andExpr = () => {
+    let out = primary();
+    while (/^AND$/i.test(tokens[i] ?? '')) {
+      i++;
+      const r = primary();
+      out = out && r ? [...out, ...r] : null;
+    }
+    return out;
+  };
+  const orExpr = () => {
+    let out = andExpr();
+    while (/^OR$/i.test(tokens[i] ?? '')) {
+      i++;
+      const r = andExpr();
+      out ??= r;
+    }
+    return out;
+  };
+  if (!tokens.length) fail('no license id');
+  const chosen = orExpr();
+  if (i !== tokens.length) fail(`unexpected "${tokens[i]}"`);
+  if (!chosen) fail('no license text for any choice');
+  return [...new Set(chosen)];
+}
+
+/** Browsable https URL of a package.json `repository`, or null. */
+export function repositoryUrl(pkg) {
+  const raw = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
+  if (!raw) return null;
+  let url = raw.trim();
+  const short = /^(?:github:)?([\w.-]+\/[\w.-]+)$/.exec(url);
+  if (short) url = `https://github.com/${short[1]}`;
+  url = url
+    .replace(/^git\+/, '')
+    .replace(/^git@([^:]+):/, 'https://$1/')
+    .replace(/^(git|ssh):\/\/(git@)?/, 'https://')
+    .replace(/\.git$/, '')
+    .replace(/\/$/, '');
+  return url;
+}
+
+/** Copyright holder for a generated notice: the package.json author's name, else "the <name> authors". */
+export function copyrightHolder(pkg) {
+  const author = typeof pkg.author === 'string' ? pkg.author : pkg.author?.name;
+  // npm's "Name <email> (url)" form: keep the name.
+  const name = author?.split(/[<(]/)[0].trim();
+  return name || `the ${pkg.name} authors`;
+}
+
+/** Text names to ship plus the source obligation of the copyleft ones (LGPL-3.0 is GPL-3.0 plus permissions). */
+function withCopyleft(texts) {
+  const lgpl = texts.includes('LGPL-3.0');
+  const copyleft = lgpl || texts.includes('GPL-3.0');
+  return {
+    copyleft,
+    texts: lgpl && !texts.includes('GPL-3.0') ? [...texts, 'GPL-3.0'] : texts,
+  };
+}
+
+function sourceLine(pkg, repo, label) {
+  if (!repo)
+    throw new Error(`${label}: copyleft license but no repository in package.json to point at`);
+  return `Corresponding source: ${repo}/tree/v${pkg.version} (repository ${repo}, tag v${pkg.version})`;
+}
+
+// Texts that open with a template copyright line ("Copyright (c) <year> <owner>") to fill with the holder.
+// The GNU and Apache texts stay verbatim: their placeholders belong to the how-to-apply appendix.
+const HOLDER_TEMPLATES = new Set(['MIT', 'ISC', '0BSD', 'BSD-2-Clause', 'BSD-3-Clause']);
+
+function licenseSections(names, texts, holder) {
+  return names
+    .map((n) => {
+      const lines = texts[n].split('\n');
+      if (HOLDER_TEMPLATES.has(n)) {
+        const at = lines.findIndex(
+          (l) => l.startsWith('Copyright') && (l.includes('<') || l.includes('YEAR')),
+        );
+        if (at >= 0) lines[at] = `Copyright (c) ${holder}`;
+      }
+      return `==== ${n} ====\n\n${lines.join('\n').trimEnd()}\n`;
+    })
+    .join('\n');
+}
+
+/** LICENSE-FROM-PACKAGE.txt for a package that declares a license but ships no license file. */
+export function generatedNotice(pkg, texts) {
+  const label = `${pkg.name}@${pkg.version}`;
+  const declared = declaredLicense(pkg);
+  const { copyleft, texts: names } = withCopyleft(chooseLicenseTexts(declared, label));
+  const repo = repositoryUrl(pkg);
+  const holder = copyrightHolder(pkg);
+  const head = [
+    `Package: ${pkg.name}`,
+    `Version: ${pkg.version}`,
+    `License (declared in package.json): ${declared}`,
+    `License texts below: ${names.join(', ')}`,
+    `Copyright holder: ${holder}`,
+    `Repository: ${repo ?? 'none declared'}`,
+    ...(copyleft ? [sourceLine(pkg, repo, label)] : []),
+    '',
+    'This package ships no license file. This notice was generated when the bundle was built from the license',
+    'declared in its package.json, with the canonical license text from the SPDX License List.',
+    '',
+  ];
+  return `${head.join('\n')}\n${licenseSections(names, texts, holder)}`;
+}
+
+/** CORRESPONDING-SOURCE.txt for a copyleft package that ships its own license file, or null. */
+function copyleftNotice(pkg, texts) {
+  const label = `${pkg.name}@${pkg.version}`;
+  let chosen;
+  try {
+    chosen = chooseLicenseTexts(declaredLicense(pkg), label);
+  } catch {
+    return null; // the package ships its own license text; the declared id only decides the source obligation
+  }
+  const { copyleft, texts: names } = withCopyleft(chosen);
+  if (!copyleft) return null;
+  const head = [
+    `Package: ${pkg.name}`,
+    `Version: ${pkg.version}`,
+    `License (declared in package.json): ${declaredLicense(pkg)}`,
+    sourceLine(pkg, repositoryUrl(pkg), label),
+    '',
+    'The license files shipped by the package are next to this file. The GNU license texts follow.',
+    '',
+  ];
+  return `${head.join('\n')}\n${licenseSections(names, texts, copyrightHolder(pkg))}`;
+}
+
+/** Copy one package's license files to destDir/<name>/ and write the notices it needs; see collectLicenses. */
+function licensePackage(dir, name, destDir, texts) {
+  const out = path.join(destDir, name);
+  let copied = 0;
+  let generated = 0;
+  for (const f of readdirSync(dir)) {
+    const fp = path.join(dir, f);
+    if (LICENSE_FILE.test(f.replace(/\.(md|txt|markdown)$/i, '')) && statSync(fp).isFile()) {
+      mkdirSync(out, { recursive: true });
+      cpSync(fp, path.join(out, f));
+      copied++;
+    }
+  }
+  const manifest = path.join(dir, 'package.json');
+  if (!existsSync(manifest)) {
+    if (copied === 0) throw new Error(`${name}: no package.json and no license file`);
+    return { copied, generated, entry: null };
+  }
+  const pkg = JSON.parse(readFileSync(manifest, 'utf8'));
+  const [file, notice] =
+    copied === 0
+      ? ['LICENSE-FROM-PACKAGE.txt', generatedNotice(pkg, texts)]
+      : ['CORRESPONDING-SOURCE.txt', copyleftNotice(pkg, texts)];
+  if (notice) {
+    mkdirSync(out, { recursive: true });
+    writeFileSync(path.join(out, file), notice);
+    generated++;
+  }
+  const entry = {
+    name: pkg.name ?? name,
+    version: pkg.version ?? 'unknown',
+    license: declaredLicense(pkg) ?? 'see the license files',
+    source: repositoryUrl(pkg) ?? `https://www.npmjs.com/package/${pkg.name}/v/${pkg.version}`,
+    dir: name,
+  };
+  return { copied, generated, entry };
+}
+
+/**
+ * Copy the license files of every package under nodeModules to destDir/<dir name>/. A package that ships none gets
+ * a generated LICENSE-FROM-PACKAGE.txt from its declared license; a copyleft package also gets its source pointer.
+ * An undeclared or unknown license fails the build. Returns {copied, generated, packages: [{name, version,
+ * license, source, dir}]}.
+ */
+export function collectLicenses(nodeModules, destDir, texts = loadLicenseTexts()) {
+  const total = { copied: 0, generated: 0, packages: [] };
   const visit = (nm) => {
     for (const ent of readdirSync(nm, { withFileTypes: true })) {
-      if (!ent.isDirectory() || ent.name === '.bin' || ent.name === '.cache') continue;
+      if (!ent.isDirectory() || ent.name.startsWith('.')) continue;
       const dir = path.join(nm, ent.name);
       if (ent.name.startsWith('@')) {
         visit(dir);
@@ -257,20 +500,72 @@ function collectLicenses(nodeModules, destDir) {
         .split(path.sep)
         .join('__')
         .replace(/(^|__)node_modules__/g, '$1');
-      for (const f of readdirSync(dir)) {
-        const fp = path.join(dir, f);
-        if (LICENSE_FILE.test(f.replace(/\.(md|txt|markdown)$/i, '')) && statSync(fp).isFile()) {
-          mkdirSync(path.join(destDir, name), { recursive: true });
-          cpSync(fp, path.join(destDir, name, f));
-          count++;
-        }
-      }
+      const r = licensePackage(dir, name, destDir, texts);
+      total.copied += r.copied;
+      total.generated += r.generated;
+      if (r.entry) total.packages.push(r.entry);
       const inner = path.join(dir, 'node_modules');
       if (existsSync(inner)) visit(inner);
     }
   };
   visit(nodeModules);
-  return count;
+  return total;
+}
+
+/** LICENSES/THIRD_PARTY.md: one row per bundled npm package, plus Node.js and the language pack. */
+export function thirdPartyMarkdown({ packages, nodeVersion, lang }) {
+  const cell = (s) => String(s).replaceAll('|', '\\|');
+  const rows = [
+    {
+      name: 'Node.js',
+      version: nodeVersion,
+      license: 'MIT and the licenses of its bundled components (NODE-LICENSE)',
+      source: `https://github.com/nodejs/node/tree/v${nodeVersion}`,
+    },
+    ...(lang
+      ? [
+          {
+            name: 'ohs-lang-vi',
+            version: lang.version,
+            license:
+              'Proprietary, all rights reserved; use only with pkm under its EULA (OHS-LANG-VI-LICENSE)',
+            source: lang.source,
+          },
+        ]
+      : []),
+    ...[...packages].sort(
+      (a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version),
+    ),
+  ];
+  const seen = new Set();
+  const lines = [];
+  for (const r of rows) {
+    const key = `${r.name}@${r.version}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    lines.push(`| ${[r.name, r.version, r.license, r.source].map(cell).join(' | ')} |`);
+  }
+  return [
+    '# Third-party components',
+    '',
+    'Components shipped in this bundle besides obsidian-hybrid-search itself (MIT, `OHS-LICENSE`).',
+    'License texts: `NODE-LICENSE`, `OHS-LANG-VI-LICENSE`, and `deps/<package>/` for npm packages (a scoped',
+    'name such as `@a/b` is in `deps/@a__b/`, a nested copy in `deps/<parent>__<package>/`).',
+    '',
+    '| Component | Version | License | Source |',
+    '| --- | --- | --- | --- |',
+    ...lines,
+    '',
+  ].join('\n');
+}
+
+/** The language pack is proprietary: its LICENSE goes next to it and into LICENSES/, or the build fails. */
+function shipLangLicense(langDir, langDest, licenses) {
+  const file = path.join(langDir, 'LICENSE');
+  if (!existsSync(file))
+    throw new Error('ohs-lang-vi has no LICENSE; the bundle must carry its license');
+  cpSync(file, path.join(langDest, 'LICENSE'));
+  cpSync(file, path.join(licenses, 'OHS-LANG-VI-LICENSE'));
 }
 
 function patchList(tree) {
@@ -404,9 +699,9 @@ export async function main(argv) {
   );
   cpSync(nodeInfo.licenseFile, path.join(licenses, 'NODE-LICENSE'));
   const nm = path.join(app, 'node_modules');
-  const licenseFiles = collectLicenses(nm, path.join(licenses, 'deps'));
+  const deps = collectLicenses(nm, path.join(licenses, 'deps'));
 
-  // 4. Language pack (PRD 8.2 `lang/`).
+  // 4. Language pack (PRD 8.2 `lang/`), then the third-party table of everything shipped.
   let langVersion = null;
   const langSrc = path.join(tree, 'vantt', 'packages', 'ohs-lang-vi');
   if (!values['no-lang'] && existsSync(path.join(langSrc, 'package.json'))) {
@@ -428,7 +723,19 @@ export async function main(argv) {
         cpSync(path.join(work2, item), path.join(langDest, item), { recursive: true });
     if (!existsSync(path.join(langDest, 'build', 'index.js')))
       throw new Error('ohs-lang-vi build produced no build/index.js');
+    shipLangLicense(work2, langDest, licenses);
   }
+  writeFileSync(
+    path.join(licenses, 'THIRD_PARTY.md'),
+    thirdPartyMarkdown({
+      packages: deps.packages,
+      nodeVersion,
+      lang: langVersion && {
+        version: langVersion,
+        source: `${FORK_REPO}/tree/v${version}/vantt/packages/ohs-lang-vi`,
+      },
+    }),
+  );
 
   // 5. Prune (only deletes files; PRD 8.2).
   const before = dirSize(root);
@@ -489,7 +796,8 @@ export async function main(argv) {
     size_unpacked: after,
     size_unpacked_before_prune: before,
     pruned_files: pruned,
-    license_files: licenseFiles,
+    license_files: deps.copied + deps.generated,
+    license_files_generated: deps.generated,
     node_version: nodeVersion,
     lang_packs: manifest.lang_packs,
     patches: manifest.patches.length,
