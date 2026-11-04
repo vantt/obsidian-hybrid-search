@@ -1,0 +1,39 @@
+Copyright (c) 2026 Van Tran. All rights reserved.
+
+This directory (`vantt/packages/ohs-lang-vi`, the Vietnamese language pack for
+obsidian-hybrid-search, with its source code, build output, data files, scripts,
+tests, and documentation) is proprietary software. It is not covered by the MIT
+license of the rest of this repository.
+
+The source code is published for viewing only. No right to use, copy, modify,
+build, distribute, sublicense, or sell any part of it is granted by its
+publication, nor by its inclusion in an obsidian-hybrid-search bundle that
+anyone can download.
+
+The right to use this language pack is granted only to customers who have bought
+the `pkm` product, only together with `pkm`, under the end-user license
+agreement (EULA) they accept when they buy it, and only within the scope of that
+agreement.
+
+`data/compounds.txt` is derived from datasets licensed under the Creative
+Commons Attribution 4.0 International License (CC BY 4.0). The attribution in
+`data/ATTRIBUTION.md` still applies and must be kept with that file.
+
+---
+
+Bản quyền (c) 2026 Van Tran. Giữ mọi quyền.
+
+Thư mục này (`vantt/packages/ohs-lang-vi`, gói tiếng Việt cho
+obsidian-hybrid-search, gồm mã nguồn, bản dựng, dữ liệu, script, kiểm thử và tài
+liệu) là phần mềm độc quyền, không theo giấy phép MIT của phần còn lại của repo.
+
+Mã nguồn được công bố chỉ để xem. Việc công bố, hay việc gói này nằm trong một gói
+obsidian-hybrid-search ai cũng tải được, không cấp quyền dùng, sao chép, sửa,
+dựng, phân phối, cấp phép lại hay bán bất kỳ phần nào.
+
+Quyền dùng gói tiếng Việt chỉ cấp cho khách đã mua sản phẩm `pkm`, chỉ dùng cùng
+`pkm`, theo điều khoản sử dụng (EULA) khách đồng ý khi mua, và trong phạm vi điều
+khoản đó.
+
+`data/compounds.txt` được dựng từ các bộ dữ liệu theo giấy phép CC BY 4.0; phần
+ghi công trong `data/ATTRIBUTION.md` vẫn áp dụng và phải đi kèm file đó.

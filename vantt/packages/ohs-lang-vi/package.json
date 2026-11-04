@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "description": "Vietnamese language pack for obsidian-hybrid-search (norm and fold views, query analysis, diacritic restoration, rescore)",
+  "license": "UNLICENSED",
   "type": "module",
   "main": "build/index.js",
   "types": "build/index.d.ts",

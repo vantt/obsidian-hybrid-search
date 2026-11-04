@@ -39,6 +39,7 @@ Fork của [flowing-abyss/obsidian-hybrid-search](https://github.com/flowing-aby
 
 ## Quy tắc
 
+- Giấy phép: thư mục [`packages/ohs-lang-vi/`](packages/ohs-lang-vi/) theo giấy phép độc quyền riêng ([`LICENSE`](packages/ohs-lang-vi/LICENSE), giữ mọi quyền, chỉ dùng cùng `pkm` theo EULA); phần còn lại của fork vẫn MIT.
 - Commit trên `master` của fork không sửa file của upstream. Thay đổi mã OHS chỉ đi qua bản vá trong `vantt/patches/`.
 - Mỗi bản vá có spec (yêu cầu, bất biến, điểm chạm, cách viết lại khi xung đột) và probe hành vi.
 - Không có gói ngôn ngữ thì OHS của fork phải cho kết quả giống hệt upstream cùng tag.
