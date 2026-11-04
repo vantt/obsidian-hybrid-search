@@ -24,12 +24,20 @@ on:
         description: 'Run id of an earlier vantt-bundles run: skip the build and re-test/re-release its bundle artifacts'
         required: false
         default: ''
+      darwin_x64:
+        description: 'Also build, check (pin-effect) and evaluate the Intel Mac bundle (three extra macOS jobs)'
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       tag:
         description: 'Fork release tag'
         required: true
         type: string
+      darwin_x64:
+        description: 'Also build, check (pin-effect) and evaluate the Intel Mac bundle'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -72,18 +80,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: win32-x64
-            runner: windows-latest
-          - platform: darwin-arm64
-            runner: macos-14
-          # onnxruntime-node 1.30 ships no darwin/x64 binding; bundle.mjs substitutes the newest version
-          # that has one (PLATFORM_PINS) for this platform only, and the parity job checks the result.
-          - platform: darwin-x64
-            runner: macos-15-intel
-          - platform: linux-x64
-            runner: ubuntu-latest
-    runs-on: ${{ matrix.runner }}
+        # darwin-x64 only on request: its bundle is held back by the pin-effect check (user decision
+        # 2026-11-03), and its jobs take three of the account's few concurrent macOS runners.
+        platform: ${{ fromJSON(inputs.darwin_x64 && '["win32-x64","darwin-arm64","darwin-x64","linux-x64"]' || '["win32-x64","darwin-arm64","linux-x64"]') }}
+    # onnxruntime-node 1.30 ships no darwin/x64 binding; bundle.mjs substitutes the newest version
+    # that has one (PLATFORM_PINS) for that platform only, and the pin-effect check measures the result.
+    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-14","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
     timeout-minutes: 45
     defaults:
       run:
@@ -148,16 +150,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: win32-x64
-            runner: windows-latest
-          - platform: darwin-arm64
-            runner: macos-14
-          - platform: darwin-x64
-            runner: macos-15-intel
-          - platform: linux-x64
-            runner: ubuntu-latest
-    runs-on: ${{ matrix.runner }}
+        # The same platforms as the bundle job.
+        platform: ${{ fromJSON(inputs.darwin_x64 && '["win32-x64","darwin-arm64","darwin-x64","linux-x64"]' || '["win32-x64","darwin-arm64","linux-x64"]') }}
+    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-14","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
     timeout-minutes: 45
     defaults:
       run:
@@ -235,7 +230,7 @@ jobs:
   # on (AMD EPYC); another class retries on a fresh runner, up to three attempts.
   pe1:
     needs: prepare
-    if: ${{ !cancelled() && needs.prepare.result == 'success' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (inputs.darwin_x64 || inputs.only == 'pin-effect') }}
     uses: ./.github/workflows/vantt-pin-effect.yml
     with:
       tag: ${{ inputs.tag || github.ref_name }}
@@ -285,7 +280,7 @@ jobs:
   # The Intel bundle's own eval numbers on its own platform: its per-platform baseline (informational).
   eval-darwin-x64:
     needs: prepare
-    if: ${{ !cancelled() && inputs.only == '' && needs.prepare.result == 'success' }}
+    if: ${{ !cancelled() && inputs.only == '' && needs.prepare.result == 'success' && inputs.darwin_x64 }}
     runs-on: macos-15-intel
     continue-on-error: true
     timeout-minutes: 90
@@ -354,8 +349,9 @@ jobs:
           path: artifacts
       - name: Write notes
         env:
-          ALL_OK: ${{ needs.smoke.result == 'success' && needs.pin-effect.outputs.ok == 'true' }}
+          ALL_OK: ${{ needs.smoke.result == 'success' && (!inputs.darwin_x64 || needs.pin-effect.outputs.ok == 'true') }}
           PIN_OK: ${{ needs.pin-effect.outputs.ok == 'true' }}
+          INTEL: ${{ inputs.darwin_x64 }}
         run: |
           set -euo pipefail
           find artifacts -type f | sort
@@ -363,6 +359,9 @@ jobs:
           for f in artifacts/pin-effect-*/pin-effect.md; do [ -f "$f" ] && args+=(--parity "$f"); done
           [ "$PIN_OK" = true ] || args+=(--hold darwin-x64)
           node tools/vantt/scripts/bundle-notes.mjs "${args[@]}" > notes.md
+          if [ "$INTEL" != true ]; then
+            printf '\n**Mac Intel:** no darwin-x64 bundle; it is built only when vantt-bundles runs with darwin_x64 (the pin-effect check holds back onnxruntime-node 1.23.2). Intel machines: see vantt/README.md.\n' >> notes.md
+          fi
           cat notes.md >> "$GITHUB_STEP_SUMMARY"
           if [ "$ALL_OK" = true ]; then gh release edit "$TAG" --notes-file notes.md --latest
           else gh release edit "$TAG" --notes-file notes.md; fi
