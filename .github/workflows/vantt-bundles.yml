@@ -85,7 +85,7 @@ jobs:
         platform: ${{ fromJSON(inputs.darwin_x64 && '["win32-x64","darwin-arm64","darwin-x64","linux-x64"]' || '["win32-x64","darwin-arm64","linux-x64"]') }}
     # onnxruntime-node 1.30 ships no darwin/x64 binding; bundle.mjs substitutes the newest version
     # that has one (PLATFORM_PINS) for that platform only, and the pin-effect check measures the result.
-    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-14","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
+    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-15","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
     timeout-minutes: 45
     defaults:
       run:
@@ -152,7 +152,7 @@ jobs:
       matrix:
         # The same platforms as the bundle job.
         platform: ${{ fromJSON(inputs.darwin_x64 && '["win32-x64","darwin-arm64","darwin-x64","linux-x64"]' || '["win32-x64","darwin-arm64","linux-x64"]') }}
-    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-14","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
+    runs-on: ${{ fromJSON('{"win32-x64":"windows-latest","darwin-arm64":"macos-15","darwin-x64":"macos-15-intel","linux-x64":"ubuntu-latest"}')[matrix.platform] }}
     timeout-minutes: 45
     defaults:
       run:
