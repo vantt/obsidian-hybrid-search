@@ -1,0 +1,39 @@
+{
+  "name": "ohs-lang-vi",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Vietnamese language pack for obsidian-hybrid-search (norm and fold views, query analysis, diacritic restoration, rescore)",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "bin": {
+    "ohs-lang-vi": "build/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "files": [
+    "build",
+    "data"
+  ],
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "fast-check": "4.10.2",
+    "hyparquet": "1.31.5",
+    "hyparquet-compressors": "1.1.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
+  }
+}

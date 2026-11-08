@@ -1,0 +1,119 @@
+{
+  "_comment": "Thresholds of quality-gate.mjs (PRD 11.6) and the corpora of invariance.mjs (PRD 11.4). A target with status \"enforced\" fails the gate; \"pending\" is reported but never fails (use it for a feature that does not exist yet). Change a status or a number only through a reviewed PR. Pass or fail compares numbers measured in the same run on the same machine (quantised ONNX scores differ per CPU): the fork without a pack against pristine upstream, the fork with the pack against the fork without it. Stored baselines under vantt/eval/baselines/ are a drift report (status warn, never a failure).",
+  "version": 1,
+  "invariance": {
+    "corpora": ["obsidian-help"],
+    "optional_corpora": ["evergreen-notes"],
+    "_optional": "used only when fixtures/<corpus>/dataset already exists: preparing evergreen-notes crawls a website for an hour or more (npm run eval:prepare-evergreen-notes -- --no-images). The report lists what was skipped."
+  },
+  "upstream": {
+    "corpus": "obsidian-help",
+    "metric": "ndcg_5",
+    "tolerance": 0.005,
+    "pack_regression_max": 0.01
+  },
+  "pack_options": {},
+  "vi": {
+    "set": "vi-search",
+    "metric": "ndcg_5",
+    "category_regression_max": 0.02,
+    "previous_release_enforced": false,
+    "overall_regression_max": 0,
+    "targets": [
+      {
+        "id": "G3-unaccented",
+        "category": "vi-unaccented",
+        "metric": "hit_5",
+        "min": 0.85,
+        "min_ratio_over_upstream": 2,
+        "status": "enforced"
+      },
+      {
+        "id": "G3-dd",
+        "category": "vi-dd",
+        "metric": "hit_5",
+        "min": 0.85,
+        "min_ratio_over_upstream": 2,
+        "status": "enforced"
+      },
+      {
+        "id": "G3-accented",
+        "category": "vi-accented",
+        "metric": "ndcg_5",
+        "max_drop_vs_upstream": 0,
+        "status": "enforced"
+      },
+      {
+        "id": "G3-tone-precision",
+        "category": "vi-tone-precision",
+        "metric": "mrr",
+        "min": 0.9,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-telex",
+        "category": "vi-telex",
+        "metric": "hit_5",
+        "min": 0.8,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-typo",
+        "category": "vi-typo",
+        "metric": "hit_5",
+        "min": 0.8,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-synonym",
+        "category": "vi-synonym",
+        "metric": "hit_5",
+        "min": 0.8,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-abbr",
+        "category": "vi-abbr",
+        "metric": "hit_5",
+        "min": 0.8,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-alias",
+        "category": "vi-alias",
+        "metric": "hit_5",
+        "min": 0.8,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-compound",
+        "category": "vi-compound",
+        "metric": "ndcg_5",
+        "min_gain_over_upstream": 0.1,
+        "status": "enforced"
+      },
+      {
+        "id": "G8-snippet",
+        "category": "vi-snippet",
+        "metric": "snippet_ok",
+        "min": 1,
+        "status": "enforced",
+        "note": "snippet_ok comes from vantt/eval/vi/check-snippets.mjs, run by quality-gate.mjs"
+      },
+      {
+        "id": "G8-others",
+        "categories": [
+          "vi-partial-accent",
+          "vi-iy",
+          "vi-tone-placement",
+          "vi-mixed-en",
+          "vi-semantic",
+          "vi-names"
+        ],
+        "metric": "ndcg_5",
+        "max_drop_vs_upstream": 0.01,
+        "status": "enforced"
+      }
+    ]
+  }
+}
