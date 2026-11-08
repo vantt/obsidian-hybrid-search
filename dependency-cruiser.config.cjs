@@ -57,7 +57,7 @@ module.exports = {
       name: 'storage-no-orchestration',
       severity: 'error',
       from: { path: '^src/storage/' },
-      to: { path: '^src/(indexing|search|inference)/' },
+      to: { path: '^src/(indexing|search|inference|language)/' },
     },
     {
       name: 'sqlite-acquisition',
@@ -76,6 +76,12 @@ module.exports = {
       severity: 'error',
       from: { path: '^src/content/' },
       to: { path: '^src/', pathNot: '^src/(content/|runtime/config[.]ts$)' },
+    },
+    {
+      name: 'language-independent',
+      severity: 'error',
+      from: { path: '^src/language/' },
+      to: { path: '^src/', pathNot: '^src/(language/|runtime/config[.]ts$)' },
     },
     {
       name: 'runtime-independent',
